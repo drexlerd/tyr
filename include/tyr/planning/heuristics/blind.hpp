@@ -26,6 +26,11 @@ namespace tyr::planning
 template<typename Task>
 class BlindHeuristic : public Heuristic<Task>
 {
+public:
+    BlindHeuristic() = default;
+
+    static std::shared_ptr<BlindHeuristic> create() { return std::make_shared<BlindHeuristic>(); }
+
     void set_goal(View<Index<formalism::planning::GroundConjunctiveCondition>, formalism::planning::Repository> goal) override {}
 
     float_t evaluate(const State<Task>& state) override { return float_t { 0 }; }
