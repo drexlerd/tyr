@@ -85,10 +85,10 @@ void PredicateFactSet<T>::insert(View<Index<fd::GroundAtom<T>>, fd::Repository> 
     m_indices.push_back(ground_atom_index);
     m_bitset.set(ground_atom_index.value);
 
-    const auto objs = ground_atom.get_objects().get_data();
+    const auto objs = ground_atom.get_objects();
     assert(m_columns.size() == objs.size());
     for (size_t pos = 0; pos < objs.size(); ++pos)
-        m_columns[pos].push_back(objs[pos]);
+        m_columns[pos].push_back(objs[pos].get_index());
 }
 
 template<f::FactKind T>
