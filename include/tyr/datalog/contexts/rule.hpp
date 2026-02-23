@@ -93,7 +93,7 @@ public:
         }
 
         auto& kpkc_workspace() noexcept { return m_ws_worker.iteration.kpkc_workspace; }
-        auto& head_to_witness() noexcept { return m_ws_worker.iteration.head_to_witness; }
+        auto& and_annot() noexcept { return m_ws_worker.iteration.and_annot; }
         auto& heads() noexcept { return m_ws_worker.iteration.heads; }
 
         auto& applicability_check_pool() noexcept { return m_ws_worker.solve.applicability_check_pool; }

@@ -85,7 +85,7 @@ ATTRIBUTES = [
 ]
 
 # 16 is baseline
-exp = Experiment("gbfs_combine_16_23")
+exp = Experiment("gbfs_combine_16_24")
 
 def rename_algorithm(properties):
     """Rename algorithm dynamically during fetching."""
@@ -104,7 +104,7 @@ def rename_algorithm(properties):
     return properties
 
 exp.add_fetcher("../16-2026-1-8-gbfs_lazy-profiling-classical-combined-eval", filter=rename_algorithm)
-exp.add_fetcher("../23-2026-1-8-gbfs_lazy-profiling-classical-combined-eval")
+exp.add_fetcher("../24-2026-1-8-gbfs_lazy-profiling-classical-combined-eval")
 
 exp.add_report(BaseReport(attributes=ATTRIBUTES, filter_algorithm=[
     "old-gbfs-lazy-ff-1", 

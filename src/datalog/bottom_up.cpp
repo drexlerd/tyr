@@ -98,7 +98,7 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                                       in.cws_rule().get_rule(),
                                       in.cws_rule().get_witness_condition(),
                                       in.or_annot(),
-                                      out.head_to_witness(),
+                                      out.and_annot(),
                                       out.ground_context_solve());
     }
 }
@@ -176,7 +176,7 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
                                       in.cws_rule().get_rule(),
                                       in.cws_rule().get_witness_condition(),
                                       in.or_annot(),
-                                      out.head_to_witness(),
+                                      out.and_annot(),
                                       out.ground_context_solve());
     }
     else
@@ -271,7 +271,7 @@ void process_pending(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                                               in.cws_rule().get_rule(),
                                               in.cws_rule().get_witness_condition(),
                                               in.or_annot(),
-                                              out.head_to_witness(),
+                                              out.and_annot(),
                                               out.ground_context_solve());
 
                 it = out.pending_rules().erase(it);
@@ -395,8 +395,8 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                         const auto cost_update = ctx.ctx.ws.or_ap.update_annotation(program_head,
                                                                                     worker_head,
                                                                                     ctx.ctx.ws.or_annot,
-                                                                                    worker.iteration.head_to_witness,
-                                                                                    ctx.ctx.ws.head_to_witness);
+                                                                                    worker.iteration.and_annot,
+                                                                                    ctx.ctx.ws.and_annot);
 
                         cost_buckets.update(cost_update, program_head);
                     }

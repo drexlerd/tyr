@@ -51,7 +51,7 @@ struct ProgramExecutionContext
         // Clear the annotation policy.
         for (auto& vec : ws.or_annot)
             vec.clear();
-        ws.head_to_witness.clear();
+        ws.and_annot.clear();
 
         // Initialize the termination policy.
         ws.tp.clear();

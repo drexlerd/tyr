@@ -200,7 +200,7 @@ struct RuleWorkspace
         UnorderedSet<Index<formalism::datalog::GroundAtom<formalism::FluentTag>>> heads;
 
         // Annotations stored in stage_repository
-        HeadToWitness head_to_witness;
+        AndAnnotationsMap and_annot;
     };
 
     struct Solve
@@ -307,7 +307,7 @@ void RuleWorkspace<AndAP>::Common::initialize_iteration(const StaticConsistencyG
 }
 
 template<typename AndAP>
-RuleWorkspace<AndAP>::Iteration::Iteration(const Common& common) : program_overlay_repository(&common.program_repository), heads(), head_to_witness()
+RuleWorkspace<AndAP>::Iteration::Iteration(const Common& common) : program_overlay_repository(&common.program_repository), heads(), and_annot()
 {
 }
 
@@ -316,7 +316,7 @@ void RuleWorkspace<AndAP>::Iteration::clear() noexcept
 {
     program_overlay_repository.clear();
     heads.clear();
-    head_to_witness.clear();
+    and_annot.clear();
 }
 
 template<typename AndAP>

@@ -84,15 +84,15 @@ private:
 };
 
 // TODO: change name to AndAnnotationsMap
-using HeadToWitness = UnorderedMap<Index<formalism::datalog::GroundAtom<formalism::FluentTag>>, Witness>;
+using AndAnnotationsMap = UnorderedMap<Index<formalism::datalog::GroundAtom<formalism::FluentTag>>, Witness>;
 
 /// @brief `CostAnnotations` encapsulates the cost of nodes.
 struct CostAnnotations
 {
     OrAnnotationsList or_annot;
-    std::vector<HeadToWitness> and_annots;
+    std::vector<AndAnnotationsMap> and_annots;
 
-    CostAnnotations(OrAnnotationsList or_annot, std::vector<HeadToWitness> and_annots) : or_annot(std::move(or_annot)), and_annots(std::move(and_annots)) {}
+    CostAnnotations(OrAnnotationsList or_annot, std::vector<AndAnnotationsMap> and_annots) : or_annot(std::move(or_annot)), and_annots(std::move(and_annots)) {}
 
     void clear() noexcept
     {
@@ -129,8 +129,8 @@ concept OrAnnotationPolicyConcept = requires(const T& p,
                                              Index<formalism::datalog::GroundAtom<formalism::FluentTag>> program_head,
                                              Index<formalism::datalog::GroundAtom<formalism::FluentTag>> delta_head,
                                              OrAnnotationsList& or_annot,
-                                             const HeadToWitness& delta_and_annot,
-                                             HeadToWitness& program_and_annot) {
+                                             const AndAnnotationsMap& delta_and_annot,
+                                             AndAnnotationsMap& program_and_annot) {
     /// Annotate the initial cost of the atom.
     { p.initialize_annotation(program_head, or_annot) } -> std::same_as<void>;
     /// Annotate the cost of the atom from the given witness and annotations.
@@ -148,7 +148,7 @@ concept AndAnnotationPolicyConcept = requires(const T& p,
                                               View<Index<formalism::datalog::Rule>, formalism::datalog::Repository> rule,
                                               View<Index<formalism::datalog::ConjunctiveCondition>, formalism::datalog::Repository> witness_condition,
                                               const OrAnnotationsList& or_annot,
-                                              HeadToWitness& delta_and_annot,
+                                              AndAnnotationsMap& delta_and_annot,
                                               formalism::datalog::GrounderContext& delta_context) {
     /// Ground the witness and annotate the cost of it from the given annotations.
     {
@@ -166,8 +166,8 @@ public:
     CostUpdate update_annotation(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> program_head,
                                  Index<formalism::datalog::GroundAtom<formalism::FluentTag>> delta_head,
                                  OrAnnotationsList& or_annot,
-                                 const HeadToWitness& delta_and_annot,
-                                 HeadToWitness& program_and_annot) const noexcept
+                                 const AndAnnotationsMap& delta_and_annot,
+                                 AndAnnotationsMap& program_and_annot) const noexcept
     {
         return CostUpdate();
     }
@@ -185,7 +185,7 @@ public:
                            View<Index<formalism::datalog::Rule>, formalism::datalog::Repository> rule,
                            View<Index<formalism::datalog::ConjunctiveCondition>, formalism::datalog::Repository> witness_condition,
                            const OrAnnotationsList& or_annot,
-                           HeadToWitness& delta_and_annot,
+                           AndAnnotationsMap& delta_and_annot,
                            formalism::datalog::GrounderContext& delta_context) const noexcept
     {
     }
@@ -206,8 +206,8 @@ public:
     CostUpdate update_annotation(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> program_head,
                                  Index<formalism::datalog::GroundAtom<formalism::FluentTag>> delta_head,
                                  OrAnnotationsList& or_annot,
-                                 const HeadToWitness& delta_and_annot,
-                                 HeadToWitness& program_and_annot) const
+                                 const AndAnnotationsMap& delta_and_annot,
+                                 AndAnnotationsMap& program_and_annot) const
     {
         resize_or_annot_to_fit(program_head, or_annot);
 
@@ -246,7 +246,7 @@ private:
     }
 
     static std::optional<Witness> fetch_best_head_witness_cost(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> delta_head,
-                                                               const HeadToWitness& delta_and_annot)
+                                                               const AndAnnotationsMap& delta_and_annot)
     {
         if (auto it = delta_and_annot.find(delta_head); it != delta_and_annot.end())
             return it->second;
@@ -278,7 +278,7 @@ public:
                            View<Index<formalism::datalog::Rule>, formalism::datalog::Repository> rule,
                            View<Index<formalism::datalog::ConjunctiveCondition>, formalism::datalog::Repository> witness_condition,
                            const OrAnnotationsList& or_annot,
-                           HeadToWitness& delta_and_annot,
+                           AndAnnotationsMap& delta_and_annot,
                            formalism::datalog::GrounderContext& delta_context) const
     {
         // Use min among global minimum in cost of last iteration and thread local minimum.
@@ -298,7 +298,7 @@ public:
     }
 
 private:
-    static uint_t fetch_current_best_cost(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> delta_head, const HeadToWitness& delta_and_annot)
+    static uint_t fetch_current_best_cost(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> delta_head, const AndAnnotationsMap& delta_and_annot)
     {
         if (auto it = delta_and_annot.find(delta_head); it != delta_and_annot.end())
             return it->second.get_cost();

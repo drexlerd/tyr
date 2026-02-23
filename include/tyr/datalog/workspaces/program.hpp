@@ -127,7 +127,7 @@ struct ProgramWorkspace
 
     OrAP or_ap;
     OrAnnotationsList or_annot;
-    HeadToWitness head_to_witness;
+    AndAnnotationsMap and_annot;
 
     TP tp;
 
@@ -172,7 +172,7 @@ ProgramWorkspace<OrAP, AndAP, TP>::ProgramWorkspace(ProgramContext& context, con
           context.get_program().get_fterm_values<formalism::FluentTag>()),
     or_ap(or_ap),
     or_annot(context.get_program().get_predicates<formalism::FluentTag>().size()),
-    head_to_witness(),
+    and_annot(),
     tp(tp),
     rules(),
     d2p(),

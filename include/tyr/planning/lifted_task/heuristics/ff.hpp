@@ -93,8 +93,8 @@ private:
         tyr::set(atom.value, true, m_markings[uint_t(atom.group)]);
 
         // Base case 2: atom has no witness, i.e., was true initially => do not recurse again
-        const auto it = m_workspace.head_to_witness.find(atom);
-        if (it == m_workspace.head_to_witness.end())
+        const auto it = m_workspace.and_annot.find(atom);
+        if (it == m_workspace.and_annot.end())
             return;
 
         const auto& witness = it->second;
