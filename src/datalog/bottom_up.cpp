@@ -83,6 +83,8 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
 
     const auto& in = wrctx.in();
     auto& out = wrctx.out();
+    ++out.statistics().num_executions;
+    ++out.statistics().num_generated_rules;
 
     create_nullary_binding(out.ground_context_solve().binding);
 
@@ -145,6 +147,8 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
 
     assert(ensure_novel_binding(out.ground_context_solve().binding, out.seen_bindings_dbg()));
 
+    ++out.statistics().num_generated_rules;
+
     const auto program_head_index = fd::ground(in.cws_rule().get_rule().get_head(), out.ground_context_iteration()).first;
     if (in.fact_sets().fluent_sets.predicate.contains(program_head_index))
         return;  ///< optimal cost proven
@@ -185,6 +189,8 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
     }
     else
     {
+        ++out.statistics().num_pending_rules;
+
         out.pending_rules().emplace(fd::ground(out.ground_context_solve().binding, out.ground_context_solve()).first, std::move(applicability_check));
     }
 }
@@ -226,6 +232,7 @@ void generate_general_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                     auto wrctx = rctx.get_rule_worker_execution_context();
                     auto& out = wrctx.out();
                     auto& kpkc_workspace = out.kpkc_workspace();
+                    ++out.statistics().num_executions;
 
                     // Round-robin: lane 0 gets 0,p,2p,...; lane 1 gets 1,p+1,...
                     for (uint_t e = lane; e < delta_edges.size(); e += num_tasks)
@@ -247,6 +254,7 @@ void generate_general_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
         auto wrctx = rctx.get_rule_worker_execution_context();
         auto& out = wrctx.out();
         auto& kpkc_workspace = out.kpkc_workspace();
+        ++out.statistics().num_executions;
 
         kpkc_algorithm.for_each_new_k_clique([&](auto&& clique) { process_clique(wrctx, clique); }, kpkc_workspace);
     }

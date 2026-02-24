@@ -115,6 +115,11 @@ int main(int argc, char** argv)
         for (const auto& ws_rule : ff_heuristic->get_workspace().rules)
             ff_heuristic_rule_statistics.push_back(ws_rule->common.statistics);
         std::cout << datalog::compute_aggregated_rule_statistics(ff_heuristic_rule_statistics) << std::endl;
+        auto ff_heuristic_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
+        for (const auto& ws_rule : ff_heuristic->get_workspace().rules)
+            for (const auto& worker : ws_rule->worker)
+                ff_heuristic_rule_worker_statistics.push_back(worker.solve.statistics);
+        std::cout << datalog::compute_aggregated_rule_worker_statistics(ff_heuristic_rule_worker_statistics) << std::endl;
     }
 
     std::cout << "[Total] Peak memory usage: " << get_peak_memory_usage_in_bytes() << " bytes" << std::endl;

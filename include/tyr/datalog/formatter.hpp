@@ -68,6 +68,10 @@ extern std::ostream& print(std::ostream& os, const datalog::RuleStatistics& el);
 
 extern std::ostream& print(std::ostream& os, const datalog::AggregatedRuleStatistics& el);
 
+extern std::ostream& print(std::ostream& os, const datalog::RuleWorkerStatistics& el);
+
+extern std::ostream& print(std::ostream& os, const datalog::AggregatedRuleWorkerStatistics& el);
+
 namespace datalog
 {
 namespace details
@@ -118,6 +122,10 @@ extern std::ostream& operator<<(std::ostream& os, const ProgramStatistics& el);
 extern std::ostream& operator<<(std::ostream& os, const RuleStatistics& el);
 
 extern std::ostream& operator<<(std::ostream& os, const AggregatedRuleStatistics& el);
+
+extern std::ostream& operator<<(std::ostream& os, const RuleWorkerStatistics& el);
+
+extern std::ostream& operator<<(std::ostream& os, const AggregatedRuleWorkerStatistics& el);
 }  // end namespace datalog
 }
 

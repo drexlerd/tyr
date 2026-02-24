@@ -29,18 +29,23 @@ namespace tyr::datalog
 
 struct RuleStatistics
 {
-    uint64_t num_executions = 0;
-    uint64_t num_bindings = 0;
+    uint64_t num_executions { 0 };
     std::chrono::nanoseconds initialize_time { 0 };
     std::chrono::nanoseconds process_generate_time { 0 };
     std::chrono::nanoseconds process_pending_time { 0 };
     std::chrono::nanoseconds total_time { 0 };
 };
 
+struct RuleWorkerStatistics
+{
+    uint64_t num_executions { 0 };
+    uint64_t num_generated_rules { 0 };
+    uint64_t num_pending_rules { 0 };
+};
+
 struct AggregatedRuleStatistics
 {
-    uint64_t num_executions = 0;
-    uint64_t num_bindings = 0;
+    uint64_t num_executions { 0 };
     std::chrono::nanoseconds initialize_time { 0 };
     std::chrono::nanoseconds process_generate_time { 0 };
     std::chrono::nanoseconds process_pending_time { 0 };
@@ -55,16 +60,23 @@ struct AggregatedRuleStatistics
     std::chrono::nanoseconds avg_time_median { 0 };
 };
 
-inline AggregatedRuleStatistics compute_aggregated_rule_statistics(const std::vector<datalog::RuleStatistics>& rules)
+struct AggregatedRuleWorkerStatistics
+{
+    uint64_t num_executions { 0 };
+    uint64_t num_generated_rules { 0 };
+    uint64_t num_pending_rules { 0 };
+};
+
+inline AggregatedRuleStatistics compute_aggregated_rule_statistics(const std::vector<datalog::RuleStatistics>& statistics)
 {
     AggregatedRuleStatistics result {};
 
     std::vector<std::chrono::nanoseconds> samples;
-    samples.reserve(rules.size());
+    samples.reserve(statistics.size());
     std::vector<std::chrono::nanoseconds> avg_samples;
-    avg_samples.reserve(rules.size());
+    avg_samples.reserve(statistics.size());
 
-    for (const auto& rs : rules)
+    for (const auto& rs : statistics)
     {
         if (rs.num_executions == 0)
             continue;
@@ -72,7 +84,6 @@ inline AggregatedRuleStatistics compute_aggregated_rule_statistics(const std::ve
         samples.push_back(rs.total_time);
         avg_samples.push_back(rs.total_time / rs.num_executions);
         result.num_executions += rs.num_executions;
-        result.num_bindings += rs.num_bindings;
         result.total_time += rs.total_time;
         result.initialize_time += rs.initialize_time;
         result.process_generate_time += rs.process_generate_time;
@@ -110,6 +121,20 @@ inline AggregatedRuleStatistics compute_aggregated_rule_statistics(const std::ve
             const auto b = avg_samples[n / 2].count();
             result.avg_time_median = std::chrono::nanoseconds { (a + b) / 2 };
         }
+    }
+
+    return result;
+}
+
+inline AggregatedRuleWorkerStatistics compute_aggregated_rule_worker_statistics(const std::vector<RuleWorkerStatistics>& statistics)
+{
+    auto result = AggregatedRuleWorkerStatistics {};
+
+    for (const auto& rs : statistics)
+    {
+        result.num_executions += rs.num_executions;
+        result.num_generated_rules += rs.num_generated_rules;
+        result.num_pending_rules += rs.num_pending_rules;
     }
 
     return result;

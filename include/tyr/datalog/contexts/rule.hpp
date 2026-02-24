@@ -99,6 +99,7 @@ public:
         auto& applicability_check_pool() noexcept { return m_ws_worker.solve.applicability_check_pool; }
         auto& seen_bindings_dbg() noexcept { return m_ws_worker.solve.seen_bindings_dbg; }
         auto& pending_rules() noexcept { return m_ws_worker.solve.pending_rules; }
+        auto& statistics() noexcept { return m_ws_worker.solve.statistics; }
 
         auto& const_ground_context_program() noexcept { return m_const_ground_context_program; }
         auto& ground_context_solve() noexcept { return m_ground_context_solve; }

@@ -320,21 +320,19 @@ std::ostream& print(std::ostream& os, const datalog::ProgramStatistics& el)
     const double frac = parallel_ns > 0.0 && total_ns > 0.0 ? parallel_ns / total_ns : 1.0;
 
     const auto avg_total_us = el.num_executions > 0 ? to_us(el.total_time) / el.num_executions : 0.0;
-    const auto avg_total_ns = el.num_executions > 0 ? to_ns(el.total_time) / el.num_executions : 0.0;
 
     fmt::print(os,
-               "[ProgramStatistics] Num executions: {}\n"
-               "[ProgramStatistics] T_par - wallclock time inside parallel: {} ms ({} ns)\n"
-               "[ProgramStatistics] T_total - wallclock time total: {} ms ({} ns)\n"
-               "[ProgramStatistics] T_avg - average wallclock time total: {} us ({} ns)\n"
-               "[ProgramStatistics] T_par / T_total - Parallel fraction: {:.2f}",
+               "[ProgramStatistics] N_exec = {:>10}    | executions\n"
+               "[ProgramStatistics] T_seq  = {:>10} ms | sequential time\n"
+               "[ProgramStatistics] T_par  = {:>10} ms | parallel time\n"
+               "[ProgramStatistics] T_tot  = {:>10} ms | total time\n"
+               "[ProgramStatistics] T_avg  = {:>10} us | average time\n"
+               "[ProgramStatistics] PF     = {:>10.2f}    | parallel fraction (T_par / T_tot)",
                el.num_executions,
+               to_ms(el.total_time) - to_ms(el.parallel_time),
                to_ms(el.parallel_time),
-               to_ns(el.parallel_time),
                to_ms(el.total_time),
-               to_ns(el.total_time),
                avg_total_us,
-               avg_total_ns,
                frac);
 
     return os;
@@ -342,29 +340,27 @@ std::ostream& print(std::ostream& os, const datalog::ProgramStatistics& el)
 
 std::ostream& print(std::ostream& os, const datalog::RuleStatistics& el)
 {
+    const auto avg_total_us = el.num_executions > 0 ? to_us(el.total_time) / el.num_executions : 0.0;
+
     fmt::print(os,
-               "[RuleStatistics] Num executions: {}\n"
-               "[RuleStatistics] Num bindings: {}\n"
-               "[RuleStatistics] T_initialize - total wallclock time inside initialization of delta kpkc: {} ms ({} ns)\n"
-               "[RuleStatistics] T_generate - wallclock time to process generate: {} ms ({} ns)\n"
-               "[RuleStatistics] T_pending - wallclock time to process pending: {} ms ({} ns)\n"
-               "[RuleStatistics] T_total - wallclock time total: {} ms ({} ns)\n",
+               "[RuleStatistics] N_exec = {:>10}    | executions\n"
+               "[RuleStatistics] T_seq  = {:>10} ms | sequential time\n"
+               "[RuleStatistics] T_par  = {:>10} ms | parallel time\n"
+               "[RuleStatistics] T_tot  = {:>10} ms | total time\n"
+               "[RuleStatistics] T_avg  = {:>10} us | average time",
                el.num_executions,
-               el.num_bindings,
-               to_ms(el.initialize_time),
-               to_ns(el.initialize_time),
+               to_ms(el.initialize_time) + to_ms(el.process_pending_time),
                to_ms(el.process_generate_time),
-               to_ns(el.process_generate_time),
-               to_ms(el.process_pending_time),
-               to_ns(el.process_pending_time),
                to_ms(el.total_time),
-               to_ns(el.total_time));
+               avg_total_us);
 
     return os;
 }
 
 std::ostream& print(std::ostream& os, const datalog::AggregatedRuleStatistics& el)
 {
+    const auto avg_total_us = el.num_executions > 0 ? to_us(el.total_time) / el.num_executions : 0.0;
+
     const double tot_max_ns = static_cast<double>(to_ns(el.tot_time_max));
     const double tot_med_ns = static_cast<double>(to_ns(el.tot_time_median));
     const double tot_skew = tot_max_ns > 0.0 && tot_med_ns > 0.0 ? tot_max_ns / tot_med_ns : 1.0;
@@ -378,51 +374,74 @@ std::ostream& print(std::ostream& os, const datalog::AggregatedRuleStatistics& e
     const double frac = parallel_ns > 0.0 && total_ns > 0.0 ? parallel_ns / total_ns : 1.0;
 
     fmt::print(os,
-               "[AggregatedRuleStatistics] Number of executions: {}\n"
-               "[AggregatedRuleStatistics] Number of bindings: {}\n"
-               "[AggregatedRuleStatistics] Number of samples: {}\n"
-               "[AggregatedRuleStatistics] T_initialize - total wallclock time inside initialization of delta kpkc: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_generate - wallclock time to process generate: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_pending - wallclock time to process pending: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_par = T_generate: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_total - total wallclock time: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_par / T_total - Parallel fraction: {:.2f}\n"
-               "[AggregatedRuleStatistics] T_total_min - minimum total wallclock time inside parallel: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_total_max - maximum total wallclock time inside parallel: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_total_med - median total wallclock time inside parallel: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_total_max / T_total_med_par - Total skew: {:.2f}\n"
-               "[AggregatedRuleStatistics] T_avg_min - minimum average wallclock time inside parallel: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_avg_max - maximum average wallclock time inside parallel: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_avg_med - median average wallclock time inside parallel: {} ms ({} ns)\n"
-               "[AggregatedRuleStatistics] T_avg_max / T_avg_med_par - Average skew: {:.2f}\n",
+               "[AggregatedRuleStatistics] N_exec     = {:>10}    | executions\n"
+               "[AggregatedRuleStatistics] N_samples  = {:>10}    | samples\n"
+               "[AggregatedRuleStatistics] T_seq      = {:>10} ms | sequential time\n"
+               "[AggregatedRuleStatistics] T_par      = {:>10} ms | parallel time\n"
+               "[AggregatedRuleStatistics] T_tot      = {:>10} ms | total time\n"
+               "[AggregatedRuleStatistics] T_avg      = {:>10} us | average time\n"
+               "[AggregatedRuleStatistics] PF         = {:>10.2f}    | parallel fraction (T_par / T_tot)\n"
+               "[AggregatedRuleStatistics] T_tot_min  = {:>10} ms | minimum total time\n"
+               "[AggregatedRuleStatistics] T_tot_max  = {:>10} ms | maximum total time\n"
+               "[AggregatedRuleStatistics] T_tot_med  = {:>10} ms | median total time\n"
+               "[AggregatedRuleStatistics] T_tot_skew = {:>10.2f}    | skew total time (T_tot_max / T_tot_med)\n"
+               "[AggregatedRuleStatistics] T_avg_min  = {:>10} us | minimum average time\n"
+               "[AggregatedRuleStatistics] T_avg_max  = {:>10} us | maximum average time\n"
+               "[AggregatedRuleStatistics] T_avg_med  = {:>10} us | median average time\n"
+               "[AggregatedRuleStatistics] T_avg_skew = {:>10.2f}    | skew average time (T_avg_max / T_avg_med)",
                el.num_executions,
-               el.num_bindings,
                el.sample_count,
-               to_ms(el.initialize_time),
-               to_ns(el.initialize_time),
+               to_ms(el.initialize_time) + to_ms(el.process_pending_time),
                to_ms(el.process_generate_time),
-               to_ns(el.process_generate_time),
-               to_ms(el.process_pending_time),
-               to_ns(el.process_pending_time),
-               to_ms(el.process_generate_time),
-               to_ns(el.process_generate_time),
                to_ms(el.total_time),
-               to_ns(el.total_time),
+               avg_total_us,
                frac,
                to_ms(el.tot_time_min),
-               to_ns(el.tot_time_min),
                to_ms(el.tot_time_max),
-               to_ns(el.tot_time_max),
                to_ms(el.tot_time_median),
-               to_ns(el.tot_time_median),
                tot_skew,
-               to_ms(el.avg_time_min),
-               to_ns(el.avg_time_min),
-               to_ms(el.avg_time_max),
-               to_ns(el.avg_time_max),
-               to_ms(el.avg_time_median),
-               to_ns(el.avg_time_median),
+               to_us(el.avg_time_min),
+               to_us(el.avg_time_max),
+               to_us(el.avg_time_median),
                avg_skew);
+
+    return os;
+}
+
+std::ostream& print(std::ostream& os, const datalog::RuleWorkerStatistics& el)
+{
+    const auto pen = static_cast<float_t>(el.num_pending_rules);
+    const auto gen = static_cast<float_t>(el.num_generated_rules);
+    auto overapproximation_ratio = (gen > 0) ? (pen + gen) / gen : float_t { 1.0 };
+
+    fmt::print(os,
+               "[RuleWorkerStatistics] N_exec = {:>10} | executions\n"
+               "[RuleWorkerStatistics] N_gen  = {:>10} | generated rules\n"
+               "[RuleWorkerStatistics] N_pen  = {:>10} | pending rules\n"
+               "[RuleWorkerStatistics] OA     = {:>10.2f} | overapproximation ratio (1 + N_pen / N_gen)",
+               el.num_executions,
+               el.num_generated_rules,
+               el.num_pending_rules,
+               overapproximation_ratio);
+
+    return os;
+}
+
+std::ostream& print(std::ostream& os, const datalog::AggregatedRuleWorkerStatistics& el)
+{
+    const auto pen = static_cast<float_t>(el.num_pending_rules);
+    const auto gen = static_cast<float_t>(el.num_generated_rules);
+    auto overapproximation_ratio = (gen > 0) ? (pen + gen) / gen : float_t { 1.0 };
+
+    fmt::print(os,
+               "[AggregatedRuleWorkerStatistics] N_exec =  {:>10}    | executions\n"
+               "[AggregatedRuleWorkerStatistics] N_gen  =  {:>10}    | generated rules\n"
+               "[AggregatedRuleWorkerStatistics] N_pen  =  {:>10}    | pending rules\n"
+               "[AggregatedRuleWorkerStatistics] OA     =  {:>10.2f}    | overapproximation ratio (1 + N_pen / N_gen)",
+               el.num_executions,
+               el.num_generated_rules,
+               el.num_pending_rules,
+               overapproximation_ratio);
 
     return os;
 }
@@ -484,5 +503,8 @@ std::ostream& operator<<(std::ostream& os, const RuleStatistics& el) { return pr
 
 std::ostream& operator<<(std::ostream& os, const AggregatedRuleStatistics& el) { return print(os, el); }
 
+std::ostream& operator<<(std::ostream& os, const RuleWorkerStatistics& el) { return print(os, el); }
+
+std::ostream& operator<<(std::ostream& os, const AggregatedRuleWorkerStatistics& el) { return print(os, el); }
 }  // end namespace datalog
 }
