@@ -55,7 +55,6 @@ struct SearchNode
     StateIndex parent_state;
     SearchNodeStatus status;
     bool preferred;
-    bool compatible;
 };
 
 static_assert(sizeof(SearchNode) == 16);
@@ -64,7 +63,7 @@ using SearchNodeVector = SegmentedVector<SearchNode>;
 
 static SearchNode& get_or_create_search_node(StateIndex state_index, SearchNodeVector& search_nodes)
 {
-    static auto default_node = SearchNode { std::numeric_limits<float_t>::infinity(), StateIndex::max(), SearchNodeStatus::NEW, false, false };
+    static auto default_node = SearchNode { std::numeric_limits<float_t>::infinity(), StateIndex::max(), SearchNodeStatus::NEW, false };
 
     while (uint_t(state_index) >= search_nodes.size())
     {
@@ -123,20 +122,33 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
     const auto goal_strategy = (options.goal_strategy) ? options.goal_strategy : TaskGoalStrategy<Task>::create(task);
 
     auto step = uint_t(0);
-
     auto result = SearchResult<Task>();
+    auto search_nodes = SearchNodeVector();
+    auto preferred_openlist = ExhaustiveQueue();
+    auto standard_openlist = ExhaustiveQueue();
+    auto openlist = AlternatingOpenList<ExhaustiveQueue, ExhaustiveQueue>(preferred_openlist,
+                                                                          standard_openlist,
+                                                                          std::array<size_t, 2> { options.prefered_queue_weight, 1 });
+    const auto start_h_value = heuristic.evaluate(start_state);
+    auto best_h_value = start_h_value;
+    const auto start_preferred = false;
+    auto& start_search_node = get_or_create_search_node(start_state_index, search_nodes);
+    start_search_node.status = (start_h_value == std::numeric_limits<float_t>::infinity()) ? SearchNodeStatus::DEAD_END : SearchNodeStatus::OPEN;
+    start_search_node.g_value = start_node.get_metric();
+    start_search_node.preferred = start_preferred;
+
+    event_handler->on_start_search(start_node, start_h_value);
 
     /* Test static goal. */
 
     if (!goal_strategy->is_static_goal_satisfied())
     {
+        event_handler->on_end_search();
         event_handler->on_unsolvable();
 
         result.status = SearchStatus::UNSOLVABLE;
         return result;
     }
-
-    auto search_nodes = SearchNodeVector();
 
     /* Test whether initial state is goal. */
 
@@ -153,32 +165,18 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
         return result;
     }
 
-    auto preferred_openlist = ExhaustiveQueue();
-    auto standard_openlist = ExhaustiveQueue();
-    auto openlist = AlternatingOpenList<ExhaustiveQueue, ExhaustiveQueue>(preferred_openlist,
-                                                                          standard_openlist,
-                                                                          std::array<size_t, 2> { options.prefered_queue_weight, 1 });
-
     if (std::isnan(start_node.get_metric()))
     {
+        event_handler->on_end_search();
+
         throw std::runtime_error("find_solution(...): start node metric value is NaN.");
     }
-    const auto start_h_value = heuristic.evaluate(start_state);
-    auto best_h_value = start_h_value;
-    const auto start_preferred = false;
-
-    event_handler->on_start_search(start_node, start_h_value);
-
-    auto& start_search_node = get_or_create_search_node(start_state_index, search_nodes);
-    start_search_node.status = (start_h_value == std::numeric_limits<float_t>::infinity()) ? SearchNodeStatus::DEAD_END : SearchNodeStatus::OPEN;
-    start_search_node.g_value = start_node.get_metric();
-    start_search_node.preferred = start_preferred;
-    start_search_node.compatible = false;
 
     /* Test whether start state is deadend. */
 
     if (start_search_node.status == SearchNodeStatus::DEAD_END)
     {
+        event_handler->on_end_search();
         event_handler->on_unsolvable();
 
         result.status = SearchStatus::UNSOLVABLE;
@@ -195,6 +193,8 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
     {
         if (stopwatch && stopwatch->has_finished())
         {
+            event_handler->on_end_search();
+
             result.status = SearchStatus::OUT_OF_TIME;
             return result;
         }
@@ -254,6 +254,8 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
 
             if (is_new_successor_state && search_nodes.size() >= options.max_num_states)
             {
+                event_handler->on_end_search();
+
                 result.status = SearchStatus::OUT_OF_STATES;
                 return result;
             }

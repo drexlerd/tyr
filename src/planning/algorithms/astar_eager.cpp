@@ -103,18 +103,26 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
     const auto goal_strategy = (options.goal_strategy) ? options.goal_strategy : TaskGoalStrategy<Task>::create(task);
 
     auto result = SearchResult<Task>();
+    auto search_nodes = SearchNodeVector();
+    auto openlist = Queue();
+    const auto start_h_value = heuristic.evaluate(start_state);
+    const auto start_f_value = start_node.get_metric() + start_h_value;
+    auto& start_search_node = get_or_create_search_node(start_state_index, search_nodes);
+    start_search_node.status = (start_h_value == std::numeric_limits<float_t>::infinity()) ? SearchNodeStatus::DEAD_END : SearchNodeStatus::OPEN;
+    start_search_node.g_value = start_node.get_metric();
+
+    event_handler->on_start_search(start_node, start_f_value);
 
     /* Test static goal. */
 
     if (!goal_strategy->is_static_goal_satisfied())
     {
+        event_handler->on_end_search();
         event_handler->on_unsolvable();
 
         result.status = SearchStatus::UNSOLVABLE;
         return result;
     }
-
-    auto search_nodes = SearchNodeVector();
 
     /* Test whether initial state is goal. */
 
@@ -131,25 +139,18 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
         return result;
     }
 
-    auto openlist = Queue();
-
     if (std::isnan(start_node.get_metric()))
     {
+        event_handler->on_end_search();
+
         throw std::runtime_error("find_solution(...): start node metric value is NaN.");
     }
-    const auto start_h_value = heuristic.evaluate(start_state);
-    const auto start_f_value = start_node.get_metric() + start_h_value;
-
-    event_handler->on_start_search(start_node, start_f_value);
-
-    auto& start_search_node = get_or_create_search_node(start_state_index, search_nodes);
-    start_search_node.status = (start_h_value == std::numeric_limits<float_t>::infinity()) ? SearchNodeStatus::DEAD_END : SearchNodeStatus::OPEN;
-    start_search_node.g_value = start_node.get_metric();
 
     /* Test whether start state is deadend. */
 
     if (start_search_node.status == SearchNodeStatus::DEAD_END)
     {
+        event_handler->on_end_search();
         event_handler->on_unsolvable();
 
         result.status = SearchStatus::UNSOLVABLE;
@@ -166,6 +167,8 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
     {
         if (stopwatch && stopwatch->has_finished())
         {
+            event_handler->on_end_search();
+
             result.status = SearchStatus::OUT_OF_TIME;
             return result;
         }
@@ -233,6 +236,8 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
 
             if (is_new_successor_state && search_nodes.size() >= options.max_num_states)
             {
+                event_handler->on_end_search();
+
                 result.status = SearchStatus::OUT_OF_STATES;
                 return result;
             }
