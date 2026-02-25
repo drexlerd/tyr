@@ -22,6 +22,7 @@
 #include "tyr/formalism/planning/declarations.hpp"
 #include "tyr/formalism/planning/indices.hpp"
 
+#include <boost/dynamic_bitset.hpp>
 #include <cassert>
 #include <cmath>
 #include <iterator>
@@ -30,8 +31,79 @@
 
 namespace tyr::planning
 {
+
+/**
+ * Atom
+ */
+
 template<class Tag>
-class NumericIterator
+class AtomIterator
+{
+public:
+    using value_type = Index<formalism::planning::GroundAtom<Tag>>;
+    using difference_type = std::ptrdiff_t;
+    using iterator_category = std::input_iterator_tag;
+    using iterator_concept = std::input_iterator_tag;
+
+    AtomIterator() noexcept : m_data(nullptr), m_i(0) {}
+    AtomIterator(const boost::dynamic_bitset<>& data, bool begin) noexcept : m_data(&data), m_i(begin ? m_data->find_first() : boost::dynamic_bitset<>::npos) {}
+
+    value_type operator*() const noexcept
+    {
+        assert(m_data);
+        return Index<formalism::planning::GroundAtom<Tag>> { m_i };
+    }
+
+    AtomIterator& operator++() noexcept
+    {
+        assert(m_data);
+        m_i = m_data->find_next(m_i);
+        return *this;
+    }
+    AtomIterator operator++(int) noexcept
+    {
+        AtomIterator tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+
+    friend bool operator==(const AtomIterator& lhs, const AtomIterator& rhs) noexcept { return lhs.m_data == rhs.m_data && lhs.m_i == rhs.m_i; }
+    friend bool operator!=(const AtomIterator& lhs, const AtomIterator& rhs) noexcept { return !(lhs == rhs); }
+
+private:
+    const boost::dynamic_bitset<>* m_data;
+    boost::dynamic_bitset<>::size_type m_i = 0;
+};
+
+template<class Tag>
+class AtomRange
+{
+public:
+    explicit AtomRange(const boost::dynamic_bitset<>& values) : m_data(values) {}
+
+    auto begin() const { return AtomIterator<Tag>(m_data, true); }
+    auto end() const { return AtomIterator<Tag>(m_data, false); }
+
+private:
+    const boost::dynamic_bitset<>& m_data;
+};
+
+/**
+ * FDRFact
+ */
+
+template<typename Task, class Tag>
+class FDRFactIterator;
+
+template<typename Task, class Tag>
+class FDRFactRange;
+
+/**
+ * FunctionTermValue
+ */
+
+template<class Tag>
+class FunctionTermValueIterator
 {
 public:
     using value_type = std::pair<Index<formalism::planning::GroundFunctionTerm<Tag>>, float_t>;
@@ -46,8 +118,8 @@ public:
             ++m_i;
     }
 
-    NumericIterator() noexcept : m_data(nullptr), m_i(0) {}
-    NumericIterator(const std::vector<float_t>& data, bool begin) noexcept : m_data(&data), m_i(begin ? 0 : m_data->size())
+    FunctionTermValueIterator() noexcept : m_data(nullptr), m_i(0) {}
+    FunctionTermValueIterator(const std::vector<float_t>& data, bool begin) noexcept : m_data(&data), m_i(begin ? 0 : m_data->size())
     {
         if (begin)
             skip_nan();
@@ -59,21 +131,24 @@ public:
         return { Index<formalism::planning::GroundFunctionTerm<Tag>> { m_i }, (*m_data)[m_i] };
     }
 
-    NumericIterator& operator++() noexcept
+    FunctionTermValueIterator& operator++() noexcept
     {
         ++m_i;
         skip_nan();
         return *this;
     }
-    NumericIterator operator++(int) noexcept
+    FunctionTermValueIterator operator++(int) noexcept
     {
-        NumericIterator tmp = *this;
+        FunctionTermValueIterator tmp = *this;
         ++(*this);
         return tmp;
     }
 
-    friend bool operator==(const NumericIterator& lhs, const NumericIterator& rhs) noexcept { return lhs.m_data == rhs.m_data && lhs.m_i == rhs.m_i; }
-    friend bool operator!=(const NumericIterator& lhs, const NumericIterator& rhs) noexcept { return !(lhs == rhs); }
+    friend bool operator==(const FunctionTermValueIterator& lhs, const FunctionTermValueIterator& rhs) noexcept
+    {
+        return lhs.m_data == rhs.m_data && lhs.m_i == rhs.m_i;
+    }
+    friend bool operator!=(const FunctionTermValueIterator& lhs, const FunctionTermValueIterator& rhs) noexcept { return !(lhs == rhs); }
 
 private:
     const std::vector<float_t>* m_data;
@@ -81,13 +156,13 @@ private:
 };
 
 template<class Tag>
-class NumericRange
+class FunctionTermValueRange
 {
 public:
-    explicit NumericRange(const std::vector<float_t>& values) : m_data(values) {}
+    explicit FunctionTermValueRange(const std::vector<float_t>& values) : m_data(values) {}
 
-    auto begin() const { return NumericIterator<Tag>(m_data, true); }
-    auto end() const { return NumericIterator<Tag>(m_data, false); }
+    auto begin() const { return FunctionTermValueIterator<Tag>(m_data, true); }
+    auto end() const { return FunctionTermValueIterator<Tag>(m_data, false); }
 
 private:
     const std::vector<float_t>& m_data;

@@ -25,6 +25,7 @@
 #include "tyr/formalism/planning/repository.hpp"
 #include "tyr/formalism/planning/views.hpp"
 #include "tyr/planning/declarations.hpp"
+#include "tyr/planning/lifted_task/state_iterators.hpp"
 #include "tyr/planning/state.hpp"
 #include "tyr/planning/state_iterators.hpp"
 
@@ -54,11 +55,22 @@ public:
 
     bool test(Index<formalism::planning::GroundAtom<formalism::DerivedTag>> index) const;
 
+    /**
+     * Iterators
+     */
+
+    AtomRange<formalism::StaticTag> get_static_atoms() const noexcept;
+    FDRFactRange<LiftedTask, formalism::FluentTag> get_fluent_facts() const noexcept;
+    AtomRange<formalism::DerivedTag> get_derived_atoms() const noexcept;
+    FunctionTermValueRange<formalism::StaticTag> get_static_fterm_values() const noexcept;
+    FunctionTermValueRange<formalism::FluentTag> get_fluent_fterm_values() const noexcept;
+
+    /**
+     * Getters
+     */
+
     const LiftedTask& get_task() const noexcept;
-
     const UnpackedState<LiftedTask>& get_unpacked_state() const noexcept;
-
-    auto get_fluent_fterm_values() const noexcept { return NumericRange<formalism::FluentTag>(get_numeric_variables<formalism::FluentTag>()); }
 
     /**
      * For LiftedTask

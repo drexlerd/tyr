@@ -55,6 +55,31 @@ const std::vector<float_t>& State<LiftedTask>::get_numeric_variables() const noe
 template const std::vector<float_t>& State<LiftedTask>::get_numeric_variables<formalism::StaticTag>() const noexcept;
 template const std::vector<float_t>& State<LiftedTask>::get_numeric_variables<formalism::FluentTag>() const noexcept;
 
+AtomRange<formalism::StaticTag> State<LiftedTask>::get_static_atoms() const noexcept
+{
+    return AtomRange<formalism::StaticTag>(m_task->get_static_atoms_bitset());
+}
+
+FDRFactRange<LiftedTask, formalism::FluentTag> State<LiftedTask>::get_fluent_facts() const noexcept
+{
+    return FDRFactRange<LiftedTask, formalism::FluentTag>(get_atoms<formalism::FluentTag>());
+}
+
+AtomRange<formalism::DerivedTag> State<LiftedTask>::get_derived_atoms() const noexcept
+{
+    return AtomRange<formalism::DerivedTag>(get_atoms<formalism::DerivedTag>());
+}
+
+FunctionTermValueRange<formalism::StaticTag> State<LiftedTask>::get_static_fterm_values() const noexcept
+{
+    return FunctionTermValueRange<formalism::StaticTag>(m_task->get_static_numeric_variables());
+}
+
+FunctionTermValueRange<formalism::FluentTag> State<LiftedTask>::get_fluent_fterm_values() const noexcept
+{
+    return FunctionTermValueRange<formalism::FluentTag>(get_numeric_variables<formalism::FluentTag>());
+}
+
 static_assert(StateConcept<State<LiftedTask>, LiftedTask>);
 
 }

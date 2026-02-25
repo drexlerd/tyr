@@ -37,15 +37,15 @@ class State
 };
 
 template<class R, class Tag>
-concept StateAtomRange =
+concept AtomRangeConcept =
     std::ranges::input_range<R> && std::same_as<std::remove_cvref_t<std::ranges::range_value_t<R>>, Index<formalism::planning::GroundAtom<Tag>>>;
 
 template<class R, class Tag>
-concept StateFactRange =
+concept FactRangeConcept =
     std::ranges::input_range<R> && std::same_as<std::remove_cvref_t<std::ranges::range_value_t<R>>, Data<formalism::planning::FDRFact<Tag>>>;
 
 template<class R, class Tag>
-concept StateFunctionTermValueRange =
+concept FunctionTermValueRangeConcept =
     std::ranges::input_range<R>
     && std::same_as<std::remove_cvref_t<std::ranges::range_value_t<R>>, std::pair<Index<formalism::planning::GroundFunctionTerm<Tag>>, float_t>>;
 
@@ -56,7 +56,7 @@ concept StateConcept = requires(const T& cs,
                                 Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>> fluent_fterm,
                                 Index<formalism::planning::GroundAtom<formalism::StaticTag>> static_atom,
                                 Index<formalism::planning::GroundAtom<formalism::DerivedTag>> derived_atom) {
-    typename T::TaskType;
+    requires std::same_as<typename T::TaskType, Task>;
     { cs.get_index() } -> std::same_as<StateIndex>;
     { cs.get(variable) } -> std::same_as<formalism::planning::FDRValue>;
     { cs.get(static_fterm) } -> std::same_as<float_t>;
@@ -65,11 +65,11 @@ concept StateConcept = requires(const T& cs,
     { cs.test(derived_atom) } -> std::same_as<bool>;
     { cs.get_task() } -> std::same_as<const Task&>;
 
-    // requires StateAtomRange<decltype(cs.get_static_atoms()), formalism::StaticTag>;
-    // requires StateFactRange<decltype(cs.get_fluent_facts()), formalism::FluentTag>;
-    // requires StateAtomRange<decltype(cs.get_derived_atoms()), formalism::DerivedTag>;
-    // requires StateFunctionTermValueRange<decltype(cs.get_static_fterm_values()), formalism::StaticTag>;
-    requires StateFunctionTermValueRange<decltype(cs.get_fluent_fterm_values()), formalism::FluentTag>;
+    requires AtomRangeConcept<decltype(cs.get_static_atoms()), formalism::StaticTag>;
+    requires FactRangeConcept<decltype(cs.get_fluent_facts()), formalism::FluentTag>;
+    requires AtomRangeConcept<decltype(cs.get_derived_atoms()), formalism::DerivedTag>;
+    requires FunctionTermValueRangeConcept<decltype(cs.get_static_fterm_values()), formalism::StaticTag>;
+    requires FunctionTermValueRangeConcept<decltype(cs.get_fluent_fterm_values()), formalism::FluentTag>;
 };
 
 template<typename Task>

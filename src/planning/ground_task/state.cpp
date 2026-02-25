@@ -57,5 +57,30 @@ const std::vector<float_t>& State<GroundTask>::get_numeric_variables() const noe
 template const std::vector<float_t>& State<GroundTask>::get_numeric_variables<f::StaticTag>() const noexcept;
 template const std::vector<float_t>& State<GroundTask>::get_numeric_variables<f::FluentTag>() const noexcept;
 
+AtomRange<formalism::StaticTag> State<GroundTask>::get_static_atoms() const noexcept
+{
+    return AtomRange<formalism::StaticTag>(m_task->get_static_atoms_bitset());
+}
+
+FDRFactRange<GroundTask, formalism::FluentTag> State<GroundTask>::get_fluent_facts() const noexcept
+{
+    return FDRFactRange<GroundTask, formalism::FluentTag>(get_fluent_values());
+}
+
+AtomRange<formalism::DerivedTag> State<GroundTask>::get_derived_atoms() const noexcept
+{
+    return AtomRange<formalism::DerivedTag>(get_atoms<formalism::DerivedTag>());
+}
+
+FunctionTermValueRange<formalism::StaticTag> State<GroundTask>::get_static_fterm_values() const noexcept
+{
+    return FunctionTermValueRange<formalism::StaticTag>(m_task->get_static_numeric_variables());
+}
+
+FunctionTermValueRange<formalism::FluentTag> State<GroundTask>::get_fluent_fterm_values() const noexcept
+{
+    return FunctionTermValueRange<formalism::FluentTag>(get_numeric_variables<formalism::FluentTag>());
+}
+
 static_assert(StateConcept<State<GroundTask>, GroundTask>);
 }
