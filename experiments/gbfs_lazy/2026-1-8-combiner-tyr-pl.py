@@ -1,11 +1,20 @@
 #! /usr/bin/env python
 
+import sys 
+
+from pathlib import Path
+
 from lab.experiment import Experiment
 from downward.reports.absolute import AbsoluteReport
 
 from lab.reports import Attribute, geometric_mean
 
-from suite import SUITE_IPC_SATISFICING_ADL, SUITE_IPC_SATISFICING_STRIPS
+DIR = Path(__file__).resolve().parent
+REPO = DIR.parent.parent
+
+sys.path.append(str(DIR.parent.parent))
+
+from experiments.suite import SUITE_IPC_SATISFICING_ADL, SUITE_IPC_SATISFICING_STRIPS
 
 # Create custom report class with suitable info and error attributes.
 class BaseReport(AbsoluteReport):
@@ -36,7 +45,7 @@ ATTRIBUTES = [
     Attribute("search_time", function=geometric_mean),
     "num_expanded",
     "num_generated",
-    Attribute("search_time_per_expanded", function=geometric_mean),
+    Attribute("search_time_us_per_expanded", function=geometric_mean),
 
     # Total
     Attribute("total_time", function=geometric_mean),
@@ -55,6 +64,11 @@ EXCLUDED_DOMAINS = [
     "termes-sat18-strips",
     "tetris-sat14-strips",
     "tidybot-sat11-strips",
+    "data-network",
+    "snake",
+    "termes",
+    "tetris",
+    "tidybot",
     # Powerlifted: Derived predicates are not supported.
     "optical-telegraphs",
     "philosophers",
@@ -83,17 +97,43 @@ EXCLUDED_DOMAINS = [
     "storage",
     # Powerlifted: requirements = pddl.Requirements(opt[1:])
     "cavediving-14-adl",
-
 ]
 
 EXCLUDED_DOMAINS += SUITE_IPC_SATISFICING_ADL
 EXCLUDED_DOMAINS += SUITE_IPC_SATISFICING_STRIPS
 
-# exp.add_fetcher("profiling/15-2026-1-8-gbfs_lazy-profiling-classical-combined-eval", filter=lambda run: run["domain"] not in EXCLUDED_DOMAINS)
-# exp.add_fetcher("profiling/2026-1-9-lazy-gbfs-ff-pref-ff-profiling-eval", filter=lambda run: run["domain"] not in EXCLUDED_DOMAINS)
+def exclude_domains(run) -> bool:
+    domain = run.get("domain")
+    return domain not in EXCLUDED_DOMAINS
 
-exp.add_fetcher("gbfs/2026-1-8-gbfs_lazy-combined-eval", filter=lambda run: run["domain"] not in EXCLUDED_DOMAINS)
-exp.add_fetcher("gbfs/2026-1-9-lazy-gbfs-ff-pref-ff-eval", filter=lambda run: run["domain"] not in EXCLUDED_DOMAINS)
+def merge_domain(run, name) -> bool:
+    dom = run.get("domain", "")
+    if dom.startswith(name):
+        prob = run.get("problem", "")
+        run["problem"] = f"{dom}_{prob}"
+        run["domain"] = name
+        if "id" in run and isinstance(run["id"], list):
+            if len(run["id"]) > 1:
+                run["id"][1] = name
+            if len(run["id"]) > 2:
+                run["id"][2] = run["problem"]
+
+def normalize(run):
+    if not exclude_domains(run):
+        return False
+    
+    merge_domain(run, "childsnack")
+    merge_domain(run, "visitall")
+    merge_domain(run, "genome-edit-distance")
+    merge_domain(run, "organic-synthesis")
+    merge_domain(run, "blocksworld")
+    merge_domain(run, "logistics")
+
+    return True
+
+
+exp.add_fetcher("results/pl-2026-1-9-lazy-gbfs-ff-pref-ff-eval", filter=normalize)
+exp.add_fetcher("results/1-2026-1-8-gbfs_lazy-combined-eval", filter=normalize)
 
 
 exp.add_report(BaseReport(attributes=ATTRIBUTES))

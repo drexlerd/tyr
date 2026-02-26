@@ -122,8 +122,16 @@ int main(int argc, char** argv)
         std::cout << "[FFHeuristic] Summary" << std::endl;
         std::cout << ff_heuristic->get_workspace().statistics << std::endl;
         auto ff_heuristic_rule_statistics = std::vector<datalog::RuleStatistics> {};
-        for (const auto& ws_rule : ff_heuristic->get_workspace().rules)
+        for (size_t i = 0; i < ff_heuristic->get_workspace().rules.size(); ++i)
+        {
+            const auto& ws_rule = ff_heuristic->get_workspace().rules[i];
+            const auto& cws_rule = lifted_task->get_rpg_program().get_const_program_workspace().rules[i];
             ff_heuristic_rule_statistics.push_back(ws_rule->common.statistics);
+            std::cout << cws_rule.get_rule() << std::endl;
+            std::cout << ws_rule->common.statistics << std::endl;
+            for (const auto& worker : ws_rule->worker)
+                std::cout << worker.solve.statistics << std::endl;
+        }
         std::cout << datalog::compute_aggregated_rule_statistics(ff_heuristic_rule_statistics) << std::endl;
         auto ff_heuristic_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
         for (const auto& ws_rule : ff_heuristic->get_workspace().rules)

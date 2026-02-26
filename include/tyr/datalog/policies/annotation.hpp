@@ -272,6 +272,9 @@ public:
         if (best_cost <= cur_cost_lower_bound)
             return;  ///< No local or global improvement
 
+        if (!can_witness_improve_cost(best_cost, rule, witness_condition, delta_context, program_repository, or_annot))
+            return;  ///< No local or global improvement
+
         const auto witness = try_ground_better_witness(best_cost, rule, witness_condition, delta_context, program_repository, or_annot);
         if (!witness)
             return;  ///< No local or global improvement
@@ -292,6 +295,44 @@ private:
     static uint_t fetch_atom_cost(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> atom, const OrAnnotationsList& or_annot)
     {
         return tyr::get(atom.value, or_annot[uint_t(atom.group)], std::numeric_limits<uint_t>::max());
+    }
+
+    static bool can_witness_improve_cost(uint_t best_cost,
+                                         View<Index<formalism::datalog::Rule>, formalism::datalog::Repository> rule,
+                                         View<Index<formalism::datalog::ConjunctiveCondition>, formalism::datalog::Repository> witness_condition,
+                                         formalism::datalog::GrounderContext& delta_context,
+                                         const formalism::datalog::Repository& program_repository,
+                                         const OrAnnotationsList& or_annot)
+    {
+        auto body_cost = AggregationFunction::identity();
+        const auto rule_cost = rule.get_cost();
+
+        if (best_cost <= body_cost + rule_cost)
+            return false;  ///< No local or global improvement
+
+        // We only use it to find in the program repository.
+        auto ground_atom_ptr = delta_context.builder.get_builder<formalism::datalog::GroundAtom<formalism::FluentTag>>();
+        auto& ground_atom = *ground_atom_ptr;
+
+        for (const auto literal : witness_condition.get_literals<formalism::FluentTag>())
+        {
+            assert(literal.get_polarity());
+
+            formalism::datalog::ground_into_buffer(literal.get_atom(), delta_context.binding, ground_atom);
+
+            const auto program_ground_atom = program_repository.find(ground_atom);
+            assert(program_ground_atom);  // must exist
+
+            const auto program_ground_atom_cost = fetch_atom_cost(*program_ground_atom, or_annot);
+            assert(program_ground_atom_cost != std::numeric_limits<uint_t>::max());
+
+            body_cost = agg(body_cost, program_ground_atom_cost);
+
+            if (best_cost <= body_cost + rule_cost)
+                return false;  ///< No local or global improvement
+        }
+
+        return true;
     }
 
     static std::optional<Witness>

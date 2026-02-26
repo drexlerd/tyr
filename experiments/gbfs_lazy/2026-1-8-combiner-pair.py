@@ -39,6 +39,7 @@ ATTRIBUTES += DatalogParser.get_attributes()
 # 16 is baseline
 exp = Experiment("gbfs_combine_24_1")
 
+
 def rename_algorithm(properties):
     """Rename algorithm dynamically during fetching."""
     if properties["algorithm"] == "gbfs-lazy-hff-pref-ff-1":
