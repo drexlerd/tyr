@@ -37,7 +37,7 @@ ATTRIBUTES += SearchParser.get_attributes()
 ATTRIBUTES += DatalogParser.get_attributes()
 
 # 16 is baseline
-exp = Experiment("gbfs_combine_1_2")
+exp = Experiment("gbfs_combine_5_6")
 
 
 def rename_algorithm(properties):
@@ -58,11 +58,11 @@ def rename_algorithm(properties):
 
 
 
-# exp.add_fetcher("../24-2026-1-8-gbfs_lazy-profiling-classical-combined-eval", filter=rename_algorithm)
-# exp.add_fetcher("../1-2026-1-8-gbfs_lazy-profiling-classical-combined-eval")
+exp.add_fetcher("../../5-2026-1-8-gbfs_lazy-profiling-classical-combined-eval", filter=rename_algorithm)
+exp.add_fetcher("../../6-2026-1-8-gbfs_lazy-profiling-classical-combined-eval")
 
-exp.add_fetcher("../../1-2026-1-8-gbfs_lazy-profiling-classical-1-eval", filter=rename_algorithm)
-exp.add_fetcher("../../2-2026-1-8-gbfs_lazy-profiling-classical-1-eval")
+# exp.add_fetcher("../../5-2026-1-8-gbfs_lazy-profiling-classical-1-eval", filter=rename_algorithm)
+# exp.add_fetcher("../../6-2026-1-8-gbfs_lazy-profiling-classical-1-eval")
 
 exp.add_report(BaseReport(attributes=ATTRIBUTES, filter_algorithm=[
     "gbfs-lazy-ff-1",

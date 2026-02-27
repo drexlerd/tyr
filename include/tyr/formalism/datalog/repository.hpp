@@ -25,6 +25,8 @@
 #include "tyr/buffer/declarations.hpp"
 #include "tyr/buffer/indexed_hash_set.hpp"
 #include "tyr/buffer/segmented_buffer.hpp"
+#include "tyr/common/equal_to.hpp"
+#include "tyr/common/hash.hpp"
 #include "tyr/common/tuple.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 
@@ -65,7 +67,7 @@ private:
     struct RepositoryEntry<T>
     {
         using value_type = T;
-        using slot_type = std::vector<Slot<T>>;
+        using slot_type = UnorderedMap<typename Index<T>::GroupType, Slot<T>>;
 
         slot_type slot;
     };
@@ -127,41 +129,22 @@ private:
     RepositoryStorage m_repository;
     buffer::SegmentedBuffer m_arena;
 
-    /**
-     * initialize_entry
-     */
-
-    template<typename T>
-        requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
-    void initialize_entry(RepositoryEntry<T>& entry)
-    {
-        entry.slot.parent_size = m_parent ? m_parent->template size<T>() : 0;
-    }
-
     template<typename T>
         requires(GroupIndexConcept<Index<T>>)
-    void initialize_entry(RepositoryEntry<T>& entry)
+    auto& get_or_create_slot(Index<T> index)
     {
-        if (m_parent)
-        {
-            const auto& parent_entry = std::get<RepositoryEntry<T>>(m_parent->m_repository);
-            if (entry.slot.size() < parent_entry.slot.size())
-            {
-                entry.slot.resize(parent_entry.slot.size());
-            }
-        }
+        const auto g = index.group;
 
-        for (uint_t g = 0; g < entry.slot.size(); ++g)
-        {
-            auto idx = Index<T> {};
-            idx.group.value = g;
-            entry.slot[g].parent_size = m_parent ? m_parent->template size<T>(idx) : 0;
-        }
-    }
+        auto& entry = std::get<RepositoryEntry<T>>(m_repository);
+        const auto it = entry.slot.find(g);
+        if (it != entry.slot.end())
+            return it->second;  ///< slot already exists
 
-    void initialize_entries()
-    {
-        std::apply([&]<typename... E>(E&... e) { ((initialize_entry(e)), ...); }, m_repository);
+        auto& slot = entry.slot[g];  ///< create a new slot and initialize it
+        const auto parent_size = m_parent ? m_parent->size(index) : size_t { 0 };
+        slot.parent_size = parent_size;
+
+        return slot;
     }
 
     /**
@@ -173,17 +156,19 @@ private:
     void clear(RepositoryEntry<T>& entry) noexcept
     {
         entry.slot.container.clear();
-        entry.slot.parent_size = 0;
+        entry.slot.parent_size = m_parent ? m_parent->template size<T>() : size_t { 0 };
     }
 
     template<typename T>
         requires(GroupIndexConcept<Index<T>>)
     void clear(RepositoryEntry<T>& entry) noexcept
     {
-        for (auto& slot : entry.slot)
+        for (auto& [g, slot] : entry.slot)
         {
             slot.container.clear();
-            slot.parent_size = 0;
+            auto idx = Index<T> {};
+            idx.group = g;
+            slot.parent_size = m_parent ? m_parent->template size<T>(idx) : size_t { 0 };
         }
     }
 
@@ -193,7 +178,7 @@ private:
     }
 
 public:
-    Repository(const Repository* parent = nullptr) : m_parent(parent), m_repository(), m_arena() { initialize_entries(); }
+    Repository(const Repository* parent = nullptr) : m_parent(parent), m_repository(), m_arena() {}
 
     template<typename T>
         requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
@@ -227,12 +212,14 @@ public:
     std::optional<Index<T>> find_with_hash(const Data<T>& builder, size_t h) const noexcept
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = builder.index.group.value;
+        const auto g = builder.index.group;
 
-        if (g >= entry.slot.size())
+        const auto it = entry.slot.find(g);
+
+        if (it == entry.slot.end())
             return std::nullopt;
 
-        const auto& indexed_hash_set = entry.slot[g].container;
+        const auto& indexed_hash_set = it->second.container;
 
         if (auto ptr = indexed_hash_set.find_with_hash(builder, h))
             return ptr->index;
@@ -245,12 +232,14 @@ public:
     std::optional<Index<T>> find(const Data<T>& builder) const noexcept
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = builder.index.group.value;
+        const auto g = builder.index.group;
 
-        if (g >= entry.slot.size())
+        const auto it = entry.slot.find(g);
+
+        if (it == entry.slot.end())
             return std::nullopt;
 
-        const auto& indexed_hash_set = entry.slot[g].container;
+        const auto& indexed_hash_set = it->second.container;
         const auto h = indexed_hash_set.hash(builder);
 
         return find_with_hash<T>(builder, h);
@@ -281,16 +270,8 @@ public:
         requires(GroupIndexConcept<Index<T>>)
     std::pair<Index<T>, bool> get_or_create(Data<T>& builder, buffer::Buffer& buf)
     {
-        auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        auto& slot = entry.slot;
-        const auto g = builder.index.group.value;
-
-        if (g >= slot.size())
-        {
-            slot.resize(g + 1);
-        }
-
-        auto& indexed_hash_set = slot[g].container;
+        auto& slot = get_or_create_slot(builder.index);
+        auto& indexed_hash_set = slot.container;
         const auto h = indexed_hash_set.hash(builder);
 
         if (m_parent)
@@ -298,9 +279,9 @@ public:
                 return { *ptr, false };
 
         // Manually assign index to continue indexing.
-        builder.index.value = slot[g].parent_size + slot[g].container.size();
+        builder.index.value = slot.parent_size + slot.container.size();
 
-        const auto [ptr, success] = slot[g].container.insert_with_hash(h, builder, buf, m_arena);
+        const auto [ptr, success] = slot.container.insert_with_hash(h, builder, buf, m_arena);
         return { ptr->index, success };
     }
 
@@ -334,8 +315,9 @@ public:
         assert(index != Index<T>::max() && "Unassigned index.");
 
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = index.group.value;
-        const auto parent_size = entry.slot[g].parent_size;
+        const auto g = index.group;
+        const auto& slot = entry.slot.at(g);
+        const auto parent_size = slot.parent_size;
 
         // In parent range -> delegate
         if (index.value < parent_size)
@@ -347,7 +329,7 @@ public:
         // Local range -> shift down
         index.value -= parent_size;
 
-        return entry.slot[g].container[index];
+        return slot.container[index];
     }
 
     template<typename T>
@@ -370,17 +352,17 @@ public:
     const Data<T>& front(Index<T> index) const
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = index.group.value;
-        assert(g < entry.slot.size());
+        const auto g = index.group;
+        const auto& slot = entry.slot.at(g);
 
-        const auto parent_size = entry.slot[g].parent_size;
+        const auto parent_size = slot.parent_size;
         if (parent_size > 0)
         {
             assert(m_parent);
             return m_parent->template front<T>(index);  // same group
         }
 
-        return entry.slot[g].container.front();
+        return slot.container.front();
     }
 
     /// @brief Get the number of stored elements.
@@ -398,13 +380,14 @@ public:
     size_t size(Index<T> index) const noexcept
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = index.group.value;
+        const auto g = index.group;
 
-        if (g >= entry.slot.size())
+        const auto it = entry.slot.find(g);
+        if (it == entry.slot.end())
             return 0;
 
-        const size_t parent_size = entry.slot[g].parent_size;
-        const size_t local_size = entry.slot[g].container.size();
+        const size_t parent_size = it->second.parent_size;
+        const size_t local_size = it->second.container.size();
 
         return parent_size + local_size;
     }
@@ -414,12 +397,8 @@ public:
     {
         m_arena.clear();
         clear_entries();
-        initialize_entries();
     }
 };
-
-// template<>
-// std::pair<Index<GroundAtom<FluentTag>>, bool> Repository::get_or_create<GroundAtom<FluentTag>>(Data<GroundAtom<FluentTag>>& builder, buffer::Buffer& buf);
 
 static_assert(RepositoryConcept<Repository>);
 
