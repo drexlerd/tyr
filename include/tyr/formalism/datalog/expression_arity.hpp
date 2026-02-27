@@ -18,8 +18,12 @@
 #ifndef TYR_FORMALISM_DATALOG_EXPRESSION_ARITY_HPP_
 #define TYR_FORMALISM_DATALOG_EXPRESSION_ARITY_HPP_
 
+#include "tyr/common/equal_to.hpp"
+#include "tyr/common/hash.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 #include "tyr/formalism/datalog/views.hpp"
+
+#include <numeric>
 
 namespace tyr::formalism::datalog
 {

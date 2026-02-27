@@ -132,7 +132,7 @@ exp = Experiment("2026-1-8-gbfs_lazy-profiling-tyr-pl-combined")
 # exp = Experiment("2026-1-8-gbfs_lazy-tyr-pl-combined")
 
 exp.add_fetcher("tmp/2026-1-9-lazy-gbfs-ff-pref-ff-profiling-eval", filter=normalize)
-exp.add_fetcher("tmp/4-2026-1-8-gbfs_lazy-profiling-classical-combined-eval", filter=normalize)
+exp.add_fetcher("tmp/5-2026-1-8-gbfs_lazy-profiling-classical-combined-eval", filter=normalize)
 
 # exp.add_fetcher("results/pl-2026-1-9-lazy-gbfs-ff-pref-ff-eval", filter=normalize)
 # exp.add_fetcher("results/1-2026-1-8-gbfs_lazy-combined-eval", filter=normalize)

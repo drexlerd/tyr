@@ -24,6 +24,7 @@
 //
 #include "tyr/buffer/declarations.hpp"
 #include "tyr/buffer/indexed_hash_set.hpp"
+#include "tyr/buffer/segmented_buffer.hpp"
 #include "tyr/common/tuple.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 
@@ -122,9 +123,9 @@ private:
                                          RepositoryEntry<GroundRule>,
                                          RepositoryEntry<Program>>;
 
-    RepositoryStorage m_repository;
-
     const Repository* m_parent;
+    RepositoryStorage m_repository;
+    buffer::SegmentedBuffer m_arena;
 
     /**
      * initialize_entry
@@ -145,7 +146,9 @@ private:
         {
             const auto& parent_entry = std::get<RepositoryEntry<T>>(m_parent->m_repository);
             if (entry.slot.size() < parent_entry.slot.size())
+            {
                 entry.slot.resize(parent_entry.slot.size());
+            }
         }
 
         for (uint_t g = 0; g < entry.slot.size(); ++g)
@@ -177,10 +180,10 @@ private:
         requires(GroupIndexConcept<Index<T>>)
     void clear(RepositoryEntry<T>& entry) noexcept
     {
-        for (auto& [indexed_hash_set, parent_size] : entry.slot)
+        for (auto& slot : entry.slot)
         {
-            indexed_hash_set.clear();
-            parent_size = 0;
+            slot.container.clear();
+            slot.parent_size = 0;
         }
     }
 
@@ -190,7 +193,7 @@ private:
     }
 
 public:
-    Repository(const Repository* parent = nullptr) : m_parent(parent) { initialize_entries(); }
+    Repository(const Repository* parent = nullptr) : m_parent(parent), m_repository(), m_arena() { initialize_entries(); }
 
     template<typename T>
         requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
@@ -269,7 +272,7 @@ public:
         // Manually assign index to continue indexing.
         builder.index.value = slot.parent_size + indexed_hash_set.size();
 
-        const auto [ptr, success] = indexed_hash_set.insert_with_hash(h, builder, buf);
+        const auto [ptr, success] = indexed_hash_set.insert_with_hash(h, builder, buf, m_arena);
 
         return { ptr->index, success };
     }
@@ -295,7 +298,7 @@ public:
         // Manually assign index to continue indexing.
         builder.index.value = slot[g].parent_size + slot[g].container.size();
 
-        const auto [ptr, success] = slot[g].container.insert_with_hash(h, builder, buf);
+        const auto [ptr, success] = slot[g].container.insert_with_hash(h, builder, buf, m_arena);
         return { ptr->index, success };
     }
 
@@ -365,17 +368,17 @@ public:
     const Data<T>& front(Index<T> index) const
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
+        const auto g = index.group.value;
+        assert(g < entry.slot.size());
 
-        if (entry.slot.parent_size > 0)
+        const auto parent_size = entry.slot[g].parent_size;
+        if (parent_size > 0)
         {
             assert(m_parent);
-            return m_parent->template front<T>();  // recurse to root-most non-empty
+            return m_parent->template front<T>(index);  // same group
         }
 
-        assert(index.group.value < entry.slot.size());
-        assert(entry.slot[index.group.value].container.size() > 0);
-
-        return entry.slot[index.group.value].container[index.group.value].front();
+        return entry.slot[g].container.front();
     }
 
     /// @brief Get the number of stored elements.
@@ -407,10 +410,14 @@ public:
     /// @brief Clear the repository but keep memory allocated.
     void clear() noexcept
     {
+        m_arena.clear();
         clear_entries();
         initialize_entries();
     }
 };
+
+// template<>
+// std::pair<Index<GroundAtom<FluentTag>>, bool> Repository::get_or_create<GroundAtom<FluentTag>>(Data<GroundAtom<FluentTag>>& builder, buffer::Buffer& buf);
 
 static_assert(RepositoryConcept<Repository>);
 

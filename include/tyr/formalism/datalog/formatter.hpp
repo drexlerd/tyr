@@ -290,7 +290,7 @@ inline std::ostream& print(std::ostream& os, const View<Index<formalism::datalog
 template<formalism::FactKind T>
 inline std::ostream& print(std::ostream& os, const Data<formalism::datalog::GroundAtom<T>>& el)
 {
-    fmt::print(os, "({} {})", to_string(el.predicate), fmt::format("{}", fmt::join(to_strings(el.objects), " ")));
+    fmt::print(os, "({} {})", to_string(el.index.group), fmt::format("{}", fmt::join(to_strings(el.objects), " ")));
     return os;
 }
 
@@ -338,7 +338,7 @@ inline std::ostream& print(std::ostream& os, const View<Index<formalism::datalog
 template<formalism::FactKind T>
 inline std::ostream& print(std::ostream& os, const Data<formalism::datalog::GroundFunctionTerm<T>>& el)
 {
-    fmt::print(os, "({} {})", to_string(el.function), fmt::format("{}", fmt::join(to_strings(el.objects), " ")));
+    fmt::print(os, "({} {})", to_string(el.index.group), fmt::format("{}", fmt::join(to_strings(el.objects), " ")));
     return os;
 }
 

@@ -28,6 +28,7 @@ namespace tyr::tests
 TEST(TyrTests, TyrBufferIndexedHashSet)
 {
     auto repository = b::IndexedHashSet<f::Predicate<f::FluentTag>>();
+    auto arena = b::SegmentedBuffer();
     auto buffer = b::Buffer();
     auto builder = Data<f::Predicate<f::FluentTag>>();
 
@@ -37,7 +38,7 @@ TEST(TyrTests, TyrBufferIndexedHashSet)
     builder.arity = 2;
 
     canonicalize(builder);
-    auto [predicate_0, success_0] = repository.insert(builder, buffer);
+    auto [predicate_0, success_0] = repository.insert(builder, buffer, arena);
 
     EXPECT_EQ(predicate_0->index.value, 0);
     EXPECT_EQ(predicate_0->name, builder.name);
@@ -49,7 +50,7 @@ TEST(TyrTests, TyrBufferIndexedHashSet)
     builder.arity = 3;
 
     canonicalize(builder);
-    auto [predicate_1, success_1] = repository.insert(builder, buffer);
+    auto [predicate_1, success_1] = repository.insert(builder, buffer, arena);
 
     EXPECT_EQ(predicate_1->index.value, 1);
     EXPECT_EQ(predicate_1->name, builder.name);
@@ -61,7 +62,7 @@ TEST(TyrTests, TyrBufferIndexedHashSet)
     builder.arity = 3;
 
     canonicalize(builder);
-    auto [predicate_2, success_2] = repository.insert(builder, buffer);
+    auto [predicate_2, success_2] = repository.insert(builder, buffer, arena);
 
     EXPECT_EQ(predicate_2->index.value, 1);
     EXPECT_EQ(predicate_2->name, builder.name);

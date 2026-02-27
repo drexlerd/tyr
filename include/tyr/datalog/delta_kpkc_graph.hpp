@@ -19,7 +19,9 @@
 #define TYR_DATALOG_DELTA_KPKC_GRAPH_HPP_
 
 #include "tyr/common/dynamic_bitset.hpp"
+#include "tyr/common/equal_to.hpp"
 #include "tyr/common/formatter.hpp"
+#include "tyr/common/hash.hpp"
 #include "tyr/common/vector.hpp"
 #include "tyr/datalog/declarations.hpp"
 #include "tyr/datalog/formatter.hpp"

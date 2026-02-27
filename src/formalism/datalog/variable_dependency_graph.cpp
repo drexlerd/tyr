@@ -19,6 +19,7 @@
 
 #include "tyr/common/comparators.hpp"
 #include "tyr/formalism/datalog/expression_arity.hpp"
+#include "tyr/formalism/datalog/repository.hpp"
 #include "tyr/formalism/views.hpp"
 
 namespace tyr::formalism::datalog

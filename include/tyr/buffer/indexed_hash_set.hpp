@@ -39,9 +39,6 @@ template<typename Tag, typename H, typename E>
 class IndexedHashSet
 {
 private:
-    // Persistent storage
-    SegmentedBuffer m_storage;
-
     // Deduplication
     gtl::flat_hash_set<ObserverPtr<const Data<Tag>>, H, E> m_set;
 
@@ -49,7 +46,7 @@ private:
     std::vector<const Data<Tag>*> m_vec;
 
 public:
-    explicit IndexedHashSet(size_t seg_size = 1024) : m_storage(seg_size), m_set(), m_vec() {}
+    explicit IndexedHashSet() : m_set(), m_vec() {}
     IndexedHashSet(const IndexedHashSet& other) = delete;
     IndexedHashSet& operator=(const IndexedHashSet& other) = delete;
     IndexedHashSet(IndexedHashSet&& other) = default;
@@ -75,7 +72,6 @@ public:
 
     void clear()
     {
-        m_storage.clear();
         m_set.clear();
         m_vec.clear();
     }
@@ -102,7 +98,7 @@ public:
     }
 
     template<::cista::mode Mode = CISTA_MODE>
-    std::pair<const Data<Tag>*, bool> insert_with_hash(size_t h, const Data<Tag>& element, ::cista::buf<std::vector<uint8_t>>& buf)
+    std::pair<const Data<Tag>*, bool> insert_with_hash(size_t h, const Data<Tag>& element, ::cista::buf<std::vector<uint8_t>>& buf, SegmentedBuffer& arena)
     {
         assert(is_canonical(element) && "The given element is not canonical. Did you forget to call canonicalize?");
         assert(h == hash(element) && "The given hash does not match container internal's hash.");
@@ -118,7 +114,7 @@ public:
         ::cista::serialize<Mode>(buf, element);
 
         // 3. Write to storage
-        auto begin = m_storage.write(buf.base(), buf.size(), alignof(Data<Tag>));
+        auto begin = arena.write(buf.base(), buf.size(), alignof(Data<Tag>));
 
         // 4. Insert into set
         const auto serialized_element = ::cista::deserialize<const Data<Tag>, Mode>(begin, begin + buf.size());
@@ -134,11 +130,11 @@ public:
     // const T* always points to a valid instantiation of the class.
     // We return const T* here to avoid bugs when using structured bindings.
     template<::cista::mode Mode = CISTA_MODE>
-    std::pair<const Data<Tag>*, bool> insert(const Data<Tag>& element, ::cista::buf<std::vector<uint8_t>>& buf)
+    std::pair<const Data<Tag>*, bool> insert(const Data<Tag>& element, ::cista::buf<std::vector<uint8_t>>& buf, SegmentedBuffer& arena)
     {
         assert(is_canonical(element));
 
-        return insert_with_hash<Mode>(hash(element), element, buf);
+        return insert_with_hash<Mode>(hash(element), element, buf, arena);
     }
 
     /**

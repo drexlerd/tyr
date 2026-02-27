@@ -30,7 +30,6 @@
 #include "tyr/formalism/binding_index.hpp"
 #include "tyr/formalism/datalog/builder.hpp"
 #include "tyr/formalism/datalog/ground_atom_index.hpp"
-#include "tyr/formalism/datalog/merge.hpp"
 #include "tyr/formalism/datalog/repository.hpp"
 #include "tyr/formalism/datalog/views.hpp"
 #include "tyr/formalism/object_index.hpp"

@@ -23,7 +23,6 @@
 #include "tyr/common/vector.hpp"
 #include "tyr/formalism/datalog/conjunctive_condition_view.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
-#include "tyr/formalism/datalog/repository.hpp"
 
 namespace tyr::formalism::datalog
 {

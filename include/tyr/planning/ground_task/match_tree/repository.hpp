@@ -32,6 +32,7 @@
 //
 #include "tyr/buffer/declarations.hpp"
 #include "tyr/buffer/indexed_hash_set.hpp"
+#include "tyr/buffer/segmented_buffer.hpp"
 #include "tyr/common/tuple.hpp"
 #include "tyr/formalism/planning/declarations.hpp"
 #include "tyr/formalism/planning/repository.hpp"
@@ -64,12 +65,14 @@ private:
                                          RepositoryEntry<ElementGeneratorNode<Tag>>,
                                          RepositoryEntry<Node<Tag>>>;
 
-    RepositoryStorage m_repository;
-
     const formalism::planning::Repository& m_formalism_repository;
+    RepositoryStorage m_repository;
+    buffer::SegmentedBuffer m_arena;
 
 public:
-    explicit Repository(const formalism::planning::Repository& formalism_repository) : m_formalism_repository(formalism_repository) {}
+    explicit Repository(const formalism::planning::Repository& formalism_repository) : m_formalism_repository(formalism_repository), m_repository(), m_arena()
+    {
+    }
 
     const formalism::planning::Repository& get_formalism_repository() const noexcept { return m_formalism_repository; }
 
@@ -92,7 +95,7 @@ public:
         if constexpr (AssignIndex)
             builder.index.value = indexed_hash_set.size();
 
-        const auto [ptr, success] = indexed_hash_set.insert(builder, buf);
+        const auto [ptr, success] = indexed_hash_set.insert(builder, buf, m_arena);
 
         return std::make_pair(ptr->index, success);
     }

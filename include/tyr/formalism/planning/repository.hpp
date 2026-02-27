@@ -24,6 +24,7 @@
 //
 #include "tyr/buffer/declarations.hpp"
 #include "tyr/buffer/indexed_hash_set.hpp"
+#include "tyr/buffer/segmented_buffer.hpp"
 #include "tyr/common/tuple.hpp"
 #include "tyr/formalism/planning/declarations.hpp"
 
@@ -142,9 +143,9 @@ private:
                                          RepositoryEntry<GroundConjunctiveCondition>,
                                          RepositoryEntry<FDRTask>>;
 
-    RepositoryStorage m_repository;
-
     const Repository* m_parent;
+    RepositoryStorage m_repository;
+    buffer::SegmentedBuffer m_arena;
 
     template<typename T>
     void initialize_entry(RepositoryEntry<T>& entry)
@@ -163,7 +164,7 @@ private:
     }
 
 public:
-    Repository(const Repository* parent = nullptr) : m_parent(parent) { initialize_entries(); }
+    Repository(const Repository* parent = nullptr) : m_parent(parent), m_repository(), m_arena() { initialize_entries(); }
 
     template<typename T>
     std::optional<Index<T>> find_with_hash(const Data<T>& builder, size_t h) const noexcept
@@ -208,7 +209,7 @@ public:
         // Manually assign index to continue indexing.
         builder.index.value = entry.slot.parent_size + indexed_hash_set.size();
 
-        const auto [ptr, success] = indexed_hash_set.insert_with_hash(h, builder, buf);
+        const auto [ptr, success] = indexed_hash_set.insert_with_hash(h, builder, buf, m_arena);
 
         return { ptr->index, success };
     }
@@ -261,6 +262,7 @@ public:
     /// @brief Clear the repository but keep memory allocated.
     void clear() noexcept
     {
+        m_arena.clear();
         clear_entries();
         initialize_entries();
     }
