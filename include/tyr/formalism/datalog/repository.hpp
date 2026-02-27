@@ -287,7 +287,6 @@ public:
 
         if (g >= slot.size())
         {
-            std::cout << "Resize: " << g << std::endl;
             slot.resize(g + 1);
         }
 
