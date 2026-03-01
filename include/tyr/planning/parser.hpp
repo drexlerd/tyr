@@ -28,9 +28,11 @@ namespace tyr::planning
 class Parser
 {
 public:
-    explicit Parser(const fs::path& domain_filepath, const loki::ParserOptions& options = loki::ParserOptions());
+    Parser(const fs::path& domain_filepath, const loki::ParserOptions& options = loki::ParserOptions());
+    Parser(const std::string& domain_description, const fs::path& domain_filepath, const loki::ParserOptions& options = loki::ParserOptions());
 
-    LiftedTaskPtr parse_task(const fs::path& problem_filepath, const loki::ParserOptions& options = loki::ParserOptions());
+    LiftedTaskPtr parse_task(const fs::path& task_filepath, const loki::ParserOptions& options = loki::ParserOptions());
+    LiftedTaskPtr parse_task(const std::string& task_description, const fs::path& task_filepath, const loki::ParserOptions& options = loki::ParserOptions());
 
     DomainPtr get_domain() const;
 

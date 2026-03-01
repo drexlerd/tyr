@@ -14,6 +14,8 @@ REPO = DIR.parent.parent
 
 sys.path.append(str(DIR.parent.parent))
 
+from experiments.parser_search import SearchParser
+
 from experiments.suite import SUITE_IPC_SATISFICING_ADL, SUITE_IPC_SATISFICING_STRIPS, SUITE_HTG, SUITE_AUTOSCALE_AGILE_STRIPS
 
 # Create custom report class with suitable info and error attributes.
@@ -32,24 +34,17 @@ ATTRIBUTES = [
     "run_dir",
 
     Attribute("coverage", min_wins=False),
-    # GBFS Lazy
     "cost",
     "length",
     "unsolvable",
-
-    # VAL
     "invalid",
-
-    # Search
     "initial_h_value",
-    Attribute("search_time", function=geometric_mean),
+    Attribute("search_time_s", function=geometric_mean, digits=2),
     "num_expanded",
     "num_generated",
-    Attribute("search_time_us_per_expanded", function=geometric_mean),
-
-    # Total
-    Attribute("total_time", function=geometric_mean),
-    "memory",
+    Attribute("search_time_ms_per_expanded", function=geometric_mean, digits=2),
+    Attribute("total_time_s", function=geometric_mean, digits=2),
+    Attribute("memory_mb", function=geometric_mean),
 ]
 
 
@@ -144,21 +139,21 @@ def normalize(run):
 # exp = Experiment("2026-1-8-gbfs_lazy-profiling-tyr-pl-combined")
 exp_htg = Experiment("2026-1-8-gbfs_lazy-htg-tyr-pl-fd")
 exp_htg.add_fetcher("results_raw/pl-2026-1-9-lazy-gbfs-ff-pref-ff-eval", filter=normalize_htg)
-exp_htg.add_fetcher("results_raw/3-2026-1-8-gbfs_lazy-combined-eval", filter=normalize_htg)
+exp_htg.add_fetcher("results_raw/tyr-2026-1-8-gbfs_lazy-combined-eval", filter=normalize_htg)
 exp_htg.add_fetcher("results_raw/fd-2026-2-28-gbfs-lazy-ff-pref-ff-eval", filter=normalize_htg)
 exp_htg.add_report(BaseReport(attributes=ATTRIBUTES, filter_algorithm=["downward-gbfs-lazy-hff-pref-ff", "powerlifted-gbfs-lazy-hff-pref-ff", "gbfs-lazy-hff-pref-ff-1", "gbfs-lazy-hff-pref-ff-2", "gbfs-lazy-hff-pref-ff-4", "gbfs-lazy-hff-pref-ff-8"]))
 exp_htg.run_steps()
 
 exp_autoscale = Experiment("2026-1-8-gbfs_lazy-autoscale-tyr-pl-fd")
 exp_autoscale.add_fetcher("results_raw/pl-2026-1-9-lazy-gbfs-ff-pref-ff-eval", filter=normalize_autoscale)
-exp_autoscale.add_fetcher("results_raw/3-2026-1-8-gbfs_lazy-combined-eval", filter=normalize_autoscale)
+exp_autoscale.add_fetcher("results_raw/tyr-2026-1-8-gbfs_lazy-combined-eval", filter=normalize_autoscale)
 exp_autoscale.add_fetcher("results_raw/fd-2026-2-28-gbfs-lazy-ff-pref-ff-eval", filter=normalize_autoscale)
 exp_autoscale.add_report(BaseReport(attributes=ATTRIBUTES, filter_algorithm=["downward-gbfs-lazy-hff-pref-ff", "powerlifted-gbfs-lazy-hff-pref-ff", "gbfs-lazy-hff-pref-ff-1", "gbfs-lazy-hff-pref-ff-2", "gbfs-lazy-hff-pref-ff-4", "gbfs-lazy-hff-pref-ff-8"]))
 exp_autoscale.run_steps()
 
 exp = Experiment("2026-1-8-gbfs_lazy-tyr-pl-fd")
 exp.add_fetcher("results_raw/pl-2026-1-9-lazy-gbfs-ff-pref-ff-eval", filter=normalize)
-exp.add_fetcher("results_raw/3-2026-1-8-gbfs_lazy-combined-eval", filter=normalize)
+exp.add_fetcher("results_raw/tyr-2026-1-8-gbfs_lazy-combined-eval", filter=normalize)
 exp.add_fetcher("results_raw/fd-2026-2-28-gbfs-lazy-ff-pref-ff-eval", filter=normalize)
 exp.add_report(BaseReport(attributes=ATTRIBUTES, filter_algorithm=["downward-gbfs-lazy-hff-pref-ff", "powerlifted-gbfs-lazy-hff-pref-ff", "gbfs-lazy-hff-pref-ff-1", "gbfs-lazy-hff-pref-ff-2", "gbfs-lazy-hff-pref-ff-4", "gbfs-lazy-hff-pref-ff-8"]))
 exp.run_steps()

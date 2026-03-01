@@ -25,8 +25,10 @@ namespace fp = tyr::formalism::planning;
 namespace tyr::planning
 {
 
-Parser::Parser(const fs::path& domain_filepath, const loki::ParserOptions& options) :
-    m_loki_parser(loki::Parser(loki::read_file(domain_filepath), domain_filepath, options)),
+Parser::Parser(const fs::path& domain_filepath, const loki::ParserOptions& options) : Parser(loki::read_file(domain_filepath), domain_filepath, options) {}
+
+Parser::Parser(const std::string& domain_description, const fs::path& domain_filepath, const loki::ParserOptions& options) :
+    m_loki_parser(loki::Parser(domain_description, domain_filepath, options)),
     m_loki_domain_translation_result(loki::translate(m_loki_parser.get_domain())),
     m_domain_repository(std::make_shared<fp::Repository>())
 {
@@ -36,12 +38,17 @@ Parser::Parser(const fs::path& domain_filepath, const loki::ParserOptions& optio
     m_domain = translator.translate(m_loki_domain_translation_result.get_translated_domain(), builder, m_domain_repository);
 }
 
-LiftedTaskPtr Parser::parse_task(const fs::path& problem_filepath, const loki::ParserOptions& options)
+LiftedTaskPtr Parser::parse_task(const fs::path& task_filepath, const loki::ParserOptions& options)
+{
+    return parse_task(loki::read_file(task_filepath), task_filepath, options);
+}
+
+LiftedTaskPtr Parser::parse_task(const std::string& task_description, const fs::path& task_filepath, const loki::ParserOptions& options)
 {
     auto translator = LokiToTyrTranslator();
     auto builder = fp::Builder();
 
-    return translator.translate(loki::translate(m_loki_parser.parse_problem(problem_filepath, options), m_loki_domain_translation_result),
+    return translator.translate(loki::translate(m_loki_parser.parse_problem(task_description, task_filepath, options), m_loki_domain_translation_result),
                                 builder,
                                 m_domain,
                                 m_domain_repository);
