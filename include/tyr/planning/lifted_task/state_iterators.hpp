@@ -77,16 +77,17 @@ private:
 };
 
 template<typename Tag>
-class FDRFactRange<LiftedTask, Tag>
+class FDRFactRange<LiftedTask, Tag> : public std::ranges::view_interface<FDRFactRange<LiftedTask, Tag>>
 {
 public:
-    explicit FDRFactRange(const boost::dynamic_bitset<>& values) : m_data(values) {}
+    FDRFactRange() = default;
+    explicit FDRFactRange(const boost::dynamic_bitset<>& values) : m_data(&values) {}
 
-    auto begin() const { return FDRFactIterator<LiftedTask, Tag>(m_data, true); }
-    auto end() const { return FDRFactIterator<LiftedTask, Tag>(m_data, false); }
+    auto begin() const { return FDRFactIterator<LiftedTask, Tag>(*m_data, true); }
+    auto end() const { return FDRFactIterator<LiftedTask, Tag>(*m_data, false); }
 
 private:
-    const boost::dynamic_bitset<>& m_data;
+    const boost::dynamic_bitset<>* m_data;
 };
 }
 

@@ -76,16 +76,17 @@ private:
 };
 
 template<typename Tag>
-class FDRFactRange<GroundTask, Tag>
+class FDRFactRange<GroundTask, Tag> : public std::ranges::view_interface<FDRFactRange<GroundTask, Tag>>
 {
 public:
-    explicit FDRFactRange(const std::vector<formalism::planning::FDRValue>& values) : m_data(values) {}
+    FDRFactRange() = default;
+    explicit FDRFactRange(const std::vector<formalism::planning::FDRValue>& values) : m_data(&values) {}
 
-    auto begin() const { return FDRFactIterator<GroundTask, Tag>(m_data, true); }
-    auto end() const { return FDRFactIterator<GroundTask, Tag>(m_data, false); }
+    auto begin() const { return FDRFactIterator<GroundTask, Tag>(*m_data, true); }
+    auto end() const { return FDRFactIterator<GroundTask, Tag>(*m_data, false); }
 
 private:
-    const std::vector<formalism::planning::FDRValue>& m_data;
+    const std::vector<formalism::planning::FDRValue>* m_data;
 };
 }
 

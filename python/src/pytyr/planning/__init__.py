@@ -4,6 +4,7 @@ from pytyr.pytyr.planning import (
     Domain,
     ParserOptions,
     Parser,
+    StateIndex,
 )
 
 from pytyr.pytyr.planning import (

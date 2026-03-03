@@ -17,6 +17,8 @@
 
 #include "bindings.hpp"
 
+#include "../common/bindings.hpp"
+
 namespace f = tyr::formalism;
 namespace fp = tyr::formalism::planning;
 
@@ -32,6 +34,12 @@ void bind_module_definitions(nb::module_& m)
     nb::class_<Domain>(m, "Domain")  //
         .def("get_repository", &Domain::get_repository)
         .def("get_domain", &Domain::get_domain);
+
+    /**
+     * StateIndex
+     */
+
+    bind_index<StateIndex>(m, "StateIndex");
 
     /**
      * GroundTask

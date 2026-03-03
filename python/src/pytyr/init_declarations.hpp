@@ -53,18 +53,15 @@ using namespace nb::literals;
 
 namespace tyr
 {
-template<typename T>
-struct PyImmutable
-{
-    explicit PyImmutable(const T& obj) : obj_(obj) {}
-
-    const T& obj_;  // Read-only reference
-};
 
 /**
  * init - declarations:
  */
 
+namespace common
+{
+extern void bind_module_definitions(nb::module_& m);
+}
 namespace formalism
 {
 extern void bind_module_definitions(nb::module_& m);

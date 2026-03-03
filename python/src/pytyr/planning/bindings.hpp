@@ -28,73 +28,73 @@ void bind_state(nb::module_& m, const std::string& name)
     nb::class_<State<Task>>(m, name.c_str())  //
         .def("__str__", [](const State<Task>& self) { return to_string(self); })
         .def("get_index", &State<Task>::get_index, nb::rv_policy::copy)
+        .def("get_repository", &State<Task>::get_repository, nb::rv_policy::copy)
         .def("get_state_repository", &State<Task>::get_state_repository, nb::rv_policy::copy)
         // AccessibleStateConcept
         .def("test",
-             nb::overload_cast<Index<formalism::planning::GroundAtom<formalism::StaticTag>>>(&State<Task>::test, nb::const_),
+             nb::overload_cast<View<Index<formalism::planning::GroundAtom<formalism::StaticTag>>, formalism::planning::Repository>>(&State<Task>::test,
+                                                                                                                                    nb::const_),
              nb::rv_policy::copy,
-             "index"_a)
+             "static_atom"_a)
         .def("test",
-             nb::overload_cast<Index<formalism::planning::GroundAtom<formalism::DerivedTag>>>(&State<Task>::test, nb::const_),
+             nb::overload_cast<View<Index<formalism::planning::GroundAtom<formalism::DerivedTag>>, formalism::planning::Repository>>(&State<Task>::test,
+                                                                                                                                     nb::const_),
              nb::rv_policy::copy,
-             "index"_a)
+             "derived_atom"_a)
         .def("get",
-             nb::overload_cast<Index<formalism::planning::GroundFunctionTerm<formalism::StaticTag>>>(&State<Task>::get, nb::const_),
+             nb::overload_cast<View<Index<formalism::planning::GroundFunctionTerm<formalism::StaticTag>>, formalism::planning::Repository>>(&State<Task>::get,
+                                                                                                                                            nb::const_),
              nb::rv_policy::copy,
-             "index"_a)
+             "static_fterm"_a)
         .def("get",
-             nb::overload_cast<Index<formalism::planning::FDRVariable<formalism::FluentTag>>>(&State<Task>::get, nb::const_),
+             nb::overload_cast<View<Index<formalism::planning::FDRVariable<formalism::FluentTag>>, formalism::planning::Repository>>(&State<Task>::get,
+                                                                                                                                     nb::const_),
              nb::rv_policy::copy,
-             "index"_a)
+             "fluent_fact"_a)
         .def("get",
-             nb::overload_cast<Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>>(&State<Task>::get, nb::const_),
+             nb::overload_cast<View<Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>, formalism::planning::Repository>>(&State<Task>::get,
+                                                                                                                                            nb::const_),
              nb::rv_policy::copy,
-             "index"_a)
+             "fluent_fterm"_a)
         // IterableStateConcept
         .def(
             "static_atoms",
             [](const State<Task>& s)
             {
-                auto r = s.get_static_atoms();
-                return nb::make_iterator(nb::type<AtomRange<formalism::StaticTag>>(), "static atom iterator", std::begin(r), std::end(r));
+                auto range = s.get_static_atoms_view();
+                return nb::make_iterator(nb::type<State<Task>>(), "static atom iterator", range);
             },
             nb::keep_alive<0, 1>())
         .def(
             "fluent_facts",
             [](const State<Task>& s)
             {
-                auto r = s.get_fluent_facts();
-                return nb::make_iterator(nb::type<FDRFactRange<Task, formalism::FluentTag>>(), "fluent fact iterator", std::begin(r), std::end(r));
+                auto range = s.get_fluent_facts_view();
+                return nb::make_iterator(nb::type<State<Task>>(), "fluent facts iterator", range);
             },
             nb::keep_alive<0, 1>())
         .def(
             "derived_atoms",
             [](const State<Task>& s)
             {
-                auto r = s.get_derived_atoms();
-                return nb::make_iterator(nb::type<AtomRange<formalism::DerivedTag>>(), "derived atom iterator", std::begin(r), std::end(r));
+                auto range = s.get_derived_atoms_view();
+                return nb::make_iterator(nb::type<State<Task>>(), "derived atom iterator", range);
             },
             nb::keep_alive<0, 1>())
         .def(
             "static_fterm_values",
             [](const State<Task>& s)
             {
-                auto r = s.get_static_fterm_values();
-                return nb::make_iterator(nb::type<FunctionTermValueRange<formalism::StaticTag>>(),
-                                         "static function term value iterator",
-                                         std::begin(r),
-                                         std::end(r));
+                auto range = s.get_static_fterm_values_view();
+                return nb::make_iterator(nb::type<State<Task>>(), "static function term value iterator", range);
             },
             nb::keep_alive<0, 1>())
         .def(
             "fluent_fterm_values",
             [](const State<Task>& s)
             {
-                auto r = s.get_fluent_fterm_values();
-                return nb::make_iterator(nb::type<FunctionTermValueRange<formalism::FluentTag>>(),
-                                         "fluent function term value iterator",
-                                         std::begin(r),
-                                         std::end(r));
+                auto range = s.get_fluent_fterm_values_view();
+                return nb::make_iterator(nb::type<State<Task>>(), "fluent function term value iterator", range);
             },
             nb::keep_alive<0, 1>());
 }

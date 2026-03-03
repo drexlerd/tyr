@@ -84,7 +84,14 @@ FunctionTermValueRange<formalism::FluentTag> State<LiftedTask>::get_fluent_fterm
     return FunctionTermValueRange<formalism::FluentTag>(get_numeric_variables<formalism::FluentTag>());
 }
 
+const std::shared_ptr<formalism::planning::Repository>& State<LiftedTask>::get_repository() const noexcept
+{
+    return m_state_repository->get_task()->get_repository();
+}
+
 static_assert(IterableStateConcept<State<LiftedTask>>);
+static_assert(IterableViewStateConcept<State<LiftedTask>>);
 static_assert(IndexableStateConcept<State<LiftedTask>, LiftedTask>);
+static_assert(IndexableViewStateConcept<State<LiftedTask>, LiftedTask>);
 
 }

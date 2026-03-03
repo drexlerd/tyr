@@ -76,16 +76,17 @@ private:
 };
 
 template<class Tag>
-class AtomRange
+class AtomRange : public std::ranges::view_interface<AtomRange<Tag>>
 {
 public:
-    explicit AtomRange(const boost::dynamic_bitset<>& values) : m_data(values) {}
+    AtomRange() = default;
+    explicit AtomRange(const boost::dynamic_bitset<>& values) : m_data(&values) {}
 
-    auto begin() const { return AtomIterator<Tag>(m_data, true); }
-    auto end() const { return AtomIterator<Tag>(m_data, false); }
+    auto begin() const { return AtomIterator<Tag>(*m_data, true); }
+    auto end() const { return AtomIterator<Tag>(*m_data, false); }
 
 private:
-    const boost::dynamic_bitset<>& m_data;
+    const boost::dynamic_bitset<>* m_data;
 };
 
 /**
@@ -156,16 +157,17 @@ private:
 };
 
 template<class Tag>
-class FunctionTermValueRange
+class FunctionTermValueRange : public std::ranges::view_interface<FunctionTermValueRange<Tag>>
 {
 public:
-    explicit FunctionTermValueRange(const std::vector<float_t>& values) : m_data(values) {}
+    FunctionTermValueRange() = default;
+    explicit FunctionTermValueRange(const std::vector<float_t>& values) : m_data(&values) {}
 
-    auto begin() const { return FunctionTermValueIterator<Tag>(m_data, true); }
-    auto end() const { return FunctionTermValueIterator<Tag>(m_data, false); }
+    auto begin() const { return FunctionTermValueIterator<Tag>(*m_data, true); }
+    auto end() const { return FunctionTermValueIterator<Tag>(*m_data, false); }
 
 private:
-    const std::vector<float_t>& m_data;
+    const std::vector<float_t>* m_data;
 };
 }
 

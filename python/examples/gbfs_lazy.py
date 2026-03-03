@@ -18,6 +18,9 @@ def main():
     lifted_init_state = lifted_state_repository.get_initial_state()
     print(lifted_init_state)
 
+    # for x in lifted_init_state.static_atoms():
+    #     print(x)
+
     lifted_succ_gen = tp.LiftedSuccessorGenerator(lifted_task)
     lifted_init_node = lifted_succ_gen.get_initial_node()
     print(lifted_init_node)
