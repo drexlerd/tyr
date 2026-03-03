@@ -79,6 +79,11 @@ StateRepository<GroundTask>::StateRepository(std::shared_ptr<GroundTask> task) :
 {
 }
 
+std::shared_ptr<StateRepository<GroundTask>> StateRepository<GroundTask>::create(std::shared_ptr<GroundTask> task)
+{
+    return std::make_shared<StateRepository<GroundTask>>(std::move(task));
+}
+
 State<GroundTask> StateRepository<GroundTask>::get_initial_state()
 {
     auto unpacked_state = get_unregistered_state();

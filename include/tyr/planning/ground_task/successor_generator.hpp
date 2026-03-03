@@ -35,13 +35,18 @@ class SuccessorGenerator<GroundTask>
 public:
     explicit SuccessorGenerator(std::shared_ptr<GroundTask> task);
 
+    static std::shared_ptr<SuccessorGenerator<GroundTask>> create(std::shared_ptr<GroundTask> task);
+
     Node<GroundTask> get_initial_node();
 
     std::vector<LabeledNode<GroundTask>> get_labeled_successor_nodes(const Node<GroundTask>& node);
-
     void get_labeled_successor_nodes(const Node<GroundTask>& node, std::vector<LabeledNode<GroundTask>>& out_nodes);
 
     State<GroundTask> get_state(StateIndex state_index);
+
+    /**
+     * Expert API
+     */
 
     const auto& get_state_repository() const noexcept { return m_state_repository; }
 

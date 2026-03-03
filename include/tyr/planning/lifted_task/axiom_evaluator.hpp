@@ -37,6 +37,8 @@ class AxiomEvaluator<LiftedTask>
 public:
     explicit AxiomEvaluator(std::shared_ptr<LiftedTask> task);
 
+    static std::shared_ptr<AxiomEvaluator<LiftedTask>> create(std::shared_ptr<LiftedTask> task);
+
     void compute_extended_state(UnpackedState<LiftedTask>& unpacked_state);
 
     const auto& get_workspace() const noexcept { return m_workspace; }

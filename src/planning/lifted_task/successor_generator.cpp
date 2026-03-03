@@ -51,6 +51,11 @@ SuccessorGenerator<LiftedTask>::SuccessorGenerator(std::shared_ptr<LiftedTask> t
 {
 }
 
+std::shared_ptr<SuccessorGenerator<LiftedTask>> SuccessorGenerator<LiftedTask>::create(std::shared_ptr<LiftedTask> task)
+{
+    return std::make_shared<SuccessorGenerator<LiftedTask>>(std::move(task));
+}
+
 Node<LiftedTask> SuccessorGenerator<LiftedTask>::get_initial_node()
 {
     auto initial_state = m_state_repository->get_initial_state();

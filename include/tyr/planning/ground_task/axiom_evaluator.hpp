@@ -33,6 +33,8 @@ class AxiomEvaluator<GroundTask>
 public:
     explicit AxiomEvaluator(std::shared_ptr<GroundTask> task);
 
+    static std::shared_ptr<AxiomEvaluator<GroundTask>> create(std::shared_ptr<GroundTask> task);
+
     void compute_extended_state(UnpackedState<GroundTask>& unpacked_state);
 
 private:

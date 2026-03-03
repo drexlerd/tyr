@@ -38,13 +38,18 @@ class SuccessorGenerator<LiftedTask>
 public:
     explicit SuccessorGenerator(std::shared_ptr<LiftedTask> task);
 
+    static std::shared_ptr<SuccessorGenerator<LiftedTask>> create(std::shared_ptr<LiftedTask> task);
+
     Node<LiftedTask> get_initial_node();
 
     std::vector<LabeledNode<LiftedTask>> get_labeled_successor_nodes(const Node<LiftedTask>& node);
-
     void get_labeled_successor_nodes(const Node<LiftedTask>& node, std::vector<LabeledNode<LiftedTask>>& out_nodes);
 
     State<LiftedTask> get_state(StateIndex state_index);
+
+    /**
+     * Expert API
+     */
 
     const auto& get_state_repository() const noexcept { return m_state_repository; }
     const auto& get_workspace() const noexcept { return m_workspace; }

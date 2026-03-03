@@ -44,8 +44,9 @@ void bind_module_definitions(nb::module_& m)
     bind_state<GroundTask>(m, "GroundState");
     bind_node<GroundTask>(m, "GroundNode");
     bind_labeled_node<GroundTask>(m, "GroundLabeledNode");
+    nb::bind_vector<std::vector<LabeledNode<GroundTask>>>(m, "GroundLabeledNodeList");
     bind_state_repository<GroundTask>(m, "GroundStateRepository");
-    // bind_successor_generator<GroundTask>(m, "GroundSuccessorGenerator");
+    bind_successor_generator<GroundTask>(m, "GroundSuccessorGenerator");
 
     /**
      * LiftedTask
@@ -59,8 +60,9 @@ void bind_module_definitions(nb::module_& m)
     bind_state<LiftedTask>(m, "LiftedState");
     bind_node<LiftedTask>(m, "LiftedNode");
     bind_labeled_node<LiftedTask>(m, "LiftedLabeledNode");
+    nb::bind_vector<std::vector<LabeledNode<LiftedTask>>>(m, "LiftedLabeledNodeList");
     bind_state_repository<LiftedTask>(m, "LiftedStateRepository");
-    // bind_successor_generator<LiftedTask>(m, "LiftedSuccessorGenerator");
+    bind_successor_generator<LiftedTask>(m, "LiftedSuccessorGenerator");
 
     /**
      * Parser

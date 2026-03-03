@@ -45,6 +45,8 @@ class StateRepository<GroundTask>
 public:
     explicit StateRepository(std::shared_ptr<GroundTask> task);
 
+    static std::shared_ptr<StateRepository<GroundTask>> create(std::shared_ptr<GroundTask> task);
+
     State<GroundTask> get_initial_state();
 
     State<GroundTask> get_registered_state(StateIndex state_index);

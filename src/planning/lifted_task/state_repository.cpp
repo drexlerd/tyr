@@ -47,6 +47,11 @@ StateRepository<LiftedTask>::StateRepository(std::shared_ptr<LiftedTask> task) :
 {
 }
 
+std::shared_ptr<StateRepository<LiftedTask>> StateRepository<LiftedTask>::create(std::shared_ptr<LiftedTask> task)
+{
+    return std::make_shared<StateRepository<LiftedTask>>(std::move(task));
+}
+
 State<LiftedTask> StateRepository<LiftedTask>::get_initial_state()
 {
     auto unpacked_state = get_unregistered_state();

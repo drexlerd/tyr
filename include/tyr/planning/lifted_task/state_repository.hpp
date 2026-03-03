@@ -41,6 +41,8 @@ class StateRepository<LiftedTask>
 public:
     explicit StateRepository(std::shared_ptr<LiftedTask> task);
 
+    static std::shared_ptr<StateRepository<LiftedTask>> create(std::shared_ptr<LiftedTask> task);
+
     State<LiftedTask> get_initial_state();
 
     State<LiftedTask> get_registered_state(StateIndex state_index);

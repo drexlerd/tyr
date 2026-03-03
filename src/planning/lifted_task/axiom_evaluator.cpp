@@ -91,6 +91,11 @@ AxiomEvaluator<LiftedTask>::AxiomEvaluator(std::shared_ptr<LiftedTask> task) :
 {
 }
 
+std::shared_ptr<AxiomEvaluator<LiftedTask>> AxiomEvaluator<LiftedTask>::create(std::shared_ptr<LiftedTask> task)
+{
+    return std::make_shared<AxiomEvaluator<LiftedTask>>(std::move(task));
+}
+
 void AxiomEvaluator<LiftedTask>::compute_extended_state(UnpackedState<LiftedTask>& unpacked_state)
 {
     auto merge_datalog_context = fp::MergeDatalogContext { m_workspace.datalog_builder, m_workspace.repository };

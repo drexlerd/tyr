@@ -39,6 +39,11 @@ SuccessorGenerator<GroundTask>::SuccessorGenerator(std::shared_ptr<GroundTask> t
 {
 }
 
+std::shared_ptr<SuccessorGenerator<GroundTask>> SuccessorGenerator<GroundTask>::create(std::shared_ptr<GroundTask> task)
+{
+    return std::make_shared<SuccessorGenerator<GroundTask>>(std::move(task));
+}
+
 Node<GroundTask> SuccessorGenerator<GroundTask>::get_initial_node()
 {
     auto initial_state = m_state_repository->get_initial_state();
