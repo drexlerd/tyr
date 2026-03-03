@@ -140,6 +140,42 @@ void bind_successor_generator(nb::module_& m, const std::string& name)
         .def("get_state_repository", &SuccessorGenerator<Task>::get_state_repository, nb::rv_policy::copy);
 }
 
+template<typename Task>
+void bind_heuristic(nb::module_& m, const std::string& name)
+{
+    nb::class_<Heuristic<Task>>(m, name.c_str())  //
+        .def("set_goal", &Heuristic<Task>::set_goal, "goal"_a)
+        .def("evaluate", &Heuristic<Task>::evaluate, "state"_a);
+}
+
+template<typename Task>
+void bind_blind_heuristic(nb::module_& m, const std::string& name)
+{
+    nb::class_<BlindHeuristic<Task>, Heuristic<Task>>(m, name.c_str())  //
+        .def(nb::new_([]() { return BlindHeuristic<Task>::create(); }));
+}
+
+template<typename Task>
+void bind_max_heuristic(nb::module_& m, const std::string& name)
+{
+    nb::class_<MaxHeuristic<Task>, Heuristic<Task>>(m, name.c_str())  //
+        .def(nb::new_([](std::shared_ptr<Task> task) { return MaxHeuristic<Task>::create(std::move(task)); }), "task"_a);
+}
+
+template<typename Task>
+void bind_add_heuristic(nb::module_& m, const std::string& name)
+{
+    nb::class_<AddHeuristic<Task>, Heuristic<Task>>(m, name.c_str())  //
+        .def(nb::new_([](std::shared_ptr<Task> task) { return AddHeuristic<Task>::create(std::move(task)); }), "task"_a);
+}
+
+template<typename Task>
+void bind_ff_heuristic(nb::module_& m, const std::string& name)
+{
+    nb::class_<FFHeuristic<Task>, Heuristic<Task>>(m, name.c_str())  //
+        .def(nb::new_([](std::shared_ptr<Task> task) { return FFHeuristic<Task>::create(std::move(task)); }), "task"_a);
+}
+
 }
 
 #endif

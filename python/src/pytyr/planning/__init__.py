@@ -13,7 +13,12 @@ from pytyr.pytyr.planning import (
     LiftedNode,    
     LiftedLabeledNode,
     LiftedStateRepository,
-    LiftedSuccessorGenerator
+    LiftedSuccessorGenerator,
+    LiftedHeuristic,
+    LiftedBlindHeuristic,
+    LiftedMaxHeuristic,
+    LiftedAddHeuristic,
+    LiftedFFHeuristic,
 )
 
 from pytyr.pytyr.planning import (
@@ -23,6 +28,8 @@ from pytyr.pytyr.planning import (
     GroundLabeledNode,
     GroundStateRepository,
     GroundSuccessorGenerator,
+    GroundHeuristic,
+    GroundBlindHeuristic,
     
 )
 

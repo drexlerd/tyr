@@ -54,6 +54,8 @@ void bind_module_definitions(nb::module_& m)
     bind_labeled_node<GroundTask>(m, "GroundLabeledNode");
     bind_state_repository<GroundTask>(m, "GroundStateRepository");
     bind_successor_generator<GroundTask>(m, "GroundSuccessorGenerator");
+    bind_heuristic<GroundTask>(m, "GroundHeuristic");
+    bind_blind_heuristic<GroundTask>(m, "GroundBlindHeuristic");
 
     /**
      * LiftedTask
@@ -69,6 +71,11 @@ void bind_module_definitions(nb::module_& m)
     bind_labeled_node<LiftedTask>(m, "LiftedLabeledNode");
     bind_state_repository<LiftedTask>(m, "LiftedStateRepository");
     bind_successor_generator<LiftedTask>(m, "LiftedSuccessorGenerator");
+    bind_heuristic<LiftedTask>(m, "LiftedHeuristic");
+    bind_blind_heuristic<LiftedTask>(m, "LiftedBlindHeuristic");
+    bind_max_heuristic<LiftedTask>(m, "LiftedMaxHeuristic");
+    bind_add_heuristic<LiftedTask>(m, "LiftedAddHeuristic");
+    bind_ff_heuristic<LiftedTask>(m, "LiftedFFHeuristic");
 
     /**
      * Parser
