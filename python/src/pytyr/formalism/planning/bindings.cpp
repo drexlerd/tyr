@@ -28,6 +28,9 @@ void bind_module_definitions(nb::module_& m)
         .def("__str__", [](View<Index<Object>, Repository> self) { return to_string(self); })
         .def("get_name", &View<Index<Object>, Repository>::get_name);
 
+    nb::class_<View<Index<Binding>, Repository>>(m, "Binding")  //
+        .def("__str__", [](View<Index<Binding>, Repository> self) { return to_string(self); });
+
     nb::class_<View<Index<Variable>, Repository>>(m, "Variable")  //
         .def("__str__", [](View<Index<Variable>, Repository> self) { return to_string(self); })
         .def("get_name", &View<Index<Variable>, Repository>::get_name);
@@ -58,11 +61,54 @@ void bind_module_definitions(nb::module_& m)
     bind_ground_literal<FluentTag>(m, "FluentGroundLiteral");
     bind_ground_literal<DerivedTag>(m, "DerivedGroundLiteral");
 
+    bind_fdr_variable<FluentTag>(m, "FluentFDRVariable");
+    bind_fixed_uint<FDRValue>(m, "FDRValue");
+    bind_fdr_fact<FluentTag>(m, "FluentFDRFact");
+
     bind_function<StaticTag>(m, "StaticFunction");
     bind_function<FluentTag>(m, "FluentFunction");
     bind_function<AuxiliaryTag>(m, "AuxiliaryFunction");
 
+    bind_function_term<StaticTag>(m, "StaticFunctionTerm");
+    bind_function_term<FluentTag>(m, "FluentFunctionTerm");
+    bind_function_term<AuxiliaryTag>(m, "AuxiliaryFunctionTerm");
+
+    bind_ground_function_term<StaticTag>(m, "StaticGroundFunctionTerm");
+    bind_ground_function_term<FluentTag>(m, "FluentGroundFunctionTerm");
+    bind_ground_function_term<AuxiliaryTag>(m, "AuxiliaryGroundFunctionTerm");
+
+    bind_ground_function_term_value<StaticTag>(m, "StaticGroundFunctionTermValue");
+    bind_ground_function_term_value<FluentTag>(m, "FluentGroundFunctionTermValue");
+    bind_ground_function_term_value<AuxiliaryTag>(m, "AuxiliaryGroundFunctionTermValue");
+
+    bind_unary_operator<OpSub, Data<FunctionExpression>>(m, "UnaryOperatorSub");
+    bind_binary_operator<OpAdd, Data<FunctionExpression>>(m, "BinaryOperatorAdd");
+    bind_binary_operator<OpSub, Data<FunctionExpression>>(m, "BinaryOperatorSub");
+    bind_binary_operator<OpMul, Data<FunctionExpression>>(m, "BinaryOperatorMul");
+    bind_binary_operator<OpDiv, Data<FunctionExpression>>(m, "BinaryOperatorDiv");
+    bind_binary_operator<OpEq, Data<FunctionExpression>>(m, "BinaryOperatorEq");
+    bind_binary_operator<OpNe, Data<FunctionExpression>>(m, "BinaryOperatorNe");
+    bind_binary_operator<OpLe, Data<FunctionExpression>>(m, "BinaryOperatorLe");
+    bind_binary_operator<OpLt, Data<FunctionExpression>>(m, "BinaryOperatorLt");
+    bind_binary_operator<OpGe, Data<FunctionExpression>>(m, "BinaryOperatorGe");
+    bind_binary_operator<OpGt, Data<FunctionExpression>>(m, "BinaryOperatorGt");
+
+    bind_arithmethic_operator<Data<FunctionExpression>>(m, "ArithmeticOperator");
+    bind_boolean_operator<Data<GroundFunctionExpression>>(m, "BooleanOperator");
+
+    nb::class_<View<Data<FunctionExpression>, Repository>>(m, "FunctionExpression");
+
     nb::class_<View<Index<ConjunctiveCondition>, Repository>>(m, "ConjunctiveCondition");
+
+    bind_numeric_effect<OpAssign, FluentTag>(m, "FluentNumericEffectAssign");
+    bind_numeric_effect<OpIncrease, FluentTag>(m, "FluentNumericEffectIncrease");
+    bind_numeric_effect<OpDecrease, FluentTag>(m, "FluentNumericEffectDecrease");
+    bind_numeric_effect<OpScaleUp, FluentTag>(m, "FluentNumericEffectScaleUp");
+    bind_numeric_effect<OpScaleDown, FluentTag>(m, "FluentNumericEffectScaleDown");
+    bind_numeric_effect<OpIncrease, AuxiliaryTag>(m, "AuxiliaryNumericEffectIncrease");
+
+    bind_numeric_effect_operator<FluentTag>(m, "FluentNumericEffectOperator");
+    bind_numeric_effect_operator<AuxiliaryTag>(m, "AuxiliaryNumericEffectOperator");
 
     nb::class_<View<Index<ConjunctiveEffect>, Repository>>(m, "ConjunctiveEffect");
 
@@ -79,7 +125,34 @@ void bind_module_definitions(nb::module_& m)
 
     nb::class_<View<Index<Axiom>, Repository>>(m, "Axiom");
 
+    bind_unary_operator<OpSub, Data<GroundFunctionExpression>>(m, "GroundUnaryOperatorSub");
+    bind_binary_operator<OpAdd, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorAdd");
+    bind_binary_operator<OpSub, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorSub");
+    bind_binary_operator<OpMul, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorMul");
+    bind_binary_operator<OpDiv, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorDiv");
+    bind_binary_operator<OpEq, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorEq");
+    bind_binary_operator<OpNe, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorNe");
+    bind_binary_operator<OpLe, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorLe");
+    bind_binary_operator<OpLt, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorLt");
+    bind_binary_operator<OpGe, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorGe");
+    bind_binary_operator<OpGt, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorGt");
+
+    bind_arithmethic_operator<Data<GroundFunctionExpression>>(m, "GroundArithmeticOperator");
+    bind_boolean_operator<Data<GroundFunctionExpression>>(m, "GroundBooleanOperator");
+
+    nb::class_<View<Data<GroundFunctionExpression>, Repository>>(m, "GroundFunctionExpression");
+
     nb::class_<View<Index<GroundConjunctiveCondition>, Repository>>(m, "GroundConjunctiveCondition");
+
+    bind_ground_numeric_effect<OpAssign, FluentTag>(m, "FluentGroundNumericEffectAssign");
+    bind_ground_numeric_effect<OpIncrease, FluentTag>(m, "FluentGroundNumericEffectIncrease");
+    bind_ground_numeric_effect<OpDecrease, FluentTag>(m, "FluentGroundNumericEffectDecrease");
+    bind_ground_numeric_effect<OpScaleUp, FluentTag>(m, "FluentGroundNumericEffectScaleUp");
+    bind_ground_numeric_effect<OpScaleDown, FluentTag>(m, "FluentGroundNumericEffectScaleDown");
+    bind_ground_numeric_effect<OpIncrease, AuxiliaryTag>(m, "AuxiliaryGroundNumericEffectIncrease");
+
+    bind_ground_numeric_effect_operator<FluentTag>(m, "FluentGroundNumericEffectOperator");
+    bind_ground_numeric_effect_operator<AuxiliaryTag>(m, "AuxiliaryGroundNumericEffectOperator");
 
     nb::class_<View<Index<GroundConjunctiveEffect>, Repository>>(m, "GroundConjunctiveEffect");
 
@@ -93,6 +166,16 @@ void bind_module_definitions(nb::module_& m)
         .def("get_effects", &View<Index<GroundAction>, Repository>::get_effects);
 
     nb::class_<View<Index<GroundAxiom>, Repository>>(m, "GroundAxiom");
+
+    nb::class_<View<Index<Metric>, Repository>>(m, "Metric");
+
+    nb::class_<View<Index<Domain>, Repository>>(m, "Domain");
+
+    nb::class_<View<Index<Task>, Repository>>(m, "LiftedTask");
+
+    nb::class_<View<Index<FDRTask>, Repository>>(m, "GroundTask");
+
+    nb::class_<Repository>(m, "Repository");
 }
 
 }
