@@ -25,76 +25,75 @@ namespace tyr::planning
 template<typename Task>
 void bind_state(nb::module_& m, const std::string& name)
 {
-    nb::class_<State<Task>>(m, name.c_str())  //
-        .def("__str__", [](const State<Task>& self) { return to_string(self); })
-        .def("get_index", &State<Task>::get_index, nb::rv_policy::copy)
-        .def("get_repository", &State<Task>::get_repository, nb::rv_policy::copy)
-        .def("get_state_repository", &State<Task>::get_state_repository, nb::rv_policy::copy)
+    using T = State<Task>;
+
+    nb::class_<T>(m, name.c_str())  //
+        .def("__str__", [](const T& self) { return to_string(self); })
+        .def("get_index", &T::get_index, nb::rv_policy::copy)
+        .def("get_repository", &T::get_repository, nb::rv_policy::copy)
+        .def("get_state_repository", &T::get_state_repository, nb::rv_policy::copy)
         // AccessibleStateConcept
         .def("test",
-             nb::overload_cast<View<Index<formalism::planning::GroundAtom<formalism::StaticTag>>, formalism::planning::Repository>>(&State<Task>::test,
-                                                                                                                                    nb::const_),
+             nb::overload_cast<View<Index<formalism::planning::GroundAtom<formalism::StaticTag>>, formalism::planning::Repository>>(&T::test, nb::const_),
              nb::rv_policy::copy,
              "static_atom"_a)
         .def("test",
-             nb::overload_cast<View<Index<formalism::planning::GroundAtom<formalism::DerivedTag>>, formalism::planning::Repository>>(&State<Task>::test,
-                                                                                                                                     nb::const_),
+             nb::overload_cast<View<Index<formalism::planning::GroundAtom<formalism::DerivedTag>>, formalism::planning::Repository>>(&T::test, nb::const_),
              nb::rv_policy::copy,
              "derived_atom"_a)
+        .def(
+            "get",
+            nb::overload_cast<View<Index<formalism::planning::GroundFunctionTerm<formalism::StaticTag>>, formalism::planning::Repository>>(&T::get, nb::const_),
+            nb::rv_policy::copy,
+            "static_fterm"_a)
         .def("get",
-             nb::overload_cast<View<Index<formalism::planning::GroundFunctionTerm<formalism::StaticTag>>, formalism::planning::Repository>>(&State<Task>::get,
-                                                                                                                                            nb::const_),
-             nb::rv_policy::copy,
-             "static_fterm"_a)
-        .def("get",
-             nb::overload_cast<View<Index<formalism::planning::FDRVariable<formalism::FluentTag>>, formalism::planning::Repository>>(&State<Task>::get,
-                                                                                                                                     nb::const_),
+             nb::overload_cast<View<Index<formalism::planning::FDRVariable<formalism::FluentTag>>, formalism::planning::Repository>>(&T::get, nb::const_),
              nb::rv_policy::copy,
              "fluent_fact"_a)
-        .def("get",
-             nb::overload_cast<View<Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>, formalism::planning::Repository>>(&State<Task>::get,
-                                                                                                                                            nb::const_),
-             nb::rv_policy::copy,
-             "fluent_fterm"_a)
+        .def(
+            "get",
+            nb::overload_cast<View<Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>, formalism::planning::Repository>>(&T::get, nb::const_),
+            nb::rv_policy::copy,
+            "fluent_fterm"_a)
         // IterableStateConcept
         .def(
             "static_atoms",
-            [](const State<Task>& s)
+            [](const T& s)
             {
                 auto range = s.get_static_atoms_view();
-                return nb::make_iterator(nb::type<State<Task>>(), "static atom iterator", range);
+                return nb::make_iterator(nb::type<T>(), "static atom iterator", range);
             },
             nb::keep_alive<0, 1>())
         .def(
             "fluent_facts",
-            [](const State<Task>& s)
+            [](const T& s)
             {
                 auto range = s.get_fluent_facts_view();
-                return nb::make_iterator(nb::type<State<Task>>(), "fluent facts iterator", range);
+                return nb::make_iterator(nb::type<T>(), "fluent facts iterator", range);
             },
             nb::keep_alive<0, 1>())
         .def(
             "derived_atoms",
-            [](const State<Task>& s)
+            [](const T& s)
             {
                 auto range = s.get_derived_atoms_view();
-                return nb::make_iterator(nb::type<State<Task>>(), "derived atom iterator", range);
+                return nb::make_iterator(nb::type<T>(), "derived atom iterator", range);
             },
             nb::keep_alive<0, 1>())
         .def(
             "static_fterm_values",
-            [](const State<Task>& s)
+            [](const T& s)
             {
                 auto range = s.get_static_fterm_values_view();
-                return nb::make_iterator(nb::type<State<Task>>(), "static function term value iterator", range);
+                return nb::make_iterator(nb::type<T>(), "static function term value iterator", range);
             },
             nb::keep_alive<0, 1>())
         .def(
             "fluent_fterm_values",
-            [](const State<Task>& s)
+            [](const T& s)
             {
                 auto range = s.get_fluent_fterm_values_view();
-                return nb::make_iterator(nb::type<State<Task>>(), "fluent function term value iterator", range);
+                return nb::make_iterator(nb::type<T>(), "fluent function term value iterator", range);
             },
             nb::keep_alive<0, 1>());
 }
@@ -257,7 +256,9 @@ void bind_find_solution(nb::module_& m, const std::string& py_name)
 template<typename Task>
 void bind_event_handler(nb::module_& m, const std::string& name)
 {
-    nb::class_<EventHandler<Task>>(m, name.c_str());
+    using T = EventHandler<Task>;
+
+    nb::class_<T>(m, name.c_str());
 }
 }
 
