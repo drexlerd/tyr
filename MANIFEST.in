@@ -6,9 +6,12 @@ include README.md
 include setup.py
 include Config.cmake.in
 recursive-include dependencies/ *
+prune dependencies/build
+prune dependencies/installs
 recursive-include cmake/ *
 recursive-include exe/ *
 recursive-include include/ *
 recursive-include python/ *
+prune python/src/pytyr.egg-info
 recursive-include src/ *
 recursive-include tests/ *

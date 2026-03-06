@@ -40,6 +40,10 @@ class CMakeBuild(build_ext):
         # Create the temporary build directory, if it does not already exist
         os.makedirs(temp_directory, exist_ok=True)
 
+        #######################################################################
+        # Build dependencies
+        #######################################################################
+
         cmake_args = [
             f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DCMAKE_INSTALL_PREFIX={str(temp_directory / 'dependencies' / 'installs')}",
@@ -66,11 +70,14 @@ class CMakeBuild(build_ext):
         #######################################################################
 
         cmake_args = [
-            "-DBUILD_PYTYR=ON",
             f"-DTYR_VERSION_INFO={__version__}",
             f"-DCMAKE_BUILD_TYPE={build_type}",  # not used on MSVC, but no harm
             f"-DCMAKE_PREFIX_PATH={str(temp_directory / 'dependencies' / 'installs')}",
-            f"-DPython_EXECUTABLE={sys.executable}"
+            f"-DPython_EXECUTABLE={sys.executable}",
+            "-DBUILD_PYTYR=ON",
+            "-DBUILD_TESTS=OFF",
+            "-DBUILD_EXECUTABLES=OFF",
+            "-DBUILD_PROFILING=OFF",
         ]
 
         subprocess.run(
