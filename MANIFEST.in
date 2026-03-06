@@ -1,0 +1,14 @@
+include CMakeLists.txt
+include LICENSE.md
+include MANIFEST.in
+include pyproject.toml
+include README.md
+include setup.py
+include Config.cmake.in
+recursive-include dependencies/ *
+recursive-include cmake/ *
+recursive-include exe/ *
+recursive-include include/ *
+recursive-include python/ *
+recursive-include src/ *
+recursive-include tests/ *
