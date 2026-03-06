@@ -143,6 +143,7 @@ public:
 
     const Data<Tag>& operator[](Index<Tag> index) const noexcept
     {
+        // std::cout << index.get_value() << " " << m_vec.size() << std::endl;
         assert(index.get_value() < m_vec.size());
         return *m_vec[index.get_value()];
     }

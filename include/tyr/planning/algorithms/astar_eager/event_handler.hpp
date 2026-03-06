@@ -77,8 +77,6 @@ public:
 
     /// @brief React on exhausting a search.
     virtual void on_exhausted() = 0;
-
-    virtual const tyr::planning::Statistics& get_statistics() const = 0;
 };
 
 /**
@@ -221,7 +219,7 @@ public:
      * Getters
      */
 
-    const tyr::planning::Statistics& get_statistics() const override { return m_statistics; }
+    const tyr::planning::Statistics& get_statistics() const { return m_statistics; }
 };
 
 template<typename Task>

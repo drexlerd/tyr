@@ -19,7 +19,7 @@
 #define TYR_PLANNING_ALGORITHMS_STRATEGIES_PRUNING_HPP_
 
 #include "tyr/planning/declarations.hpp"
-#include "tyr/planning/node.hpp"
+#include "tyr/planning/state.hpp"
 
 #include <memory>
 
@@ -34,7 +34,9 @@ public:
 
     static std::shared_ptr<PruningStrategy<Task>> create() { return std::make_shared<PruningStrategy<Task>>(); }
 
-    virtual bool should_prune(const Node<Task>& node) { return false; }
+    virtual bool should_prune(const State<Task>& state) { return false; }
+
+    virtual bool should_prune(const State<Task>& state, const State<Task>& succ_state, bool is_new_succ) { return false; }
 };
 
 }

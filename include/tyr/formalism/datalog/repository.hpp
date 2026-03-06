@@ -46,7 +46,7 @@ private:
     struct Slot
     {
         buffer::IndexedHashSet<T> container {};
-        size_t parent_size {};
+        size_t parent_size = 0;
     };
 
     template<typename T>
@@ -153,7 +153,7 @@ private:
 
     template<typename T>
         requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
-    void clear(RepositoryEntry<T>& entry) noexcept
+    void clear_entry(RepositoryEntry<T>& entry) noexcept
     {
         entry.slot.container.clear();
         entry.slot.parent_size = m_parent ? m_parent->template size<T>() : size_t { 0 };
@@ -161,7 +161,7 @@ private:
 
     template<typename T>
         requires(GroupIndexConcept<Index<T>>)
-    void clear(RepositoryEntry<T>& entry) noexcept
+    void clear_entry(RepositoryEntry<T>& entry) noexcept
     {
         for (auto& [g, slot] : entry.slot)
         {
@@ -174,11 +174,11 @@ private:
 
     void clear_entries() noexcept
     {
-        std::apply([&](auto&... entry) { (clear(entry), ...); }, m_repository);
+        std::apply([&](auto&... entry) { (clear_entry(entry), ...); }, m_repository);
     }
 
 public:
-    Repository(const Repository* parent = nullptr) : m_parent(parent), m_repository(), m_arena() {}
+    Repository(const Repository* parent = nullptr) : m_parent(parent), m_repository(), m_arena() { clear_entries(); }
 
     template<typename T>
         requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
@@ -215,7 +215,10 @@ public:
 
         const auto it = slot.find(g);
         if (it == slot.end())
+        {
+            assert(!m_parent || !std::get<RepositoryEntry<T>>(m_parent->m_repository).slot.contains(g));
             return std::nullopt;
+        }
 
         const auto& container = it->second.container;
         if (auto ptr = container.find_with_hash(builder, h))
@@ -234,7 +237,10 @@ public:
 
         const auto it = slot.find(g);
         if (it == slot.end())
+        {
+            assert((!m_parent || !std::get<RepositoryEntry<T>>(m_parent->m_repository).slot.contains(g)) && "Child doesn't have slot while parent does.");
             return std::nullopt;
+        }
 
         const auto& container = it->second.container;
         const auto h = container.hash(builder);

@@ -20,7 +20,7 @@
 
 #include "tyr/planning/applicability.hpp"
 #include "tyr/planning/declarations.hpp"
-#include "tyr/planning/node.hpp"
+#include "tyr/planning/state.hpp"
 
 #include <memory>
 
@@ -34,7 +34,7 @@ public:
     virtual ~GoalStrategy() = default;
 
     virtual bool is_static_goal_satisfied() = 0;
-    virtual bool is_dynamic_goal_satisfied(const Node<Task>& node) = 0;
+    virtual bool is_dynamic_goal_satisfied(const State<Task>& state) = 0;
 };
 
 template<typename Task>
@@ -46,10 +46,9 @@ public:
     static std::shared_ptr<TaskGoalStrategy<Task>> create(const Task& task) { return std::make_shared<TaskGoalStrategy<Task>>(task); }
 
     bool is_static_goal_satisfied() override { return is_statically_applicable(m_task.get_task().get_goal(), m_task.get_static_atoms_bitset()); }
-    bool is_dynamic_goal_satisfied(const Node<Task>& node) override
+    bool is_dynamic_goal_satisfied(const State<Task>& state) override
     {
-        const auto& state = node.get_state();
-        const auto state_context = StateContext { m_task, state.get_unpacked_state(), node.get_metric() };
+        const auto state_context = StateContext { m_task, state.get_unpacked_state(), float_t { 0 } };
         return is_dynamically_applicable(m_task.get_task().get_goal(), state_context);
     }
 

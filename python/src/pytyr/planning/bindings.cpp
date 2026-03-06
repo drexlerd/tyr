@@ -98,6 +98,9 @@ void bind_ground_module_definitions(nb::module_& m)
     bind_state_repository<GroundTask>(m, "StateRepository");
     bind_successor_generator<GroundTask>(m, "SuccessorGenerator");
     bind_search_result<GroundTask>(m, "SearchResult");
+    bind_goal_strategy<GroundTask>(m, "GoalStrategy");
+    bind_task_goal_strategy<GroundTask>(m, "TaskGoalStrategy");
+    bind_pruning_strategy<GroundTask>(m, "PruningStrategy");
     bind_heuristic<GroundTask>(m, "Heuristic");
     bind_blind_heuristic<GroundTask>(m, "BlindHeuristic");
 }
@@ -118,6 +121,9 @@ void bind_lifted_module_definitions(nb::module_& m)
     bind_state_repository<LiftedTask>(m, "StateRepository");
     bind_successor_generator<LiftedTask>(m, "SuccessorGenerator");
     bind_search_result<LiftedTask>(m, "SearchResult");
+    bind_goal_strategy<LiftedTask>(m, "GoalStrategy");
+    bind_task_goal_strategy<LiftedTask>(m, "TaskGoalStrategy");
+    bind_pruning_strategy<LiftedTask>(m, "PruningStrategy");
     bind_heuristic<LiftedTask>(m, "Heuristic");
     bind_blind_heuristic<LiftedTask>(m, "BlindHeuristic");
     bind_max_heuristic<LiftedTask>(m, "MaxHeuristic");
@@ -132,6 +138,7 @@ void bind_ground_module_definitions(nb::module_& m)
     bind_options<GroundTask>(m, "Options");
     bind_find_solution<GroundTask>(m, "find_solution");
     bind_event_handler<GroundTask>(m, "EventHandler");
+    bind_default_event_handler<GroundTask>(m, "DefaultEventHandler");
 }
 
 void bind_lifted_module_definitions(nb::module_& m)
@@ -139,6 +146,26 @@ void bind_lifted_module_definitions(nb::module_& m)
     bind_options<LiftedTask>(m, "Options");
     bind_find_solution<LiftedTask>(m, "find_solution");
     bind_event_handler<LiftedTask>(m, "EventHandler");
+    bind_default_event_handler<LiftedTask>(m, "DefaultEventHandler");
+}
+}
+
+namespace gbfs_lazy
+{
+void bind_ground_module_definitions(nb::module_& m)
+{
+    bind_options<GroundTask>(m, "Options");
+    bind_find_solution<GroundTask>(m, "find_solution");
+    bind_event_handler<GroundTask>(m, "EventHandler");
+    bind_default_event_handler<GroundTask>(m, "DefaultEventHandler");
+}
+
+void bind_lifted_module_definitions(nb::module_& m)
+{
+    bind_options<LiftedTask>(m, "Options");
+    bind_find_solution<LiftedTask>(m, "find_solution");
+    bind_event_handler<LiftedTask>(m, "EventHandler");
+    bind_default_event_handler<LiftedTask>(m, "DefaultEventHandler");
 }
 }
 

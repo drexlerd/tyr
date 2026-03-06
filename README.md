@@ -1,62 +1,46 @@
 
 # Tyr
 
-Tyr aims to become a weighted, annotated, and parallelizable datalog solver with a grounder based on k-clique enumeration in k-partite graphs (KPKC) with a focus on AI planning. Tyr also provides a PDDL interface, that employs the parallelized datalog solver to address three foundational problems within planning through compilations into datalog: 1) task grounding, 2) lifted axiom evaluation, 3) enumerating applicable actions in a state. For lifted states, Tyr employs a sparse representation, and for grounded planning, it employs a finite-domain representation.
+Tyr is a C++20-based generalized planning library with Python bindings, designed for both grounded and lifted planning. At its core, it reimplements a subset of [Mimir](https://github.com/simon-stahlberg/mimir) with a simplified API and a parallelizable architecture.
 
+Internally, Tyr is built around a weighted, annotated, and parallelizable Datalog solver with a grounder based on k-clique enumeration in k-partite graphs (KPKC). Core reasoning problems in planning, such as task grounding, lifted axiom evaluation, enumerating applicable actions, and computing relaxed planning graph heuristics, are compiled into Datalog programs. These programs are evaluated using a parallel bottom-up semi-naive solver.
 
 # Key Features
 
--  **Datalog Language Support**: relations over symbols, stratifiable programs
--  **Language Extensions**: weighted rule expansion, rule annotation, early termination
--  **Parallelized Architecture**: lock-free rule parallelization, zero-copy data serialization
--  **Program Analysis**: variable domain analysis, stratification, listeners
--  **Grounder Technology**: k-clique enumeration in k-partite graph (KPKC)
+- **Rich PDDL Support:**
+  Tyr meets a wide range of Planning Domain Definition Language (PDDL) requirements:
+  - `:action-costs`
+  - `:conditional-effects`
+  - `:derived-predicates`
+  - `:disjunctive-preconditions`
+  - `:equality`
+  - `:existential-preconditions`
+  - `:negative-preconditions`
+  - `:numeric-fluents`
+  - `:strips`
+  - `:typing`
+  - `:universal-preconditions`
 
+- **Grounded and Lifted Planning:**
+  Tyr supports the PDDL requirements for both grounded and lifted planning. In particular, lifted planning is critical for learning-based approaches, which often do not require access to grounded actions. This can result in significant speedups.
+
+- **Collections of Problems:**
+  Tyr supports parsing, translation, and in-memory manipulation for collections of problems.
+
+- **Efficiency:**
+  Tyr can also be included as a library in C++ projects, which is recommended for optimal performance.
   
 # Getting Started
 
 ## 1. Installation
 
-Instructions on how to build the library and exeutables is available [here](docs/BUILD.md).
+Instructions on how to build the library and executables is available [here](docs/BUILD.md).
 
-## 2. Integration
-
-TODO
-
-## 3. Datalog Interface (Semi-Finished)
-
-The high level C++ datalog interface is as follows:
-
-```cpp
-#include <tyr/tyr.hpp>
-
-auto parser = tyr::formalism::Parser("program.dl");
-
-auto program = parser.get_program();
-// Fluent facts can optionally be parsed to override the ones in the program
-auto fluent_facts = parser.parse_fluent_facts("fluent_facts.dl");
-// Goal facts can optionally be parsed to trigger early termination
-auto goal_facts = parser.parse_goal("goal_facts.dl");
-
-// Initialize execution context. Fine-grained reinitialization with new fluent and goal facts possible.
-// Only assumptions are fixed sets of objects and static facts.
-auto execuction_context = tyr::datalog::ProgramExecutionContext(program, fluent_facts, goal_facts);
-
-// Execution modes
-const auto annotated = bool{true};
-const auto weighted = bool{true};
-
-// Solution is a set of ground facts and rules annotated with achievers and cost
-auto solution = tyr::datalog::solve_bottomup(execuction_context, annotated, weighted);
-
-```
-  
-
-## 4 PDDL Interface
+## 2. PDDL Interface
 
 The high level C++ planning interface is as follows:
 
-## 4.1 Lifted Planning (Finished)
+## 2.1. Lifted Planning
 
 We obtain a lifted task by parsing the PDDL. Then, we translate the lifted task into three datalog program: P1) ground task program, P2) action program, P3) axiom program. Program P1 encodes the delete free task to approximate the set of applicable ground actions and axioms in the task. Program P2 encodes the action preconditions to overapproximate the set of ground applicable actions in a state. Program P3 encodes the axiom evaluation in a state. Given these three programs, the API allows to retrieve the extended initial node (sparse state + metric value) using program P3. Given a node, compute the labeled successor nodes (ground action + node) using programs P2 and P3.
 
@@ -75,9 +59,9 @@ auto successor_nodes = successor_generator.get_labeled_successor_nodes(initial_n
 
 ```
 
-## 4.1 Grounded Planning (Finished)
+## 2.2. Grounded Planning
 
-From the lifted task and using program P1, we can compute a ground task that overapproximates the delete-free reachable ground atoms, actions, and axioms. From those, we derived mutex groups, enabling us to form a more compact finite-domain representation (FDR). The remaining interface remains identical, but uses FDR instead of a sparse state representation.
+From the lifted task and using program P1, we can compute a ground task that overapproximates the delete-free reachable ground atoms, actions, and axioms. From those, we may derive mutex groups, enabling us to form a more compact finite-domain representation (FDR). The remaining interface remains identical, but uses FDR instead of a sparse state representation.
 
 ```cpp
 #include <tyr/tyr.hpp>

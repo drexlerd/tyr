@@ -100,6 +100,19 @@ using Queue = PriorityQueue<QueueEntry>;
 template<typename Task>
 SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor_generator, Heuristic<Task>& heuristic, const Options<Task>& options)
 {
+    const auto available_threads = static_cast<uint_t>(oneapi::tbb::info::default_concurrency());
+
+    if (options.num_threads == 0)
+        throw std::invalid_argument("num_threads must be at least 1.");
+    if (options.num_threads > available_threads)
+        throw std::invalid_argument("Requested " + std::to_string(options.num_threads) + " threads, but only " + std::to_string(available_threads)
+                                    + " are available by default.");
+
+    auto control = std::optional<oneapi::tbb::global_control> { std::nullopt };
+
+    if (options.num_threads > 1)
+        control.emplace(oneapi::tbb::global_control::max_allowed_parallelism, options.num_threads);
+
     const auto start_node = (options.start_node) ? options.start_node.value() : successor_generator.get_initial_node();
     const auto& start_state = start_node.get_state();
     const auto start_state_index = start_state.get_index();
@@ -137,7 +150,7 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
 
     /* Test whether initial state is goal. */
 
-    if (goal_strategy->is_dynamic_goal_satisfied(start_node))
+    if (goal_strategy->is_dynamic_goal_satisfied(start_state))
     {
         event_handler->on_end_search();
 
@@ -165,6 +178,16 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
         event_handler->on_unsolvable();
 
         result.status = SearchStatus::UNSOLVABLE;
+        return result;
+    }
+
+    /* Test whether initial state should be pruned. */
+    if (pruning_strategy->should_prune(start_state))
+    {
+        event_handler->on_end_search();
+        event_handler->on_unsolvable();
+
+        result.status = SearchStatus::EXHAUSTED;
         return result;
     }
 
@@ -269,7 +292,7 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
 
             /* Early goal test. */
 
-            const auto successor_is_goal_state = goal_strategy->is_dynamic_goal_satisfied(succ_node);
+            const auto successor_is_goal_state = goal_strategy->is_dynamic_goal_satisfied(succ_state);
 
             if (successor_is_goal_state)
             {
@@ -290,7 +313,7 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
 
             /* Apply pruning strategy */
 
-            if (pruning_strategy->should_prune(succ_node))
+            if (pruning_strategy->should_prune(state, succ_state, is_new_successor_state))
             {
                 event_handler->on_prune_node(succ_node);
                 continue;

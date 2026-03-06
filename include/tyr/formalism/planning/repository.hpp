@@ -44,7 +44,7 @@ private:
     struct Slot
     {
         buffer::IndexedHashSet<T> container {};
-        size_t parent_size {};
+        size_t parent_size = 0;
     };
 
     template<typename T>
@@ -148,23 +148,19 @@ private:
     buffer::SegmentedBuffer m_arena;
 
     template<typename T>
-    void initialize_entry(RepositoryEntry<T>& entry)
+    void clear_entry(RepositoryEntry<T>& entry)
     {
+        entry.slot.container.clear();
         entry.slot.parent_size = m_parent ? m_parent->template size<T>() : 0;
-    }
-
-    void initialize_entries()
-    {
-        std::apply([&](auto&... e) { (initialize_entry(e), ...); }, m_repository);
     }
 
     void clear_entries() noexcept
     {
-        std::apply([](auto&... entry) { (entry.slot.container.clear(), ...); }, m_repository);
+        std::apply([&](auto&... entry) { (clear_entry(entry), ...); }, m_repository);
     }
 
 public:
-    Repository(const Repository* parent = nullptr) : m_parent(parent), m_repository(), m_arena() { initialize_entries(); }
+    Repository(const Repository* parent = nullptr) : m_parent(parent), m_repository(), m_arena() { clear_entries(); }
 
     template<typename T>
     std::optional<Index<T>> find_with_hash(const Data<T>& builder, size_t h) const noexcept
@@ -264,7 +260,6 @@ public:
     {
         m_arena.clear();
         clear_entries();
-        initialize_entries();
     }
 };
 

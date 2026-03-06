@@ -56,7 +56,6 @@ int main(int argc, char** argv)
         auto problem_filepath = program.get<std::string>("--problem-filepath");
         auto plan_filepath = program.get<std::string>("--plan-filepath");
         auto num_worker_threads = program.get<std::size_t>("--num-worker-threads");
-        auto control = oneapi::tbb::global_control(oneapi::tbb::global_control::max_allowed_parallelism, num_worker_threads);
         auto random_seed = program.get<uint64_t>("--random-seed");
         auto shuffle_labeled_succ_nodes = program.get<bool>("--shuffle-labeled-succ-nodes");
         auto verbosity = program.get<size_t>("--verbosity");
@@ -85,6 +84,7 @@ int main(int argc, char** argv)
         auto options = planning::gbfs_lazy::Options<planning::LiftedTask>();
         options.start_node = successor_generator.get_initial_node();
         options.event_handler = planning::gbfs_lazy::DefaultEventHandler<planning::LiftedTask>::create(verbosity);
+        options.num_threads = num_worker_threads;
         options.random_seed = random_seed;
         options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
 

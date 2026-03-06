@@ -36,6 +36,7 @@ struct Options
     PruningStrategyPtr<Task> pruning_strategy = nullptr;
     GoalStrategyPtr<Task> goal_strategy = nullptr;
     uint_t max_num_states = std::numeric_limits<uint_t>::max();
+    uint_t num_threads = 1;
     std::optional<std::chrono::steady_clock::duration> max_time = std::nullopt;
     bool stop_if_goal = true;
     uint64_t random_seed = 0;
