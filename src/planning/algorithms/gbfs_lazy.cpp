@@ -179,7 +179,8 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
     }
 
     /* Test whether initial state should be pruned. */
-    if (pruning_strategy->should_prune(start_state))
+
+    if (pruning_strategy->should_prune_state(start_state))
     {
         event_handler->on_end_search();
         event_handler->on_unsolvable();
@@ -310,7 +311,7 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
 
             /* Apply pruning strategy */
 
-            if (pruning_strategy->should_prune(state, succ_state, is_new_successor_state))
+            if (pruning_strategy->should_prune_successor_state(state, succ_state, is_new_successor_state))
             {
                 event_handler->on_prune_node(succ_node);
                 continue;

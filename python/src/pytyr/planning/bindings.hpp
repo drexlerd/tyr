@@ -24,36 +24,6 @@
 
 namespace tyr::planning
 {
-template<typename Task>
-class PyGoalStrategy : public GoalStrategy<Task>
-{
-public:
-    using Base = GoalStrategy<Task>;
-
-    NB_TRAMPOLINE(Base, 2);
-
-    /* Trampoline (need one for each virtual function) */
-    bool is_static_goal_satisfied() override { NB_OVERRIDE_PURE(is_static_goal_satisfied); }
-
-    bool is_dynamic_goal_satisfied(const State<Task>& state) override { NB_OVERRIDE_PURE(is_dynamic_goal_satisfied, state); }
-};
-
-template<typename Task>
-class PyPruningStrategy : public PruningStrategy<Task>
-{
-public:
-    using Base = PruningStrategy<Task>;
-
-    NB_TRAMPOLINE(Base, 2);
-
-    /* Trampoline (need one for each virtual function) */
-    bool should_prune(const State<Task>& state) override { NB_OVERRIDE_PURE(should_prune, state); }
-
-    bool should_prune(const State<Task>& state, const State<Task>& succ_state, bool is_new_succ_state) override
-    {
-        NB_OVERRIDE_PURE(should_prune, state, succ_state, is_new_succ_state);
-    }
-};
 
 template<typename Task>
 void bind_state(nb::module_& m, const std::string& name)
@@ -218,6 +188,20 @@ void bind_search_result(nb::module_& m, const std::string& name)
 }
 
 template<typename Task>
+class PyGoalStrategy : public GoalStrategy<Task>
+{
+public:
+    using Base = GoalStrategy<Task>;
+
+    NB_TRAMPOLINE(Base, 2);
+
+    /* Trampoline (need one for each virtual function) */
+    bool is_static_goal_satisfied() override { NB_OVERRIDE_PURE(is_static_goal_satisfied); }
+
+    bool is_dynamic_goal_satisfied(const State<Task>& state) override { NB_OVERRIDE_PURE(is_dynamic_goal_satisfied, state); }
+};
+
+template<typename Task>
 void bind_goal_strategy(nb::module_& m, const std::string& name)
 {
     using T = GoalStrategy<Task>;
@@ -237,25 +221,60 @@ void bind_task_goal_strategy(nb::module_& m, const std::string& name)
 }
 
 template<typename Task>
+class PyPruningStrategy : public PruningStrategy<Task>
+{
+public:
+    using Base = PruningStrategy<Task>;
+
+    NB_TRAMPOLINE(Base, 2);
+
+    /* Trampoline (need one for each virtual function) */
+    bool should_prune_state(const State<Task>& state) override { NB_OVERRIDE(should_prune_state, state); }
+
+    bool should_prune_successor_state(const State<Task>& state, const State<Task>& succ_state, bool is_new_succ_state) override
+    {
+        NB_OVERRIDE(should_prune_successor_state, state, succ_state, is_new_succ_state);
+    }
+};
+
+template<typename Task>
 void bind_pruning_strategy(nb::module_& m, const std::string& name)
 {
     using T = PruningStrategy<Task>;
 
     nb::class_<T, PyPruningStrategy<Task>>(m, name.c_str())  //
-        .def("should_prune", nb::overload_cast<const State<Task>&>(&T::should_prune), "state"_a)
-        .def("should_prune",
-             nb::overload_cast<const State<Task>&, const State<Task>&, bool>(&T::should_prune),
+        .def(nb::init<>())
+        .def("should_prune_state", nb::overload_cast<const State<Task>&>(&T::should_prune_state), "state"_a)
+        .def("should_prune_successor_state",
+             nb::overload_cast<const State<Task>&, const State<Task>&, bool>(&T::should_prune_successor_state),
              "state"_a,
              "succ_state"_a,
              "is_new_succ_state"_a);
 }
 
 template<typename Task>
+class PyHeuristic : public Heuristic<Task>
+{
+public:
+    using Base = Heuristic<Task>;
+
+    NB_TRAMPOLINE(Base, 2);
+
+    /* Trampoline (need one for each virtual function) */
+    void set_goal(View<Index<formalism::planning::GroundConjunctiveCondition>, formalism::planning::Repository> goal) override
+    {
+        NB_OVERRIDE_PURE(set_goal, goal);
+    }
+
+    float_t evaluate(const State<Task>& state) override { NB_OVERRIDE_PURE(evaluate, state); }
+};
+
+template<typename Task>
 void bind_heuristic(nb::module_& m, const std::string& name)
 {
     using T = Heuristic<Task>;
 
-    nb::class_<T>(m, name.c_str())  //
+    nb::class_<T, PyHeuristic<Task>>(m, name.c_str())  //
         .def("set_goal", &T::set_goal, "goal"_a)
         .def("evaluate", &T::evaluate, "state"_a);
 }
@@ -300,7 +319,7 @@ namespace astar_eager
 {
 
 template<typename Task>
-class IPyEventHandler : public EventHandler<Task>
+class PyEventHandler : public EventHandler<Task>
 {
 public:
     using Base = EventHandler<Task>;
@@ -312,11 +331,14 @@ public:
 
     void on_expand_goal_node(const Node<Task>& node) override { NB_OVERRIDE_PURE(on_expand_goal_node, node); }
 
-    void on_generate_node(const LabeledNode<Task>& labeled_succ_node) { NB_OVERRIDE_PURE(on_generate_node, labeled_succ_node); }
+    void on_generate_node(const LabeledNode<Task>& labeled_succ_node) override { NB_OVERRIDE_PURE(on_generate_node, labeled_succ_node); }
 
-    void on_generate_node_relaxed(const LabeledNode<Task>& labeled_succ_node) { NB_OVERRIDE_PURE(on_generate_node_relaxed, labeled_succ_node); };
+    void on_generate_node_relaxed(const LabeledNode<Task>& labeled_succ_node) override { NB_OVERRIDE_PURE(on_generate_node_relaxed, labeled_succ_node); };
 
-    void on_generate_node_not_relaxed(const LabeledNode<Task>& labeled_succ_node) { NB_OVERRIDE_PURE(on_generate_node_not_relaxed, labeled_succ_node); }
+    void on_generate_node_not_relaxed(const LabeledNode<Task>& labeled_succ_node) override
+    {
+        NB_OVERRIDE_PURE(on_generate_node_not_relaxed, labeled_succ_node);
+    }
 
     void on_close_node(const Node<Task>& node) override { NB_OVERRIDE_PURE(on_close_node, node); }
 
@@ -349,7 +371,6 @@ void bind_options(nb::module_& m, const std::string& name)
         .def_rw("max_num_states", &T::max_num_states)
         .def_rw("max_time", &T::max_time)
         .def_rw("num_threads", &T::num_threads)
-        .def_rw("stop_if_goal", &T::stop_if_goal)
         .def_rw("random_seed", &T::random_seed)
         .def_rw("shuffle_labeled_succ_nodes", &T::shuffle_labeled_succ_nodes);
 }
@@ -373,8 +394,8 @@ void bind_event_handler(nb::module_& m, const std::string& name)
 {
     using T = EventHandler<Task>;
 
-    nb::class_<T, IPyEventHandler<Task>>(m, name.c_str())
-        .def("on_expand_goal_node", &T::on_expand_goal_node, "node"_a)
+    nb::class_<T, PyEventHandler<Task>>(m, name.c_str())
+        .def("on_expand_node", &T::on_expand_goal_node, "node"_a)
         .def("on_expand_goal_node", &T::on_expand_goal_node, "node"_a)
         .def("on_generate_node", &T::on_generate_node, "labeled_succ_node"_a)
         .def("on_generate_node_relaxed", &T::on_generate_node_relaxed, "labeled_succ_node"_a)
@@ -395,6 +416,7 @@ void bind_default_event_handler(nb::module_& m, const std::string& name)
     using T = DefaultEventHandler<Task>;
 
     nb::class_<T, EventHandler<Task>>(m, name.c_str())  //
+        .def(nb::init<size_t>(), "verbosity"_a)
         .def("get_statistics", &T::get_statistics);
 }
 }
@@ -402,7 +424,7 @@ void bind_default_event_handler(nb::module_& m, const std::string& name)
 namespace gbfs_lazy
 {
 template<typename Task>
-class IPyEventHandler : public EventHandler<Task>
+class PyEventHandler : public EventHandler<Task>
 {
 public:
     using Base = EventHandler<Task>;
@@ -414,15 +436,15 @@ public:
 
     void on_expand_goal_node(const Node<Task>& node) override { NB_OVERRIDE_PURE(on_expand_goal_node, node); }
 
-    void on_generate_node(const LabeledNode<Task>& labeled_succ_node) { NB_OVERRIDE_PURE(on_generate_node, labeled_succ_node); }
+    void on_generate_node(const LabeledNode<Task>& labeled_succ_node) override { NB_OVERRIDE_PURE(on_generate_node, labeled_succ_node); }
 
     void on_prune_node(const Node<Task>& node) override { NB_OVERRIDE_PURE(on_prune_node, node); }
 
-    void on_start_search(const Node<Task>& node, float_t h_value) { NB_OVERRIDE_PURE(on_start_search, node, h_value); }
+    void on_start_search(const Node<Task>& node, float_t h_value) override { NB_OVERRIDE_PURE(on_start_search, node, h_value); }
 
     void on_new_best_h_value(float_t h_value) override { NB_OVERRIDE_PURE(on_new_best_h_value, h_value); }
 
-    void on_end_search() { NB_OVERRIDE_PURE(on_end_search); }
+    void on_end_search() override { NB_OVERRIDE_PURE(on_end_search); }
 
     void on_solved(const Plan<Task>& plan) override { NB_OVERRIDE_PURE(on_solved, plan); }
 
@@ -469,7 +491,7 @@ void bind_event_handler(nb::module_& m, const std::string& name)
 {
     using T = EventHandler<Task>;
 
-    nb::class_<T, IPyEventHandler<Task>>(m, name.c_str())
+    nb::class_<T, PyEventHandler<Task>>(m, name.c_str())
         .def("on_expand_node", &T::on_expand_node, "node"_a)
         .def("on_expand_goal_node", &T::on_expand_goal_node, "node"_a)
         .def("on_generate_node", &T::on_generate_node, "labeled_suc_node"_a)
@@ -488,6 +510,7 @@ void bind_default_event_handler(nb::module_& m, const std::string& name)
     using T = DefaultEventHandler<Task>;
 
     nb::class_<T, EventHandler<Task>>(m, name.c_str())  //
+        .def(nb::init<size_t>(), "verbosity"_a)
         .def("get_statistics", &T::get_statistics);
 }
 }

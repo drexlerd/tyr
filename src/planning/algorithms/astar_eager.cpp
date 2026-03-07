@@ -139,7 +139,7 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
 
     /* Test whether initial state is goal. */
 
-    if (options.stop_if_goal && goal_strategy->is_dynamic_goal_satisfied(start_state))
+    if (goal_strategy->is_dynamic_goal_satisfied(start_state))
     {
         event_handler->on_end_search();
 
@@ -167,6 +167,17 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
         event_handler->on_unsolvable();
 
         result.status = SearchStatus::UNSOLVABLE;
+        return result;
+    }
+
+    /* Test whether initial state should be pruned. */
+
+    if (pruning_strategy->should_prune_state(start_state))
+    {
+        event_handler->on_end_search();
+        event_handler->on_unsolvable();
+
+        result.status = SearchStatus::EXHAUSTED;
         return result;
     }
 
@@ -208,7 +219,7 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
         }
 
         /* Test whether state achieves the dynamic goal. */
-        if (options.stop_if_goal && search_node.status == SearchNodeStatus::GOAL)
+        if (search_node.status == SearchNodeStatus::GOAL)
         {
             search_node.status = SearchNodeStatus::GOAL;
 
@@ -265,7 +276,7 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
 
             /* Apply pruning strategy */
 
-            if (pruning_strategy->should_prune(succ_state))
+            if (pruning_strategy->should_prune_successor_state(state, succ_state, is_new_successor_state))
             {
                 event_handler->on_prune_node(succ_node);
                 continue;

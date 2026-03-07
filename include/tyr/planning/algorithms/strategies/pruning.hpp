@@ -34,9 +34,9 @@ public:
 
     static std::shared_ptr<PruningStrategy<Task>> create() { return std::make_shared<PruningStrategy<Task>>(); }
 
-    virtual bool should_prune(const State<Task>& state) { return false; }
+    virtual bool should_prune_state(const State<Task>& state) { return false; }
 
-    virtual bool should_prune(const State<Task>& state, const State<Task>& succ_state, bool is_new_succ) { return false; }
+    virtual bool should_prune_successor_state(const State<Task>& state, const State<Task>& succ_state, bool is_new_succ) { return false; }
 };
 
 }
