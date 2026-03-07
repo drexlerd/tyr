@@ -22,9 +22,9 @@ The library consists of a **formalism** and a **planning** component. The formal
 
 Pytyr is available at [Pypi.org](https://pypi.org/project/pytyr/) and can be installed with `pip install pytyr`. 
 
-An example showing how to parse and traverse all planning formalism structures is provided in [`formalism/planning/structures.py`](python/examples/formalism/planning/structures.py).  
-An example showing how to use and customize off-the-shelf search algorithms is provided in [`planning/astar_eager.py`](python/examples/planning/astar_eager.py).  
-An example showing how to implement a custom search algorithm from scratch is provided in [`planning/gbfs_lazy.py`](python/examples/planning/gbfs_lazy.py).
+An example showing how to parse and traverse all planning formalism structures is provided in [`structures.py`](python/examples/formalism/planning/structures.py).  
+An example showing how to use and customize off-the-shelf search algorithms is provided in [`astar_eager.py`](python/examples/planning/astar_eager.py).  
+An example showing how to implement a custom search algorithm from scratch is provided in [`gbfs_lazy.py`](python/examples/planning/gbfs_lazy.py).
 
 The Python interface for implementing search algorithms is:
 
