@@ -10,7 +10,7 @@ It is designed to address several challenges in modern planning systems:
 
 3. **Supporting expressive numeric planning formalisms** across both grounded and lifted reasoning paradigms (see [Supported PDDL Features](docs/PDDL_SUPPORT.md)).
 
-4. **Enabling scalable reasoning** through a parallel architecture with efficient memory management based on hierarchical arenas (domain → task → worker) and object pools for recycling frequently allocated objects such as states.
+4. **Enabling scalable reasoning** through a parallel architecture with efficient memory management based on hierarchical arenas (domain ← tasks ← workers) and object pools for recycling frequently allocated objects such as states.
 
 5. **Integrating learning and reasoning** by supporting collections of planning tasks defined over a common planning domain.
   
