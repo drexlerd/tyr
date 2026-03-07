@@ -16,6 +16,8 @@ It addresses several challenges in modern planning systems:
   
 # Getting Started
 
+The library consists of a **formalism** and a **planning** component. The formalism component is responsible for representing PDDL entities. The planning component provides functionality for implementing search algorithms, as well as off-the-shelf implementations of eager A*, lazy GBFS, and heuristics such as blind, max, add, and FF. Below is a basic overview of the Python and C++ APIs for implementing custom search algorithms.
+
 ## Python Interface
 
 Pytyr is available at [Pypi.org](https://pypi.org/project/pytyr/) and can be installed with `pip install pytyr`.
