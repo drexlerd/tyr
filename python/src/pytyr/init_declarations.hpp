@@ -20,6 +20,7 @@
 
 #include "utils/optional.hpp"
 #include "utils/string.hpp"
+#include "utils/unordered_set.hpp"
 #include "utils/variant.hpp"
 #include "utils/vector.hpp"
 

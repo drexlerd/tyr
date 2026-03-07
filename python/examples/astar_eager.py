@@ -22,6 +22,12 @@ from pytyr.planning import ParserOptions, Parser
 from pytyr.planning.lifted import SuccessorGenerator, Heuristic, MaxHeuristic, PruningStrategy, GoalStrategy, TaskGoalStrategy, State, Node, LabeledNode, Plan, Task
 from pytyr.planning.lifted.astar_eager import Options, EventHandler, DefaultEventHandler, find_solution
 
+# Lazy Greedy Best-First Search (GBFS) exposes an almost identical interface,
+# although some options and EventHandler events differ slightly.
+# To switch the search algorithm, typically only the following import needs to be changed:
+#
+# from pytyr.planning.lifted.gbfs_lazy import Options, EventHandler, DefaultEventHandler, find_solution
+
 
 class CustomHeuristic(Heuristic):
     """
@@ -123,7 +129,6 @@ def main():
 
     parser_options = ParserOptions()
     parser = Parser(domain_filepath, parser_options)
-    domain = parser.get_domain()
     lifted_task = parser.parse_task(task_filepath, parser_options)
 
     heuristic = MaxHeuristic(lifted_task)
@@ -137,12 +142,16 @@ def main():
     options.pruning_strategy = PruningStrategy()           # Never prunes
 
     search_result = find_solution(lifted_task, successor_generator, heuristic, options)
-
+ 
+    print("Search status:", search_result.status)
+    
     plan = search_result.plan
 
     if plan is not None:
         print(f"Found plan with length {plan.get_length()} and cost {plan.get_cost()}")
         print(plan)
+    else:
+        print("No solution was found.")
 
 
 if __name__ == "__main__":

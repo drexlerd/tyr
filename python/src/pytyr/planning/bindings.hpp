@@ -107,6 +107,7 @@ void bind_node(nb::module_& m, const std::string& name)
     using T = Node<Task>;
 
     nb::class_<T>(m, name.c_str())
+        .def(nb::init<State<Task>, float_t>(), "state"_a, "metric_value"_a)
         .def("__str__", [](const T& self) { return to_string(self); })
         .def("get_state", &T::get_state, nb::rv_policy::reference_internal)
         .def("get_metric", &T::get_metric, nb::rv_policy::copy);
@@ -128,6 +129,7 @@ void bind_plan(nb::module_& m, const std::string& name)
     using T = Plan<Task>;
 
     nb::class_<T>(m, name.c_str())  //
+        .def(nb::init<Node<Task>>(), "start_node"_a)
         .def(nb::init<Node<Task>, LabeledNodeList<Task>>(), "start_node"_a, "labeled_succ_nodes"_a)
         .def("__str__", [](const T& self) { return to_string(self); })
         .def("get_start_node", &T::get_start_node, nb::rv_policy::copy)
@@ -175,7 +177,8 @@ void bind_successor_generator(nb::module_& m, const std::string& name)
         .def(nb::new_([](std::shared_ptr<Task> task) { return T::create(std::move(task)); }), "task"_a)
         .def("get_initial_node", &T::get_initial_node, nb::rv_policy::move)
         .def("get_labeled_successor_nodes", nb::overload_cast<const Node<Task>&>(&T::get_labeled_successor_nodes), nb::rv_policy::move, "node"_a)
-        .def("get_state", &T::get_state, nb::rv_policy::move)
+        .def("get_successor_node", &T::get_successor_node, "node"_a, "action"_a)
+        .def("get_node", &T::get_node, nb::rv_policy::move, "state_index"_a)
         .def("get_state_repository", &T::get_state_repository, nb::rv_policy::copy);
 }
 
@@ -258,7 +261,7 @@ class PyHeuristic : public Heuristic<Task>
 public:
     using Base = Heuristic<Task>;
 
-    NB_TRAMPOLINE(Base, 2);
+    NB_TRAMPOLINE(Base, 3);
 
     /* Trampoline (need one for each virtual function) */
     void set_goal(View<Index<formalism::planning::GroundConjunctiveCondition>, formalism::planning::Repository> goal) override
@@ -267,6 +270,11 @@ public:
     }
 
     float_t evaluate(const State<Task>& state) override { NB_OVERRIDE_PURE(evaluate, state); }
+
+    const UnorderedSet<View<Index<formalism::planning::GroundAction>, formalism::planning::Repository>>& get_preferred_action_views() override
+    {
+        NB_OVERRIDE(get_preferred_action_views);
+    }
 };
 
 template<typename Task>
@@ -276,7 +284,8 @@ void bind_heuristic(nb::module_& m, const std::string& name)
 
     nb::class_<T, PyHeuristic<Task>>(m, name.c_str())  //
         .def("set_goal", &T::set_goal, "goal"_a)
-        .def("evaluate", &T::evaluate, "state"_a);
+        .def("evaluate", &T::evaluate, "state"_a)
+        .def("get_preferred_actions", &T::get_preferred_action_views);
 }
 
 template<typename Task>

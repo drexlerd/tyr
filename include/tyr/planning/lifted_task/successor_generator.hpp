@@ -21,6 +21,7 @@
 #include "tyr/datalog/policies/annotation.hpp"
 #include "tyr/datalog/policies/termination.hpp"
 #include "tyr/datalog/workspaces/program.hpp"
+#include "tyr/formalism/planning/ground_action_view.hpp"
 #include "tyr/planning/action_executor.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/ground_task/match_tree/declarations.hpp"  // for Matc...
@@ -45,7 +46,9 @@ public:
     std::vector<LabeledNode<LiftedTask>> get_labeled_successor_nodes(const Node<LiftedTask>& node);
     void get_labeled_successor_nodes(const Node<LiftedTask>& node, std::vector<LabeledNode<LiftedTask>>& out_nodes);
 
-    State<LiftedTask> get_state(StateIndex state_index);
+    Node<LiftedTask> get_successor_node(const Node<LiftedTask>& node, View<Index<formalism::planning::GroundAction>, formalism::planning::Repository> action);
+
+    Node<LiftedTask> get_node(StateIndex state_index);
 
     /**
      * Expert API

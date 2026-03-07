@@ -44,6 +44,12 @@ public:
         static const auto actions = UnorderedSet<Index<formalism::planning::GroundAction>> {};
         return actions;
     }
+
+    virtual const UnorderedSet<View<Index<formalism::planning::GroundAction>, formalism::planning::Repository>>& get_preferred_action_views()
+    {
+        static const auto actions = UnorderedSet<View<Index<formalism::planning::GroundAction>, formalism::planning::Repository>> {};
+        return actions;
+    }
 };
 
 }

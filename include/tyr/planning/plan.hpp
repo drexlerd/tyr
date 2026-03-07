@@ -33,6 +33,8 @@ private:
     LabeledNodeList<Task> m_labeled_succ_nodes;
 
 public:
+    Plan(Node<Task> start_node) : Plan(start_node, LabeledNodeList<Task> {}) {}
+
     Plan(Node<Task> start_node, LabeledNodeList<Task> labeled_succ_nodes) :
         m_start_node(std::move(start_node)),
         m_labeled_succ_nodes(std::move(labeled_succ_nodes))

@@ -57,7 +57,9 @@ public:
         m_iter_workspace(),
         m_effect_families(),
         m_relaxed_plan(),
-        m_preferred_actions()
+        m_preferred_actions(),
+        m_preferred_action_views(),
+        m_preferred_action_views_dirty(true)
     {
     }
 
@@ -65,6 +67,7 @@ public:
 
     float_t extract_cost_and_set_preferred_actions_impl(const State<LiftedTask>& state)
     {
+        m_preferred_action_views_dirty = true;
         m_relaxed_plan.clear();
         m_preferred_actions.clear();
         for (auto& bitset : m_markings)
@@ -86,6 +89,20 @@ public:
     }
 
     const UnorderedSet<Index<formalism::planning::GroundAction>>& get_preferred_actions() override { return m_preferred_actions; }
+
+    const UnorderedSet<View<Index<formalism::planning::GroundAction>, formalism::planning::Repository>>& get_preferred_action_views() override
+    {
+        if (m_preferred_action_views_dirty)
+        {
+            m_preferred_action_views_dirty = false;
+            m_preferred_action_views.clear();
+            const auto& repository = *this->m_task->get_repository();
+            for (const auto action_index : m_preferred_actions)
+                m_preferred_action_views.insert(make_view(action_index, repository));
+        }
+
+        return m_preferred_action_views;
+    }
 
     bool mark_atom(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> atom)
     {
@@ -171,6 +188,8 @@ private:
 
     UnorderedSet<Index<formalism::planning::GroundAction>> m_relaxed_plan;
     UnorderedSet<Index<formalism::planning::GroundAction>> m_preferred_actions;
+    UnorderedSet<View<Index<formalism::planning::GroundAction>, formalism::planning::Repository>> m_preferred_action_views;
+    bool m_preferred_action_views_dirty;
 };
 
 }

@@ -37,6 +37,7 @@ NodeList<Task> extract_node_trajectory(const SegmentedVector<SearchNode>& search
     trajectory.push_back(final_node);
 
     auto cur_search_node = &final_search_node;
+    auto& state_repository = *successor_generator.get_state_repository();
 
     while (cur_search_node->parent_state != StateIndex::max())
     {
@@ -44,7 +45,7 @@ NodeList<Task> extract_node_trajectory(const SegmentedVector<SearchNode>& search
 
         cur_search_node = &search_nodes.at(uint_t(cur_search_node->parent_state));
 
-        trajectory.push_back(Node<Task>(successor_generator.get_state(parent_state_index), cur_search_node->g_value));
+        trajectory.push_back(Node<Task>(state_repository.get_registered_state(parent_state_index), cur_search_node->g_value));
     }
 
     std::reverse(trajectory.begin(), trajectory.end());

@@ -30,12 +30,14 @@
 #include "tyr/planning/ground_task.hpp"
 #include "tyr/planning/ground_task/node.hpp"
 #include "tyr/planning/ground_task/state.hpp"
+#include "tyr/planning/ground_task/state_repository.hpp"
 #include "tyr/planning/ground_task/successor_generator.hpp"
 #include "tyr/planning/ground_task/unpacked_state.hpp"
 #include "tyr/planning/heuristic.hpp"
 #include "tyr/planning/lifted_task.hpp"
 #include "tyr/planning/lifted_task/node.hpp"
 #include "tyr/planning/lifted_task/state.hpp"
+#include "tyr/planning/lifted_task/state_repository.hpp"
 #include "tyr/planning/lifted_task/successor_generator.hpp"
 #include "tyr/planning/lifted_task/unpacked_state.hpp"
 #include "tyr/planning/search_node.hpp"
@@ -117,6 +119,7 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
     const auto pruning_strategy = (options.pruning_strategy) ? options.pruning_strategy : PruningStrategy<Task>::create();
     const auto goal_strategy = (options.goal_strategy) ? options.goal_strategy : TaskGoalStrategy<Task>::create(task);
     auto rng = std::mt19937_64(options.random_seed);
+    auto& state_repository = *successor_generator.get_state_repository();
 
     auto step = uint_t(0);
     auto result = SearchResult<Task>();
@@ -208,7 +211,7 @@ SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor
         }
 
         const auto state_index = openlist.top();
-        const auto state = successor_generator.get_state(state_index);
+        const auto state = state_repository.get_registered_state(state_index);
 
         openlist.pop();
         // Weight decay of prefered queue

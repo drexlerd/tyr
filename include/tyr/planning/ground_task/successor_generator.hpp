@@ -22,6 +22,7 @@
 #include "tyr/planning/ground_task/state.hpp"  // for State
 //
 #include "tyr/formalism/planning/ground_action_index.hpp"  // for Index
+#include "tyr/formalism/planning/ground_action_view.hpp"
 #include "tyr/planning/action_executor.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/successor_generator.hpp"
@@ -42,7 +43,9 @@ public:
     std::vector<LabeledNode<GroundTask>> get_labeled_successor_nodes(const Node<GroundTask>& node);
     void get_labeled_successor_nodes(const Node<GroundTask>& node, std::vector<LabeledNode<GroundTask>>& out_nodes);
 
-    State<GroundTask> get_state(StateIndex state_index);
+    Node<GroundTask> get_successor_node(const Node<GroundTask>& node, View<Index<formalism::planning::GroundAction>, formalism::planning::Repository> action);
+
+    Node<GroundTask> get_node(StateIndex state_index);
 
     /**
      * Expert API

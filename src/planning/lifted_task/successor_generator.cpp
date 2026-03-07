@@ -132,5 +132,21 @@ void SuccessorGenerator<LiftedTask>::get_labeled_successor_nodes(const Node<Lift
     }
 }
 
-State<LiftedTask> SuccessorGenerator<LiftedTask>::get_state(StateIndex state_index) { return m_state_repository->get_registered_state(state_index); }
+Node<LiftedTask> SuccessorGenerator<LiftedTask>::get_successor_node(const Node<LiftedTask>& node,
+                                                                    View<Index<formalism::planning::GroundAction>, formalism::planning::Repository> action)
+{
+    const auto& state = node.get_state();
+    const auto state_context = StateContext<LiftedTask>(*m_task, state.get_unpacked_state(), node.get_metric());
+
+    return m_executor.apply_action(state_context, action, *m_state_repository);
+}
+
+Node<LiftedTask> SuccessorGenerator<LiftedTask>::get_node(StateIndex state_index)
+{
+    auto state = m_state_repository->get_registered_state(state_index);
+    const auto state_context = StateContext<LiftedTask>(*m_task, state.get_unpacked_state(), 0);
+    const auto state_metric = evaluate_metric(m_task->get_task().get_metric(), m_task->get_task().get_auxiliary_fterm_value(), state_context);
+
+    return Node<LiftedTask>(std::move(state), state_metric);
+}
 }

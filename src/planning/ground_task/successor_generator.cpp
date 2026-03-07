@@ -81,6 +81,22 @@ void SuccessorGenerator<GroundTask>::get_labeled_successor_nodes(const Node<Grou
     }
 }
 
-State<GroundTask> SuccessorGenerator<GroundTask>::get_state(StateIndex state_index) { return m_state_repository->get_registered_state(state_index); }
+Node<GroundTask> SuccessorGenerator<GroundTask>::get_successor_node(const Node<GroundTask>& node,
+                                                                    View<Index<formalism::planning::GroundAction>, formalism::planning::Repository> action)
+{
+    const auto& state = node.get_state();
+    const auto state_context = StateContext<GroundTask>(*m_task, state.get_unpacked_state(), node.get_metric());
+
+    return m_executor.apply_action(state_context, action, *m_state_repository);
+}
+
+Node<GroundTask> SuccessorGenerator<GroundTask>::get_node(StateIndex state_index)
+{
+    auto state = m_state_repository->get_registered_state(state_index);
+    const auto state_context = StateContext<GroundTask>(*m_task, state.get_unpacked_state(), 0);
+    const auto state_metric = evaluate_metric(m_task->get_task().get_metric(), m_task->get_task().get_auxiliary_fterm_value(), state_context);
+
+    return Node<GroundTask>(std::move(state), state_metric);
+}
 
 }
