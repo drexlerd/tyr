@@ -6,7 +6,7 @@ It is designed to address several challenges in modern planning systems:
 
 1. **Unified grounded and lifted planning** within a type-safe API.
 
-2. **Rapid prototyping** through Python bindings with type hints, while maintaining a high-performance C++ core.
+2. **Rapid prototyping** through Python bindings with type hints, backed by a high-performance C++ core.
 
 3. **Supporting expressive numeric planning formalisms** across both grounded and lifted reasoning paradigms (see [Supported PDDL Features](docs/PDDL_SUPPORT.md)).
 
