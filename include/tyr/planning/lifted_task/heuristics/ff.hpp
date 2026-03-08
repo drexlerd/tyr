@@ -137,17 +137,18 @@ private:
 
             grounder_context.binding = witness.get_binding().get_data().objects;
 
-            const auto ground_action_index = formalism::planning::ground(make_view(action, grounder_context.destination),
-                                                                         grounder_context,
-                                                                         m_task->get_parameter_domains_per_cond_effect_per_action()[uint_t(action)],
-                                                                         m_assign,
-                                                                         m_iter_workspace,
-                                                                         m_task->get_fdr_context())
-                                                 .first;
+            const auto ground_action = formalism::planning::ground(make_view(action, grounder_context.destination),
+                                                                   grounder_context,
+                                                                   m_task->get_parameter_domains_per_cond_effect_per_action()[uint_t(action)],
+                                                                   m_assign,
+                                                                   m_iter_workspace,
+                                                                   m_task->get_fdr_context())
+                                           .first;
+
+            const auto ground_action_index = ground_action.get_index();
 
             m_relaxed_plan.insert(ground_action_index);
 
-            const auto ground_action = make_view(ground_action_index, grounder_context.destination);
             if (is_applicable(ground_action, state_context, m_effect_families))
                 m_preferred_actions.insert(ground_action_index);
 

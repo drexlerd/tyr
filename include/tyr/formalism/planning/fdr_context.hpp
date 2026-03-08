@@ -53,7 +53,7 @@ public:
         m_builder.domain_size = 2;
         m_builder.atoms.push_back(atom);
         canonicalize(m_builder);
-        const auto var_index = m_context.get_or_create(m_builder, m_buffer).first;
+        const auto var_index = m_context.get_or_create(m_builder, m_buffer).first.get_index();
 
         m_variables.push_back(var_index);
         const auto fact = Data<FDRFact<FluentTag>>(var_index, FDRValue { 1 });
@@ -115,10 +115,10 @@ public:
             for (const auto& atom : group)
                 variable.atoms.push_back(atom.get_index());
             canonicalize(variable);
-            const auto new_variable = context.get_or_create(variable, buffer).first;
-            m_variables.push_back(new_variable);
+            const auto var_index = context.get_or_create(variable, buffer).first.get_index();
+            m_variables.push_back(var_index);
             for (uint_t i = 0; i < group.size(); ++i)
-                m_mapping.emplace(group[i].get_index(), Data<FDRFact<FluentTag>>(new_variable, FDRValue { i + 1 }));
+                m_mapping.emplace(group[i].get_index(), Data<FDRFact<FluentTag>>(var_index, FDRValue { i + 1 }));
         }
     }
 

@@ -298,7 +298,7 @@ private:
             function.name = element->get_name();
             function.arity = element->get_parameters().size();
             formalism::canonicalize(function);
-            return context.get_or_create(function, builder.get_buffer()).first;
+            return context.get_or_create(function, builder.get_buffer()).first.get_index();
         };
 
         if (element->get_name() == "total-cost")
@@ -316,7 +316,7 @@ private:
         object.clear();
         object.name = element->get_name();
         formalism::canonicalize(object);
-        return context.get_or_create(object, builder.get_buffer()).first;
+        return context.get_or_create(object, builder.get_buffer()).first.get_index();
     }
 
     Index<formalism::Variable> translate_common(loki::Parameter element, formalism::planning::Builder& builder, formalism::planning::Repository& context)
@@ -336,7 +336,7 @@ private:
             predicate.name = element->get_name();
             predicate.arity = element->get_parameters().size();
             formalism::canonicalize(predicate);
-            return context.get_or_create(predicate, builder.get_buffer()).first;
+            return context.get_or_create(predicate, builder.get_buffer()).first.get_index();
         };
 
         if (m_fluent_predicates.count(element->get_name()) && !m_derived_predicates.count(element->get_name()))
@@ -354,7 +354,7 @@ private:
         variable.clear();
         variable.name = element->get_name();
         formalism::canonicalize(variable);
-        return context.get_or_create(variable, builder.get_buffer()).first;
+        return context.get_or_create(variable, builder.get_buffer()).first.get_index();
     }
 
     /**
@@ -404,7 +404,7 @@ private:
             atom.predicate = predicate_index;
             atom.terms = this->translate_lifted(element->get_terms(), builder, context);
             formalism::planning::canonicalize(atom);
-            return context.get_or_create(atom, builder.get_buffer()).first;
+            return context.get_or_create(atom, builder.get_buffer()).first.get_index();
         };
 
         return std::visit(
@@ -437,7 +437,7 @@ private:
             literal.atom = atom_index;
             literal.polarity = element->get_polarity();
             formalism::planning::canonicalize(literal);
-            return context.get_or_create(literal, builder.get_buffer()).first;
+            return context.get_or_create(literal, builder.get_buffer()).first.get_index();
         };
 
         return std::visit(
@@ -476,7 +476,7 @@ private:
             binary.rhs = translate_lifted(element->get_right_function_expression(), builder, context);
             formalism::planning::canonicalize(binary);
             return Data<formalism::planning::FunctionExpression>(Data<formalism::planning::ArithmeticOperator<Data<formalism::planning::FunctionExpression>>>(
-                context.get_or_create(binary, builder.get_buffer()).first));
+                context.get_or_create(binary, builder.get_buffer()).first.get_index()));
         };
 
         switch (element->get_binary_operator())
@@ -507,7 +507,7 @@ private:
             multi.args = translate_lifted(element->get_function_expressions(), builder, context);
             formalism::planning::canonicalize(multi);
             return Data<formalism::planning::FunctionExpression>(Data<formalism::planning::ArithmeticOperator<Data<formalism::planning::FunctionExpression>>>(
-                context.get_or_create(multi, builder.get_buffer()).first));
+                context.get_or_create(multi, builder.get_buffer()).first.get_index()));
         };
 
         switch (element->get_multi_operator())
@@ -530,7 +530,7 @@ private:
         minus.arg = translate_lifted(element->get_function_expression(), builder, context);
         formalism::planning::canonicalize(minus);
         return Data<formalism::planning::FunctionExpression>(Data<formalism::planning::ArithmeticOperator<Data<formalism::planning::FunctionExpression>>>(
-            context.get_or_create(minus, builder.get_buffer()).first));
+            context.get_or_create(minus, builder.get_buffer()).first.get_index()));
     }
 
     Data<formalism::planning::FunctionExpression>
@@ -575,7 +575,7 @@ private:
             fterm.function = function_index;
             fterm.terms = this->translate_lifted(element->get_terms(), builder, context);
             formalism::planning::canonicalize(fterm);
-            return context.get_or_create(fterm, builder.get_buffer()).first;
+            return context.get_or_create(fterm, builder.get_buffer()).first.get_index();
         };
 
         return std::visit(
@@ -609,7 +609,7 @@ private:
             binary.rhs = translate_lifted(element->get_right_function_expression(), builder, context);
             formalism::planning::canonicalize(binary);
             return Data<formalism::planning::BooleanOperator<Data<formalism::planning::FunctionExpression>>>(
-                context.get_or_create(binary, builder.get_buffer()).first);
+                context.get_or_create(binary, builder.get_buffer()).first.get_index());
         };
 
         switch (element->get_binary_comparator())
@@ -703,7 +703,7 @@ private:
                     }
 
                     formalism::planning::canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first;
+                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
                 }
                 else if constexpr (std::is_same_v<ConditionT, loki::ConditionLiteral>)
                 {
@@ -712,7 +712,7 @@ private:
                     func_insert_literal(index_literal_variant, conj_condition.static_literals, conj_condition.fluent_literals, conj_condition.derived_literals);
 
                     formalism::planning::canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first;
+                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
                 }
                 else if constexpr (std::is_same_v<ConditionT, loki::ConditionNumericConstraint>)
                 {
@@ -721,7 +721,7 @@ private:
                     conj_condition.numeric_constraints.push_back(numeric_constraint);
 
                     formalism::planning::canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first;
+                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
                 }
                 else
                 {
@@ -748,7 +748,7 @@ private:
             numeric_effect.fterm = fterm_index;
             numeric_effect.fexpr = this->translate_lifted(element->get_function_expression(), builder, context);
             formalism::planning::canonicalize(numeric_effect);
-            return context.get_or_create(numeric_effect, builder.get_buffer()).first;
+            return context.get_or_create(numeric_effect, builder.get_buffer()).first.get_index();
         };
 
         auto build_numeric_effect_term = [&](auto fact_tag, auto fterm_index) -> IndexNumericEffectVariant
@@ -859,7 +859,7 @@ private:
                             auto& conj_cond = *conj_cond_ptr;
                             conj_cond.clear();
                             formalism::planning::canonicalize(conj_cond);
-                            return context.get_or_create(conj_cond, builder.get_buffer()).first;
+                            return context.get_or_create(conj_cond, builder.get_buffer()).first.get_index();
                         }
                     },
                     tmp_effect->get_effect());
@@ -997,7 +997,7 @@ private:
             conj_effect.numeric_effects = cond_effect_fluent_numeric_effects;
             conj_effect.auxiliary_numeric_effect = cond_effect_auxiliary_numeric_effects;
             formalism::planning::canonicalize(conj_effect);
-            const auto conj_effect_index = context.get_or_create(conj_effect, builder.get_buffer()).first;
+            const auto conj_effect_index = context.get_or_create(conj_effect, builder.get_buffer()).first.get_index();
 
             auto cond_effect_ptr = builder.template get_builder<formalism::planning::ConditionalEffect>();
             auto& cond_effect = *cond_effect_ptr;
@@ -1006,7 +1006,7 @@ private:
             cond_effect.condition = cond_conjunctive_condition;
             cond_effect.effect = conj_effect_index;
             formalism::planning::canonicalize(cond_effect);
-            const auto cond_effect_index = context.get_or_create(cond_effect, builder.get_buffer()).first;
+            const auto cond_effect_index = context.get_or_create(cond_effect, builder.get_buffer()).first.get_index();
 
             conditional_effects.push_back(cond_effect_index);
         }
@@ -1041,7 +1041,7 @@ private:
                 auto& conj_cond = *conj_cond_ptr;
                 conj_cond.clear();
                 formalism::planning::canonicalize(conj_cond);
-                conjunctive_condition = context.get_or_create(conj_cond, builder.get_buffer()).first;
+                conjunctive_condition = context.get_or_create(conj_cond, builder.get_buffer()).first.get_index();
             }
             action.condition = conjunctive_condition;
 
@@ -1058,7 +1058,7 @@ private:
         m_param_map.pop_parameters(parameters);
 
         formalism::planning::canonicalize(action);
-        return context.get_or_create(action, builder.get_buffer()).first;
+        return context.get_or_create(action, builder.get_buffer()).first.get_index();
     }
 
     Index<formalism::planning::Axiom> translate_lifted(loki::Axiom element, formalism::planning::Builder& builder, formalism::planning::Repository& context)
@@ -1091,7 +1091,7 @@ private:
         m_param_map.pop_parameters(parameters);
 
         formalism::planning::canonicalize(axiom);
-        return context.get_or_create(axiom, builder.get_buffer()).first;
+        return context.get_or_create(axiom, builder.get_buffer()).first.get_index();
     }
 
     /**
@@ -1135,7 +1135,7 @@ private:
         binding.clear();
         binding.objects = element;
         formalism::canonicalize(binding);
-        return context.get_or_create(binding, builder.get_buffer()).first;
+        return context.get_or_create(binding, builder.get_buffer()).first.get_index();
     }
 
     IndexGroundAtomVariant translate_grounded(loki::Atom element, formalism::planning::Builder& builder, formalism::planning::Repository& context)
@@ -1152,7 +1152,7 @@ private:
             atom.predicate = predicate_index;
             atom.objects = this->translate_grounded(element->get_terms(), builder, context);
             formalism::planning::canonicalize(atom);
-            return context.get_or_create(atom, builder.get_buffer()).first;
+            return context.get_or_create(atom, builder.get_buffer()).first.get_index();
         };
 
         return std::visit(
@@ -1208,7 +1208,7 @@ private:
             literal.atom = atom;
             literal.polarity = element->get_polarity();
             formalism::planning::canonicalize(literal);
-            return context.get_or_create(literal, builder.get_buffer()).first;
+            return context.get_or_create(literal, builder.get_buffer()).first.get_index();
         };
 
         return std::visit(
@@ -1271,7 +1271,7 @@ private:
             formalism::planning::canonicalize(binary);
             return Data<formalism::planning::GroundFunctionExpression>(
                 Data<formalism::planning::ArithmeticOperator<Data<formalism::planning::GroundFunctionExpression>>>(
-                    context.get_or_create(binary, builder.get_buffer()).first));
+                    context.get_or_create(binary, builder.get_buffer()).first.get_index()));
         };
 
         switch (element->get_binary_operator())
@@ -1303,7 +1303,7 @@ private:
             formalism::planning::canonicalize(multi);
             return Data<formalism::planning::GroundFunctionExpression>(
                 Data<formalism::planning::ArithmeticOperator<Data<formalism::planning::GroundFunctionExpression>>>(
-                    context.get_or_create(multi, builder.get_buffer()).first));
+                    context.get_or_create(multi, builder.get_buffer()).first.get_index()));
         };
 
         switch (element->get_multi_operator())
@@ -1328,7 +1328,7 @@ private:
         formalism::planning::canonicalize(minus);
         return Data<formalism::planning::GroundFunctionExpression>(
             Data<formalism::planning::ArithmeticOperator<Data<formalism::planning::GroundFunctionExpression>>>(
-                context.get_or_create(minus, builder.get_buffer()).first));
+                context.get_or_create(minus, builder.get_buffer()).first.get_index()));
     }
 
     Data<formalism::planning::GroundFunctionExpression>
@@ -1373,7 +1373,7 @@ private:
             fterm.function = function_index;
             fterm.objects = this->translate_grounded(element->get_terms(), builder, context);
             formalism::planning::canonicalize(fterm);
-            return context.get_or_create(fterm, builder.get_buffer()).first;
+            return context.get_or_create(fterm, builder.get_buffer()).first.get_index();
         };
 
         return std::visit(
@@ -1407,7 +1407,7 @@ private:
             fterm_value.fterm = fterm_index;
             fterm_value.value = element->get_number();
             formalism::planning::canonicalize(fterm_value);
-            return context.get_or_create(fterm_value, builder.get_buffer()).first;
+            return context.get_or_create(fterm_value, builder.get_buffer()).first.get_index();
         };
 
         return std::visit(
@@ -1440,7 +1440,7 @@ private:
             binary.rhs = translate_grounded(element->get_right_function_expression(), builder, context);
             formalism::planning::canonicalize(binary);
             return Data<formalism::planning::BooleanOperator<Data<formalism::planning::GroundFunctionExpression>>>(
-                context.get_or_create(binary, builder.get_buffer()).first);
+                context.get_or_create(binary, builder.get_buffer()).first.get_index());
         };
 
         switch (element->get_binary_comparator())
@@ -1530,7 +1530,7 @@ private:
                     }
 
                     formalism::planning::canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first;
+                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
                 }
                 else if constexpr (std::is_same_v<ConditionT, loki::ConditionLiteral>)
                 {
@@ -1539,7 +1539,7 @@ private:
                     func_insert_literal(index_literal_variant, conj_condition.static_literals, conj_condition.fluent_facts, conj_condition.derived_literals);
 
                     formalism::planning::canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first;
+                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
                 }
                 else if constexpr (std::is_same_v<ConditionT, loki::ConditionNumericConstraint>)
                 {
@@ -1548,7 +1548,7 @@ private:
                     conj_condition.numeric_constraints.push_back(numeric_constraint);
 
                     formalism::planning::canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first;
+                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
                 }
                 else
                 {
@@ -1584,7 +1584,7 @@ private:
         }
 
         formalism::planning::canonicalize(metric);
-        return context.get_or_create(metric, builder.get_buffer()).first;
+        return context.get_or_create(metric, builder.get_buffer()).first.get_index();
     }
 
 public:

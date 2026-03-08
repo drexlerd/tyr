@@ -115,15 +115,13 @@ void SuccessorGenerator<LiftedTask>::get_labeled_successor_nodes(const Node<Lift
 
                 m_workspace.d2p.binding = fact.get_objects().get_data();
 
-                const auto ground_action_index = fp::ground(action,
-                                                            grounder_context,
-                                                            m_task->get_parameter_domains_per_cond_effect_per_action()[action_index.get_value()],
-                                                            fluent_assign,
-                                                            iter_workspace,
-                                                            m_task->get_fdr_context())
-                                                     .first;
-
-                const auto ground_action = make_view(ground_action_index, grounder_context.destination);
+                const auto ground_action = fp::ground(action,
+                                                      grounder_context,
+                                                      m_task->get_parameter_domains_per_cond_effect_per_action()[action_index.get_value()],
+                                                      fluent_assign,
+                                                      iter_workspace,
+                                                      m_task->get_fdr_context())
+                                               .first;
 
                 if (m_executor.is_applicable(ground_action, state_context))
                     out_nodes.emplace_back(ground_action, m_executor.apply_action(state_context, ground_action, *m_state_repository));

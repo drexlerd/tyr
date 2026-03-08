@@ -318,7 +318,7 @@ DomainPtr LokiToTyrTranslator::translate(const loki::Domain& element, fp::Builde
     domain.axioms = translate_lifted(element->get_axioms(), builder, *context);
 
     canonicalize(domain);
-    return std::make_shared<Domain>(context, make_view(context->get_or_create(domain, builder.get_buffer()).first, *context));
+    return std::make_shared<Domain>(context, make_view(context->get_or_create(domain, builder.get_buffer()).first.get_index(), *context));
 }
 
 LiftedTaskPtr LokiToTyrTranslator::translate(const loki::Problem& element, fp::Builder& builder, DomainPtr domain, fp::RepositoryPtr domain_context)
@@ -442,7 +442,7 @@ LiftedTaskPtr LokiToTyrTranslator::translate(const loki::Problem& element, fp::B
         auto& conj_cond = *conj_cond_ptr;
         conj_cond.clear();
         canonicalize(conj_cond);
-        task.goal = task_context->get_or_create(conj_cond, builder.get_buffer()).first;
+        task.goal = task_context->get_or_create(conj_cond, builder.get_buffer()).first.get_index();
     }
 
     /* Metric section */
@@ -459,10 +459,7 @@ LiftedTaskPtr LokiToTyrTranslator::translate(const loki::Problem& element, fp::B
     task.axioms = translate_lifted(element->get_axioms(), builder, *task_context);
 
     canonicalize(task);
-    return std::make_shared<LiftedTask>(std::move(domain),
-                                        task_context,
-                                        make_view(task_context->get_or_create(task, builder.get_buffer()).first, *task_context),
-                                        std::move(fdr_context));
+    return std::make_shared<LiftedTask>(std::move(domain), task_context, task_context->get_or_create(task, builder.get_buffer()).first, std::move(fdr_context));
 }
 
 }

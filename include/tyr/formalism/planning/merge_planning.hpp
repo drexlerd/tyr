@@ -181,7 +181,7 @@ inline auto merge_d2p(View<Data<formalism::Term>, formalism::datalog::Repository
             if constexpr (std::is_same_v<Alternative, formalism::ParameterIndex>)
                 return Data<formalism::Term>(arg);
             else if constexpr (std::is_same_v<Alternative, View<Index<formalism::Object>, formalism::datalog::Repository>>)
-                return Data<formalism::Term>(merge_d2p(arg, context).first);
+                return Data<formalism::Term>(merge_d2p(arg, context).first.get_index());
             else
                 static_assert(dependent_false<Alternative>::value, "Missing case");
         },
@@ -211,7 +211,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::Atom<T_SRC>>, formalism::da
     auto& atom = *atom_ptr;
     atom.clear();
 
-    atom.predicate = merge_d2p<T_SRC, T_DST>(element.get_predicate(), context).first;
+    atom.predicate = merge_d2p<T_SRC, T_DST>(element.get_predicate(), context).first.get_index();
     for (const auto term : element.get_terms())
         atom.terms.push_back(merge_d2p(term, context));
 
@@ -226,7 +226,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::GroundAtom<T_SRC>>, formali
     auto& atom = *atom_ptr;
     atom.clear();
 
-    atom.predicate = merge_d2p<T_SRC, T_DST>(element.get_predicate(), context).first;
+    atom.predicate = merge_d2p<T_SRC, T_DST>(element.get_predicate(), context).first.get_index();
     atom.objects = element.get_data().objects;
 
     canonicalize(atom);
@@ -241,7 +241,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::Literal<T_SRC>>, formalism:
     literal.clear();
 
     literal.polarity = element.get_polarity();
-    literal.atom = merge_d2p<T_SRC, T_DST>(element.get_atom(), context).first;
+    literal.atom = merge_d2p<T_SRC, T_DST>(element.get_atom(), context).first.get_index();
 
     canonicalize(literal);
     return context.destination.get_or_create(literal, context.builder.get_buffer());
@@ -255,7 +255,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::GroundLiteral<T_SRC>>, form
     literal.clear();
 
     literal.polarity = element.get_polarity();
-    literal.atom = merge_d2p<T_SRC, T_DST>(element.get_atom(), context).first;
+    literal.atom = merge_d2p<T_SRC, T_DST>(element.get_atom(), context).first.get_index();
 
     canonicalize(literal);
     return context.destination.get_or_create(literal, context.builder.get_buffer());
@@ -313,7 +313,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::GroundFunctionTermValue<T>>
     auto& fterm_value = *fterm_value_ptr;
     fterm_value.clear();
 
-    fterm_value.fterm = merge_d2p(element.get_fterm(), context).first;
+    fterm_value.fterm = merge_d2p(element.get_fterm(), context).first.get_index();
     fterm_value.value = element.get_value();
 
     canonicalize(fterm_value);
@@ -336,7 +336,7 @@ inline auto merge_d2p(View<Data<formalism::datalog::FunctionExpression>, formali
             else if constexpr (std::is_same_v<Alternative, View<Index<formalism::datalog::FunctionTerm<AuxiliaryTag>>, formalism::datalog::Repository>>)
                 throw std::logic_error("AuxiliaryTag FunctionTerm must not be merged.");
             else
-                return Data<FunctionExpression>(merge_d2p(arg, context).first);
+                return Data<FunctionExpression>(merge_d2p(arg, context).first.get_index());
         },
         element.get_variant());
 }
@@ -357,7 +357,7 @@ inline auto merge_d2p(View<Data<formalism::datalog::GroundFunctionExpression>, f
             else if constexpr (std::is_same_v<Alternative, View<Index<formalism::datalog::GroundFunctionTerm<AuxiliaryTag>>, formalism::datalog::Repository>>)
                 throw std::logic_error("AuxiliaryTag GroundFunctionTerm must not be merged.");
             else
-                return Data<GroundFunctionExpression>(merge_d2p(arg, context).first);
+                return Data<GroundFunctionExpression>(merge_d2p(arg, context).first.get_index());
         },
         element.get_variant());
 }
@@ -414,7 +414,7 @@ inline auto merge_d2p(View<Data<formalism::datalog::ArithmeticOperator<T>>, form
 {
     using T_DST = to_planning_payload_t<T>;
 
-    return visit([&](auto&& arg) { return Data<ArithmeticOperator<T_DST>>(merge_d2p(arg, context).first); }, element.get_variant());
+    return visit([&](auto&& arg) { return Data<ArithmeticOperator<T_DST>>(merge_d2p(arg, context).first.get_index()); }, element.get_variant());
 }
 
 template<typename T>
@@ -422,7 +422,7 @@ inline auto merge_d2p(View<Data<formalism::datalog::BooleanOperator<T>>, formali
 {
     using T_DST = to_planning_payload_t<T>;
 
-    return visit([&](auto&& arg) { return Data<BooleanOperator<T_DST>>(merge_d2p(arg, context).first); }, element.get_variant());
+    return visit([&](auto&& arg) { return Data<BooleanOperator<T_DST>>(merge_d2p(arg, context).first.get_index()); }, element.get_variant());
 }
 
 }

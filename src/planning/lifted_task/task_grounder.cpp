@@ -51,7 +51,7 @@ static auto remap_fdr_fact(View<Data<fp::FDRFact<f::FluentTag>>, fp::Repository>
     // Ensure that remapping is unambiguous
     assert(fact.get_variable().get_domain_size() == 2);
 
-    auto new_atom = merge_p2p(fact.get_variable().get_atoms().front(), context).first;
+    auto new_atom = merge_p2p(fact.get_variable().get_atoms().front(), context).first.get_index();
     auto new_fact = fdr_context.get_fact(new_atom);
 
     // value 1 -> keep positive fact
@@ -73,13 +73,13 @@ static auto create_ground_fdr_conjunctive_condition(View<Index<fp::GroundConjunc
     fdr_conj_cond.clear();
 
     for (const auto literal : element.get_facts<f::StaticTag>())
-        fdr_conj_cond.static_literals.push_back(merge_p2p(literal, context).first);
+        fdr_conj_cond.static_literals.push_back(merge_p2p(literal, context).first.get_index());
 
     for (const auto fact : element.get_facts<f::FluentTag>())
         fdr_conj_cond.fluent_facts.push_back(remap_fdr_fact(fact, fdr_context, context));
 
     for (const auto literal : element.get_facts<f::DerivedTag>())
-        fdr_conj_cond.derived_literals.push_back(merge_p2p(literal, context).first);
+        fdr_conj_cond.derived_literals.push_back(merge_p2p(literal, context).first.get_index());
 
     for (const auto numeric_constraint : element.get_numeric_constraints())
         fdr_conj_cond.numeric_constraints.push_back(merge_p2p(numeric_constraint, context));
@@ -119,8 +119,8 @@ static auto create_ground_conditional_effect(View<Index<fp::GroundConditionalEff
     auto& fdr_cond_eff = *fdr_cond_eff_ptr;
     fdr_cond_eff.clear();
 
-    fdr_cond_eff.condition = create_ground_fdr_conjunctive_condition(element.get_condition(), fdr_context, context).first;
-    fdr_cond_eff.effect = create_ground_conjunctive_effect(element.get_effect(), fdr_context, context).first;
+    fdr_cond_eff.condition = create_ground_fdr_conjunctive_condition(element.get_condition(), fdr_context, context).first.get_index();
+    fdr_cond_eff.effect = create_ground_conjunctive_effect(element.get_effect(), fdr_context, context).first.get_index();
 
     canonicalize(fdr_cond_eff);
     return context.destination.get_or_create(fdr_cond_eff, context.builder.get_buffer());
@@ -132,11 +132,11 @@ static auto create_ground_action(View<Index<fp::GroundAction>, fp::Repository> e
     auto& fdr_action = *fdr_action_ptr;
     fdr_action.clear();
 
-    fdr_action.binding = merge_p2p(element.get_binding(), context).first;
+    fdr_action.binding = merge_p2p(element.get_binding(), context).first.get_index();
     fdr_action.action = element.get_action().get_index();
-    fdr_action.condition = create_ground_fdr_conjunctive_condition(element.get_condition(), fdr_context, context).first;
+    fdr_action.condition = create_ground_fdr_conjunctive_condition(element.get_condition(), fdr_context, context).first.get_index();
     for (const auto cond_eff : element.get_effects())
-        fdr_action.effects.push_back(create_ground_conditional_effect(cond_eff, fdr_context, context).first);
+        fdr_action.effects.push_back(create_ground_conditional_effect(cond_eff, fdr_context, context).first.get_index());
 
     canonicalize(fdr_action);
     return context.destination.get_or_create(fdr_action, context.builder.get_buffer());
@@ -148,10 +148,10 @@ static auto create_ground_axiom(View<Index<fp::GroundAxiom>, fp::Repository> ele
     auto& fdr_axiom = *fdr_axiom_ptr;
     fdr_axiom.clear();
 
-    fdr_axiom.binding = merge_p2p(element.get_binding(), context).first;
+    fdr_axiom.binding = merge_p2p(element.get_binding(), context).first.get_index();
     fdr_axiom.axiom = element.get_axiom().get_index();
-    fdr_axiom.body = create_ground_fdr_conjunctive_condition(element.get_body(), fdr_context, context).first;
-    fdr_axiom.head = merge_p2p(element.get_head(), context).first;
+    fdr_axiom.body = create_ground_fdr_conjunctive_condition(element.get_body(), fdr_context, context).first.get_index();
+    fdr_axiom.head = merge_p2p(element.get_head(), context).first.get_index();
 
     canonicalize(fdr_axiom);
     return context.destination.get_or_create(fdr_axiom, context.builder.get_buffer());
@@ -165,7 +165,7 @@ static auto create_mutex_groups(View<IndexList<fp::GroundAtom<f::FluentTag>>, fp
     for (const auto atom : atoms)
     {
         auto group = std::vector<View<Index<fp::GroundAtom<f::FluentTag>>, fp::Repository>> {};
-        group.push_back(make_view(merge_p2p(atom, context).first, context.destination));
+        group.push_back(make_view(merge_p2p(atom, context).first.get_index(), context.destination));
         mutex_groups.push_back(group);
     }
 
@@ -190,29 +190,29 @@ static auto create_task(View<Index<fp::Task>, fp::Repository> task,
     fdr_task.name = task.get_name();
     fdr_task.domain = task.get_domain().get_index();
     for (const auto predicate : task.get_derived_predicates())
-        fdr_task.derived_predicates.push_back(merge_p2p(predicate, merge_context).first);
+        fdr_task.derived_predicates.push_back(merge_p2p(predicate, merge_context).first.get_index());
     for (const auto object : task.get_objects())
-        fdr_task.objects.push_back(merge_p2p(object, merge_context).first);
+        fdr_task.objects.push_back(merge_p2p(object, merge_context).first.get_index());
 
     for (const auto atom : task.get_atoms<f::StaticTag>())
-        fdr_task.static_atoms.push_back(merge_p2p(atom, merge_context).first);
+        fdr_task.static_atoms.push_back(merge_p2p(atom, merge_context).first.get_index());
     for (const auto atom : fluent_atoms)
-        fdr_task.fluent_atoms.push_back(merge_p2p(atom, merge_context).first);
+        fdr_task.fluent_atoms.push_back(merge_p2p(atom, merge_context).first.get_index());
     for (const auto atom : derived_atoms)
-        fdr_task.derived_atoms.push_back(merge_p2p(atom, merge_context).first);
+        fdr_task.derived_atoms.push_back(merge_p2p(atom, merge_context).first.get_index());
     for (const auto fterm : fluent_fterms)
-        fdr_task.fluent_fterms.push_back(merge_p2p(fterm, merge_context).first);
+        fdr_task.fluent_fterms.push_back(merge_p2p(fterm, merge_context).first.get_index());
 
     for (const auto fterm_value : task.get_fterm_values<f::StaticTag>())
-        fdr_task.static_fterm_values.push_back(merge_p2p(fterm_value, merge_context).first);
+        fdr_task.static_fterm_values.push_back(merge_p2p(fterm_value, merge_context).first.get_index());
     for (const auto fterm_value : task.get_fterm_values<f::FluentTag>())
-        fdr_task.fluent_fterm_values.push_back(merge_p2p(fterm_value, merge_context).first);
+        fdr_task.fluent_fterm_values.push_back(merge_p2p(fterm_value, merge_context).first.get_index());
     if (task.get_auxiliary_fterm_value().has_value())
-        fdr_task.auxiliary_fterm_value = merge_p2p(task.get_auxiliary_fterm_value().value(), merge_context).first;
+        fdr_task.auxiliary_fterm_value = merge_p2p(task.get_auxiliary_fterm_value().value(), merge_context).first.get_index();
     if (task.get_metric())
-        fdr_task.metric = merge_p2p(task.get_metric().value(), merge_context).first;
+        fdr_task.metric = merge_p2p(task.get_metric().value(), merge_context).first.get_index();
     for (const auto axiom : task.get_axioms())
-        fdr_task.axioms.push_back(merge_p2p(axiom, merge_context).first);
+        fdr_task.axioms.push_back(merge_p2p(axiom, merge_context).first.get_index());
 
     /// --- Create FDR context
     auto mutex_groups = create_mutex_groups(fluent_atoms, merge_context);
@@ -224,20 +224,20 @@ static auto create_task(View<Index<fp::Task>, fp::Repository> task,
 
     /// --- Create FDR fluent facts
     for (const auto atom : task.get_atoms<f::FluentTag>())
-        fdr_task.fluent_facts.push_back(fdr_context.get_fact(merge_p2p(atom, merge_context).first));
+        fdr_task.fluent_facts.push_back(fdr_context.get_fact(merge_p2p(atom, merge_context).first.get_index()));
 
     /// --- Create FDR goal
-    fdr_task.goal = create_ground_fdr_conjunctive_condition(task.get_goal(), fdr_context, merge_context).first;
+    fdr_task.goal = create_ground_fdr_conjunctive_condition(task.get_goal(), fdr_context, merge_context).first.get_index();
 
     /// --- Create FDR actions and axioms
     for (const auto action : actions)
-        fdr_task.ground_actions.push_back(create_ground_action(action, fdr_context, merge_context).first);
+        fdr_task.ground_actions.push_back(create_ground_action(action, fdr_context, merge_context).first.get_index());
     for (const auto axiom : axioms)
-        fdr_task.ground_axioms.push_back(create_ground_axiom(axiom, fdr_context, merge_context).first);
+        fdr_task.ground_axioms.push_back(create_ground_axiom(axiom, fdr_context, merge_context).first.get_index());
 
     canonicalize(fdr_task);
 
-    return std::make_pair(make_view(repository.get_or_create(fdr_task, builder.get_buffer()).first, repository), std::move(fdr_context));
+    return std::make_pair(make_view(repository.get_or_create(fdr_task, builder.get_buffer()).first.get_index(), repository), std::move(fdr_context));
 }
 
 static auto create_fdr_task(DomainPtr domain,
@@ -337,7 +337,7 @@ GroundTaskPtr ground_task(LiftedTask& lifted_task)
                                                             fluent_assign,
                                                             iter_workspace,
                                                             lifted_task.get_fdr_context())
-                                                     .first;
+                                                     .first.get_index();
 
                 const auto ground_action = make_view(ground_action_index, grounder_context.destination);
 
@@ -392,7 +392,7 @@ GroundTaskPtr ground_task(LiftedTask& lifted_task)
 
                 const auto axiom = make_view(axiom_index, grounder_context.destination);
 
-                const auto ground_axiom_index = fp::ground(axiom, grounder_context, lifted_task.get_fdr_context()).first;
+                const auto ground_axiom_index = fp::ground(axiom, grounder_context, lifted_task.get_fdr_context()).first.get_index();
 
                 const auto ground_axiom = make_view(ground_axiom_index, grounder_context.destination);
 

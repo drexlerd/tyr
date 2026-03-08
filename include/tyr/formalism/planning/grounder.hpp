@@ -128,7 +128,7 @@ inline auto ground(View<Data<FunctionExpression>, Repository> element, GrounderC
             else if constexpr (std::is_same_v<Alternative, View<Data<ArithmeticOperator<Data<FunctionExpression>>>, Repository>>)
                 return Data<GroundFunctionExpression>(ground(arg, context));
             else
-                return Data<GroundFunctionExpression>(ground(arg, context).first);
+                return Data<GroundFunctionExpression>(ground(arg, context).first.get_index());
         },
         element.get_variant());
 }
@@ -185,12 +185,14 @@ inline auto ground(View<Index<MultiOperator<O, Data<FunctionExpression>>>, Repos
 
 inline auto ground(View<Data<BooleanOperator<Data<FunctionExpression>>>, Repository> element, GrounderContext& context)
 {
-    return visit([&](auto&& arg) { return Data<BooleanOperator<Data<GroundFunctionExpression>>>(ground(arg, context).first); }, element.get_variant());
+    return visit([&](auto&& arg) { return Data<BooleanOperator<Data<GroundFunctionExpression>>>(ground(arg, context).first.get_index()); },
+                 element.get_variant());
 }
 
 inline auto ground(View<Data<ArithmeticOperator<Data<FunctionExpression>>>, Repository> element, GrounderContext& context)
 {
-    return visit([&](auto&& arg) { return Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(ground(arg, context).first); }, element.get_variant());
+    return visit([&](auto&& arg) { return Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(ground(arg, context).first.get_index()); },
+                 element.get_variant());
 }
 
 template<FactKind T_SRC, FactKind T_DST>
@@ -202,7 +204,7 @@ inline auto ground(View<Index<Atom<T_SRC>>, Repository> element, MergeContext& m
     atom.clear();
 
     // Fill data
-    atom.predicate = merge<T_SRC, T_DST>(element.get_predicate(), merge_context).first;
+    atom.predicate = merge<T_SRC, T_DST>(element.get_predicate(), merge_context).first.get_index();
     for (const auto term : element.get_terms())
     {
         visit(
@@ -261,7 +263,7 @@ template<typename FDR>
     requires FDRContext<FDR>
 inline auto ground(View<Index<Atom<FluentTag>>, Repository> element, GrounderContext& context, FDR& fdr)
 {
-    return fdr.get_fact(ground(element, context).first);
+    return fdr.get_fact(ground(element, context).first.get_index());
 }
 
 template<FactKind T>
@@ -274,7 +276,7 @@ inline auto ground(View<Index<Literal<T>>, Repository> element, GrounderContext&
 
     // Fill data
     ground_literal.polarity = element.get_polarity();
-    ground_literal.atom = ground(element.get_atom(), context).first;
+    ground_literal.atom = ground(element.get_atom(), context).first.get_index();
 
     // Canonicalize and Serialize
     canonicalize(ground_literal);
@@ -303,11 +305,11 @@ inline auto ground(View<Index<ConjunctiveCondition>, Repository> element, Ground
 
     // Fill data
     for (const auto literal : element.template get_literals<StaticTag>())
-        conj_cond.static_literals.push_back(ground(literal, context).first);
+        conj_cond.static_literals.push_back(ground(literal, context).first.get_index());
     for (const auto literal : element.template get_literals<FluentTag>())
         conj_cond.fluent_facts.push_back(ground(literal, context, fdr));
     for (const auto literal : element.template get_literals<DerivedTag>())
-        conj_cond.derived_literals.push_back(ground(literal, context).first);
+        conj_cond.derived_literals.push_back(ground(literal, context).first.get_index());
     for (const auto numeric_constraint : element.get_numeric_constraints())
         conj_cond.numeric_constraints.push_back(ground(numeric_constraint, context));
 
@@ -325,7 +327,7 @@ inline auto ground(View<Index<NumericEffect<Op, T>>, Repository> element, Ground
     numeric_effect.clear();
 
     // Fill data
-    numeric_effect.fterm = ground(element.get_fterm(), context).first;
+    numeric_effect.fterm = ground(element.get_fterm(), context).first.get_index();
     numeric_effect.fexpr = ground(element.get_fexpr(), context);
 
     // Canonicalize and Serialize
@@ -336,7 +338,7 @@ inline auto ground(View<Index<NumericEffect<Op, T>>, Repository> element, Ground
 template<FactKind T>
 inline auto ground(View<Data<NumericEffectOperator<T>>, Repository> element, GrounderContext& context)
 {
-    return visit([&](auto&& arg) { return Data<GroundNumericEffectOperator<T>>(ground(arg, context).first); }, element.get_variant());
+    return visit([&](auto&& arg) { return Data<GroundNumericEffectOperator<T>>(ground(arg, context).first.get_index()); }, element.get_variant());
 }
 
 template<typename FDR>
@@ -391,8 +393,8 @@ ground(View<Index<ConditionalEffect>, Repository> element, GrounderContext& cont
     cond_effect.clear();
 
     // Fill data
-    cond_effect.condition = ground(element.get_condition(), context, fdr).first;
-    cond_effect.effect = ground(element.get_effect(), context, assign, fdr).first;
+    cond_effect.condition = ground(element.get_condition(), context, fdr).first.get_index();
+    cond_effect.effect = ground(element.get_effect(), context, assign, fdr).first.get_index();
 
     // Canonicalize and Serialize
     canonicalize(cond_effect);
@@ -415,8 +417,8 @@ inline auto ground(View<Index<Action>, Repository> element,
 
     // Fill data
     action.action = element.get_index();
-    action.binding = ground(context.binding, context).first;
-    action.condition = ground(element.get_condition(), context, fdr).first;
+    action.binding = ground(context.binding, context).first.get_index();
+    action.condition = ground(element.get_condition(), context, fdr).first.get_index();
 
     auto binding_size = context.binding.size();
 
@@ -437,7 +439,7 @@ inline auto ground(View<Index<Action>, Repository> element,
                                                        context.binding.resize(binding_size);
                                                        context.binding.insert(context.binding.end(), binding_cond.begin(), binding_cond.end());
 
-                                                       action.effects.push_back(ground(cond_effect, context, assign, fdr).first);
+                                                       action.effects.push_back(ground(cond_effect, context, assign, fdr).first.get_index());
                                                    });
     }
     context.binding.resize(binding_size);  ///< important to restore the binding in case of grounding other actions
@@ -458,9 +460,9 @@ inline auto ground(View<Index<Axiom>, Repository> element, GrounderContext& cont
 
     // Fill data
     axiom.axiom = element.get_index();
-    axiom.binding = ground(context.binding, context).first;
-    axiom.body = ground(element.get_body(), context, fdr).first;
-    axiom.head = ground(element.get_head(), context).first;
+    axiom.binding = ground(context.binding, context).first.get_index();
+    axiom.body = ground(element.get_body(), context, fdr).first.get_index();
+    axiom.head = ground(element.get_head(), context).first.get_index();
 
     // Canonicalize and Serialize
     canonicalize(axiom);

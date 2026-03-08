@@ -163,22 +163,20 @@ public:
     Repository(const Repository* parent = nullptr) : m_parent(parent), m_repository(), m_arena() { clear_entries(); }
 
     template<typename T>
-    std::optional<Index<T>> find_with_hash(const Data<T>& builder, size_t h) const noexcept
+    std::optional<View<Index<T>, Repository>> find_with_hash(const Data<T>& builder, size_t h) const noexcept
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
         const auto& indexed_hash_set = entry.slot.container;
         assert(h == indexed_hash_set.hash(builder) && "The given hash does not match container internal's hash.");
 
         if (auto ptr = indexed_hash_set.find_with_hash(builder, h))
-        {
-            return ptr->index;
-        }
+            return View<Index<T>, Repository>(ptr->index, *this);
 
         return m_parent ? m_parent->template find_with_hash<T>(builder, h) : std::nullopt;
     }
 
     template<typename T>
-    std::optional<Index<T>> find(const Data<T>& builder) const noexcept
+    std::optional<View<Index<T>, Repository>> find(const Data<T>& builder) const noexcept
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
         const auto& indexed_hash_set = entry.slot.container;
@@ -188,26 +186,22 @@ public:
     }
 
     template<typename T>
-    std::pair<Index<T>, bool> get_or_create(Data<T>& builder, buffer::Buffer& buf)
+    std::pair<View<Index<T>, Repository>, bool> get_or_create(Data<T>& builder, buffer::Buffer& buf)
     {
         auto& entry = std::get<RepositoryEntry<T>>(m_repository);
         auto& indexed_hash_set = entry.slot.container;
         const auto h = indexed_hash_set.hash(builder);
 
         if (m_parent)
-        {
             if (auto ptr = m_parent->template find_with_hash<T>(builder, h))
-            {
                 return { *ptr, false };
-            }
-        }
 
         // Manually assign index to continue indexing.
         builder.index.value = entry.slot.parent_size + indexed_hash_set.size();
 
         const auto [ptr, success] = indexed_hash_set.insert_with_hash(h, builder, buf, m_arena);
 
-        return { ptr->index, success };
+        return { View<Index<T>, Repository>(ptr->index, *this), success };
     }
 
     /// @brief Access the element with the given index.
