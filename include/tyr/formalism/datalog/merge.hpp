@@ -41,71 +41,71 @@ struct MergeContext
 
 // Common
 
-auto merge_d2d(View<Index<Variable>, Repository> element, MergeContext& context);
+auto merge_d2d(VariableView element, MergeContext& context);
 
-auto merge_d2d(View<Index<Object>, Repository> element, MergeContext& context);
+auto merge_d2d(ObjectView element, MergeContext& context);
 
-auto merge_d2d(View<Index<Binding>, Repository> element, MergeContext& context);
+auto merge_d2d(BindingView element, MergeContext& context);
 
-auto merge_d2d(View<Data<Term>, Repository> element, MergeContext& context);
+auto merge_d2d(TermView element, MergeContext& context);
 
 // Propositional
 
 template<FactKind T>
-auto merge_d2d(View<Index<Predicate<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(PredicateView<T> element, MergeContext& context);
 
 template<FactKind T>
-auto merge_d2d(View<Index<Atom<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(AtomView<T> element, MergeContext& context);
 
 template<FactKind T>
-auto merge_d2d(View<Index<GroundAtom<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(GroundAtomView<T> element, MergeContext& context);
 
 template<FactKind T>
-auto merge_d2d(View<Index<Literal<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(LiteralView<T> element, MergeContext& context);
 
 template<FactKind T>
-auto merge_d2d(View<Index<GroundLiteral<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(GroundLiteralView<T> element, MergeContext& context);
 
 // Numeric
 
 template<FactKind T>
-auto merge_d2d(View<Index<Function<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(FunctionView<T> element, MergeContext& context);
 
 template<FactKind T>
-auto merge_d2d(View<Index<FunctionTerm<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(FunctionTermView<T> element, MergeContext& context);
 
 template<FactKind T>
-auto merge_d2d(View<Index<GroundFunctionTerm<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(GroundFunctionTermView<T> element, MergeContext& context);
 
 template<FactKind T>
-auto merge_d2d(View<Index<GroundFunctionTermValue<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(GroundFunctionTermValueView<T> element, MergeContext& context);
 
-auto merge_d2d(View<Data<FunctionExpression>, Repository> element, MergeContext& context);
+auto merge_d2d(FunctionExpressionView element, MergeContext& context);
 
-auto merge_d2d(View<Data<GroundFunctionExpression>, Repository> element, MergeContext& context);
-
-template<OpKind O, typename T>
-auto merge_d2d(View<Index<UnaryOperator<O, T>>, Repository> element, MergeContext& context);
+auto merge_d2d(GroundFunctionExpressionView element, MergeContext& context);
 
 template<OpKind O, typename T>
-auto merge_d2d(View<Index<BinaryOperator<O, T>>, Repository> element, MergeContext& context);
+auto merge_d2d(UnaryOperatorView<O, T> element, MergeContext& context);
 
 template<OpKind O, typename T>
-auto merge_d2d(View<Index<MultiOperator<O, T>>, Repository> element, MergeContext& context);
+auto merge_d2d(BinaryOperatorView<O, T> element, MergeContext& context);
+
+template<OpKind O, typename T>
+auto merge_d2d(MultiOperatorView<O, T> element, MergeContext& context);
 
 template<typename T>
-auto merge_d2d(View<Data<ArithmeticOperator<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(ArithmeticOperatorView<T> element, MergeContext& context);
 
 template<typename T>
-auto merge_d2d(View<Data<BooleanOperator<T>>, Repository> element, MergeContext& context);
+auto merge_d2d(BooleanOperatorView<T> element, MergeContext& context);
 
-auto merge_d2d(View<Index<ConjunctiveCondition>, Repository> element, MergeContext& context);
+auto merge_d2d(ConjunctiveConditionView element, MergeContext& context);
 
-auto merge_d2d(View<Index<GroundConjunctiveCondition>, Repository> element, MergeContext& context);
+auto merge_d2d(GroundConjunctiveConditionView element, MergeContext& context);
 
-auto merge_d2d(View<Index<Rule>, Repository> element, MergeContext& context);
+auto merge_d2d(RuleView element, MergeContext& context);
 
-auto merge_d2d(View<Index<GroundRule>, Repository> element, MergeContext& context);
+auto merge_d2d(GroundRuleView element, MergeContext& context);
 
 /**
  * Implementations
@@ -113,7 +113,7 @@ auto merge_d2d(View<Index<GroundRule>, Repository> element, MergeContext& contex
 
 // Common
 
-inline auto merge_d2d(View<Index<Variable>, Repository> element, MergeContext& context)
+inline auto merge_d2d(VariableView element, MergeContext& context)
 {
     auto variable_ptr = context.builder.template get_builder<Variable>();
     auto& variable = *variable_ptr;
@@ -125,7 +125,7 @@ inline auto merge_d2d(View<Index<Variable>, Repository> element, MergeContext& c
     return context.destination.get_or_create(variable, context.builder.get_buffer());
 }
 
-inline auto merge_d2d(View<Index<Object>, Repository> element, MergeContext& context)
+inline auto merge_d2d(ObjectView element, MergeContext& context)
 {
     auto object_ptr = context.builder.template get_builder<Object>();
     auto& object = *object_ptr;
@@ -137,7 +137,7 @@ inline auto merge_d2d(View<Index<Object>, Repository> element, MergeContext& con
     return context.destination.get_or_create(object, context.builder.get_buffer());
 }
 
-inline auto merge_d2d(View<Index<Binding>, Repository> element, MergeContext& context)
+inline auto merge_d2d(BindingView element, MergeContext& context)
 {
     auto binding_ptr = context.builder.template get_builder<Binding>();
     auto& binding = *binding_ptr;
@@ -149,7 +149,7 @@ inline auto merge_d2d(View<Index<Binding>, Repository> element, MergeContext& co
     return context.destination.get_or_create(binding, context.builder.get_buffer());
 }
 
-inline auto merge_d2d(View<Data<Term>, Repository> element, MergeContext& context)
+inline auto merge_d2d(TermView element, MergeContext& context)
 {
     return visit(
         [&](auto&& arg)
@@ -158,7 +158,7 @@ inline auto merge_d2d(View<Data<Term>, Repository> element, MergeContext& contex
 
             if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                 return Data<Term>(arg);
-            else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+            else if constexpr (std::is_same_v<Alternative, ObjectView>)
                 return Data<Term>(merge_d2d(arg, context).first.get_index());
             else
                 static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -169,7 +169,7 @@ inline auto merge_d2d(View<Data<Term>, Repository> element, MergeContext& contex
 // Propositional
 
 template<FactKind T>
-inline auto merge_d2d(View<Index<Predicate<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(PredicateView<T> element, MergeContext& context)
 {
     auto predicate_ptr = context.builder.template get_builder<Predicate<T>>();
     auto& predicate = *predicate_ptr;
@@ -183,7 +183,7 @@ inline auto merge_d2d(View<Index<Predicate<T>>, Repository> element, MergeContex
 }
 
 template<FactKind T>
-inline auto merge_d2d(View<Index<Atom<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(AtomView<T> element, MergeContext& context)
 {
     auto atom_ptr = context.builder.template get_builder<Atom<T>>();
     auto& atom = *atom_ptr;
@@ -198,7 +198,7 @@ inline auto merge_d2d(View<Index<Atom<T>>, Repository> element, MergeContext& co
 }
 
 template<FactKind T>
-inline auto merge_d2d(View<Index<GroundAtom<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(GroundAtomView<T> element, MergeContext& context)
 {
     auto atom_ptr = context.builder.template get_builder<GroundAtom<T>>();
     auto& atom = *atom_ptr;
@@ -212,7 +212,7 @@ inline auto merge_d2d(View<Index<GroundAtom<T>>, Repository> element, MergeConte
 }
 
 template<FactKind T>
-inline auto merge_d2d(View<Index<Literal<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(LiteralView<T> element, MergeContext& context)
 {
     auto literal_ptr = context.builder.template get_builder<Literal<T>>();
     auto& literal = *literal_ptr;
@@ -226,7 +226,7 @@ inline auto merge_d2d(View<Index<Literal<T>>, Repository> element, MergeContext&
 }
 
 template<FactKind T>
-inline auto merge_d2d(View<Index<GroundLiteral<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(GroundLiteralView<T> element, MergeContext& context)
 {
     auto literal_ptr = context.builder.template get_builder<GroundLiteral<T>>();
     auto& literal = *literal_ptr;
@@ -242,7 +242,7 @@ inline auto merge_d2d(View<Index<GroundLiteral<T>>, Repository> element, MergeCo
 // Numeric
 
 template<FactKind T>
-inline auto merge_d2d(View<Index<Function<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(FunctionView<T> element, MergeContext& context)
 {
     auto function_ptr = context.builder.template get_builder<Function<T>>();
     auto& function = *function_ptr;
@@ -256,7 +256,7 @@ inline auto merge_d2d(View<Index<Function<T>>, Repository> element, MergeContext
 }
 
 template<FactKind T>
-inline auto merge_d2d(View<Index<FunctionTerm<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(FunctionTermView<T> element, MergeContext& context)
 {
     auto fterm_ptr = context.builder.template get_builder<FunctionTerm<T>>();
     auto& fterm = *fterm_ptr;
@@ -271,7 +271,7 @@ inline auto merge_d2d(View<Index<FunctionTerm<T>>, Repository> element, MergeCon
 }
 
 template<FactKind T>
-inline auto merge_d2d(View<Index<GroundFunctionTerm<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(GroundFunctionTermView<T> element, MergeContext& context)
 {
     auto fterm_ptr = context.builder.template get_builder<GroundFunctionTerm<T>>();
     auto& fterm = *fterm_ptr;
@@ -285,7 +285,7 @@ inline auto merge_d2d(View<Index<GroundFunctionTerm<T>>, Repository> element, Me
 }
 
 template<FactKind T>
-inline auto merge_d2d(View<Index<GroundFunctionTermValue<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(GroundFunctionTermValueView<T> element, MergeContext& context)
 {
     auto fterm_value_ptr = context.builder.template get_builder<GroundFunctionTermValue<T>>();
     auto& fterm_value = *fterm_value_ptr;
@@ -298,7 +298,7 @@ inline auto merge_d2d(View<Index<GroundFunctionTermValue<T>>, Repository> elemen
     return context.destination.get_or_create(fterm_value, context.builder.get_buffer());
 }
 
-inline auto merge_d2d(View<Data<FunctionExpression>, Repository> element, MergeContext& context)
+inline auto merge_d2d(FunctionExpressionView element, MergeContext& context)
 {
     return visit(
         [&](auto&& arg)
@@ -307,7 +307,7 @@ inline auto merge_d2d(View<Data<FunctionExpression>, Repository> element, MergeC
 
             if constexpr (std::is_same_v<Alternative, float_t>)
                 return Data<FunctionExpression>(arg);
-            else if constexpr (std::is_same_v<Alternative, View<Data<ArithmeticOperator<Data<FunctionExpression>>>, Repository>>)
+            else if constexpr (std::is_same_v<Alternative, LiftedArithmeticOperatorView>)
                 return Data<FunctionExpression>(merge_d2d(arg, context));
             else
                 return Data<FunctionExpression>(merge_d2d(arg, context).first.get_index());
@@ -315,7 +315,7 @@ inline auto merge_d2d(View<Data<FunctionExpression>, Repository> element, MergeC
         element.get_variant());
 }
 
-inline auto merge_d2d(View<Data<GroundFunctionExpression>, Repository> element, MergeContext& context)
+inline auto merge_d2d(GroundFunctionExpressionView element, MergeContext& context)
 {
     return visit(
         [&](auto&& arg)
@@ -324,7 +324,7 @@ inline auto merge_d2d(View<Data<GroundFunctionExpression>, Repository> element, 
 
             if constexpr (std::is_same_v<Alternative, float_t>)
                 return Data<GroundFunctionExpression>(arg);
-            else if constexpr (std::is_same_v<Alternative, View<Data<ArithmeticOperator<Data<GroundFunctionExpression>>>, Repository>>)
+            else if constexpr (std::is_same_v<Alternative, GroundArithmeticOperatorView>)
                 return Data<GroundFunctionExpression>(merge_d2d(arg, context));
             else
                 return Data<GroundFunctionExpression>(merge_d2d(arg, context).first.get_index());
@@ -333,7 +333,7 @@ inline auto merge_d2d(View<Data<GroundFunctionExpression>, Repository> element, 
 }
 
 template<OpKind O, typename T>
-inline auto merge_d2d(View<Index<UnaryOperator<O, T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(UnaryOperatorView<O, T> element, MergeContext& context)
 {
     auto unary_ptr = context.builder.template get_builder<UnaryOperator<O, T>>();
     auto& unary = *unary_ptr;
@@ -346,7 +346,7 @@ inline auto merge_d2d(View<Index<UnaryOperator<O, T>>, Repository> element, Merg
 }
 
 template<OpKind O, typename T>
-inline auto merge_d2d(View<Index<BinaryOperator<O, T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(BinaryOperatorView<O, T> element, MergeContext& context)
 {
     auto binary_ptr = context.builder.template get_builder<BinaryOperator<O, T>>();
     auto& binary = *binary_ptr;
@@ -360,7 +360,7 @@ inline auto merge_d2d(View<Index<BinaryOperator<O, T>>, Repository> element, Mer
 }
 
 template<OpKind O, typename T>
-inline auto merge_d2d(View<Index<MultiOperator<O, T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(MultiOperatorView<O, T> element, MergeContext& context)
 {
     auto multi_ptr = context.builder.template get_builder<MultiOperator<O, T>>();
     auto& multi = *multi_ptr;
@@ -374,18 +374,18 @@ inline auto merge_d2d(View<Index<MultiOperator<O, T>>, Repository> element, Merg
 }
 
 template<typename T>
-inline auto merge_d2d(View<Data<ArithmeticOperator<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(ArithmeticOperatorView<T> element, MergeContext& context)
 {
     return visit([&](auto&& arg) { return Data<ArithmeticOperator<T>>(merge_d2d(arg, context).first.get_index()); }, element.get_variant());
 }
 
 template<typename T>
-inline auto merge_d2d(View<Data<BooleanOperator<T>>, Repository> element, MergeContext& context)
+inline auto merge_d2d(BooleanOperatorView<T> element, MergeContext& context)
 {
     return visit([&](auto&& arg) { return Data<BooleanOperator<T>>(merge_d2d(arg, context).first.get_index()); }, element.get_variant());
 }
 
-inline auto merge_d2d(View<Index<ConjunctiveCondition>, Repository> element, MergeContext& context)
+inline auto merge_d2d(ConjunctiveConditionView element, MergeContext& context)
 {
     auto conj_cond_ptr = context.builder.template get_builder<ConjunctiveCondition>();
     auto& conj_cond = *conj_cond_ptr;
@@ -402,7 +402,7 @@ inline auto merge_d2d(View<Index<ConjunctiveCondition>, Repository> element, Mer
     return context.destination.get_or_create(conj_cond, context.builder.get_buffer());
 }
 
-inline auto merge_d2d(View<Index<GroundConjunctiveCondition>, Repository> element, MergeContext& context)
+inline auto merge_d2d(GroundConjunctiveConditionView element, MergeContext& context)
 {
     auto conj_cond_ptr = context.builder.template get_builder<GroundConjunctiveCondition>();
     auto& conj_cond = *conj_cond_ptr;
@@ -419,7 +419,7 @@ inline auto merge_d2d(View<Index<GroundConjunctiveCondition>, Repository> elemen
     return context.destination.get_or_create(conj_cond, context.builder.get_buffer());
 }
 
-inline auto merge_d2d(View<Index<Rule>, Repository> element, MergeContext& context)
+inline auto merge_d2d(RuleView element, MergeContext& context)
 {
     auto rule_ptr = context.builder.template get_builder<Rule>();
     auto& rule = *rule_ptr;
@@ -434,7 +434,7 @@ inline auto merge_d2d(View<Index<Rule>, Repository> element, MergeContext& conte
     return context.destination.get_or_create(rule, context.builder.get_buffer());
 }
 
-inline auto merge_d2d(View<Index<GroundRule>, Repository> element, MergeContext& context)
+inline auto merge_d2d(GroundRuleView element, MergeContext& context)
 {
     auto rule_ptr = context.builder.template get_builder<GroundRule>();
     auto& rule = *rule_ptr;

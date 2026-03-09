@@ -52,7 +52,7 @@ private:
     }
 
 public:
-    explicit VariableDependencyGraph(View<Index<ConjunctiveCondition>, Repository> condition);
+    explicit VariableDependencyGraph(ConjunctiveConditionView condition);
 
     static constexpr uint_t get_index(uint_t pi, uint_t pj, uint_t k) noexcept
     {

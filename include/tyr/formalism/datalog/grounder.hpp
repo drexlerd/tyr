@@ -55,9 +55,9 @@ auto ground(View<DataList<Term>, Repository> element, GrounderContext& context);
 auto ground(const IndexList<Object>& element, GrounderContext& context);
 
 template<FactKind T>
-auto ground(View<Index<FunctionTerm<T>>, Repository> element, GrounderContext& context);
+auto ground(FunctionTermView<T> element, GrounderContext& context);
 
-auto ground(View<Data<FunctionExpression>, Repository> element, GrounderContext& context);
+auto ground(FunctionExpressionView element, GrounderContext& context);
 
 template<OpKind O>
 auto ground(View<Index<UnaryOperator<O, Data<FunctionExpression>>>, Repository> element, GrounderContext& context);
@@ -68,15 +68,15 @@ auto ground(View<Index<BinaryOperator<O, Data<FunctionExpression>>>, Repository>
 template<OpKind O>
 auto ground(View<Index<MultiOperator<O, Data<FunctionExpression>>>, Repository> element, GrounderContext& context);
 
-auto ground(View<Data<BooleanOperator<Data<FunctionExpression>>>, Repository> element, GrounderContext& context);
+auto ground(LiftedBooleanOperatorView element, GrounderContext& context);
 
-auto ground(View<Data<ArithmeticOperator<Data<FunctionExpression>>>, Repository> element, GrounderContext& context);
-
-template<FactKind T>
-auto ground(View<Index<Atom<T>>, Repository> element, GrounderContext& context);
+auto ground(LiftedArithmeticOperatorView element, GrounderContext& context);
 
 template<FactKind T>
-auto ground(View<Index<Literal<T>>, Repository> element, GrounderContext& context);
+auto ground(AtomView<T> element, GrounderContext& context);
+
+template<FactKind T>
+auto ground(LiteralView<T> element, GrounderContext& context);
 
 auto ground(View<Index<ConjunctiveCondition>, Repository> element, GrounderContext& context);
 
@@ -87,21 +87,21 @@ auto ground(View<Index<Rule>, Repository> element, GrounderContext& context);
  */
 
 template<FactKind T>
-void ground_into_buffer(View<Index<Atom<T>>, Repository> element, const IndexList<Object>& binding, Data<GroundAtom<T>>& out_atom);
+void ground_into_buffer(AtomView<T> element, const IndexList<Object>& binding, Data<GroundAtom<T>>& out_atom);
 
 template<FactKind T>
-void ground_into_buffer(View<Index<FunctionTerm<T>>, Repository> element, const IndexList<Object>& binding, Data<GroundFunctionTerm<T>>& out_fterm);
+void ground_into_buffer(FunctionTermView<T> element, const IndexList<Object>& binding, Data<GroundFunctionTerm<T>>& out_fterm);
 
 /**
  * is_ground
  */
 
-bool is_ground(View<Data<Term>, Repository> element);
+bool is_ground(TermView element);
 
 template<FactKind T>
-bool is_ground(View<Index<FunctionTerm<T>>, Repository> element);
+bool is_ground(FunctionTermView<T> element);
 
-bool is_ground(View<Data<FunctionExpression>, Repository> element);
+bool is_ground(FunctionExpressionView element);
 
 template<OpKind O>
 bool is_ground(View<Index<UnaryOperator<O, Data<FunctionExpression>>>, Repository> element);
@@ -112,15 +112,15 @@ bool is_ground(View<Index<BinaryOperator<O, Data<FunctionExpression>>>, Reposito
 template<OpKind O>
 bool is_ground(View<Index<MultiOperator<O, Data<FunctionExpression>>>, Repository> element);
 
-bool is_ground(View<Data<BooleanOperator<Data<FunctionExpression>>>, Repository> element);
+bool is_ground(LiftedBooleanOperatorView element);
 
-bool is_ground(View<Data<ArithmeticOperator<Data<FunctionExpression>>>, Repository> element);
-
-template<FactKind T>
-bool is_ground(View<Index<Atom<T>>, Repository> element);
+bool is_ground(LiftedArithmeticOperatorView element);
 
 template<FactKind T>
-bool is_ground(View<Index<Literal<T>>, Repository> element);
+bool is_ground(AtomView<T> element);
+
+template<FactKind T>
+bool is_ground(LiteralView<T> element);
 
 /**
  * Implementations
@@ -147,7 +147,7 @@ inline auto ground(View<DataList<Term>, Repository> element, GrounderContext& co
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                     binding.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
                     binding.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -176,7 +176,7 @@ inline auto ground(const IndexList<Object>& element, GrounderContext& context)
 }
 
 template<FactKind T>
-inline auto ground(View<Index<FunctionTerm<T>>, Repository> element, GrounderContext& context)
+inline auto ground(FunctionTermView<T> element, GrounderContext& context)
 {
     // Fetch and clear
     auto fterm_ptr = context.builder.template get_builder<GroundFunctionTerm<T>>();
@@ -194,7 +194,7 @@ inline auto ground(View<Index<FunctionTerm<T>>, Repository> element, GrounderCon
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                     fterm.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
                     fterm.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -207,7 +207,7 @@ inline auto ground(View<Index<FunctionTerm<T>>, Repository> element, GrounderCon
     return context.destination.get_or_create(fterm, context.builder.get_buffer());
 }
 
-inline auto ground(View<Data<FunctionExpression>, Repository> element, GrounderContext& context)
+inline auto ground(FunctionExpressionView element, GrounderContext& context)
 {
     return visit(
         [&](auto&& arg)
@@ -216,7 +216,7 @@ inline auto ground(View<Data<FunctionExpression>, Repository> element, GrounderC
 
             if constexpr (std::is_same_v<Alternative, float_t>)
                 return Data<GroundFunctionExpression>(arg);
-            else if constexpr (std::is_same_v<Alternative, View<Data<ArithmeticOperator<Data<FunctionExpression>>>, Repository>>)
+            else if constexpr (std::is_same_v<Alternative, LiftedArithmeticOperatorView>)
                 return Data<GroundFunctionExpression>(ground(arg, context));
             else
                 return Data<GroundFunctionExpression>(ground(arg, context).first.get_index());
@@ -274,20 +274,20 @@ inline auto ground(View<Index<MultiOperator<O, Data<FunctionExpression>>>, Repos
     return context.destination.get_or_create(multi, context.builder.get_buffer());
 }
 
-inline auto ground(View<Data<BooleanOperator<Data<FunctionExpression>>>, Repository> element, GrounderContext& context)
+inline auto ground(LiftedBooleanOperatorView element, GrounderContext& context)
 {
     return visit([&](auto&& arg) { return Data<BooleanOperator<Data<GroundFunctionExpression>>>(ground(arg, context).first.get_index()); },
                  element.get_variant());
 }
 
-inline auto ground(View<Data<ArithmeticOperator<Data<FunctionExpression>>>, Repository> element, GrounderContext& context)
+inline auto ground(LiftedArithmeticOperatorView element, GrounderContext& context)
 {
     return visit([&](auto&& arg) { return Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(ground(arg, context).first.get_index()); },
                  element.get_variant());
 }
 
 template<FactKind T>
-inline auto ground(View<Index<Atom<T>>, Repository> element, GrounderContext& context)
+inline auto ground(AtomView<T> element, GrounderContext& context)
 {
     // Fetch and clear
     auto atom_ptr = context.builder.template get_builder<GroundAtom<T>>();
@@ -305,7 +305,7 @@ inline auto ground(View<Index<Atom<T>>, Repository> element, GrounderContext& co
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                     atom.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
                     atom.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -319,7 +319,7 @@ inline auto ground(View<Index<Atom<T>>, Repository> element, GrounderContext& co
 }
 
 template<FactKind T>
-inline auto ground(View<Index<Literal<T>>, Repository> element, GrounderContext& context)
+inline auto ground(LiteralView<T> element, GrounderContext& context)
 {
     // Fetch and clear
     auto ground_literal_ptr = context.builder.template get_builder<GroundLiteral<T>>();
@@ -378,7 +378,7 @@ inline auto ground(View<Index<Rule>, Repository> element, GrounderContext& conte
  */
 
 template<FactKind T>
-inline void ground_into_buffer(View<Index<Atom<T>>, Repository> element, const IndexList<Object>& binding, Data<GroundAtom<T>>& out_atom)
+inline void ground_into_buffer(AtomView<T> element, const IndexList<Object>& binding, Data<GroundAtom<T>>& out_atom)
 {
     // Fetch and clear
     out_atom.clear();
@@ -394,7 +394,7 @@ inline void ground_into_buffer(View<Index<Atom<T>>, Repository> element, const I
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                     out_atom.objects.push_back(binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
                     out_atom.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -407,7 +407,7 @@ inline void ground_into_buffer(View<Index<Atom<T>>, Repository> element, const I
 }
 
 template<FactKind T>
-inline void ground_into_buffer(View<Index<FunctionTerm<T>>, Repository> element, const IndexList<Object>& binding, Data<GroundFunctionTerm<T>>& out_fterm)
+inline void ground_into_buffer(FunctionTermView<T> element, const IndexList<Object>& binding, Data<GroundFunctionTerm<T>>& out_fterm)
 {
     // Fetch and clear
     out_fterm.clear();
@@ -423,7 +423,7 @@ inline void ground_into_buffer(View<Index<FunctionTerm<T>>, Repository> element,
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                     out_fterm.objects.push_back(binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
                     out_fterm.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -439,7 +439,7 @@ inline void ground_into_buffer(View<Index<FunctionTerm<T>>, Repository> element,
  * is_ground
  */
 
-inline bool is_ground(View<Data<Term>, Repository> element)
+inline bool is_ground(TermView element)
 {
     return visit(
         [&](auto&& arg) -> bool
@@ -448,7 +448,7 @@ inline bool is_ground(View<Data<Term>, Repository> element)
 
             if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                 return false;
-            else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+            else if constexpr (std::is_same_v<Alternative, ObjectView>)
                 return true;
             else
                 static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -457,13 +457,13 @@ inline bool is_ground(View<Data<Term>, Repository> element)
 }
 
 template<FactKind T>
-inline bool is_ground(View<Index<FunctionTerm<T>>, Repository> element)
+inline bool is_ground(FunctionTermView<T> element)
 {
     const auto terms = element.get_terms();
     return std::all_of(terms.begin(), terms.end(), [](auto&& arg) { return is_ground(arg); });
 }
 
-inline bool is_ground(View<Data<FunctionExpression>, Repository> element)
+inline bool is_ground(FunctionExpressionView element)
 {
     return visit(
         [&](auto&& arg) -> bool
@@ -497,25 +497,25 @@ inline bool is_ground(View<Index<MultiOperator<O, Data<FunctionExpression>>>, Re
     return std::all_of(args.begin(), args.end(), [](auto&& arg) { return is_ground(arg); });
 }
 
-inline bool is_ground(View<Data<BooleanOperator<Data<FunctionExpression>>>, Repository> element)
+inline bool is_ground(LiftedBooleanOperatorView element)
 {
     return visit([&](auto&& arg) { return is_ground(arg); }, element.get_variant());
 }
 
-inline bool is_ground(View<Data<ArithmeticOperator<Data<FunctionExpression>>>, Repository> element)
+inline bool is_ground(LiftedArithmeticOperatorView element)
 {
     return visit([&](auto&& arg) { return is_ground(arg); }, element.get_variant());
 }
 
 template<FactKind T>
-inline bool is_ground(View<Index<Atom<T>>, Repository> element)
+inline bool is_ground(AtomView<T> element)
 {
     const auto terms = element.get_terms();
     return std::all_of(terms.begin(), terms.end(), [](auto&& arg) { return is_ground(arg); });
 }
 
 template<FactKind T>
-inline bool is_ground(View<Index<Literal<T>>, Repository> element)
+inline bool is_ground(LiteralView<T> element)
 {
     return is_ground(element.get_atom());
 }

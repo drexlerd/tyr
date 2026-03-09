@@ -56,7 +56,7 @@ inline auto ground(View<DataList<Term>, Repository> element, GrounderContext& co
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                     binding.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
                     binding.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -85,7 +85,7 @@ inline auto ground(const IndexList<Object>& element, GrounderContext& context)
 }
 
 template<FactKind T>
-inline auto ground(View<Index<FunctionTerm<T>>, Repository> element, GrounderContext& context)
+inline auto ground(FunctionTermView<T> element, GrounderContext& context)
 {
     // Fetch and clear
     auto fterm_ptr = context.builder.template get_builder<GroundFunctionTerm<T>>();
@@ -103,7 +103,7 @@ inline auto ground(View<Index<FunctionTerm<T>>, Repository> element, GrounderCon
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                     fterm.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
                     fterm.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -116,7 +116,7 @@ inline auto ground(View<Index<FunctionTerm<T>>, Repository> element, GrounderCon
     return context.destination.get_or_create(fterm, context.builder.get_buffer());
 }
 
-inline auto ground(View<Data<FunctionExpression>, Repository> element, GrounderContext& context)
+inline auto ground(FunctionExpressionView element, GrounderContext& context)
 {
     return visit(
         [&](auto&& arg)
@@ -125,7 +125,7 @@ inline auto ground(View<Data<FunctionExpression>, Repository> element, GrounderC
 
             if constexpr (std::is_same_v<Alternative, float_t>)
                 return Data<GroundFunctionExpression>(arg);
-            else if constexpr (std::is_same_v<Alternative, View<Data<ArithmeticOperator<Data<FunctionExpression>>>, Repository>>)
+            else if constexpr (std::is_same_v<Alternative, LiftedArithmeticOperatorView>)
                 return Data<GroundFunctionExpression>(ground(arg, context));
             else
                 return Data<GroundFunctionExpression>(ground(arg, context).first.get_index());
@@ -134,7 +134,7 @@ inline auto ground(View<Data<FunctionExpression>, Repository> element, GrounderC
 }
 
 template<OpKind O>
-inline auto ground(View<Index<UnaryOperator<O, Data<FunctionExpression>>>, Repository> element, GrounderContext& context)
+inline auto ground(LiftedUnaryOperatorView<O> element, GrounderContext& context)
 {
     // Fetch and clear
     auto unary_ptr = context.builder.template get_builder<UnaryOperator<O, Data<GroundFunctionExpression>>>();
@@ -150,7 +150,7 @@ inline auto ground(View<Index<UnaryOperator<O, Data<FunctionExpression>>>, Repos
 }
 
 template<OpKind O>
-inline auto ground(View<Index<BinaryOperator<O, Data<FunctionExpression>>>, Repository> element, GrounderContext& context)
+inline auto ground(LiftedBinaryOperatorView<O> element, GrounderContext& context)
 {
     // Fetch and clear
     auto binary_ptr = context.builder.template get_builder<BinaryOperator<O, Data<GroundFunctionExpression>>>();
@@ -167,7 +167,7 @@ inline auto ground(View<Index<BinaryOperator<O, Data<FunctionExpression>>>, Repo
 }
 
 template<OpKind O>
-inline auto ground(View<Index<MultiOperator<O, Data<FunctionExpression>>>, Repository> element, GrounderContext& context)
+inline auto ground(LiftedMultiOperatorView<O> element, GrounderContext& context)
 {
     // Fetch and clear
     auto multi_ptr = context.builder.template get_builder<MultiOperator<O, Data<GroundFunctionExpression>>>();
@@ -183,20 +183,20 @@ inline auto ground(View<Index<MultiOperator<O, Data<FunctionExpression>>>, Repos
     return context.destination.get_or_create(multi, context.builder.get_buffer());
 }
 
-inline auto ground(View<Data<BooleanOperator<Data<FunctionExpression>>>, Repository> element, GrounderContext& context)
+inline auto ground(LiftedBooleanOperatorView element, GrounderContext& context)
 {
     return visit([&](auto&& arg) { return Data<BooleanOperator<Data<GroundFunctionExpression>>>(ground(arg, context).first.get_index()); },
                  element.get_variant());
 }
 
-inline auto ground(View<Data<ArithmeticOperator<Data<FunctionExpression>>>, Repository> element, GrounderContext& context)
+inline auto ground(LiftedArithmeticOperatorView element, GrounderContext& context)
 {
     return visit([&](auto&& arg) { return Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(ground(arg, context).first.get_index()); },
                  element.get_variant());
 }
 
 template<FactKind T_SRC, FactKind T_DST>
-inline auto ground(View<Index<Atom<T_SRC>>, Repository> element, MergeContext& merge_context, GrounderContext& grounder_context)
+inline auto ground(AtomView<T_SRC> element, MergeContext& merge_context, GrounderContext& grounder_context)
 {
     // Fetch and clear
     auto atom_ptr = grounder_context.builder.template get_builder<GroundAtom<T_DST>>();
@@ -214,7 +214,7 @@ inline auto ground(View<Index<Atom<T_SRC>>, Repository> element, MergeContext& m
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                     atom.objects.push_back(grounder_context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
                     atom.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -228,7 +228,7 @@ inline auto ground(View<Index<Atom<T_SRC>>, Repository> element, MergeContext& m
 }
 
 template<FactKind T_SRC, FactKind T_DST = T_SRC>
-inline auto ground(View<Index<Atom<T_SRC>>, Repository> element, GrounderContext& context)
+inline auto ground(AtomView<T_SRC> element, GrounderContext& context)
 {
     // Fetch and clear
     auto atom_ptr = context.builder.template get_builder<GroundAtom<T_DST>>();
@@ -246,7 +246,7 @@ inline auto ground(View<Index<Atom<T_SRC>>, Repository> element, GrounderContext
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
                     atom.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, View<Index<Object>, Repository>>)
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
                     atom.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -261,13 +261,13 @@ inline auto ground(View<Index<Atom<T_SRC>>, Repository> element, GrounderContext
 
 template<typename FDR>
     requires FDRContext<FDR>
-inline auto ground(View<Index<Atom<FluentTag>>, Repository> element, GrounderContext& context, FDR& fdr)
+inline auto ground(AtomView<FluentTag> element, GrounderContext& context, FDR& fdr)
 {
     return fdr.get_fact(ground(element, context).first.get_index());
 }
 
 template<FactKind T>
-inline auto ground(View<Index<Literal<T>>, Repository> element, GrounderContext& context)
+inline auto ground(LiteralView<T> element, GrounderContext& context)
 {
     // Fetch and clear
     auto ground_literal_ptr = context.builder.template get_builder<GroundLiteral<T>>();
@@ -285,7 +285,7 @@ inline auto ground(View<Index<Literal<T>>, Repository> element, GrounderContext&
 
 template<typename FDR>
     requires FDRContext<FDR>
-inline auto ground(View<Index<Literal<FluentTag>>, Repository> element, GrounderContext& context, FDR& fdr)
+inline auto ground(LiteralView<FluentTag> element, GrounderContext& context, FDR& fdr)
 {
     auto fact = ground(element.get_atom(), context, fdr);
     if (!element.get_polarity())
@@ -296,7 +296,7 @@ inline auto ground(View<Index<Literal<FluentTag>>, Repository> element, Grounder
 
 template<typename FDR>
     requires FDRContext<FDR>
-inline auto ground(View<Index<ConjunctiveCondition>, Repository> element, GrounderContext& context, FDR& fdr)
+inline auto ground(ConjunctiveConditionView element, GrounderContext& context, FDR& fdr)
 {
     // Fetch and clear
     auto conj_cond_ptr = context.builder.template get_builder<GroundConjunctiveCondition>();
@@ -319,7 +319,7 @@ inline auto ground(View<Index<ConjunctiveCondition>, Repository> element, Ground
 }
 
 template<NumericEffectOpKind Op, FactKind T>
-inline auto ground(View<Index<NumericEffect<Op, T>>, Repository> element, GrounderContext& context)
+inline auto ground(NumericEffectView<Op, T> element, GrounderContext& context)
 {
     // Fetch and clear
     auto numeric_effect_ptr = context.builder.template get_builder<GroundNumericEffect<Op, T>>();
@@ -336,15 +336,14 @@ inline auto ground(View<Index<NumericEffect<Op, T>>, Repository> element, Ground
 }
 
 template<FactKind T>
-inline auto ground(View<Data<NumericEffectOperator<T>>, Repository> element, GrounderContext& context)
+inline auto ground(NumericEffectOperatorView<T> element, GrounderContext& context)
 {
     return visit([&](auto&& arg) { return Data<GroundNumericEffectOperator<T>>(ground(arg, context).first.get_index()); }, element.get_variant());
 }
 
 template<typename FDR>
     requires FDRContext<FDR>
-inline auto
-ground(View<Index<ConjunctiveEffect>, Repository> element, GrounderContext& context, UnorderedMap<Index<FDRVariable<FluentTag>>, FDRValue>& assign, FDR& fdr)
+inline auto ground(ConjunctiveEffectView element, GrounderContext& context, UnorderedMap<Index<FDRVariable<FluentTag>>, FDRValue>& assign, FDR& fdr)
 {
     // Fetch and clear
     auto conj_effect_ptr = context.builder.template get_builder<GroundConjunctiveEffect>();
@@ -384,8 +383,7 @@ ground(View<Index<ConjunctiveEffect>, Repository> element, GrounderContext& cont
 
 template<typename FDR>
     requires FDRContext<FDR>
-inline auto
-ground(View<Index<ConditionalEffect>, Repository> element, GrounderContext& context, UnorderedMap<Index<FDRVariable<FluentTag>>, FDRValue>& assign, FDR& fdr)
+inline auto ground(ConditionalEffectView element, GrounderContext& context, UnorderedMap<Index<FDRVariable<FluentTag>>, FDRValue>& assign, FDR& fdr)
 {
     // Fetch and clear
     auto cond_effect_ptr = context.builder.template get_builder<GroundConditionalEffect>();
@@ -403,7 +401,7 @@ ground(View<Index<ConditionalEffect>, Repository> element, GrounderContext& cont
 
 template<typename FDR>
     requires FDRContext<FDR>
-inline auto ground(View<Index<Action>, Repository> element,
+inline auto ground(ActionView element,
                    GrounderContext& context,
                    const analysis::DomainListListList& cond_effect_domains,
                    UnorderedMap<Index<FDRVariable<FluentTag>>, FDRValue>& assign,
@@ -451,7 +449,7 @@ inline auto ground(View<Index<Action>, Repository> element,
 
 template<typename FDR>
     requires FDRContext<FDR>
-inline auto ground(View<Index<Axiom>, Repository> element, GrounderContext& context, FDR& fdr)
+inline auto ground(AxiomView element, GrounderContext& context, FDR& fdr)
 {
     // Fetch and clear
     auto axiom_ptr = context.builder.template get_builder<GroundAxiom>();

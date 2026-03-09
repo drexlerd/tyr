@@ -97,10 +97,10 @@ template<OpKind O, typename T>
 auto merge_p2p(MultiOperatorView<O, T> element, MergeContext& context);
 
 template<typename T>
-auto merge_p2p(View<Data<ArithmeticOperator<T>>, Repository> element, MergeContext& context);
+auto merge_p2p(ArithmeticOperatorView<T> element, MergeContext& context);
 
 template<typename T>
-auto merge_p2p(View<Data<BooleanOperator<T>>, Repository> element, MergeContext& context);
+auto merge_p2p(BooleanOperatorView<T> element, MergeContext& context);
 
 template<NumericEffectOpKind O, FactKind T>
 auto merge_p2p(NumericEffectView<O, T> element, MergeContext& context);
@@ -408,13 +408,13 @@ inline auto merge_p2p(MultiOperatorView<O, T> element, MergeContext& context)
 }
 
 template<typename T>
-inline auto merge_p2p(View<Data<ArithmeticOperator<T>>, Repository> element, MergeContext& context)
+inline auto merge_p2p(ArithmeticOperatorView<T> element, MergeContext& context)
 {
     return visit([&](auto&& arg) { return Data<ArithmeticOperator<T>>(merge_p2p(arg, context).first.get_index()); }, element.get_variant());
 }
 
 template<typename T>
-inline auto merge_p2p(View<Data<BooleanOperator<T>>, Repository> element, MergeContext& context)
+inline auto merge_p2p(BooleanOperatorView<T> element, MergeContext& context)
 {
     return visit([&](auto&& arg) { return Data<BooleanOperator<T>>(merge_p2p(arg, context).first.get_index()); }, element.get_variant());
 }

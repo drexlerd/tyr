@@ -50,63 +50,63 @@ struct MergePlanningContext
 
 // Common
 
-inline auto merge_d2p(View<Index<formalism::Variable>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::VariableView element, MergePlanningContext& context);
 
-inline auto merge_d2p(View<Index<formalism::Object>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::ObjectView element, MergePlanningContext& context);
 
-inline auto merge_d2p(View<Index<formalism::Binding>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::BindingView element, MergePlanningContext& context);
 
-inline auto merge_d2p(View<Data<formalism::Term>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::TermView element, MergePlanningContext& context);
 
 // Propositional
 
 template<FactKind T_SRC, FactKind T_DST = T_SRC>
-inline auto merge_d2p(View<Index<formalism::Predicate<T_SRC>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::PredicateView<T_SRC> element, MergePlanningContext& context);
 
 template<FactKind T_SRC, FactKind T_DST = T_SRC>
-inline auto merge_d2p(View<Index<formalism::datalog::Atom<T_SRC>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::AtomView<T_SRC> element, MergePlanningContext& context);
 
 template<FactKind T_SRC, FactKind T_DST = T_SRC>
-inline auto merge_d2p(View<Index<formalism::datalog::GroundAtom<T_SRC>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::GroundAtomView<T_SRC> element, MergePlanningContext& context);
 
 template<FactKind T_SRC, FactKind T_DST = T_SRC>
-inline auto merge_d2p(View<Index<formalism::datalog::Literal<T_SRC>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::LiteralView<T_SRC> element, MergePlanningContext& context);
 
 template<FactKind T_SRC, FactKind T_DST = T_SRC>
-inline auto merge_d2p(View<Index<formalism::datalog::GroundLiteral<T_SRC>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::GroundLiteralView<T_SRC> element, MergePlanningContext& context);
 
 // Numeric
 
 template<FactKind T>
-inline auto merge_d2p(View<Index<formalism::Function<T>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::FunctionView<T> element, MergePlanningContext& context);
 
 template<FactKind T>
-inline auto merge_d2p(View<Index<formalism::datalog::FunctionTerm<T>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::FunctionTermView<T> element, MergePlanningContext& context);
 
 template<FactKind T>
-inline auto merge_d2p(View<Index<formalism::datalog::GroundFunctionTerm<T>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::GroundFunctionTermView<T> element, MergePlanningContext& context);
 
 template<FactKind T>
-inline auto merge_d2p(View<Index<formalism::datalog::GroundFunctionTermValue<T>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::GroundFunctionTermValueView<T> element, MergePlanningContext& context);
 
-inline auto merge_d2p(View<Data<formalism::datalog::FunctionExpression>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::FunctionExpressionView element, MergePlanningContext& context);
 
-inline auto merge_d2p(View<Data<formalism::datalog::GroundFunctionExpression>, formalism::datalog::Repository> element, MergePlanningContext& context);
-
-template<OpKind O, typename T>
-inline auto merge_d2p(View<Index<formalism::datalog::UnaryOperator<O, T>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::GroundFunctionExpressionView element, MergePlanningContext& context);
 
 template<OpKind O, typename T>
-inline auto merge_d2p(View<Index<formalism::datalog::BinaryOperator<O, T>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::UnaryOperatorView<O, T> element, MergePlanningContext& context);
 
 template<OpKind O, typename T>
-inline auto merge_d2p(View<Index<formalism::datalog::MultiOperator<O, T>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::BinaryOperatorView<O, T> element, MergePlanningContext& context);
+
+template<OpKind O, typename T>
+inline auto merge_d2p(formalism::datalog::MultiOperatorView<O, T> element, MergePlanningContext& context);
 
 template<typename T>
-inline auto merge_d2p(View<Data<formalism::datalog::ArithmeticOperator<T>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::ArithmeticOperatorView<T> element, MergePlanningContext& context);
 
 template<typename T>
-inline auto merge_d2p(View<Data<formalism::datalog::BooleanOperator<T>>, formalism::datalog::Repository> element, MergePlanningContext& context);
+inline auto merge_d2p(formalism::datalog::BooleanOperatorView<T> element, MergePlanningContext& context);
 
 /**
  * Implementations
@@ -135,7 +135,7 @@ using to_planning_payload_t = typename to_planning_payload<T>::type;
 
 // Common
 
-inline auto merge_d2p(View<Index<formalism::Variable>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::VariableView element, MergePlanningContext& context)
 {
     auto variable_ptr = context.builder.template get_builder<formalism::Variable>();
     auto& variable = *variable_ptr;
@@ -147,7 +147,7 @@ inline auto merge_d2p(View<Index<formalism::Variable>, formalism::datalog::Repos
     return context.destination.get_or_create(variable, context.builder.get_buffer());
 }
 
-inline auto merge_d2p(View<Index<formalism::Object>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::ObjectView element, MergePlanningContext& context)
 {
     auto object_ptr = context.builder.template get_builder<formalism::Object>();
     auto& object = *object_ptr;
@@ -159,7 +159,7 @@ inline auto merge_d2p(View<Index<formalism::Object>, formalism::datalog::Reposit
     return context.destination.get_or_create(object, context.builder.get_buffer());
 }
 
-inline auto merge_d2p(View<Index<formalism::Binding>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::BindingView element, MergePlanningContext& context)
 {
     auto binding_ptr = context.builder.template get_builder<formalism::Binding>();
     auto& binding = *binding_ptr;
@@ -171,7 +171,7 @@ inline auto merge_d2p(View<Index<formalism::Binding>, formalism::datalog::Reposi
     return context.destination.get_or_create(binding, context.builder.get_buffer());
 }
 
-inline auto merge_d2p(View<Data<formalism::Term>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::TermView element, MergePlanningContext& context)
 {
     return visit(
         [&](auto&& arg)
@@ -180,7 +180,7 @@ inline auto merge_d2p(View<Data<formalism::Term>, formalism::datalog::Repository
 
             if constexpr (std::is_same_v<Alternative, formalism::ParameterIndex>)
                 return Data<formalism::Term>(arg);
-            else if constexpr (std::is_same_v<Alternative, View<Index<formalism::Object>, formalism::datalog::Repository>>)
+            else if constexpr (std::is_same_v<Alternative, formalism::datalog::ObjectView>)
                 return Data<formalism::Term>(merge_d2p(arg, context).first.get_index());
             else
                 static_assert(dependent_false<Alternative>::value, "Missing case");
@@ -191,7 +191,7 @@ inline auto merge_d2p(View<Data<formalism::Term>, formalism::datalog::Repository
 // Propositional
 
 template<FactKind T_SRC, FactKind T_DST>
-inline auto merge_d2p(View<Index<formalism::Predicate<T_SRC>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::PredicateView<T_SRC> element, MergePlanningContext& context)
 {
     auto predicate_ptr = context.builder.template get_builder<formalism::Predicate<T_DST>>();
     auto& predicate = *predicate_ptr;
@@ -205,7 +205,7 @@ inline auto merge_d2p(View<Index<formalism::Predicate<T_SRC>>, formalism::datalo
 }
 
 template<FactKind T_SRC, FactKind T_DST>
-inline auto merge_d2p(View<Index<formalism::datalog::Atom<T_SRC>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::AtomView<T_SRC> element, MergePlanningContext& context)
 {
     auto atom_ptr = context.builder.template get_builder<Atom<T_DST>>();
     auto& atom = *atom_ptr;
@@ -220,7 +220,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::Atom<T_SRC>>, formalism::da
 }
 
 template<FactKind T_SRC, FactKind T_DST>
-inline auto merge_d2p(View<Index<formalism::datalog::GroundAtom<T_SRC>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::GroundAtomView<T_SRC> element, MergePlanningContext& context)
 {
     auto atom_ptr = context.builder.template get_builder<GroundAtom<T_DST>>();
     auto& atom = *atom_ptr;
@@ -234,7 +234,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::GroundAtom<T_SRC>>, formali
 }
 
 template<FactKind T_SRC, FactKind T_DST>
-inline auto merge_d2p(View<Index<formalism::datalog::Literal<T_SRC>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::LiteralView<T_SRC> element, MergePlanningContext& context)
 {
     auto literal_ptr = context.builder.template get_builder<Literal<T_DST>>();
     auto& literal = *literal_ptr;
@@ -248,7 +248,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::Literal<T_SRC>>, formalism:
 }
 
 template<FactKind T_SRC, FactKind T_DST>
-inline auto merge_d2p(View<Index<formalism::datalog::GroundLiteral<T_SRC>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::GroundLiteralView<T_SRC> element, MergePlanningContext& context)
 {
     auto literal_ptr = context.builder.template get_builder<GroundLiteral<T_DST>>();
     auto& literal = *literal_ptr;
@@ -264,7 +264,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::GroundLiteral<T_SRC>>, form
 // Numeric
 
 template<FactKind T>
-inline auto merge_d2p(View<Index<formalism::Function<T>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::FunctionView<T> element, MergePlanningContext& context)
 {
     auto function_ptr = context.builder.template get_builder<formalism::Function<T>>();
     auto& function = *function_ptr;
@@ -278,7 +278,7 @@ inline auto merge_d2p(View<Index<formalism::Function<T>>, formalism::datalog::Re
 }
 
 template<FactKind T>
-inline auto merge_d2p(View<Index<formalism::datalog::FunctionTerm<T>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::FunctionTermView<T> element, MergePlanningContext& context)
 {
     auto fterm_ptr = context.builder.template get_builder<FunctionTerm<T>>();
     auto& fterm = *fterm_ptr;
@@ -293,7 +293,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::FunctionTerm<T>>, formalism
 }
 
 template<FactKind T>
-inline auto merge_d2p(View<Index<formalism::datalog::GroundFunctionTerm<T>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::GroundFunctionTermView<T> element, MergePlanningContext& context)
 {
     auto fterm_ptr = context.builder.template get_builder<GroundFunctionTerm<T>>();
     auto& fterm = *fterm_ptr;
@@ -307,7 +307,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::GroundFunctionTerm<T>>, for
 }
 
 template<FactKind T>
-inline auto merge_d2p(View<Index<formalism::datalog::GroundFunctionTermValue<T>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::GroundFunctionTermValueView<T> element, MergePlanningContext& context)
 {
     auto fterm_value_ptr = context.builder.template get_builder<GroundFunctionTermValue<T>>();
     auto& fterm_value = *fterm_value_ptr;
@@ -320,7 +320,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::GroundFunctionTermValue<T>>
     return context.destination.get_or_create(fterm_value, context.builder.get_buffer());
 }
 
-inline auto merge_d2p(View<Data<formalism::datalog::FunctionExpression>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::FunctionExpressionView element, MergePlanningContext& context)
 {
     return visit(
         [&](auto&& arg)
@@ -329,11 +329,9 @@ inline auto merge_d2p(View<Data<formalism::datalog::FunctionExpression>, formali
 
             if constexpr (std::is_same_v<Alternative, float_t>)
                 return Data<FunctionExpression>(arg);
-            else if constexpr (std::is_same_v<Alternative,
-                                              View<Data<formalism::datalog::ArithmeticOperator<Data<formalism::datalog::FunctionExpression>>>,
-                                                   formalism::datalog::Repository>>)
+            else if constexpr (std::is_same_v<Alternative, formalism::datalog::LiftedArithmeticOperatorView>)
                 return Data<FunctionExpression>(merge_d2p(arg, context));
-            else if constexpr (std::is_same_v<Alternative, View<Index<formalism::datalog::FunctionTerm<AuxiliaryTag>>, formalism::datalog::Repository>>)
+            else if constexpr (std::is_same_v<Alternative, formalism::datalog::FunctionTermView<AuxiliaryTag>>)
                 throw std::logic_error("AuxiliaryTag FunctionTerm must not be merged.");
             else
                 return Data<FunctionExpression>(merge_d2p(arg, context).first.get_index());
@@ -341,7 +339,7 @@ inline auto merge_d2p(View<Data<formalism::datalog::FunctionExpression>, formali
         element.get_variant());
 }
 
-inline auto merge_d2p(View<Data<formalism::datalog::GroundFunctionExpression>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::GroundFunctionExpressionView element, MergePlanningContext& context)
 {
     return visit(
         [&](auto&& arg)
@@ -350,11 +348,9 @@ inline auto merge_d2p(View<Data<formalism::datalog::GroundFunctionExpression>, f
 
             if constexpr (std::is_same_v<Alternative, float_t>)
                 return Data<GroundFunctionExpression>(arg);
-            else if constexpr (std::is_same_v<Alternative,
-                                              View<Data<formalism::datalog::ArithmeticOperator<Data<formalism::datalog::GroundFunctionExpression>>>,
-                                                   formalism::datalog::Repository>>)
+            else if constexpr (std::is_same_v<Alternative, formalism::datalog::GroundArithmeticOperatorView>)
                 return Data<GroundFunctionExpression>(merge_d2p(arg, context));
-            else if constexpr (std::is_same_v<Alternative, View<Index<formalism::datalog::GroundFunctionTerm<AuxiliaryTag>>, formalism::datalog::Repository>>)
+            else if constexpr (std::is_same_v<Alternative, formalism::datalog::GroundFunctionTermView<AuxiliaryTag>>)
                 throw std::logic_error("AuxiliaryTag GroundFunctionTerm must not be merged.");
             else
                 return Data<GroundFunctionExpression>(merge_d2p(arg, context).first.get_index());
@@ -363,7 +359,7 @@ inline auto merge_d2p(View<Data<formalism::datalog::GroundFunctionExpression>, f
 }
 
 template<OpKind O, typename T>
-inline auto merge_d2p(View<Index<formalism::datalog::UnaryOperator<O, T>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::UnaryOperatorView<O, T> element, MergePlanningContext& context)
 {
     using T_DST = to_planning_payload_t<T>;
 
@@ -378,7 +374,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::UnaryOperator<O, T>>, forma
 }
 
 template<OpKind O, typename T>
-inline auto merge_d2p(View<Index<formalism::datalog::BinaryOperator<O, T>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::BinaryOperatorView<O, T> element, MergePlanningContext& context)
 {
     using T_DST = to_planning_payload_t<T>;
 
@@ -394,7 +390,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::BinaryOperator<O, T>>, form
 }
 
 template<OpKind O, typename T>
-inline auto merge_d2p(View<Index<formalism::datalog::MultiOperator<O, T>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::MultiOperatorView<O, T> element, MergePlanningContext& context)
 {
     using T_DST = to_planning_payload_t<T>;
 
@@ -410,7 +406,7 @@ inline auto merge_d2p(View<Index<formalism::datalog::MultiOperator<O, T>>, forma
 }
 
 template<typename T>
-inline auto merge_d2p(View<Data<formalism::datalog::ArithmeticOperator<T>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::ArithmeticOperatorView<T> element, MergePlanningContext& context)
 {
     using T_DST = to_planning_payload_t<T>;
 
@@ -418,7 +414,7 @@ inline auto merge_d2p(View<Data<formalism::datalog::ArithmeticOperator<T>>, form
 }
 
 template<typename T>
-inline auto merge_d2p(View<Data<formalism::datalog::BooleanOperator<T>>, formalism::datalog::Repository> element, MergePlanningContext& context)
+inline auto merge_d2p(formalism::datalog::BooleanOperatorView<T> element, MergePlanningContext& context)
 {
     using T_DST = to_planning_payload_t<T>;
 
