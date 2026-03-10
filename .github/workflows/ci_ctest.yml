@@ -1,0 +1,52 @@
+name: CI Ctest
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        build_type: [Debug, Release]
+
+    steps:
+      - name: Checkout Tyr
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install python requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install typing_extensions
+
+      - name: Install CMake on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake
+
+      - name: Configure, Build, and Install Dependencies
+        run: |
+          cd dependencies
+          cmake -S . -B build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/dependencies/installs
+          cmake --build build
+          cmake --install build
+
+      - name: Configure and Build Tyr
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+                -DBUILD_TESTS=ON \
+                -S . -B build_${{ matrix.build_type }} \
+                -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/dependencies/installs
+          cmake --build build_${{ matrix.build_type }}
+
+      - name: Run Tests
+        working-directory: build_${{ matrix.build_type }}/tests/unit
+        run: |
+          GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V

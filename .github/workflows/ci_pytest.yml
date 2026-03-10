@@ -1,0 +1,44 @@
+name: CI Pytest
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install CMake on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake
+
+      - name: Install dependencies and requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install setuptools pytest
+
+      - name: Build and install
+        run: python -m pip install --verbose .[test]
+        env:
+          PYMIMIR_DEBUG_BUILD: 1
+
+      - name: Test
+        run: pytest python/tests
