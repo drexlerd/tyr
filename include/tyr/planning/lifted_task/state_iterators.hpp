@@ -42,9 +42,11 @@ class FDRFactIterator<LiftedTask, Tag>
 {
 public:
     using value_type = Data<formalism::planning::FDRFact<Tag>>;
+    using reference = value_type;
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = std::input_iterator_tag;
+    using pointer = void;
 
     FDRFactIterator() noexcept : m_data(nullptr), m_i(0) {}
     FDRFactIterator(const boost::dynamic_bitset<>& data, bool begin) noexcept : m_data(&data), m_i(begin ? 0 : m_data->size()) {}

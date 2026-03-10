@@ -41,9 +41,11 @@ class AtomIterator
 {
 public:
     using value_type = Index<formalism::planning::GroundAtom<Tag>>;
+    using reference = value_type;
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = std::input_iterator_tag;
+    using pointer = void;
 
     AtomIterator() noexcept : m_data(nullptr), m_i(0) {}
     AtomIterator(const boost::dynamic_bitset<>& data, bool begin) noexcept : m_data(&data), m_i(begin ? m_data->find_first() : boost::dynamic_bitset<>::npos) {}
@@ -108,9 +110,11 @@ class FunctionTermValueIterator
 {
 public:
     using value_type = std::pair<Index<formalism::planning::GroundFunctionTerm<Tag>>, float_t>;
+    using reference = value_type;
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = std::input_iterator_tag;
+    using pointer = void;
 
     void skip_nan() noexcept
     {

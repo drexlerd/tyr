@@ -810,7 +810,7 @@ static auto compute_tagged_indexed_literals(fd::LiteralListView<T> literals, siz
 }
 
 template<f::FactKind T>
-static auto compute_tagged_indexed_fterms(fd::FunctionTermListView<T> fterms, size_t arity)
+static auto compute_tagged_indexed_fterms(const std::vector<fd::FunctionTermView<T>>& fterms, size_t arity)
 {
     auto result = details::TaggedRuleToFunctionTermInfos<T> {};
 
@@ -902,8 +902,8 @@ static auto compute_constraint_info(fd::LiftedBooleanOperatorView element, size_
     auto static_fterms = fd::collect_fterms<f::StaticTag>(element);
     auto fluent_fterms = fd::collect_fterms<f::FluentTag>(element);
 
-    result.static_infos = compute_tagged_indexed_fterms(make_view(static_fterms, element.get_context()), arity);
-    result.fluent_infos = compute_tagged_indexed_fterms(make_view(fluent_fterms, element.get_context()), arity);
+    result.static_infos = compute_tagged_indexed_fterms(static_fterms, arity);
+    result.fluent_infos = compute_tagged_indexed_fterms(fluent_fterms, arity);
 
     result.kpkc_arity = kpkc_arity(element);
 

@@ -68,154 +68,13 @@ std::ostream& print(std::ostream& os, const planning::GroundTask& el)
     return os;
 }
 
-std::ostream& print(std::ostream& os, const planning::Node<planning::LiftedTask>& el)
-{
-    os << "Node(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "metric value = " << el.get_metric() << "\n";
-
-        os << print_indent << "state = " << el.get_state() << "\n";
-    }
-    os << print_indent << ")";
-
-    return os;
-}
-
 std::ostream& print(std::ostream& os, const planning::PackedState<planning::LiftedTask>& el) { return os; }
 
 std::ostream& print(std::ostream& os, const planning::UnpackedState<planning::LiftedTask>& el) { return os; }
 
-std::ostream& print(std::ostream& os, const planning::State<planning::LiftedTask>& el)
-{
-    const auto& context = *el.get_state_repository()->get_task()->get_repository();
-
-    const auto& static_atoms_bitset = el.template get_atoms<formalism::StaticTag>();
-    const auto& fluent_atoms_bitset = el.template get_atoms<formalism::FluentTag>();
-    const auto& derived_atoms_bitset = el.template get_atoms<formalism::DerivedTag>();
-    const auto& static_numeric_variables = el.template get_numeric_variables<formalism::StaticTag>();
-    const auto& fluent_numeric_variables = el.template get_numeric_variables<formalism::FluentTag>();
-
-    auto static_atoms = IndexList<formalism::planning::GroundAtom<formalism::StaticTag>> {};
-    for (auto i = static_atoms_bitset.find_first(); i != boost::dynamic_bitset<>::npos; i = static_atoms_bitset.find_next(i))
-        static_atoms.push_back(Index<formalism::planning::GroundAtom<formalism::StaticTag>>(i));
-
-    auto fluent_atoms = IndexList<formalism::planning::GroundAtom<formalism::FluentTag>> {};
-    for (auto i = fluent_atoms_bitset.find_first(); i != boost::dynamic_bitset<>::npos; i = fluent_atoms_bitset.find_next(i))
-        fluent_atoms.push_back(Index<formalism::planning::GroundAtom<formalism::FluentTag>>(i));
-
-    auto derived_atoms = IndexList<formalism::planning::GroundAtom<formalism::DerivedTag>> {};
-    for (auto i = derived_atoms_bitset.find_first(); i != boost::dynamic_bitset<>::npos; i = derived_atoms_bitset.find_next(i))
-        derived_atoms.push_back(Index<formalism::planning::GroundAtom<formalism::DerivedTag>>(i));
-
-    auto static_fterm_values = std::vector<formalism::planning::GroundFunctionTermViewValuePair<formalism::StaticTag>> {};
-    for (uint_t i = 0; i < static_numeric_variables.size(); ++i)
-        if (!std::isnan(static_numeric_variables[i]))
-            static_fterm_values.emplace_back(make_view(Index<formalism::planning::GroundFunctionTerm<formalism::StaticTag>>(i), context),
-                                             static_numeric_variables[i]);
-
-    auto fluent_fterm_values = std::vector<formalism::planning::GroundFunctionTermViewValuePair<formalism::FluentTag>> {};
-    for (uint_t i = 0; i < fluent_numeric_variables.size(); ++i)
-        if (!std::isnan(fluent_numeric_variables[i]))
-            fluent_fterm_values.emplace_back(make_view(Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>(i), context),
-                                             fluent_numeric_variables[i]);
-
-    os << "State(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.get_index() << "\n";
-
-        os << print_indent << "static atoms = " << make_view(static_atoms, context) << "\n";
-
-        os << print_indent << "fluent atoms = " << make_view(fluent_atoms, context) << "\n";
-
-        os << print_indent << "derived atoms = " << make_view(derived_atoms, context) << "\n";
-
-        os << print_indent << "static numeric variables = " << static_fterm_values << "\n";
-
-        os << print_indent << "fluent numeric variables = " << fluent_fterm_values << "\n";
-    }
-
-    os << print_indent << ")";
-
-    return os;
-}
-
-std::ostream& print(std::ostream& os, const planning::Node<planning::GroundTask>& el)
-{
-    os << "Node(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "metric value = " << el.get_metric() << "\n";
-
-        os << print_indent << "state = " << el.get_state() << "\n";
-    }
-    os << print_indent << ")";
-
-    return os;
-}
-
 std::ostream& print(std::ostream& os, const planning::PackedState<planning::GroundTask>& el) { return os; }
 
 std::ostream& print(std::ostream& os, const planning::UnpackedState<planning::GroundTask>& el) { return os; }
-
-std::ostream& print(std::ostream& os, const planning::State<planning::GroundTask>& el)
-{
-    const auto& context = *el.get_state_repository()->get_task()->get_repository();
-
-    const auto& static_atoms_bitset = el.template get_atoms<formalism::StaticTag>();
-    const auto& fluent_values = el.get_fluent_values();
-    const auto& derived_atoms_bitset = el.template get_atoms<formalism::DerivedTag>();
-    const auto& static_numeric_variables = el.template get_numeric_variables<formalism::StaticTag>();
-    const auto& fluent_numeric_variables = el.template get_numeric_variables<formalism::FluentTag>();
-
-    auto static_atoms = IndexList<formalism::planning::GroundAtom<formalism::StaticTag>> {};
-    for (auto i = static_atoms_bitset.find_first(); i != boost::dynamic_bitset<>::npos; i = static_atoms_bitset.find_next(i))
-        static_atoms.push_back(Index<formalism::planning::GroundAtom<formalism::StaticTag>>(i));
-
-    auto fluent_facts = DataList<formalism::planning::FDRFact<formalism::FluentTag>> {};
-    for (uint_t i = 0; i < fluent_values.size(); ++i)
-        if (fluent_values[i] != formalism::planning::FDRValue::none())
-            fluent_facts.push_back(
-                Data<formalism::planning::FDRFact<formalism::FluentTag>>(Index<formalism::planning::FDRVariable<formalism::FluentTag>>(i), fluent_values[i]));
-    auto derived_atoms = IndexList<formalism::planning::GroundAtom<formalism::DerivedTag>> {};
-    for (auto i = derived_atoms_bitset.find_first(); i != boost::dynamic_bitset<>::npos; i = derived_atoms_bitset.find_next(i))
-        derived_atoms.push_back(Index<formalism::planning::GroundAtom<formalism::DerivedTag>>(i));
-
-    auto static_fterm_values = std::vector<formalism::planning::GroundFunctionTermViewValuePair<formalism::StaticTag>> {};
-    for (uint_t i = 0; i < static_numeric_variables.size(); ++i)
-        if (!std::isnan(static_numeric_variables[i]))
-            static_fterm_values.emplace_back(make_view(Index<formalism::planning::GroundFunctionTerm<formalism::StaticTag>>(i), context),
-                                             static_numeric_variables[i]);
-
-    auto fluent_fterm_values = std::vector<formalism::planning::GroundFunctionTermViewValuePair<formalism::FluentTag>> {};
-    for (uint_t i = 0; i < fluent_numeric_variables.size(); ++i)
-        if (!std::isnan(fluent_numeric_variables[i]))
-            fluent_fterm_values.emplace_back(make_view(Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>(i), context),
-                                             fluent_numeric_variables[i]);
-
-    os << "State(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "static atoms = " << make_view(static_atoms, context) << "\n";
-
-        os << print_indent << "fluent facts = " << make_view(fluent_facts, context) << "\n";
-
-        os << print_indent << "derived atoms = " << make_view(derived_atoms, context) << "\n";
-
-        os << print_indent << "static numeric variables = " << static_fterm_values << "\n";
-
-        os << print_indent << "fluent numeric variables = " << fluent_fterm_values << "\n";
-    }
-
-    os << print_indent << ")";
-
-    return os;
-}
 
 std::ostream& print(std::ostream& os, const planning::Statistics& el)
 {
@@ -232,6 +91,74 @@ std::ostream& print(std::ostream& os, const planning::Statistics& el)
 
     return os;
 }
+
+template<typename Task>
+std::ostream& print(std::ostream& os, const planning::State<Task>& el)
+{
+    auto static_atoms = std::vector<formalism::planning::GroundAtomView<formalism::StaticTag>> {};
+    for (auto&& atom : el.get_static_atoms_view())
+        static_atoms.push_back(atom);
+
+    auto fluent_facts = std::vector<formalism::planning::FDRFactView<formalism::FluentTag>> {};
+    for (auto&& fact : el.get_fluent_facts_view())
+        if (fact.has_value())
+            fluent_facts.push_back(fact);
+
+    auto derived_atoms = std::vector<formalism::planning::GroundAtomView<formalism::DerivedTag>> {};
+    for (auto&& atom : el.get_derived_atoms_view())
+        derived_atoms.push_back(atom);
+
+    auto static_fterm_values = std::vector<formalism::planning::GroundFunctionTermViewValuePair<formalism::StaticTag>> {};
+    for (auto&& fterm_value : el.get_static_fterm_values_view())
+        static_fterm_values.push_back(fterm_value);
+
+    auto fluent_fterm_values = std::vector<formalism::planning::GroundFunctionTermViewValuePair<formalism::FluentTag>> {};
+    for (auto&& fterm_value : el.get_fluent_fterm_values_view())
+        fluent_fterm_values.push_back(fterm_value);
+
+    os << "State(\n";
+    {
+        IndentScope scope(os);
+
+        os << print_indent << "index = " << el.get_index() << "\n";
+
+        os << print_indent << "static atoms = " << static_atoms << "\n";
+
+        os << print_indent << "fluent atoms = " << fluent_facts << "\n";
+
+        os << print_indent << "derived atoms = " << derived_atoms << "\n";
+
+        os << print_indent << "static numeric variables = " << static_fterm_values << "\n";
+
+        os << print_indent << "fluent numeric variables = " << fluent_fterm_values << "\n";
+    }
+
+    os << print_indent << ")";
+
+    return os;
+}
+
+template std::ostream& print(std::ostream& os, const planning::State<planning::LiftedTask>& el);
+template std::ostream& print(std::ostream& os, const planning::State<planning::GroundTask>& el);
+
+template<typename Task>
+std::ostream& print(std::ostream& os, const planning::Node<Task>& el)
+{
+    os << "Node(\n";
+    {
+        IndentScope scope(os);
+
+        os << print_indent << "metric value = " << el.get_metric() << "\n";
+
+        os << print_indent << "state = " << el.get_state() << "\n";
+    }
+    os << print_indent << ")";
+
+    return os;
+}
+
+template std::ostream& print(std::ostream& os, const planning::Node<planning::LiftedTask>& el);
+template std::ostream& print(std::ostream& os, const planning::Node<planning::GroundTask>& el);
 
 template<typename Task>
 std::ostream& print(std::ostream& os, const planning::Plan<Task>& el)
@@ -252,23 +179,33 @@ std::ostream& operator<<(std::ostream& os, const LiftedTask& el) { return tyr::p
 
 std::ostream& operator<<(std::ostream& os, const GroundTask& el) { return tyr::print(os, el); }
 
-std::ostream& operator<<(std::ostream& os, const Node<LiftedTask>& el) { return tyr::print(os, el); }
-
 std::ostream& operator<<(std::ostream& os, const PackedState<LiftedTask>& el) { return tyr::print(os, el); }
 
 std::ostream& operator<<(std::ostream& os, const UnpackedState<LiftedTask>& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const State<LiftedTask>& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Node<GroundTask>& el) { return tyr::print(os, el); }
 
 std::ostream& operator<<(std::ostream& os, const PackedState<GroundTask>& el) { return tyr::print(os, el); }
 
 std::ostream& operator<<(std::ostream& os, const UnpackedState<GroundTask>& el) { return tyr::print(os, el); }
 
-std::ostream& operator<<(std::ostream& os, const State<GroundTask>& el) { return tyr::print(os, el); }
-
 std::ostream& operator<<(std::ostream& os, const Statistics& el) { return tyr::print(os, el); }
+
+template<typename Task>
+std::ostream& operator<<(std::ostream& os, const State<Task>& el)
+{
+    return tyr::print(os, el);
+}
+
+template std::ostream& operator<<(std::ostream& os, const State<LiftedTask>& el);
+template std::ostream& operator<<(std::ostream& os, const State<GroundTask>& el);
+
+template<typename Task>
+std::ostream& operator<<(std::ostream& os, const Node<Task>& el)
+{
+    return tyr::print(os, el);
+}
+
+template std::ostream& operator<<(std::ostream& os, const Node<LiftedTask>& el);
+template std::ostream& operator<<(std::ostream& os, const Node<GroundTask>& el);
 
 template<typename Task>
 std::ostream& operator<<(std::ostream& os, const Plan<Task>& el)

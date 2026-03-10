@@ -40,23 +40,21 @@ extern std::ostream& print(std::ostream& os, const planning::LiftedTask& el);
 
 extern std::ostream& print(std::ostream& os, const planning::GroundTask& el);
 
-extern std::ostream& print(std::ostream& os, const planning::Node<planning::LiftedTask>& el);
-
 extern std::ostream& print(std::ostream& os, const planning::PackedState<planning::LiftedTask>& el);
 
 extern std::ostream& print(std::ostream& os, const planning::UnpackedState<planning::LiftedTask>& el);
-
-extern std::ostream& print(std::ostream& os, const planning::State<planning::LiftedTask>& el);
-
-extern std::ostream& print(std::ostream& os, const planning::Node<planning::GroundTask>& el);
 
 extern std::ostream& print(std::ostream& os, const planning::PackedState<planning::GroundTask>& el);
 
 extern std::ostream& print(std::ostream& os, const planning::UnpackedState<planning::GroundTask>& el);
 
-extern std::ostream& print(std::ostream& os, const planning::State<planning::GroundTask>& el);
-
 extern std::ostream& print(std::ostream& os, const planning::Statistics& el);
+
+template<typename Task>
+std::ostream& print(std::ostream& os, const planning::State<Task>& el);
+
+template<typename Task>
+std::ostream& print(std::ostream& os, const planning::Node<Task>& el);
 
 template<typename Task>
 std::ostream& print(std::ostream& os, const planning::Plan<Task>& el);
@@ -68,23 +66,21 @@ extern std::ostream& operator<<(std::ostream& os, const LiftedTask& el);
 
 extern std::ostream& operator<<(std::ostream& os, const GroundTask& el);
 
-extern std::ostream& operator<<(std::ostream& os, const Node<LiftedTask>& el);
-
 extern std::ostream& operator<<(std::ostream& os, const PackedState<LiftedTask>& el);
 
 extern std::ostream& operator<<(std::ostream& os, const UnpackedState<LiftedTask>& el);
-
-extern std::ostream& operator<<(std::ostream& os, const State<LiftedTask>& el);
-
-extern std::ostream& operator<<(std::ostream& os, const Node<GroundTask>& el);
 
 extern std::ostream& operator<<(std::ostream& os, const PackedState<GroundTask>& el);
 
 extern std::ostream& operator<<(std::ostream& os, const UnpackedState<GroundTask>& el);
 
-extern std::ostream& operator<<(std::ostream& os, const State<GroundTask>& el);
-
 extern std::ostream& operator<<(std::ostream& os, const Statistics& el);
+
+template<typename Task>
+std::ostream& operator<<(std::ostream& os, const State<Task>& el);
+
+template<typename Task>
+std::ostream& operator<<(std::ostream& os, const Node<Task>& el);
 
 template<typename Task>
 std::ostream& operator<<(std::ostream& os, const Plan<Task>& el);
