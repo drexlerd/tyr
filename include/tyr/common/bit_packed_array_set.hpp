@@ -15,21 +15,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_COMMON_DYNAMIC_BIT_PACKED_UINT_ARRAY_SET_HPP_
-#define TYR_COMMON_DYNAMIC_BIT_PACKED_UINT_ARRAY_SET_HPP_
+#ifndef TYR_COMMON_BIT_PACKED_ARRAY_SET_HPP_
+#define TYR_COMMON_BIT_PACKED_ARRAY_SET_HPP_
 
-#include "tyr/common/dynamic_bit_packed_uint_array_pool.hpp"
+#include "tyr/common/bit_packed_array_pool.hpp"
 
 #include <concepts>
 
 namespace tyr
 {
 template<std::unsigned_integral Block>
-class DynamicBitPackedUintArraySet
+class BitPackedArraySet
 {
 public:
 private:
-    DynamicBitPackedUintArrayPool<Block> m_pool;
+    BitPackedArrayPool<Block> m_pool;
 };
 }
 

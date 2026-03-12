@@ -83,7 +83,7 @@ private:
 public:
     explicit SegmentedBuffer(size_t seg_size = 1024) : m_seg_size(seg_size), m_segments(), m_cur_seg(0), m_cur_pos(0), m_size(0), m_capacity(0)
     {
-        assert(is_power_of_two(seg_size));
+        assert(bits::is_power_of_two(seg_size));
     }
 
     /// @brief Write the data with alignment requirement.

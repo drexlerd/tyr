@@ -30,7 +30,7 @@ namespace tyr
 template<typename T, size_t ArraysPerSegment = 1024>
 class SegmentedArrayPool
 {
-    static_assert(is_power_of_two(ArraysPerSegment));
+    static_assert(bits::is_power_of_two(ArraysPerSegment));
 
     static constexpr size_t seg_shift = std::countr_zero(ArraysPerSegment);
     static constexpr size_t seg_mask = ArraysPerSegment - 1;
