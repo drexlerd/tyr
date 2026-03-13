@@ -129,7 +129,7 @@ struct ForwardingBlockCoder
 {
     using value_type = Block;
 
-    static constexpr Block decode(Block block) noexcept { return block; }
+    static constexpr value_type decode(Block block) noexcept { return block; }
     static constexpr Block encode(value_type value) noexcept { return value; }
 };
 

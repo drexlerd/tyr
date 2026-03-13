@@ -24,8 +24,8 @@
 namespace tyr::formalism::datalog
 {
 using BindingView = View<Index<Binding>, Repository>;
+using Binding2View = View<Index<Binding2>, Repository>;
 
-using BindingListView = View<IndexList<Binding>, Repository>;
 }
 
 #endif

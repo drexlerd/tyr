@@ -126,6 +126,10 @@ struct Binding
 {
 };
 
+struct Binding2
+{
+};
+
 struct Term
 {
 };

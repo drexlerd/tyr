@@ -21,16 +21,227 @@
 #include "tyr/common/bit.hpp"
 
 #include <bit>
+#include <cassert>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <span>
+#include <stdexcept>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 namespace tyr
 {
+
+/**
+ * BasicBitPackedArrayView
+ */
+
+template<typename Block, typename Coder>
+class BasicBitPackedArrayView
+{
+public:
+    /**
+     * Type aliases
+     */
+
+    using block_type = std::remove_const_t<Block>;
+    using value_type = typename Coder::value_type;
+    using reference_type = typename bit::int_reference<block_type, Coder>;
+    using reference = std::conditional_t<std::is_const_v<Block>, value_type, reference_type>;
+
+    /**
+     * Compile-time properties
+     */
+
+    static constexpr std::size_t digits = std::numeric_limits<block_type>::digits;
+    static constexpr size_t block_shift = std::countr_zero(digits);
+
+private:
+    void ensure_fits(std::span<const value_type> elements) const
+    {
+        if (elements.size() != m_length)
+            throw std::invalid_argument("BasicBitPackedArrayView: wrong number of elements.");
+    }
+
+public:
+    /**
+     * Iterator declarations
+     */
+
+    template<typename View>
+    class BasicIterator;
+
+    using iterator = BasicIterator<BasicBitPackedArrayView<Block, Coder>>;
+    using const_iterator = BasicIterator<const BasicBitPackedArrayView<Block, Coder>>;
+
+    /**
+     * Constructors
+     */
+
+    BasicBitPackedArrayView(Block* data, size_t length, uint8_t width, uint8_t offset) : m_data(data), m_length(length), m_width(width), m_offset(offset) {}
+
+    BasicBitPackedArrayView& operator=(std::span<const value_type> elements)
+        requires(!std::is_const_v<Block>)
+    {
+        assert(elements.size() == m_length);
+
+        ensure_fits(elements);
+
+        for (size_t i = 0; i < m_length; ++i)
+            (*this)[i] = elements[i];
+
+        return *this;
+    }
+
+    /**
+     * Operators
+     */
+
+    friend bool operator==(const BasicBitPackedArrayView& lhs, const BasicBitPackedArrayView& rhs)
+    {
+        if (lhs.size() != rhs.size())
+            return false;
+
+        for (size_t i = 0; i < lhs.size(); ++i)
+            if (lhs[i] != rhs[i])
+                return false;
+
+        return true;
+    }
+
+    friend bool operator==(const BasicBitPackedArrayView& lhs, std::span<const value_type> rhs)
+    {
+        if (lhs.size() != rhs.size())
+            return false;
+
+        for (size_t i = 0; i < lhs.size(); ++i)
+            if (lhs[i] != rhs[i])
+                return false;
+
+        return true;
+    }
+
+    friend bool operator==(std::span<const value_type> lhs, const BasicBitPackedArrayView& rhs) { return rhs == lhs; }
+
+    /**
+     * Iterator definitions
+     */
+
+    template<typename View>
+    class BasicIterator
+    {
+    private:
+        using view_type = View;
+        using view_pointer = View*;
+
+    public:
+        using difference_type = std::ptrdiff_t;
+        using raw_view_type = std::remove_const_t<View>;
+        using value_type = typename raw_view_type::value_type;
+        using reference = std::conditional_t<std::is_const_v<View>, value_type, typename raw_view_type::reference_type>;
+        using iterator_category = std::bidirectional_iterator_tag;
+        using iterator_concept = std::bidirectional_iterator_tag;
+
+        BasicIterator() : m_view(nullptr), m_pos(0) {}
+        BasicIterator(view_type& view, size_t pos) : m_view(&view), m_pos(pos) {}
+
+        reference operator*() const { return (*m_view)[m_pos]; }
+
+        BasicIterator& operator++()
+        {
+            ++m_pos;
+            return *this;
+        }
+
+        BasicIterator operator++(int)
+        {
+            auto tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        BasicIterator& operator--()
+        {
+            --m_pos;
+            return *this;
+        }
+
+        BasicIterator operator--(int)
+        {
+            auto tmp = *this;
+            --(*this);
+            return tmp;
+        }
+
+        friend bool operator==(const BasicIterator&, const BasicIterator&) = default;
+
+    private:
+        view_pointer m_view;
+        size_t m_pos;
+    };
+
+    /**
+     * Accessors
+     */
+
+    reference_type operator[](size_t pos) noexcept
+        requires(!std::is_const_v<Block>)
+    {
+        assert(pos < m_length);
+
+        const size_t bit_index = static_cast<size_t>(m_offset) + pos * m_width;
+        auto* word = m_data + (bit_index >> block_shift);
+        const uint8_t offset = static_cast<uint8_t>(bit_index & (digits - 1));
+
+        return reference_type(word, offset, m_width);
+    }
+
+    value_type operator[](size_t pos) const noexcept
+    {
+        assert(pos < m_length);
+
+        const size_t bit_index = static_cast<size_t>(m_offset) + pos * m_width;
+        const auto* word = m_data + (bit_index >> block_shift);
+        const uint8_t offset = static_cast<uint8_t>(bit_index & (digits - 1));
+
+        return Coder::decode(bit::read_int<block_type>(word, offset, m_width));
+    }
+
+    /**
+     * Iterators
+     */
+
+    iterator begin() noexcept
+        requires(!std::is_const_v<Block>)
+    {
+        return iterator(*this, 0);
+    }
+    iterator end() noexcept
+        requires(!std::is_const_v<Block>)
+    {
+        return iterator(*this, size());
+    }
+    const_iterator begin() const noexcept { return const_iterator(*this, 0); }
+    const_iterator end() const noexcept { return const_iterator(*this, size()); }
+    const_iterator cbegin() const noexcept { return const_iterator(*this, 0); }
+    const_iterator cend() const noexcept { return const_iterator(*this, size()); }
+
+    /**
+     * Capacity
+     */
+
+    size_t size() const noexcept { return m_length; }
+    uint8_t width() const noexcept { return m_width; }
+
+private:
+    Block* m_data;
+    size_t m_length;
+    uint8_t m_width;
+    uint8_t m_offset;
+};
 
 /// Stores fixed-length arrays as bit-packed unsigned integer codes with stable references.
 /// Values are encoded and decoded via Coder.
@@ -45,14 +256,11 @@ public:
      * Type aliases
      */
 
-    template<typename Block_>
-        requires std::same_as<std::remove_const_t<Block_>, Block>
-    class BasicArrayView;
-
+    using block_type = std::remove_const_t<Block>;
     using value_type = typename Coder::value_type;
     using reference_type = typename bit::int_reference<Block, Coder>;
-    using ArrayView = BasicArrayView<Block>;
-    using ConstArrayView = BasicArrayView<const Block>;
+    using ArrayView = BasicBitPackedArrayView<Block, Coder>;
+    using ConstArrayView = BasicBitPackedArrayView<const Block, Coder>;
 
     /**
      * Compile-time properties
@@ -67,7 +275,7 @@ private:
      * Compile-time properties
      */
 
-    static constexpr std::size_t digits = std::numeric_limits<Block>::digits;
+    static constexpr std::size_t digits = std::numeric_limits<block_type>::digits;
     static constexpr size_t block_shift = std::countr_zero(digits);
 
     static constexpr size_t seg_shift = std::countr_zero(FirstSegmentSize);
@@ -265,203 +473,9 @@ public:
     bool empty() const noexcept { return m_size == 0; }
     const auto& segments() const noexcept { return m_segments; }
 
-    /**
-     * BasicArrayView
-     */
-
-    template<typename Block_>
-        requires std::same_as<std::remove_const_t<Block_>, Block>
-    class BasicArrayView
-    {
-    private:
-        void ensure_fits(std::span<const value_type> elements) const
-        {
-            if (elements.size() != m_length)
-                throw std::invalid_argument("BasicArrayView: wrong number of elements.");
-        }
-
-    public:
-        /**
-         * Compile-time properties
-         */
-
-        /**
-         * Iterator declarations
-         */
-
-        template<typename View>
-        class BasicIterator;
-
-        using iterator = BasicIterator<BasicArrayView<Block_>>;
-        using const_iterator = BasicIterator<const BasicArrayView<Block_>>;
-
-        /**
-         * Constructors
-         */
-
-        BasicArrayView(Block_* data, size_t length, uint8_t width, uint8_t offset) : m_data(data), m_length(length), m_width(width), m_offset(offset) {}
-
-        BasicArrayView& operator=(std::span<const value_type> elements)
-        {
-            assert(elements.size() == m_length);
-
-            ensure_fits(elements);
-
-            for (size_t i = 0; i < m_length; ++i)
-                (*this)[i] = Coder::encode(elements[i]);
-
-            return *this;
-        }
-
-        /**
-         * Operators
-         */
-
-        friend bool operator==(const BasicArrayView& lhs, const BasicArrayView& rhs)
-        {
-            if (lhs.size() != rhs.size())
-                return false;
-
-            for (size_t i = 0; i < lhs.size(); ++i)
-                if (lhs[i] != rhs[i])
-                    return false;
-
-            return true;
-        }
-
-        friend bool operator==(const BasicArrayView& lhs, std::span<const value_type> rhs)
-        {
-            if (lhs.size() != rhs.size())
-                return false;
-
-            for (size_t i = 0; i < lhs.size(); ++i)
-                if (lhs[i] != rhs[i])
-                    return false;
-
-            return true;
-        }
-
-        friend bool operator==(std::span<const value_type> lhs, const BasicArrayView& rhs) { return rhs == lhs; }
-
-        /**
-         * Iterator definitions
-         */
-
-        template<typename View>
-        class BasicIterator
-        {
-        private:
-            using view_type = View;
-            using view_pointer = View*;
-
-        public:
-            using difference_type = std::ptrdiff_t;
-            using value_type = typename Coder::value_type;
-            using reference = std::conditional_t<std::is_const_v<view_type>, value_type, reference_type>;
-            using iterator_category = std::bidirectional_iterator_tag;
-            using iterator_concept = std::bidirectional_iterator_tag;
-
-            BasicIterator() : m_view(nullptr), m_pos(0) {}
-            BasicIterator(view_type& view, size_t pos) : m_view(&view), m_pos(pos) {}
-
-            reference operator*() const { return (*m_view)[m_pos]; }
-
-            BasicIterator& operator++()
-            {
-                ++m_pos;
-                return *this;
-            }
-
-            BasicIterator operator++(int)
-            {
-                auto tmp = *this;
-                ++(*this);
-                return tmp;
-            }
-
-            BasicIterator& operator--()
-            {
-                --m_pos;
-                return *this;
-            }
-
-            BasicIterator operator--(int)
-            {
-                auto tmp = *this;
-                --(*this);
-                return tmp;
-            }
-
-            friend bool operator==(const BasicIterator&, const BasicIterator&) = default;
-
-        private:
-            view_pointer m_view;
-            size_t m_pos;
-        };
-
-        /**
-         * Accessors
-         */
-
-        reference_type operator[](size_t pos) noexcept
-            requires(!std::is_const_v<Block_>)
-        {
-            assert(pos < m_length);
-
-            const size_t bit_index = static_cast<size_t>(m_offset) + pos * m_width;
-            auto* word = m_data + (bit_index >> block_shift);
-            const uint8_t offset = static_cast<uint8_t>(bit_index & (digits - 1));
-
-            return reference_type(word, offset, m_width);
-        }
-
-        value_type operator[](size_t pos) const noexcept
-        {
-            assert(pos < m_length);
-
-            const size_t bit_index = static_cast<size_t>(m_offset) + pos * m_width;
-            const auto* word = m_data + (bit_index >> block_shift);
-            const uint8_t offset = static_cast<uint8_t>(bit_index & (digits - 1));
-
-            return Coder::decode(bit::read_int<Block>(word, offset, m_width));
-        }
-
-        /**
-         * Iterators
-         */
-
-        iterator begin() noexcept
-            requires(!std::is_const_v<Block_>)
-        {
-            return iterator(*this, 0);
-        }
-        iterator end() noexcept
-            requires(!std::is_const_v<Block_>)
-        {
-            return iterator(*this, size());
-        }
-        const_iterator begin() const noexcept { return const_iterator(*this, 0); }
-        const_iterator end() const noexcept { return const_iterator(*this, size()); }
-        const_iterator cbegin() const noexcept { return const_iterator(*this, 0); }
-        const_iterator cend() const noexcept { return const_iterator(*this, size()); }
-
-        /**
-         * Capacity
-         */
-
-        size_t size() const noexcept { return m_length; }
-        uint8_t width() const noexcept { return m_width; }
-
-    private:
-        Block_* m_data;
-        size_t m_length;
-        uint8_t m_width;
-        uint8_t m_offset;
-    };
-
 private:
     // Segments grow geometrically, i.e., FirstSegmentSize, 2*FirstSegmentSize, 4*FirstSegmentSize, ...
-    std::vector<std::vector<Block>> m_segments;
+    std::vector<std::vector<block_type>> m_segments;
 
     size_t m_length;
     uint8_t m_width;

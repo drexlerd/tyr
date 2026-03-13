@@ -108,30 +108,36 @@ public:
         m_pool->clear();
     }
 
-    std::pair<index_type, bool> insert(std::span<const value_type> elements)
+    const auto hash(std::span<const value_type> elements) const noexcept { return m_set.hash(elements); }
+
+    std::optional<index_type> find_with_hash(std::span<const value_type> elements, size_t h)
     {
-        if (const auto it = m_set.find(elements); it != m_set.end())
-            return { *it, false };
-
-        const auto index = static_cast<index_type>(m_pool->size());
-        m_pool->push_back(elements);
-
-        const auto [it, inserted] = m_set.insert(index);
-        assert(inserted);
-
-        return { index, true };
-    }
-
-    bool contains(std::span<const value_type> elements) const { return m_set.contains(elements); }
-
-    std::optional<index_type> find(std::span<const value_type> elements) const
-    {
-        const auto it = m_set.find(elements);
+        const auto it = m_set.find(elements, h);
         if (it != m_set.end())
             return *it;
 
         return std::nullopt;
     }
+
+    std::optional<index_type> find(std::span<const value_type> elements) const { return find_with_hash(elements, hash(elements)); }
+
+    std::pair<index_type, bool> insert_with_hash(size_t h, std::span<const value_type> elements)
+    {
+        if (const auto it = m_set.find(elements, h); it != m_set.end())
+            return { *it, false };
+
+        const auto index = static_cast<index_type>(m_pool->size());
+        m_pool->push_back(elements);
+
+        [[maybe_unused]] const auto [it, inserted] = m_set.insert(index);
+        assert(inserted);
+
+        return { index, true };
+    }
+
+    std::pair<index_type, bool> insert(std::span<const value_type> elements) { return insert_with_hash(hash(elements), elements); }
+
+    bool contains(std::span<const value_type> elements) const { return m_set.contains(elements); }
 
     ConstArrayView operator[](index_type index) const { return (*m_pool)[index]; }
 

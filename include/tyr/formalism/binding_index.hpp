@@ -32,6 +32,14 @@ struct Index<formalism::Binding> : IndexMixin<Index<formalism::Binding>>
     using Base::Base;
 };
 
+template<>
+struct Index<formalism::Binding2> : IndexMixin<Index<formalism::Binding2>>
+{
+    // Inherit constructors
+    using Base = IndexMixin<Index<formalism::Binding2>>;
+    using Base::Base;
+};
+
 }
 
 #endif
