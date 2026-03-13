@@ -108,9 +108,9 @@ public:
         m_pool->clear();
     }
 
-    const auto hash(std::span<const value_type> elements) const noexcept { return m_set.hash(elements); }
+    size_t hash(std::span<const value_type> elements) const noexcept { return m_set.hash(elements); }
 
-    std::optional<index_type> find_with_hash(std::span<const value_type> elements, size_t h)
+    std::optional<index_type> find_with_hash(std::span<const value_type> elements, size_t h) const
     {
         const auto it = m_set.find(elements, h);
         if (it != m_set.end())

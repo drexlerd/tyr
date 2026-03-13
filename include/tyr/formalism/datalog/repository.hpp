@@ -25,7 +25,6 @@
 #include "tyr/buffer/declarations.hpp"
 #include "tyr/buffer/indexed_hash_set.hpp"
 #include "tyr/buffer/segmented_buffer.hpp"
-#include "tyr/common/bit_packed_array_set.hpp"
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
 #include "tyr/common/tuple.hpp"
@@ -71,45 +70,9 @@ private:
         slot_type slot;
     };
 
-    struct RelationTableSlot
-    {
-        template<std::unsigned_integral Block>
-        struct ObjectCoder
-        {
-            using value_type = Index<Object>;
-
-            static constexpr value_type decode(Block block) noexcept { return value_type(block); }
-            static constexpr Block encode(value_type value) noexcept { return static_cast<Block>((static_cast<uint_t>(value))); }
-        };
-
-        BitPackedArraySet<uint_t, ObjectCoder<uint_t>> container;
-        size_t parent_size = 0;
-    };
-
-    template<typename T>
-    struct RelationTableEntry
-    {
-        template<std::unsigned_integral Block>
-        struct ObjectCoder
-        {
-            using value_type = Index<Object>;
-
-            static constexpr value_type decode(Block block) noexcept { return value_type(block); }
-            static constexpr Block encode(value_type value) noexcept { return static_cast<Block>((static_cast<uint_t>(value))); }
-        };
-
-        using slot_type = UnorderedMap<Index<T>, RelationTableSlot>;
-
-        slot_type slot;
-    };
-
     using RepositoryStorage = std::tuple<RepositoryEntry<Variable>,
                                          RepositoryEntry<Object>,
                                          RepositoryEntry<Binding>,
-                                         // RelationTableEntry<Predicate<StaticTag>>,
-                                         // RelationTableEntry<Predicate<FluentTag>>,
-                                         // RelationTableEntry<Function<StaticTag>>,
-                                         // RelationTableEntry<Function<FluentTag>>,
                                          RepositoryEntry<Predicate<StaticTag>>,
                                          RepositoryEntry<Predicate<FluentTag>>,
                                          RepositoryEntry<Atom<StaticTag>>,
@@ -204,17 +167,6 @@ private:
             auto idx = Index<T> {};
             idx.group = g;
             slot.parent_size = m_parent ? m_parent->template size<T>(idx) : size_t { 0 };
-        }
-    }
-
-    template<typename T>
-        requires(GroupIndexConcept<Index<T>>)
-    void clear_entry(RelationTableEntry<T>& entry) noexcept
-    {
-        for (auto& [g, slot] : entry.slot)
-        {
-            // slot.container.clear();
-            // slot.parent_size = m_parent ? m_parent->template size<T>(g) : size_t { 0 };
         }
     }
 
