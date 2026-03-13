@@ -129,8 +129,8 @@ struct ForwardingBlockCoder
 {
     using value_type = Block;
 
-    static Block decode(Block block) noexcept { return block; }
-    static Block encode(value_type value) noexcept { return value; }
+    static constexpr Block decode(Block block) noexcept { return block; }
+    static constexpr Block encode(value_type value) noexcept { return value; }
 };
 
 static_assert(BlockCoder<ForwardingBlockCoder<uint32_t>, uint32_t>);
@@ -139,6 +139,14 @@ template<std::unsigned_integral Block, typename Coder = bit::ForwardingBlockCode
     requires BlockCoder<Coder, Block>
 class int_reference
 {
+private:
+    constexpr void ensure_fits(Block raw) const
+    {
+        const Block mask = bit::lo_set<Block>[m_len];
+        if ((raw & ~mask) != 0)
+            throw std::out_of_range("int_reference: encoded value exceeds bit width");
+    }
+
 public:
     using value_type = typename Coder::value_type;
 
@@ -146,7 +154,9 @@ public:
 
     constexpr int_reference& operator=(const value_type& value)
     {
-        bit::write_int(m_word, Coder::encode(value), m_offset, m_len);
+        const auto raw = Coder::encode(value);
+        ensure_fits(raw);
+        bit::write_int(m_word, raw, m_offset, m_len);
         return *this;
     }
 

@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -39,7 +40,33 @@ class BitPackedArrayPool
 {
     static_assert(bit::is_power_of_two(FirstSegmentSize));
 
+public:
+    /**
+     * Type aliases
+     */
+
+    template<typename Block_>
+        requires std::same_as<std::remove_const_t<Block_>, Block>
+    class BasicArrayView;
+
+    using value_type = typename Coder::value_type;
+    using reference_type = typename bit::int_reference<Block, Coder>;
+    using ArrayView = BasicArrayView<Block>;
+    using ConstArrayView = BasicArrayView<const Block>;
+
+    /**
+     * Compile-time properties
+     */
+
 private:
+    /**
+     * Type aliases
+     */
+
+    /**
+     * Compile-time properties
+     */
+
     static constexpr std::size_t digits = std::numeric_limits<Block>::digits;
     static constexpr size_t block_shift = std::countr_zero(digits);
 
@@ -57,7 +84,7 @@ private:
 
     static constexpr size_t blocks_for_bits(size_t bits) noexcept { return (bits + digits - 1) >> block_shift; }
 
-    void resize_to_fit(size_t size)
+    void reserve(size_t size)
     {
         if (size == 0 || size <= m_capacity)
             return;
@@ -82,24 +109,13 @@ private:
         }
     }
 
+    void ensure_fits(std::span<const value_type> elements) const
+    {
+        if (elements.size() != m_length)
+            throw std::invalid_argument("BitPackedArrayPool: wrong number of elements.");
+    }
+
 public:
-    /**
-     * Type aliases
-     */
-
-    template<typename Block_>
-        requires std::same_as<std::remove_const_t<Block_>, Block>
-    class BasicArrayView;
-
-    using value_type = typename Coder::value_type;
-    using reference_type = typename bit::int_reference<Block, Coder>;
-    using ArrayView = BasicArrayView<Block>;
-    using ConstArrayView = BasicArrayView<const Block>;
-
-    /**
-     * Compile-time properties
-     */
-
     /**
      * Iterator declarations
      */
@@ -226,15 +242,14 @@ public:
 
     void push_back(std::span<const value_type> elements)
     {
-        assert(elements.size() == m_length);
+        ensure_fits(elements);
 
         const size_t index = m_size;
-        resize_to_fit(m_size + 1);
+        reserve(m_size + 1);
+        ++m_size;
         auto view = (*this)[index];
         for (size_t i = 0; i < m_length; ++i)
             view[i] = elements[i];
-
-        ++m_size;
     }
 
     void clear() noexcept { m_size = 0; }
@@ -247,6 +262,7 @@ public:
     uint8_t width() const noexcept { return m_width; }
     size_t capacity() const noexcept { return m_capacity; }
     size_t size() const noexcept { return m_size; }
+    const auto& segments() const noexcept { return m_segments; }
 
     /**
      * BasicArrayView
@@ -256,12 +272,17 @@ public:
         requires std::same_as<std::remove_const_t<Block_>, Block>
     class BasicArrayView
     {
+    private:
+        void ensure_fits(std::span<const value_type> elements) const
+        {
+            if (elements.size() != m_length)
+                throw std::invalid_argument("BasicArrayView: wrong number of elements.");
+        }
+
     public:
         /**
          * Compile-time properties
          */
-
-        static constexpr bool is_const_view = std::is_const_v<Block_>;
 
         /**
          * Iterator declarations
@@ -271,13 +292,55 @@ public:
         class BasicIterator;
 
         using iterator = BasicIterator<BasicArrayView<Block_>>;
-        using const_iterator = BasicIterator<BasicArrayView<const std::remove_const_t<Block_>>>;
+        using const_iterator = BasicIterator<const BasicArrayView<Block_>>;
 
         /**
          * Constructors
          */
 
         BasicArrayView(Block_* data, size_t length, uint8_t width, uint8_t offset) : m_data(data), m_length(length), m_width(width), m_offset(offset) {}
+
+        BasicArrayView& operator=(std::span<const value_type> elements)
+        {
+            assert(elements.size() == m_length);
+
+            ensure_fits(elements);
+
+            for (size_t i = 0; i < m_length; ++i)
+                (*this)[i] = Coder::encode(elements[i]);
+
+            return *this;
+        }
+
+        /**
+         * Operators
+         */
+
+        friend bool operator==(const BasicArrayView& lhs, const BasicArrayView& rhs)
+        {
+            if (lhs.size() != rhs.size())
+                return false;
+
+            for (size_t i = 0; i < lhs.size(); ++i)
+                if (lhs[i] != rhs[i])
+                    return false;
+
+            return true;
+        }
+
+        friend bool operator==(const BasicArrayView& lhs, std::span<const value_type> rhs)
+        {
+            if (lhs.size() != rhs.size())
+                return false;
+
+            for (size_t i = 0; i < lhs.size(); ++i)
+                if (lhs[i] != rhs[i])
+                    return false;
+
+            return true;
+        }
+
+        friend bool operator==(std::span<const value_type> lhs, const BasicArrayView& rhs) { return rhs == lhs; }
 
         /**
          * Iterator definitions
@@ -293,7 +356,7 @@ public:
         public:
             using difference_type = std::ptrdiff_t;
             using value_type = typename Coder::value_type;
-            using reference = std::conditional_t<view_type::is_const_view, value_type, reference_type>;
+            using reference = std::conditional_t<std::is_const_v<view_type>, value_type, reference_type>;
             using iterator_category = std::bidirectional_iterator_tag;
             using iterator_concept = std::bidirectional_iterator_tag;
 
