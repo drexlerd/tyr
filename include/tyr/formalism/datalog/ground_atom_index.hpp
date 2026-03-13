@@ -33,6 +33,14 @@ struct Index<formalism::datalog::GroundAtom<T>> : GroupIndexMixin<Index<formalis
     using Base::Base;
 };
 
+template<formalism::FactKind T>
+struct Index<formalism::datalog::GroundAtom2<T>> : IndexMixin<Index<formalism::datalog::GroundAtom2<T>>>
+{
+    // Inherit constructors
+    using Base = IndexMixin<Index<formalism::datalog::GroundAtom2<T>>>;
+    using Base::Base;
+};
+
 }
 
 #endif

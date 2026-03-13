@@ -70,7 +70,17 @@ struct GroundAtom
 };
 
 template<FactKind T>
+struct GroundAtom2
+{
+};
+
+template<FactKind T>
 struct GroundLiteral
+{
+};
+
+template<FactKind T>
+struct GroundLiteral2
 {
 };
 
