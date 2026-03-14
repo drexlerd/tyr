@@ -217,6 +217,12 @@ inline auto merge_p2d(AtomView<T_SRC> element, MergeDatalogContext& context)
     return context.destination.get_or_create(atom, context.builder.get_buffer());
 }
 
+template<FactKind T>
+inline auto merge_p2d(formalism::datalog::PredicateView<T> predicate, const IndexList<Object>& objects, MergeDatalogContext& context)
+{
+    return context.destination.get_or_create(predicate, objects);
+}
+
 template<FactKind T_SRC, FactKind T_DST>
 inline auto merge_p2d(GroundAtomView<T_SRC> element, MergeDatalogContext& context)
 {
@@ -224,8 +230,9 @@ inline auto merge_p2d(GroundAtomView<T_SRC> element, MergeDatalogContext& contex
     auto& atom = *atom_ptr;
     atom.clear();
 
-    atom.index.group = merge_p2d<T_SRC, T_DST>(element.get_predicate(), context).first.get_index();
-    atom.objects = element.get_data().objects;
+    const auto predicate_view = merge_p2d<T_SRC, T_DST>(element.get_predicate(), context).first;
+    atom.predicate = predicate_view.get_index();
+    atom.row = merge_p2d(predicate_view, element.get_objects().get_data(), context).first.get_index().second;
 
     canonicalize(atom);
     return context.destination.get_or_create(atom, context.builder.get_buffer());
@@ -307,6 +314,12 @@ inline auto merge_p2d(FunctionTermView<T> element, MergeDatalogContext& context)
 }
 
 template<FactKind T>
+inline auto merge_p2d(formalism::datalog::FunctionView<T> function, const IndexList<Object>& objects, MergeDatalogContext& context)
+{
+    return context.destination.get_or_create(function, objects);
+}
+
+template<FactKind T>
     requires(!std::is_same_v<T, formalism::AuxiliaryTag>)
 inline auto merge_p2d(GroundFunctionTermView<T> element, MergeDatalogContext& context)
 {
@@ -314,8 +327,9 @@ inline auto merge_p2d(GroundFunctionTermView<T> element, MergeDatalogContext& co
     auto& fterm = *fterm_ptr;
     fterm.clear();
 
-    fterm.index.group = element.get_function().get_index();
-    fterm.objects = element.get_data().objects;
+    const auto function_view = merge_p2d(element.get_function(), context).first;
+    fterm.function = function_view.get_index();
+    fterm.row = merge_p2d(function_view, element.get_objects().get_data(), context).first.get_index().second;
 
     canonicalize(fterm);
     return context.destination.get_or_create(fterm, context.builder.get_buffer());

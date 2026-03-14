@@ -231,7 +231,6 @@ struct RuleWorkspace
 
         formalism::datalog::Builder builder;
         IndexList<formalism::Object> binding;
-        IndexList<formalism::Object> projection;
 
         Iteration iteration;
         Solve solve;
@@ -347,7 +346,6 @@ template<typename AndAP>
 RuleWorkspace<AndAP>::Worker::Worker(size_t num_objects, const Common& common, const AndAP& and_ap) :
     builder(),
     binding(),
-    projection(),
     iteration(num_objects, common),
     solve(num_objects, and_ap)
 {

@@ -86,8 +86,8 @@ public:
     public:
         Out(RuleExecutionContext<OrAP, AndAP, TP>& rctx, RuleWorkspace<AndAP>::Worker& ws_worker) :
             m_ws_worker(ws_worker),
-            m_ground_context_solve(ws_worker.builder, ws_worker.solve.stage_repository, ws_worker.binding, ws_worker.projection),
-            m_ground_context_iteration(ws_worker.builder, ws_worker.iteration.program_overlay_repository, ws_worker.binding, ws_worker.projection)
+            m_ground_context_solve(ws_worker.builder, ws_worker.solve.stage_repository, ws_worker.binding),
+            m_ground_context_iteration(ws_worker.builder, ws_worker.iteration.program_overlay_repository, ws_worker.binding)
         {
         }
 

@@ -104,17 +104,21 @@ public:
         return m_preferred_action_views;
     }
 
-    bool mark_atom(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> atom)
+    bool mark_atom(formalism::datalog::GroundAtomView<formalism::FluentTag> atom)
     {
-        assert(uint_t(atom.group) < m_markings.size());
-        if (tyr::test(atom.value, m_markings[uint_t(atom.group)]))
+        const auto row = atom.get_row().get_index();
+        const auto g = uint_t(row.first);
+        const auto i = uint_t(row.second);
+
+        assert(g < m_markings.size());
+        if (tyr::test(i, m_markings[g]))
             return true;
-        tyr::set(atom.value, true, m_markings[uint_t(atom.group)]);
+        tyr::set(i, true, m_markings[g]);
         return false;
     }
 
 private:
-    void extract_relaxed_plan_and_preferred_actions(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> atom,
+    void extract_relaxed_plan_and_preferred_actions(formalism::datalog::GroundAtomView<formalism::FluentTag> atom,
                                                     const StateContext<LiftedTask>& state_context,
                                                     formalism::planning::GrounderContext& grounder_context)
     {
@@ -123,13 +127,12 @@ private:
             return;
 
         // Base case 2: atom has no witness, i.e., was true initially => do not recurse again
-        const auto it = m_workspace.and_annot.find(atom);
+        const auto it = m_workspace.and_annot.find(atom.get_index());
         if (it == m_workspace.and_annot.end())
             return;
 
         const auto& witness = it->second;
         const auto& mapping = this->m_task->get_rpg_program().get_rule_to_action_mapping();
-        // auto merge_context = formalism::planning::MergeDatalogContext { m_workspace.datalog_builder, m_workspace.repository };
 
         if (const auto it = mapping.find(witness.get_rule()); it != mapping.end())
         {
@@ -156,8 +159,8 @@ private:
         // Divide case: recursively call for preconditions.
         for (const auto literal : witness.get_witness_condition().get_literals<formalism::FluentTag>())
         {
-            // The atoms itself is part of the program, hence, literal.get_data().atom
-            extract_relaxed_plan_and_preferred_actions(literal.get_data().atom, state_context, grounder_context);
+            // The atoms itself is part of the program
+            extract_relaxed_plan_and_preferred_actions(make_view(literal.get_atom().get_index(), m_workspace.repository), state_context, grounder_context);
         }
     }
 

@@ -37,7 +37,6 @@ struct GrounderContext
     Builder& builder;
     Repository& destination;
     IndexList<Object>& binding;
-    IndexList<Object>& projection;
 };
 
 /**
@@ -132,8 +131,9 @@ inline auto ground(const IndexList<Object>& element, GrounderContext& context)
 template<FactKind T>
 inline auto ground(TermListView terms, FunctionView<T> function, GrounderContext& context)
 {
-    auto& projection = context.projection;
-    projection.clear();
+    auto binding_ptr = context.builder.template get_builder<Binding>();
+    auto& binding = *binding_ptr;
+    binding.clear();
 
     for (const auto term : terms)
     {
@@ -143,9 +143,9 @@ inline auto ground(TermListView terms, FunctionView<T> function, GrounderContext
                 using Alternative = std::decay_t<decltype(arg)>;
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                    projection.push_back(context.binding[uint_t(arg)]);
+                    binding.objects.push_back(context.binding[uint_t(arg)]);
                 else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                    projection.push_back(arg.get_index());
+                    binding.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
             },
@@ -153,7 +153,8 @@ inline auto ground(TermListView terms, FunctionView<T> function, GrounderContext
     }
 
     // Canonicalize and Serialize
-    return context.destination.get_or_create(function, projection);
+    canonicalize(binding);
+    return context.destination.get_or_create(function, binding.objects);
 }
 
 template<FactKind T>
@@ -255,8 +256,9 @@ inline auto ground(LiftedArithmeticOperatorView element, GrounderContext& contex
 template<FactKind T>
 inline auto ground(TermListView terms, PredicateView<T> predicate, GrounderContext& context)
 {
-    auto& projection = context.projection;
-    projection.clear();
+    auto binding_ptr = context.builder.template get_builder<Binding>();
+    auto& binding = *binding_ptr;
+    binding.clear();
 
     for (const auto term : terms)
     {
@@ -266,9 +268,9 @@ inline auto ground(TermListView terms, PredicateView<T> predicate, GrounderConte
                 using Alternative = std::decay_t<decltype(arg)>;
 
                 if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                    projection.push_back(context.binding[uint_t(arg)]);
+                    binding.objects.push_back(context.binding[uint_t(arg)]);
                 else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                    projection.push_back(arg.get_index());
+                    binding.objects.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<Alternative>::value, "Missing case");
             },
@@ -276,7 +278,8 @@ inline auto ground(TermListView terms, PredicateView<T> predicate, GrounderConte
     }
 
     // Canonicalize and Serialize
-    return context.destination.get_or_create(predicate, projection);
+    canonicalize(binding);
+    return context.destination.get_or_create(predicate, binding.objects);
 }
 
 template<FactKind T>

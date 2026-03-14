@@ -182,7 +182,7 @@ public:
 
     void insert(formalism::datalog::GroundFunctionTermView<T> function_term, float_t value)
     {
-        m_sets[uint_t(function_term.get_index().get_group())].insert(function_term, value);
+        m_sets[uint_t(function_term.get_function().get_index())].insert(function_term, value);
     }
 
     void insert(formalism::datalog::GroundFunctionTermListView<T> function_terms, const std::vector<float_t>& values)

@@ -20,11 +20,16 @@
 
 #include "tyr/formalism/binding_view.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
+#include "tyr/formalism/function_index.hpp"
+#include "tyr/formalism/predicate_index.hpp"
 
 namespace tyr::formalism::datalog
 {
 using BindingView = View<Index<Binding>, Repository>;
-using Binding2View = View<Index<Binding2>, Repository>;
+template<FactKind T>
+using PredicateBinding = View<std::pair<Index<Predicate<T>>, Index<Binding2>>, Repository>;
+template<FactKind T>
+using FunctionBinding = View<std::pair<Index<Function<T>>, Index<Binding2>>, Repository>;
 
 }
 

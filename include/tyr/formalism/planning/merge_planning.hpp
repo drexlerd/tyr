@@ -227,7 +227,8 @@ inline auto merge_d2p(formalism::datalog::GroundAtomView<T_SRC> element, MergePl
     atom.clear();
 
     atom.predicate = merge_d2p<T_SRC, T_DST>(element.get_predicate(), context).first.get_index();
-    atom.objects = element.get_data().objects;
+    for (const auto object : element.get_row().get_objects())
+        atom.objects.push_back(object.get_index());
 
     canonicalize(atom);
     return context.destination.get_or_create(atom, context.builder.get_buffer());
@@ -300,7 +301,8 @@ inline auto merge_d2p(formalism::datalog::GroundFunctionTermView<T> element, Mer
     fterm.clear();
 
     fterm.function = element.get_function().get_index();
-    fterm.objects = element.get_data().objects;
+    for (const auto object : element.get_row().get_objects())
+        fterm.objects.push_back(object.get_index());
 
     canonicalize(fterm);
     return context.destination.get_or_create(fterm, context.builder.get_buffer());

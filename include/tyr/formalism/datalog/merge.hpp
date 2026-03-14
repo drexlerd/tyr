@@ -198,6 +198,20 @@ inline auto merge_d2d(AtomView<T> element, MergeContext& context)
 }
 
 template<FactKind T>
+inline auto merge_d2d(PredicateView<T> predicate, PredicateBinding<T> element, MergeContext& context)
+{
+    auto binding_ptr = context.builder.template get_builder<Binding>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    for (const auto object : element.get_objects())
+        binding.objects.push_back(object.get_index());
+
+    canonicalize(binding);
+    return context.destination.get_or_create(predicate, binding.objects);
+}
+
+template<FactKind T>
 inline auto merge_d2d(GroundAtomView<T> element, MergeContext& context)
 {
     auto atom_ptr = context.builder.template get_builder<GroundAtom<T>>();
@@ -205,7 +219,7 @@ inline auto merge_d2d(GroundAtomView<T> element, MergeContext& context)
     atom.clear();
 
     atom.predicate = element.get_predicate().get_index();
-    atom.row = element.get_row().get_index();
+    atom.row = merge_d2d(element.get_predicate(), element.get_row(), context).first.get_index().second;
 
     canonicalize(atom);
     return context.destination.get_or_create(atom, context.builder.get_buffer());
@@ -271,6 +285,20 @@ inline auto merge_d2d(FunctionTermView<T> element, MergeContext& context)
 }
 
 template<FactKind T>
+inline auto merge_d2d(FunctionView<T> function, FunctionBinding<T> element, MergeContext& context)
+{
+    auto binding_ptr = context.builder.template get_builder<Binding>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    for (const auto object : element.get_objects())
+        binding.objects.push_back(object.get_index());
+
+    canonicalize(binding);
+    return context.destination.get_or_create(function, binding.objects);
+}
+
+template<FactKind T>
 inline auto merge_d2d(GroundFunctionTermView<T> element, MergeContext& context)
 {
     auto fterm_ptr = context.builder.template get_builder<GroundFunctionTerm<T>>();
@@ -278,7 +306,7 @@ inline auto merge_d2d(GroundFunctionTermView<T> element, MergeContext& context)
     fterm.clear();
 
     fterm.function = element.get_function().get_index();
-    fterm.row = element.get_row().get_index();
+    fterm.row = merge_d2d(element.get_function(), element.get_row(), context).first.get_index().second;
 
     canonicalize(fterm);
     return context.destination.get_or_create(fterm, context.builder.get_buffer());
