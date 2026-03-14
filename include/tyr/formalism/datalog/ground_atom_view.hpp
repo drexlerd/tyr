@@ -43,29 +43,12 @@ public:
     const auto& get_handle() const noexcept { return m_handle; }
 
     auto get_index() const noexcept { return m_handle; }
-    auto get_predicate() const noexcept { return make_view(m_handle.group, *m_context); }
-    auto get_objects() const noexcept { return make_view(get_data().objects, *m_context); }
-
-    auto identifying_members() const noexcept { return std::tie(m_context, m_handle); }
-};
-
-template<formalism::FactKind T, formalism::datalog::Context C>
-class View<Index<formalism::datalog::GroundAtom2<T>>, C>
-{
-private:
-    const C* m_context;
-    Data<formalism::datalog::GroundAtom2<T>> m_handle;
-
-public:
-    View(Data<formalism::datalog::GroundAtom2<T>> handle, const C& context) noexcept : m_context(&context), m_handle(handle) {}
-
-    const auto& get_data() const noexcept { return get_repository(*m_context)[m_handle]; }
-    const auto& get_context() const noexcept { return *m_context; }
-    const auto& get_handle() const noexcept { return m_handle; }
-
-    auto get_index() const noexcept { return m_handle; }
-    auto get_predicate() const noexcept { return make_view(m_handle.predicate, *m_context); }
-    auto get_binding() const noexcept { return make_view(get_data().binding, *m_context); }
+    auto get_predicate() const noexcept { return make_view(get_data().predicate, *m_context); }
+    auto get_row() const noexcept
+    {
+        const auto& data = get_data();
+        return make_view(std::make_pair(data.predicate, data.row), *m_context);
+    }
 
     auto identifying_members() const noexcept { return std::tie(m_context, m_handle); }
 };

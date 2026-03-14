@@ -26,18 +26,10 @@
 namespace tyr
 {
 template<formalism::FactKind T>
-struct Index<formalism::datalog::GroundAtom<T>> : GroupIndexMixin<Index<formalism::datalog::GroundAtom<T>>, Index<formalism::Predicate<T>>>
+struct Index<formalism::datalog::GroundAtom<T>> : IndexMixin<Index<formalism::datalog::GroundAtom<T>>>
 {
     // Inherit constructors
-    using Base = GroupIndexMixin<Index<formalism::datalog::GroundAtom<T>>, Index<formalism::Predicate<T>>>;
-    using Base::Base;
-};
-
-template<formalism::FactKind T>
-struct Index<formalism::datalog::GroundAtom2<T>> : IndexMixin<Index<formalism::datalog::GroundAtom2<T>>>
-{
-    // Inherit constructors
-    using Base = IndexMixin<Index<formalism::datalog::GroundAtom2<T>>>;
+    using Base = IndexMixin<Index<formalism::datalog::GroundAtom<T>>>;
     using Base::Base;
 };
 

@@ -75,61 +75,6 @@ concept IndexConcept = requires(const T& i, const T& j, uint_t v) {
     { i > j } -> std::same_as<bool>;
 };
 
-template<typename Derived, IndexConcept Group>
-struct GroupIndexMixin
-{
-    using GroupType = Group;
-
-    Group group {};
-    uint_t value {};
-
-    static constexpr uint_t MAX = std::numeric_limits<uint_t>::max();
-
-    GroupIndexMixin() noexcept : group(Group::max()), value(MAX) {}
-    explicit GroupIndexMixin(Group group, uint_t value) noexcept : group(group), value(value) {}
-
-    static constexpr Derived max() noexcept { return Derived(Group::max(), MAX); }
-
-    // ----------------------------------------------------
-    // Comparisons
-    // ----------------------------------------------------
-
-    friend constexpr bool operator==(const GroupIndexMixin& lhs, const GroupIndexMixin& rhs) noexcept
-    {
-        return EqualTo<Group> {}(lhs.group, rhs.group) && EqualTo<uint_t> {}(lhs.value, rhs.value);
-    }
-    friend constexpr bool operator!=(const GroupIndexMixin& lhs, const GroupIndexMixin& rhs) noexcept { return !(lhs == rhs); }
-
-    friend constexpr bool operator<(const GroupIndexMixin& lhs, const GroupIndexMixin& rhs) noexcept
-    {
-        return (lhs.group < rhs.group) || (lhs.group == rhs.group && lhs.value < rhs.value);
-    }
-    friend constexpr bool operator<=(const GroupIndexMixin& lhs, const GroupIndexMixin& rhs) noexcept { return !(rhs < lhs); }
-    friend constexpr bool operator>(const GroupIndexMixin& lhs, const GroupIndexMixin& rhs) noexcept { return rhs < lhs; }
-    friend constexpr bool operator>=(const GroupIndexMixin& lhs, const GroupIndexMixin& rhs) noexcept { return !(lhs < rhs); }
-
-    Group get_group() const noexcept { return group; }
-    uint_t get_value() const noexcept { return value; }
-
-    auto cista_members() const noexcept { return std::tie(group, value); }
-    auto identifying_members() const noexcept { return std::tie(group, value); }
-};
-
-template<typename T>
-concept GroupIndexConcept = requires(const T& i, const T& j, typename T::GroupType g, uint_t x) {
-    { T() };
-    { T(g, x) };
-    { i.get_group() } -> IndexConcept;
-    { i.get_value() } -> std::same_as<uint_t>;
-    { T::max() } -> std::same_as<T>;
-    { i == j } -> std::same_as<bool>;
-    { i != j } -> std::same_as<bool>;
-    { i <= j } -> std::same_as<bool>;
-    { i < j } -> std::same_as<bool>;
-    { i >= j } -> std::same_as<bool>;
-    { i > j } -> std::same_as<bool>;
-};
-
 }
 
 #endif

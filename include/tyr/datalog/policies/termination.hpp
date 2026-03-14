@@ -34,7 +34,7 @@ namespace tyr::datalog
 template<typename T>
 concept TerminationPolicyConcept = requires(T& p,
                                             const T& cp,
-                                            Index<formalism::datalog::GroundAtom<formalism::FluentTag>> atom,
+                                            formalism::datalog::GroundAtomView<formalism::FluentTag> atom,
                                             const PredicateFactSets<formalism::FluentTag>& goals,
                                             const OrAnnotationsList& or_annot) {
     { p.set_goals(goals) } -> std::same_as<void>;
@@ -51,7 +51,7 @@ public:
     NoTerminationPolicy() = default;
 
     void set_goals(const PredicateFactSets<formalism::FluentTag>& goals) {}
-    void achieve(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> atom) noexcept {}
+    void achieve(formalism::datalog::GroundAtomView<formalism::FluentTag> atom) noexcept {}
     bool check() const noexcept { return false; }
     Cost get_total_cost(const OrAnnotationsList& or_annot) const noexcept { return Cost(0); }
     void reset() noexcept {}
@@ -71,21 +71,21 @@ public:
         num_unsat_goals = 0;
         for (const auto& set : goals.get_sets())
         {
-            for (const auto& atom : set.get_facts().get_data())
+            for (const auto& atom : set.get_facts())
             {
-                tyr::set(atom.value, true, unsat_goals[uint_t(atom.group)]);
+                tyr::set(uint_t(atom.get_row().get_index().second), true, unsat_goals[uint_t(atom.get_predicate().get_index())]);
                 ++num_unsat_goals;
                 atoms.push_back(atom);
             }
         }
     }
 
-    void achieve(Index<formalism::datalog::GroundAtom<formalism::FluentTag>> atom) noexcept
+    void achieve(formalism::datalog::GroundAtomView<formalism::FluentTag> atom) noexcept
     {
-        if (tyr::test(atom.value, unsat_goals[uint_t(atom.group)]))
+        if (tyr::test(uint_t(atom.get_row().get_index().second), unsat_goals[uint_t(atom.get_predicate().get_index())]))
         {
             --num_unsat_goals;
-            tyr::set(atom.value, false, unsat_goals[uint_t(atom.group)]);
+            tyr::set(uint_t(atom.get_row().get_index().second), false, unsat_goals[uint_t(atom.get_predicate().get_index())]);
         }
     }
 
@@ -97,9 +97,9 @@ public:
 
         for (const auto atom : atoms)
         {
-            assert(uint_t(atom.group) < or_annot.size());
-            assert(atom.value < or_annot[uint_t(atom.group)].size());
-            cost = agg(cost, or_annot[uint_t(atom.group)][atom.value]);
+            assert(uint_t(atom.get_predicate().get_index()) < or_annot.size());
+            assert(uint_t(atom.get_row().get_index().second) < or_annot[uint_t(atom.get_predicate().get_index())].size());
+            cost = agg(cost, or_annot[uint_t(atom.get_predicate().get_index())][uint_t(atom.get_row().get_index().second)]);
         }
 
         return cost;
@@ -112,7 +112,7 @@ public:
             bitset.reset();
 
         for (const auto& atom : atoms)
-            tyr::set(atom.value, true, unsat_goals[uint_t(atom.group)]);
+            tyr::set(uint_t(atom.get_row().get_index().second), true, unsat_goals[uint_t(atom.get_predicate().get_index())]);
     }
 
     void clear() noexcept
@@ -124,13 +124,13 @@ public:
         atoms.clear();
     }
 
-    const IndexList<formalism::datalog::GroundAtom<formalism::FluentTag>>& get_atoms() const noexcept { return atoms; }
+    const std::vector<formalism::datalog::GroundAtomView<formalism::FluentTag>>& get_atoms() const noexcept { return atoms; }
 
 private:
     std::vector<boost::dynamic_bitset<>> unsat_goals;
     size_t num_unsat_goals;
 
-    IndexList<formalism::datalog::GroundAtom<formalism::FluentTag>> atoms;
+    std::vector<formalism::datalog::GroundAtomView<formalism::FluentTag>> atoms;
 
     AggregationFunction agg;
 };

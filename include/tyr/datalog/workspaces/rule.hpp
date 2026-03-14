@@ -99,7 +99,7 @@ private:
 public:
     ConflictingApplicabilityCheck() : m_condition(std::nullopt), m_unsat_fluent_literals(), m_unsat_numeric_constraints(), m_statically_applicable(false) {}
 
-    void initialize(formalism::datalog::ConjunctiveConditionView condition, const FactSets& fact_sets, formalism::datalog::ConstGrounderContext& context)
+    void initialize(formalism::datalog::ConjunctiveConditionView condition, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
     {
         m_condition = condition;
         m_unsat_fluent_literals.clear();
@@ -115,7 +115,7 @@ public:
 
     bool is_statically_applicable() const noexcept { return m_statically_applicable; }
 
-    bool is_dynamically_applicable(const FactSets& fact_sets, formalism::datalog::ConstGrounderContext& context)
+    bool is_dynamically_applicable(const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
     {
         for (auto i = m_unsat_fluent_literals.find_first(); i != boost::dynamic_bitset<>::npos; i = m_unsat_fluent_literals.find_next(i))
             if (is_valid_binding(m_condition->get_literals<formalism::FluentTag>()[i], fact_sets, context))
@@ -141,7 +141,7 @@ public:
     void initialize(formalism::datalog::GroundConjunctiveConditionView nullary,
                     formalism::datalog::ConjunctiveConditionView conflicting,
                     const FactSets& fact_sets,
-                    formalism::datalog::ConstGrounderContext& context)
+                    formalism::datalog::GrounderContext& context)
     {
         m_nullary.initialize(nullary, fact_sets);
         m_conflicting.initialize(conflicting, fact_sets, context);
@@ -149,7 +149,7 @@ public:
 
     bool is_statically_applicable() const noexcept { return m_nullary.is_statically_applicable() && m_conflicting.is_statically_applicable(); }
 
-    bool is_dynamically_applicable(const FactSets& fact_sets, formalism::datalog::ConstGrounderContext& context) noexcept
+    bool is_dynamically_applicable(const FactSets& fact_sets, formalism::datalog::GrounderContext& context) noexcept
     {
         return m_nullary.is_dynamically_applicable(fact_sets) && m_conflicting.is_dynamically_applicable(fact_sets, context);
     }
@@ -231,6 +231,7 @@ struct RuleWorkspace
 
         formalism::datalog::Builder builder;
         IndexList<formalism::Object> binding;
+        IndexList<formalism::Object> projection;
 
         Iteration iteration;
         Solve solve;
@@ -346,6 +347,7 @@ template<typename AndAP>
 RuleWorkspace<AndAP>::Worker::Worker(size_t num_objects, const Common& common, const AndAP& and_ap) :
     builder(),
     binding(),
+    projection(),
     iteration(num_objects, common),
     solve(num_objects, and_ap)
 {

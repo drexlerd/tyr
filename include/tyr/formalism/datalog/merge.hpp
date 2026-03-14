@@ -204,8 +204,8 @@ inline auto merge_d2d(GroundAtomView<T> element, MergeContext& context)
     auto& atom = *atom_ptr;
     atom.clear();
 
-    atom.index.group = element.get_index().get_group();
-    atom.objects = element.get_data().objects;
+    atom.predicate = element.get_predicate().get_index();
+    atom.row = element.get_row().get_index();
 
     canonicalize(atom);
     return context.destination.get_or_create(atom, context.builder.get_buffer());
@@ -277,8 +277,8 @@ inline auto merge_d2d(GroundFunctionTermView<T> element, MergeContext& context)
     auto& fterm = *fterm_ptr;
     fterm.clear();
 
-    fterm.index.group = element.get_function().get_index();
-    fterm.objects = element.get_data().objects;
+    fterm.function = element.get_function().get_index();
+    fterm.row = element.get_row().get_index();
 
     canonicalize(fterm);
     return context.destination.get_or_create(fterm, context.builder.get_buffer());

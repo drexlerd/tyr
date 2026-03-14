@@ -62,8 +62,8 @@ struct ProgramExecutionContext
         {
             for (const auto fact : set.get_facts())
             {
-                ws.or_ap.initialize_annotation(fact.get_index(), ws.or_annot);
-                ws.tp.achieve(fact.get_index());
+                ws.or_ap.initialize_annotation(fact, ws.or_annot);
+                ws.tp.achieve(fact);
             }
         }
 

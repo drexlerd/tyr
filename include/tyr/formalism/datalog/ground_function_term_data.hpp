@@ -20,6 +20,7 @@
 
 #include "tyr/common/types.hpp"
 #include "tyr/common/types_utils.hpp"
+#include "tyr/formalism/binding_index.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 #include "tyr/formalism/datalog/ground_function_term_index.hpp"
 #include "tyr/formalism/function_index.hpp"
@@ -32,10 +33,16 @@ template<formalism::FactKind T>
 struct Data<formalism::datalog::GroundFunctionTerm<T>>
 {
     Index<formalism::datalog::GroundFunctionTerm<T>> index;
-    IndexList<formalism::Object> objects;
+    Index<formalism::Function<T>> function;
+    Index<formalism::Binding2> row;
 
     Data() = default;
-    Data(Index<formalism::datalog::GroundFunctionTerm<T>> index, IndexList<formalism::Object> objects) : index(index), objects(objects) {}
+    Data(Index<formalism::datalog::GroundFunctionTerm<T>> index, Index<formalism::Function<T>> function, Index<formalism::Binding2> row) :
+        index(index),
+        function(function),
+        row(row)
+    {
+    }
     Data(const Data& other) = delete;
     Data& operator=(const Data& other) = delete;
     Data(Data&& other) = default;
@@ -44,11 +51,12 @@ struct Data<formalism::datalog::GroundFunctionTerm<T>>
     void clear() noexcept
     {
         tyr::clear(index);
-        tyr::clear(objects);
+        tyr::clear(function);
+        tyr::clear(row);
     }
 
-    auto cista_members() const noexcept { return std::tie(index, objects); }
-    auto identifying_members() const noexcept { return std::tie(index.group, objects); }
+    auto cista_members() const noexcept { return std::tie(index, function); }
+    auto identifying_members() const noexcept { return std::tie(function, row); }
 };
 }
 

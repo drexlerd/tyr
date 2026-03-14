@@ -22,7 +22,9 @@
 #include "tyr/common/vector.hpp"
 #include "tyr/formalism/binding_index.hpp"
 #include "tyr/formalism/declarations.hpp"
+#include "tyr/formalism/function_index.hpp"
 #include "tyr/formalism/object_index.hpp"
+#include "tyr/formalism/predicate_index.hpp"
 
 namespace tyr
 {
@@ -46,15 +48,36 @@ public:
     auto identifying_members() const noexcept { return std::tie(m_context, m_handle); }
 };
 
-template<typename C>
-class View<Index<formalism::Binding2>, C>
+template<formalism::FactKind T, typename C>
+class View<std::pair<Index<formalism::Predicate<T>>, Index<formalism::Binding2>>, C>
 {
 private:
     const C* m_context;
-    Index<formalism::Binding2> m_handle;
+    std::pair<Index<formalism::Predicate<T>>, Index<formalism::Binding2>> m_handle;
 
 public:
-    View(Index<formalism::Binding2> handle, const C& context) noexcept : m_context(&context), m_handle(handle) {}
+    View(std::pair<Index<formalism::Predicate<T>>, Index<formalism::Binding2>> handle, const C& context) noexcept : m_context(&context), m_handle(handle) {}
+
+    // This will return an ArrayView aleady
+    auto get_data() const noexcept { return get_repository(*m_context)[m_handle]; }
+    const auto& get_context() const noexcept { return *m_context; }
+    const auto& get_handle() const noexcept { return m_handle; }
+
+    auto get_index() const noexcept { return m_handle; }
+    auto get_objects() const noexcept { return make_view(get_data(), *m_context); }
+
+    auto identifying_members() const noexcept { return std::tie(m_context, m_handle); }
+};
+
+template<formalism::FactKind T, typename C>
+class View<std::pair<Index<formalism::Function<T>>, Index<formalism::Binding2>>, C>
+{
+private:
+    const C* m_context;
+    std::pair<Index<formalism::Function<T>>, Index<formalism::Binding2>> m_handle;
+
+public:
+    View(std::pair<Index<formalism::Function<T>>, Index<formalism::Binding2>> handle, const C& context) noexcept : m_context(&context), m_handle(handle) {}
 
     // This will return an ArrayView aleady
     auto get_data() const noexcept { return get_repository(*m_context)[m_handle]; }

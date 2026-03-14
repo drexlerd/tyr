@@ -297,7 +297,7 @@ inline std::ostream& print(std::ostream& os, const Data<formalism::datalog::Grou
 template<formalism::FactKind T, formalism::datalog::Context C>
 inline std::ostream& print(std::ostream& os, const View<Index<formalism::datalog::GroundAtom<T>>, C>& el)
 {
-    fmt::print(os, "({} {})", to_string(el.get_predicate().get_name()), fmt::format("{}", fmt::join(to_strings(el.get_objects()), " ")));
+    fmt::print(os, "({} {})", to_string(el.get_predicate().get_name()), fmt::format("{}", fmt::join(to_strings(el.get_row().get_objects()), " ")));
     return os;
 }
 
@@ -345,7 +345,7 @@ inline std::ostream& print(std::ostream& os, const Data<formalism::datalog::Grou
 template<formalism::FactKind T, formalism::datalog::Context C>
 inline std::ostream& print(std::ostream& os, const View<Index<formalism::datalog::GroundFunctionTerm<T>>, C>& el)
 {
-    fmt::print(os, "({} {})", to_string(el.get_function().get_name()), fmt::format("{}", fmt::join(to_strings(el.get_objects()), " ")));
+    fmt::print(os, "({} {})", to_string(el.get_function().get_name()), fmt::format("{}", fmt::join(to_strings(el.get_row().get_objects()), " ")));
     return os;
 }
 

@@ -139,7 +139,7 @@ public:
 
     bool contains(std::span<const value_type> elements) const { return m_set.contains(elements); }
 
-    ConstArrayView operator[](index_type index) const { return (*m_pool)[index]; }
+    ConstArrayView operator[](index_type index) const { return std::as_const(*m_pool)[index]; }
 
     size_t size() const noexcept { return m_pool->size(); }
     size_t capacity() const noexcept { return m_pool->capacity(); }

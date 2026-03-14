@@ -26,10 +26,10 @@
 namespace tyr
 {
 template<formalism::FactKind T>
-struct Index<formalism::datalog::GroundFunctionTerm<T>> : GroupIndexMixin<Index<formalism::datalog::GroundFunctionTerm<T>>, Index<formalism::Function<T>>>
+struct Index<formalism::datalog::GroundFunctionTerm<T>> : IndexMixin<Index<formalism::datalog::GroundFunctionTerm<T>>>
 {
     // Inherit constructors
-    using Base = GroupIndexMixin<Index<formalism::datalog::GroundFunctionTerm<T>>, Index<formalism::Function<T>>>;
+    using Base = IndexMixin<Index<formalism::datalog::GroundFunctionTerm<T>>>;
     using Base::Base;
 };
 }

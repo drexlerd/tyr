@@ -91,22 +91,22 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
 
     // Note: we never go through the consistency graph, and hence, have to check validity on the entire rule body.
     if (is_applicable(in.cws_rule().get_nullary_condition(), in.fact_sets())
-        && is_valid_binding(in.cws_rule().get_rule().get_body(), in.fact_sets(), out.const_ground_context_program()))
+        && is_valid_binding(in.cws_rule().get_rule().get_body(), in.fact_sets(), out.ground_context_iteration()))
     {
-        const auto program_head_index = fd::ground(in.cws_rule().get_rule().get_head(), out.ground_context_iteration()).first.get_index();
+        const auto program_head = fd::ground(in.cws_rule().get_rule().get_head(), out.ground_context_iteration()).first;
         const auto worker_head_index = fd::ground(in.cws_rule().get_rule().get_head(), out.ground_context_solve()).first.get_index();
 
         out.heads().insert(worker_head_index);
 
-        in.and_ap().update_annotation(program_head_index,
+        in.and_ap().update_annotation(program_head,
                                       worker_head_index,
                                       in.cost_buckets().current_cost(),
-                                      in.program_repository(),
                                       in.cws_rule().get_rule(),
                                       in.cws_rule().get_witness_condition(),
                                       in.or_annot(),
                                       out.and_annot(),
-                                      out.ground_context_solve());
+                                      out.ground_context_solve(),
+                                      out.ground_context_iteration());
     }
 }
 
@@ -150,14 +150,14 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
 
     ++out.statistics().num_generated_rules;
 
-    const auto program_head_index = fd::ground(in.cws_rule().get_rule().get_head(), out.ground_context_iteration()).first.get_index();
-    if (in.fact_sets().fluent_sets.predicate.contains(program_head_index))
+    const auto program_head = fd::ground(in.cws_rule().get_rule().get_head(), out.ground_context_iteration()).first;
+    if (in.fact_sets().fluent_sets.predicate.contains(program_head))
         return;  ///< optimal cost proven
 
     auto applicability_check = out.applicability_check_pool().get_or_allocate(in.cws_rule().get_nullary_condition(),
                                                                               in.cws_rule().get_conflicting_overapproximation_condition(),
                                                                               in.fact_sets(),
-                                                                              out.const_ground_context_program());
+                                                                              out.ground_context_iteration());
 
     if (!applicability_check->is_statically_applicable())
         return;
@@ -165,7 +165,7 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
     // IMPORTANT: A binding can fail the nullary part (e.g., arm-empty) even though the clique already exists.
     // Later, nullary may become true without any new kPKC edges/vertices, so delta-kPKC will NOT re-enumerate this binding.
     // Therefore we must store it as pending (keyed by binding) and recheck in the next fact envelope.
-    if (applicability_check->is_dynamically_applicable(in.fact_sets(), out.const_ground_context_program()))
+    if (applicability_check->is_dynamically_applicable(in.fact_sets(), out.ground_context_iteration()))
     {
         assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets()));
 
@@ -178,15 +178,15 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
 
         out.heads().insert(worker_head_index);
 
-        in.and_ap().update_annotation(program_head_index,
+        in.and_ap().update_annotation(program_head,
                                       worker_head_index,
                                       in.cost_buckets().current_cost(),
-                                      in.program_repository(),
                                       in.cws_rule().get_rule(),
                                       in.cws_rule().get_witness_condition(),
                                       in.or_annot(),
                                       out.and_annot(),
-                                      out.ground_context_solve());
+                                      out.ground_context_solve(),
+                                      out.ground_context_iteration());
     }
     else
     {
@@ -287,13 +287,13 @@ void process_pending(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
             out.ground_context_solve().binding = make_view(it->first, out.ground_context_solve().destination).get_objects().get_data();
 
             assert(out.ground_context_solve().binding == out.ground_context_iteration().binding);
-            const auto program_head_index = fd::ground(in.cws_rule().get_rule().get_head(), out.ground_context_iteration()).first.get_index();
+            const auto program_head = fd::ground(in.cws_rule().get_rule().get_head(), out.ground_context_iteration()).first;
 
-            if (in.fact_sets().fluent_sets.predicate.contains(program_head_index))  ///< optimal cost proven
+            if (in.fact_sets().fluent_sets.predicate.contains(program_head))  ///< optimal cost proven
             {
                 it = out.pending_rules().erase(it);
             }
-            else if (it->second->is_dynamically_applicable(in.fact_sets(), out.const_ground_context_program()))
+            else if (it->second->is_dynamically_applicable(in.fact_sets(), out.ground_context_iteration()))
             {
                 assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets()));
 
@@ -301,15 +301,15 @@ void process_pending(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
 
                 out.heads().insert(worker_head_index);
 
-                in.and_ap().update_annotation(program_head_index,
+                in.and_ap().update_annotation(program_head,
                                               worker_head_index,
                                               in.cost_buckets().current_cost(),
-                                              in.program_repository(),
                                               in.cws_rule().get_rule(),
                                               in.cws_rule().get_witness_condition(),
                                               in.or_annot(),
                                               out.and_annot(),
-                                              out.ground_context_solve());
+                                              out.ground_context_solve(),
+                                              out.ground_context_iteration());
 
                 it = out.pending_rules().erase(it);
             }
@@ -424,7 +424,7 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                     for (const auto worker_head : worker.iteration.heads)
                     {
                         // Merge head from delta into the program
-                        const auto program_head = fd::merge_d2d(make_view(worker_head, worker.solve.stage_repository), merge_context).first.get_index();
+                        const auto program_head = fd::merge_d2d(make_view(worker_head, worker.solve.stage_repository), merge_context).first;
 
                         // std::cout << make_view(program_head, ws.repository) << std::endl;
 
@@ -444,17 +444,15 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                 return;  // Terminate if no-nonempty bucket was found.
 
             // Insert next bucket heads into fact and assignment sets + trigger scheduler.
-            for (const auto head_index : cost_buckets.get_current_bucket())
+            for (const auto head : cost_buckets.get_current_bucket())
             {
-                if (!facts.fact_sets.predicate.contains(head_index))
+                if (!facts.fact_sets.predicate.contains(head))
                 {
-                    const auto head = make_view(head_index, ws.repository);
-
                     // Notify scheduler
                     scheduler.on_generate(head.get_predicate().get_index());
 
                     // Notify termination policy
-                    tp.achieve(head_index);
+                    tp.achieve(head);
 
                     // Update fact sets
                     facts.fact_sets.predicate.insert(head);

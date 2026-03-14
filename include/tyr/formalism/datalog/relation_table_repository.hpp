@@ -87,16 +87,10 @@ private:
         return it->second;
     }
 
-    template<typename T>
-    auto& get_or_create_container(Index<T> g, Slot& slot)
+    auto& get_or_create_container(size_t arity, uint8_t width, Slot& slot)
     {
         if (!slot.container)
-        {
-            const auto view = make_view(g, *this);
-            const auto arity = view.get_arity();
-            const auto width = std::max<uint8_t>(1, std::bit_width(m_num_objects));
             slot.container.emplace(arity, width);
-        }
         return *slot.container;
     }
 
@@ -139,7 +133,7 @@ public:
     }
 
     template<typename T>
-    std::optional<View<Index<Binding2>, RelationTableRepository>> find_with_hash(Index<T> g, const IndexList<Object>& builder, size_t h) const noexcept
+    std::optional<Index<Binding2>> find_with_hash(Index<T> g, const IndexList<Object>& builder, size_t h) const noexcept
     {
         const auto& entry = std::get<Entry<T>>(m_repository);
 
@@ -153,13 +147,13 @@ public:
             return m_parent ? m_parent->template find_with_hash<T>(g, builder, h) : std::nullopt;
 
         if (auto row_or_nullopt = slot.container->find_with_hash(builder, h))  /// container exists here
-            return View<Index<Binding2>, RelationTableRepository>(Index<Binding2>(slot.parent_size + *row_or_nullopt), *this);
+            return Index<Binding2>(slot.parent_size + *row_or_nullopt);
 
         return m_parent ? m_parent->template find_with_hash<T>(g, builder, h) : std::nullopt;
     }
 
     template<typename T>
-    std::optional<View<Index<Binding2>, RelationTableRepository>> find(Index<T> g, const IndexList<Object>& builder) const noexcept
+    std::optional<Index<Binding2>> find(Index<T> g, const IndexList<Object>& builder) const noexcept
     {
         const auto& entry = std::get<Entry<T>>(m_repository);
         const auto& slots = entry.slots;
@@ -177,11 +171,11 @@ public:
     }
 
     template<typename T>
-    std::pair<View<Index<Binding2>, RelationTableRepository>, bool> get_or_create(Index<T> g, const IndexList<Object>& builder)
+    std::pair<Index<Binding2>, bool> get_or_create(Index<T> g, size_t arity, uint8_t width, const IndexList<Object>& builder)
     {
         auto& slot = get_or_create_slot(g);
         // Note: this creates the local container even if the element was found in the parent.
-        auto& container = get_or_create_container(g, slot);
+        auto& container = get_or_create_container(arity, width, slot);
         const auto h = container.hash(builder);
 
         if (m_parent)
@@ -189,7 +183,7 @@ public:
                 return { *ptr, false };
 
         const auto [row, success] = container.insert_with_hash(h, builder);
-        return { View<Index<Binding2>, RelationTableRepository>(Index<Binding2>(slot.parent_size + row), *this), success };
+        return { Index<Binding2>(slot.parent_size + row), success };
     }
 
     template<typename T>

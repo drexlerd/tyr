@@ -32,37 +32,14 @@ template<formalism::FactKind T>
 struct Data<formalism::datalog::GroundAtom<T>>
 {
     Index<formalism::datalog::GroundAtom<T>> index;
-    IndexList<formalism::Object> objects;
-
-    Data() = default;
-    Data(Index<formalism::datalog::GroundAtom<T>> index, IndexList<formalism::Object> objects) : index(index), objects(objects) {}
-    Data(const Data& other) = delete;
-    Data& operator=(const Data& other) = delete;
-    Data(Data&& other) = default;
-    Data& operator=(Data&& other) = default;
-
-    void clear() noexcept
-    {
-        tyr::clear(index);
-        tyr::clear(objects);
-    }
-
-    auto cista_members() const noexcept { return std::tie(index, objects); }
-    auto identifying_members() const noexcept { return std::tie(index.group, objects); }
-};
-
-template<formalism::FactKind T>
-struct Data<formalism::datalog::GroundAtom2<T>>
-{
-    Index<formalism::datalog::GroundAtom2<T>> index;
     Index<formalism::Predicate<T>> predicate;
-    Index<formalism::Binding2> binding;
+    Index<formalism::Binding2> row;
 
     Data() = default;
-    Data(Index<formalism::datalog::GroundAtom2<T>> index, Index<formalism::Predicate<T>> predicate, Index<formalism::Binding2> binding) :
+    Data(Index<formalism::datalog::GroundAtom<T>> index, Index<formalism::Function<T>> predicate, Index<formalism::Binding2> row) :
         index(index),
         predicate(predicate),
-        binding(binding)
+        row(row)
     {
     }
     Data(const Data& other) = delete;
@@ -74,11 +51,11 @@ struct Data<formalism::datalog::GroundAtom2<T>>
     {
         tyr::clear(index);
         tyr::clear(predicate);
-        tyr::clear(binding);
+        tyr::clear(row);
     }
 
-    auto cista_members() const noexcept { return std::tie(index, predicate, binding); }
-    auto identifying_members() const noexcept { return std::tie(index, predicate, binding); }
+    auto cista_members() const noexcept { return std::tie(index, predicate, row); }
+    auto identifying_members() const noexcept { return std::tie(predicate, row); }
 };
 
 }

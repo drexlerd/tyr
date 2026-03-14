@@ -86,9 +86,8 @@ public:
     public:
         Out(RuleExecutionContext<OrAP, AndAP, TP>& rctx, RuleWorkspace<AndAP>::Worker& ws_worker) :
             m_ws_worker(ws_worker),
-            m_const_ground_context_program(ws_worker.builder, rctx.ws_rule.common.program_repository, ws_worker.binding),
-            m_ground_context_solve(ws_worker.builder, ws_worker.solve.stage_repository, ws_worker.binding),
-            m_ground_context_iteration(ws_worker.builder, ws_worker.iteration.program_overlay_repository, ws_worker.binding)
+            m_ground_context_solve(ws_worker.builder, ws_worker.solve.stage_repository, ws_worker.binding, ws_worker.projection),
+            m_ground_context_iteration(ws_worker.builder, ws_worker.iteration.program_overlay_repository, ws_worker.binding, ws_worker.projection)
         {
         }
 
@@ -101,14 +100,12 @@ public:
         auto& pending_rules() noexcept { return m_ws_worker.solve.pending_rules; }
         auto& statistics() noexcept { return m_ws_worker.solve.statistics; }
 
-        auto& const_ground_context_program() noexcept { return m_const_ground_context_program; }
         auto& ground_context_solve() noexcept { return m_ground_context_solve; }
         auto& ground_context_iteration() noexcept { return m_ground_context_iteration; }
 
     private:
         RuleWorkspace<AndAP>::Worker& m_ws_worker;
 
-        formalism::datalog::ConstGrounderContext m_const_ground_context_program;
         formalism::datalog::GrounderContext m_ground_context_solve;
         formalism::datalog::GrounderContext m_ground_context_iteration;
     };

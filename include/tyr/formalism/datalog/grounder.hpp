@@ -37,13 +37,7 @@ struct GrounderContext
     Builder& builder;
     Repository& destination;
     IndexList<Object>& binding;
-};
-
-struct ConstGrounderContext
-{
-    Builder& builder;
-    const Repository& destination;
-    IndexList<Object>& binding;
+    IndexList<Object>& projection;
 };
 
 /**
@@ -81,46 +75,6 @@ auto ground(LiteralView<T> element, GrounderContext& context);
 auto ground(ConjunctiveConditionView element, GrounderContext& context);
 
 auto ground(RuleView element, GrounderContext& context);
-
-/**
- * ground_into_buffer
- */
-
-template<FactKind T>
-void ground_into_buffer(AtomView<T> element, const IndexList<Object>& binding, Data<GroundAtom<T>>& out_atom);
-
-template<FactKind T>
-void ground_into_buffer(FunctionTermView<T> element, const IndexList<Object>& binding, Data<GroundFunctionTerm<T>>& out_fterm);
-
-/**
- * is_ground
- */
-
-bool is_ground(TermView element);
-
-template<FactKind T>
-bool is_ground(FunctionTermView<T> element);
-
-bool is_ground(FunctionExpressionView element);
-
-template<OpKind O>
-bool is_ground(LiftedUnaryOperatorView<O> element);
-
-template<OpKind O>
-bool is_ground(LiftedBinaryOperatorView<O> element);
-
-template<OpKind O>
-bool is_ground(LiftedMultiOperatorView<O> element);
-
-bool is_ground(LiftedBooleanOperatorView element);
-
-bool is_ground(LiftedArithmeticOperatorView element);
-
-template<FactKind T>
-bool is_ground(AtomView<T> element);
-
-template<FactKind T>
-bool is_ground(LiteralView<T> element);
 
 /**
  * Implementations
@@ -176,6 +130,33 @@ inline auto ground(const IndexList<Object>& element, GrounderContext& context)
 }
 
 template<FactKind T>
+inline auto ground(TermListView terms, FunctionView<T> function, GrounderContext& context)
+{
+    auto& projection = context.projection;
+    projection.clear();
+
+    for (const auto term : terms)
+    {
+        visit(
+            [&](auto&& arg)
+            {
+                using Alternative = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
+                    projection.push_back(context.binding[uint_t(arg)]);
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
+                    projection.push_back(arg.get_index());
+                else
+                    static_assert(dependent_false<Alternative>::value, "Missing case");
+            },
+            term.get_variant());
+    }
+
+    // Canonicalize and Serialize
+    return context.destination.get_or_create(function, projection);
+}
+
+template<FactKind T>
 inline auto ground(FunctionTermView<T> element, GrounderContext& context)
 {
     // Fetch and clear
@@ -184,23 +165,8 @@ inline auto ground(FunctionTermView<T> element, GrounderContext& context)
     fterm.clear();
 
     // Fill data
-    fterm.index.group = element.get_function().get_index();
-    for (const auto term : element.get_terms())
-    {
-        visit(
-            [&](auto&& arg)
-            {
-                using Alternative = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                    fterm.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                    fterm.objects.push_back(arg.get_index());
-                else
-                    static_assert(dependent_false<Alternative>::value, "Missing case");
-            },
-            term.get_variant());
-    }
+    fterm.function = element.get_function().get_index();
+    fterm.row = ground(element.get_terms(), element.get_function(), context).first.get_index().second;
 
     // Canonicalize and Serialize
     canonicalize(fterm);
@@ -287,6 +253,33 @@ inline auto ground(LiftedArithmeticOperatorView element, GrounderContext& contex
 }
 
 template<FactKind T>
+inline auto ground(TermListView terms, PredicateView<T> predicate, GrounderContext& context)
+{
+    auto& projection = context.projection;
+    projection.clear();
+
+    for (const auto term : terms)
+    {
+        visit(
+            [&](auto&& arg)
+            {
+                using Alternative = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
+                    projection.push_back(context.binding[uint_t(arg)]);
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
+                    projection.push_back(arg.get_index());
+                else
+                    static_assert(dependent_false<Alternative>::value, "Missing case");
+            },
+            term.get_variant());
+    }
+
+    // Canonicalize and Serialize
+    return context.destination.get_or_create(predicate, projection);
+}
+
+template<FactKind T>
 inline auto ground(AtomView<T> element, GrounderContext& context)
 {
     // Fetch and clear
@@ -295,23 +288,8 @@ inline auto ground(AtomView<T> element, GrounderContext& context)
     atom.clear();
 
     // Fill data
-    atom.index.group = element.get_predicate().get_index();
-    for (const auto term : element.get_terms())
-    {
-        visit(
-            [&](auto&& arg)
-            {
-                using Alternative = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                    atom.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                    atom.objects.push_back(arg.get_index());
-                else
-                    static_assert(dependent_false<Alternative>::value, "Missing case");
-            },
-            term.get_variant());
-    }
+    atom.predicate = element.get_predicate().get_index();
+    atom.row = ground(element.get_terms(), element.get_predicate(), context).first.get_index().second;
 
     // Canonicalize and Serialize
     canonicalize(atom);
@@ -371,153 +349,6 @@ inline auto ground(RuleView element, GrounderContext& context)
     // Canonicalize and Serialize
     canonicalize(rule);
     return context.destination.get_or_create(rule, context.builder.get_buffer());
-}
-
-/**
- * ground_into_buffer
- */
-
-template<FactKind T>
-inline void ground_into_buffer(AtomView<T> element, const IndexList<Object>& binding, Data<GroundAtom<T>>& out_atom)
-{
-    // Fetch and clear
-    out_atom.clear();
-
-    // Fill data
-    out_atom.index.group = element.get_predicate().get_index();
-    for (const auto term : element.get_terms())
-    {
-        visit(
-            [&](auto&& arg)
-            {
-                using Alternative = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                    out_atom.objects.push_back(binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                    out_atom.objects.push_back(arg.get_index());
-                else
-                    static_assert(dependent_false<Alternative>::value, "Missing case");
-            },
-            term.get_variant());
-    }
-
-    // Canonicalize and Serialize
-    canonicalize(out_atom);
-}
-
-template<FactKind T>
-inline void ground_into_buffer(FunctionTermView<T> element, const IndexList<Object>& binding, Data<GroundFunctionTerm<T>>& out_fterm)
-{
-    // Fetch and clear
-    out_fterm.clear();
-
-    // Fill data
-    out_fterm.index.group = element.get_function().get_index();
-    for (const auto term : element.get_terms())
-    {
-        visit(
-            [&](auto&& arg)
-            {
-                using Alternative = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                    out_fterm.objects.push_back(binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                    out_fterm.objects.push_back(arg.get_index());
-                else
-                    static_assert(dependent_false<Alternative>::value, "Missing case");
-            },
-            term.get_variant());
-    }
-
-    // Canonicalize and Serialize
-    canonicalize(out_fterm);
-}
-
-/**
- * is_ground
- */
-
-inline bool is_ground(TermView element)
-{
-    return visit(
-        [&](auto&& arg) -> bool
-        {
-            using Alternative = std::decay_t<decltype(arg)>;
-
-            if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                return false;
-            else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                return true;
-            else
-                static_assert(dependent_false<Alternative>::value, "Missing case");
-        },
-        element.get_variant());
-}
-
-template<FactKind T>
-inline bool is_ground(FunctionTermView<T> element)
-{
-    const auto terms = element.get_terms();
-    return std::all_of(terms.begin(), terms.end(), [](auto&& arg) { return is_ground(arg); });
-}
-
-inline bool is_ground(FunctionExpressionView element)
-{
-    return visit(
-        [&](auto&& arg) -> bool
-        {
-            using Alternative = std::decay_t<decltype(arg)>;
-
-            if constexpr (std::is_same_v<Alternative, float_t>)
-                return true;
-            else
-                return is_ground(arg);
-        },
-        element.get_variant());
-}
-
-template<OpKind O>
-inline bool is_ground(LiftedUnaryOperatorView<O> element)
-{
-    return is_ground(element.get_arg());
-}
-
-template<OpKind O>
-inline bool is_ground(LiftedBinaryOperatorView<O> element)
-{
-    return is_ground(element.get_lhs()) && is_ground(element.get_rhs());
-}
-
-template<OpKind O>
-inline bool is_ground(LiftedMultiOperatorView<O> element)
-{
-    const auto args = element.get_args();
-    return std::all_of(args.begin(), args.end(), [](auto&& arg) { return is_ground(arg); });
-}
-
-inline bool is_ground(LiftedBooleanOperatorView element)
-{
-    return visit([&](auto&& arg) { return is_ground(arg); }, element.get_variant());
-}
-
-inline bool is_ground(LiftedArithmeticOperatorView element)
-{
-    return visit([&](auto&& arg) { return is_ground(arg); }, element.get_variant());
-}
-
-template<FactKind T>
-inline bool is_ground(AtomView<T> element)
-{
-    const auto terms = element.get_terms();
-    return std::all_of(terms.begin(), terms.end(), [](auto&& arg) { return is_ground(arg); });
-}
-
-template<FactKind T>
-inline bool is_ground(LiteralView<T> element)
-{
-    return is_ground(element.get_atom());
 }
 
 }

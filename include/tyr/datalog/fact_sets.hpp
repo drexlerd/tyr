@@ -38,8 +38,6 @@ private:
 
     boost::dynamic_bitset<> m_bitset;
 
-    std::vector<std::vector<Index<formalism::Object>>> m_columns;
-
 public:
     explicit PredicateFactSet(formalism::datalog::PredicateView<T> predicate);
 
@@ -60,8 +58,6 @@ public:
     bool contains(formalism::datalog::GroundAtomView<T> ground_atom) const noexcept;
 
     formalism::datalog::GroundAtomListView<T> get_facts() const noexcept;
-
-    const std::vector<Index<formalism::Object>>& get_column(formalism::ParameterIndex parameter) const noexcept;
 
     const boost::dynamic_bitset<>& get_bitset() const noexcept;
 };
@@ -98,13 +94,7 @@ public:
             set.reset();
     }
 
-    void insert(Index<formalism::datalog::GroundAtom<T>> ground_atom)
-    {
-        assert(uint_t(ground_atom.group) < m_sets.size());
-        m_sets[uint_t(ground_atom.group)].insert(ground_atom);
-    }
-
-    void insert(formalism::datalog::GroundAtomView<T> ground_atom) { insert(ground_atom.get_index()); }
+    void insert(formalism::datalog::GroundAtomView<T> ground_atom) { m_sets[uint_t(ground_atom.get_predicate().get_index())].insert(ground_atom.get_index()); }
 
     void insert(formalism::datalog::GroundAtomListView<T> ground_atoms)
     {
@@ -112,9 +102,10 @@ public:
             insert(ground_atom);
     }
 
-    bool contains(Index<formalism::datalog::GroundAtom<T>> ground_atom) const noexcept { return m_sets[uint_t(ground_atom.get_group())].contains(ground_atom); }
-
-    bool contains(formalism::datalog::GroundAtomView<T> ground_atom) const noexcept { return contains(ground_atom.get_index()); }
+    bool contains(formalism::datalog::GroundAtomView<T> ground_atom) const noexcept
+    {
+        return m_sets[uint_t(ground_atom.get_predicate().get_index())].contains(ground_atom.get_index());
+    }
 
     const std::vector<PredicateFactSet<T>>& get_sets() const noexcept { return m_sets; }
 };
@@ -204,7 +195,7 @@ public:
 
     void insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value)
     {
-        m_sets[uint_t(fterm_value.get_fterm().get_index().get_group())].insert(fterm_value.get_fterm(), fterm_value.get_value());
+        m_sets[uint_t(fterm_value.get_fterm().get_function().get_index())].insert(fterm_value.get_fterm(), fterm_value.get_value());
     }
 
     void insert(formalism::datalog::GroundFunctionTermValueListView<T> fterm_values)
@@ -213,11 +204,15 @@ public:
             insert(fterm_value);
     }
 
-    bool contains(Index<formalism::datalog::GroundFunctionTerm<T>> fterm) const noexcept { return m_sets[uint_t(fterm.get_group())].contains(fterm); }
+    bool contains(formalism::datalog::GroundFunctionTermView<T> fterm) const noexcept
+    {
+        return m_sets[uint_t(fterm.get_function().get_index())].contains(fterm.get_index());
+    }
 
-    bool contains(formalism::datalog::GroundFunctionTermView<T> fterm) const noexcept { return contains(fterm.get_index()); }
-
-    float_t operator[](Index<formalism::datalog::GroundFunctionTerm<T>> fterm) const noexcept { return m_sets[uint_t(fterm.get_group())][fterm]; }
+    float_t operator[](formalism::datalog::GroundFunctionTermView<T> fterm) const noexcept
+    {
+        return m_sets[uint_t(fterm.get_function().get_index())][fterm.get_index()];
+    }
 
     const std::vector<FunctionFactSet<T>>& get_sets() const noexcept { return m_sets; }
 };

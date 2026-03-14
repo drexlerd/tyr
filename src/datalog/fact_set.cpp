@@ -36,8 +36,7 @@ PredicateFactSet<T>::PredicateFactSet(fd::PredicateView<T> predicate) :
     m_predicate(predicate.get_index()),
     m_context(predicate.get_context()),
     m_indices(),
-    m_bitset(),
-    m_columns(predicate.get_arity())
+    m_bitset()
 {
 }
 
@@ -46,8 +45,6 @@ void PredicateFactSet<T>::reset()
 {
     m_indices.clear();
     m_bitset.reset();
-    for (auto& column : m_columns)
-        column.clear();
 }
 
 template<f::FactKind T>
@@ -61,11 +58,6 @@ void PredicateFactSet<T>::insert(Index<formalism::datalog::GroundAtom<T>> ground
 
     m_indices.push_back(ground_atom);
     m_bitset.set(ground_atom.value);
-
-    const auto objs = make_view(ground_atom, m_context).get_objects();
-    assert(m_columns.size() == objs.size());
-    for (size_t pos = 0; pos < objs.size(); ++pos)
-        m_columns[pos].push_back(objs[pos].get_index());
 }
 
 template<f::FactKind T>
@@ -84,11 +76,6 @@ void PredicateFactSet<T>::insert(fd::GroundAtomView<T> ground_atom)
 
     m_indices.push_back(ground_atom_index);
     m_bitset.set(ground_atom_index.value);
-
-    const auto objs = ground_atom.get_objects();
-    assert(m_columns.size() == objs.size());
-    for (size_t pos = 0; pos < objs.size(); ++pos)
-        m_columns[pos].push_back(objs[pos].get_index());
 }
 
 template<f::FactKind T>
@@ -116,13 +103,6 @@ template<f::FactKind T>
 fd::GroundAtomListView<T> PredicateFactSet<T>::get_facts() const noexcept
 {
     return make_view(m_indices, m_context);
-}
-
-template<f::FactKind T>
-const std::vector<Index<formalism::Object>>& PredicateFactSet<T>::get_column(formalism::ParameterIndex parameter) const noexcept
-{
-    assert(uint_t(parameter) < m_columns.size());
-    return m_columns[uint_t(parameter)];
 }
 
 template<f::FactKind T>

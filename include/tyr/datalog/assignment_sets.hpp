@@ -156,7 +156,7 @@ public:
     void insert(formalism::datalog::GroundAtomView<T> ground_atom)
     {
         const auto arity = ground_atom.get_predicate().get_arity();
-        const auto objects = ground_atom.get_objects();
+        const auto objects = ground_atom.get_row().get_objects();
 
         assert(ground_atom.get_predicate().get_index() == m_predicate);
 
@@ -261,7 +261,7 @@ public:
     void insert(formalism::datalog::GroundFunctionTermView<T> function_term, float_t value)
     {
         const auto arity = function_term.get_function().get_arity();
-        const auto arguments = function_term.get_objects();
+        const auto arguments = function_term.get_row().get_objects();
 
         assert(function_term.get_function().get_index() == m_function);
 

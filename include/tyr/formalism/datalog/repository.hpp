@@ -30,6 +30,8 @@
 #include "tyr/common/tuple.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 #include "tyr/formalism/datalog/relation_table_repository.hpp"
+#include "tyr/formalism/function_view.hpp"
+#include "tyr/formalism/predicate_view.hpp"
 
 #include <cassert>
 #include <optional>
@@ -51,22 +53,9 @@ private:
     };
 
     template<typename T>
-    struct RepositoryEntry;
-
-    template<typename T>
-        requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
-    struct RepositoryEntry<T>
+    struct RepositoryEntry
     {
         using slot_type = Slot<T>;
-
-        slot_type slot;
-    };
-
-    template<typename T>
-        requires(GroupIndexConcept<Index<T>>)
-    struct RepositoryEntry<T>
-    {
-        using slot_type = UnorderedMap<typename Index<T>::GroupType, Slot<T>>;
 
         slot_type slot;
     };
@@ -128,48 +117,17 @@ private:
     RepositoryStorage m_repository;
     buffer::SegmentedBuffer m_arena;
     RelationTableRepository m_relation_repository;
-
-    template<typename T>
-        requires(GroupIndexConcept<Index<T>>)
-    auto& get_or_create_slot(Index<T> index)
-    {
-        const auto g = index.group;
-
-        auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto it = entry.slot.find(g);
-        if (it != entry.slot.end())
-            return it->second;  ///< slot already exists
-
-        auto& slot = entry.slot[g];  ///< create a new slot and initialize it
-        const auto parent_size = m_parent ? m_parent->size(index) : size_t { 0 };
-        slot.parent_size = parent_size;
-
-        return slot;
-    }
+    size_t m_num_objects;
 
     /**
      * Clear
      */
 
     template<typename T>
-        requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
     void clear_entry(RepositoryEntry<T>& entry) noexcept
     {
         entry.slot.container.clear();
         entry.slot.parent_size = m_parent ? m_parent->template size<T>() : size_t { 0 };
-    }
-
-    template<typename T>
-        requires(GroupIndexConcept<Index<T>>)
-    void clear_entry(RepositoryEntry<T>& entry) noexcept
-    {
-        for (auto& [g, slot] : entry.slot)
-        {
-            slot.container.clear();
-            auto idx = Index<T> {};
-            idx.group = g;
-            slot.parent_size = m_parent ? m_parent->template size<T>(idx) : size_t { 0 };
-        }
     }
 
     void clear_entries() noexcept
@@ -182,13 +140,13 @@ public:
         m_parent(parent),
         m_repository(),
         m_arena(),
-        m_relation_repository(num_objects, m_parent ? &m_parent->m_relation_repository : nullptr)
+        m_relation_repository(num_objects, m_parent ? &m_parent->m_relation_repository : nullptr),
+        m_num_objects(num_objects)
     {
         clear_entries();
     }
 
     template<typename T>
-        requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
     std::optional<View<Index<T>, Repository>> find_with_hash(const Data<T>& builder, size_t h) const noexcept
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
@@ -202,7 +160,6 @@ public:
     }
 
     template<typename T>
-        requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
     std::optional<View<Index<T>, Repository>> find(const Data<T>& builder) const noexcept
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
@@ -213,50 +170,6 @@ public:
     }
 
     template<typename T>
-        requires(GroupIndexConcept<Index<T>>)
-    std::optional<View<Index<T>, Repository>> find_with_hash(const Data<T>& builder, size_t h) const noexcept
-    {
-        const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = builder.index.group;
-        const auto& slot = entry.slot;
-
-        const auto it = slot.find(g);
-        if (it == slot.end())
-        {
-            assert(!m_parent || !std::get<RepositoryEntry<T>>(m_parent->m_repository).slot.contains(g));
-            return std::nullopt;
-        }
-
-        const auto& container = it->second.container;
-        if (auto ptr = container.find_with_hash(builder, h))
-            return View<Index<T>, Repository>(ptr->index, *this);
-
-        return m_parent ? m_parent->template find_with_hash<T>(builder, h) : std::nullopt;
-    }
-
-    template<typename T>
-        requires(GroupIndexConcept<Index<T>>)
-    std::optional<View<Index<T>, Repository>> find(const Data<T>& builder) const noexcept
-    {
-        const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = builder.index.group;
-        const auto& slot = entry.slot;
-
-        const auto it = slot.find(g);
-        if (it == slot.end())
-        {
-            assert((!m_parent || !std::get<RepositoryEntry<T>>(m_parent->m_repository).slot.contains(g)) && "Child doesn't have slot while parent does.");
-            return std::nullopt;
-        }
-
-        const auto& container = it->second.container;
-        const auto h = container.hash(builder);
-
-        return find_with_hash<T>(builder, h);
-    }
-
-    template<typename T>
-        requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
     std::pair<View<Index<T>, Repository>, bool> get_or_create(Data<T>& builder, buffer::Buffer& buf)
     {
         auto& entry = std::get<RepositoryEntry<T>>(m_repository);
@@ -276,28 +189,8 @@ public:
         return { View<Index<T>, Repository>(ptr->index, *this), success };
     }
 
-    template<typename T>
-        requires(GroupIndexConcept<Index<T>>)
-    std::pair<View<Index<T>, Repository>, bool> get_or_create(Data<T>& builder, buffer::Buffer& buf)
-    {
-        auto& slot = get_or_create_slot(builder.index);
-        auto& container = slot.container;
-        const auto h = container.hash(builder);
-
-        if (m_parent)
-            if (auto ptr = m_parent->template find_with_hash<T>(builder, h))
-                return { *ptr, false };
-
-        // Manually assign index to continue indexing.
-        builder.index.value = slot.parent_size + container.size();
-
-        const auto [ptr, success] = container.insert_with_hash(h, builder, buf, m_arena);
-        return { View<Index<T>, Repository>(ptr->index, *this), success };
-    }
-
     /// @brief Access the element with the given index.
     template<typename T>
-        requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
     const Data<T>& operator[](Index<T> index) const noexcept
     {
         assert(index != Index<T>::max() && "Unassigned index.");
@@ -320,31 +213,6 @@ public:
     }
 
     template<typename T>
-        requires(GroupIndexConcept<Index<T>>)
-    const Data<T>& operator[](Index<T> index) const noexcept
-    {
-        assert(index != Index<T>::max() && "Unassigned index.");
-
-        const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = index.group;
-        const auto& slot = entry.slot.at(g);
-        const auto parent_size = slot.parent_size;
-
-        // In parent range -> delegate
-        if (index.value < parent_size)
-        {
-            assert(m_parent);
-            return (*m_parent)[index];
-        }
-
-        // Local range -> shift down
-        index.value -= parent_size;
-
-        return slot.container[index];
-    }
-
-    template<typename T>
-        requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
     const Data<T>& front() const
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
@@ -359,27 +227,8 @@ public:
         return slot.container.front();
     }
 
-    template<typename T>
-        requires(GroupIndexConcept<Index<T>>)
-    const Data<T>& front(Index<T> index) const
-    {
-        const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = index.group;
-        const auto& slot = entry.slot.at(g);
-
-        const auto parent_size = slot.parent_size;
-        if (parent_size > 0)
-        {
-            assert(m_parent);
-            return m_parent->template front<T>(index);  // same group
-        }
-
-        return slot.container.front();
-    }
-
     /// @brief Get the number of stored elements.
     template<typename T>
-        requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
     size_t size() const noexcept
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
@@ -388,34 +237,16 @@ public:
         return slot.parent_size + slot.container.size();
     }
 
-    template<typename T>
-        requires(GroupIndexConcept<Index<T>>)
-    size_t size(Index<T> index) const noexcept
-    {
-        const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = index.group;
-        const auto& slot = entry.slot;
-
-        const auto it = slot.find(g);
-        if (it == slot.end())
-            return 0;
-
-        const size_t parent_size = it->second.parent_size;
-        const size_t local_size = it->second.container.size();
-
-        return parent_size + local_size;
-    }
-
     /// @brief Clear the repository but keep memory allocated.
     void clear() noexcept
     {
         m_arena.clear();
         clear_entries();
+        m_relation_repository.clear();
     }
 
     // Get the canonical repository which is repository whose container stores the data of the element corresponding to the given index.
     template<typename T>
-        requires(IndexConcept<Index<T>> && !GroupIndexConcept<Index<T>>)
     const Repository& get_canonical_context(Index<T> index) const noexcept
     {
         const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
@@ -429,28 +260,107 @@ public:
         return *this;
     }
 
-    template<typename T>
-        requires GroupIndexConcept<Index<T>>
-    const Repository& get_canonical_context(Index<T> index) const noexcept
+    /**
+     * Predicate relation table
+     */
+
+    template<FactKind T>
+    std::optional<View<std::pair<Index<Predicate<T>>, Index<Binding2>>, Repository>>
+    find_with_hash(Index<Predicate<T>> g, const IndexList<Object>& builder, size_t h) const noexcept
     {
-        const auto& entry = std::get<RepositoryEntry<T>>(m_repository);
-        const auto g = index.group;
+        const auto row_or_nullopt = m_relation_repository.find_with_hash(g, builder, h);
+        if (row_or_nullopt)
+            return make_view(std::make_pair(g.get_index(), *row_or_nullopt), *this);
+        return std::nullopt;
+    }
 
-        const auto it = entry.slot.find(g);
-        if (it == entry.slot.end())
-        {
-            assert(m_parent && "Element not found in the repository chain.");
-            return m_parent ? m_parent->get_canonical_context(index) : *this;
-        }
+    template<FactKind T>
+    std::optional<View<std::pair<Index<Predicate<T>>, Index<Binding2>>, Repository>> find(Index<Predicate<T>> g,
+                                                                                          const IndexList<Object>& builder) const noexcept
+    {
+        const auto row_or_nullopt = m_relation_repository.find(g, builder);
+        if (row_or_nullopt)
+            return make_view(std::make_pair(g.get_index(), *row_or_nullopt), *this);
+        return std::nullopt;
+    }
 
-        const auto& slot = it->second;
-        if (index.value < slot.parent_size)
-        {
-            assert(m_parent && "Element not found in the repository chain.");
-            return m_parent->get_canonical_context(index);
-        }
+    template<FactKind T>
+    std::pair<View<std::pair<Index<Predicate<T>>, Index<Binding2>>, Repository>, bool> get_or_create(View<Index<Predicate<T>>, Repository> g,
+                                                                                                     const IndexList<Object>& builder)
+    {
+        const auto [row, success] =
+            m_relation_repository.get_or_create(g.get_index(), g.get_arity(), std::max<uint8_t>(1, std::bit_width(m_num_objects)), builder);
 
-        return *this;
+        return { make_view(std::make_pair(g.get_index(), row), *this), success };
+    }
+
+    template<FactKind T>
+    auto operator[](std::pair<Index<Predicate<T>>, Index<Binding2>> index) const noexcept
+    {
+        return m_relation_repository[index];
+    }
+
+    template<FactKind T>
+    size_t size(Index<Predicate<T>> g) const noexcept
+    {
+        return m_relation_repository.size(g);
+    }
+
+    template<FactKind T>
+    const RelationTableRepository& get_canonical_context(std::pair<Index<Predicate<T>>, Index<Binding2>> index) const noexcept
+    {
+        return m_relation_repository.get_canonical_context(index);
+    }
+
+    /**
+     * Function relation table
+     */
+
+    template<FactKind T>
+    std::optional<View<std::pair<Index<Function<T>>, Index<Binding2>>, Repository>>
+    find_with_hash(Index<Function<T>> g, const IndexList<Object>& builder, size_t h) const noexcept
+    {
+        const auto row_or_nullopt = m_relation_repository.find_with_hash(g, builder, h);
+        if (row_or_nullopt)
+            return make_view(std::make_pair(g.get_index(), *row_or_nullopt), *this);
+        return std::nullopt;
+    }
+
+    template<FactKind T>
+    std::optional<View<std::pair<Index<Function<T>>, Index<Binding2>>, Repository>> find(Index<Function<T>> g, const IndexList<Object>& builder) const noexcept
+    {
+        const auto row_or_nullopt = m_relation_repository.find(g, builder);
+        if (row_or_nullopt)
+            return make_view(std::make_pair(g.get_index(), *row_or_nullopt), *this);
+        return std::nullopt;
+    }
+
+    template<FactKind T>
+    std::pair<View<std::pair<Index<Function<T>>, Index<Binding2>>, Repository>, bool> get_or_create(View<Index<Function<T>>, Repository> g,
+                                                                                                    const IndexList<Object>& builder)
+    {
+        const auto [row, success] =
+            m_relation_repository.get_or_create(g.get_index(), g.get_arity(), std::max<uint8_t>(1, std::bit_width(m_num_objects)), builder);
+
+        return { make_view(std::make_pair(g.get_index(), row), *this), success };
+    }
+
+    template<FactKind T>
+    auto operator[](std::pair<Index<Function<T>>, Index<Binding2>> index) const noexcept
+    {
+        return m_relation_repository[index];
+    }
+
+    template<FactKind T>
+    size_t size(Index<Function<T>> g) const noexcept
+    {
+        return m_relation_repository.size(g);
+    }
+
+    template<FactKind T>
+    const RelationTableRepository& get_canonical_context(std::pair<Index<Function<T>>, Index<Binding2>> index) const noexcept
+    {
+        return m_relation_repository.get_canonical_context(index);
     }
 };
 
