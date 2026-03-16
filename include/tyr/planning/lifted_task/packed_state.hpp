@@ -18,11 +18,10 @@
 #ifndef TYR_PLANNING_LIFTED_TASK_PACKED_STATE_HPP_
 #define TYR_PLANNING_LIFTED_TASK_PACKED_STATE_HPP_
 
-#include "tyr/planning/packed_state.hpp"
-//
 #include "tyr/common/config.hpp"
 #include "tyr/common/declarations.hpp"
 #include "tyr/planning/declarations.hpp"
+#include "tyr/planning/packed_state.hpp"
 #include "tyr/planning/state_index.hpp"
 
 #include <valla/valla.hpp>
@@ -49,6 +48,7 @@ class PackedState<LiftedTask>
 public:
     using TaskType = LiftedTask;
 
+    PackedState() noexcept = default;
     PackedState(StateIndex index, valla::Slot<uint_t> fluent_atoms, valla::Slot<uint_t> derived_atoms, valla::Slot<uint_t> numeric_variables) noexcept :
         m_index(index),
         m_fluent_atoms(fluent_atoms),

@@ -46,6 +46,7 @@ class PackedState<GroundTask>
 public:
     using TaskType = GroundTask;
 
+    PackedState() noexcept = default;
     PackedState(StateIndex index, uint_t fluent_facts, uint_t derived_facts, valla::Slot<uint_t> numeric_variables) noexcept :
         m_index(index),
         m_fluent_facts(fluent_facts),

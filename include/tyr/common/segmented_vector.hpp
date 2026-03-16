@@ -18,126 +18,140 @@
 #ifndef TYR_COMMON_SEGMENTED_VECTOR_HPP_
 #define TYR_COMMON_SEGMENTED_VECTOR_HPP_
 
+#include "tyr/common/bit.hpp"
+
 #include <bit>
+#include <cassert>
+#include <cstddef>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace tyr
 {
-template<typename T>
+template<typename T, size_t FirstSegmentSize = 32>
 class SegmentedVector
 {
+    static_assert(bit::is_power_of_two(FirstSegmentSize));
+    static_assert(std::is_trivially_copyable_v<T>);
+    static_assert(std::is_default_constructible_v<T>);
+
 private:
-    std::vector<std::vector<T>> m_segments;
-    size_t m_offset;
-    size_t m_capacity;
-    size_t m_size;
+    static constexpr size_t seg_shift = std::countr_zero(FirstSegmentSize);
+    static constexpr size_t seg_mask = FirstSegmentSize - 1;
 
-    static constexpr size_t INITIAL_SEGMENT_SIZE = 32;
+    static size_t get_segment_index(size_t index) noexcept { return std::bit_width((index >> seg_shift) + size_t { 1 }) - 1; }
 
-    // TODO assert that initial segment size is a power of 2
-    static_assert((INITIAL_SEGMENT_SIZE & (INITIAL_SEGMENT_SIZE - 1)) == 0, "INITIAL_SEGMENT_SIZE must be a power of 2");
-
-    static size_t get_index(size_t pos)
+    static size_t get_segment_pos(size_t index) noexcept
     {
-        constexpr size_t k = std::countr_zero(INITIAL_SEGMENT_SIZE);
-        return std::countr_zero(std::bit_floor(pos + INITIAL_SEGMENT_SIZE)) - k;
+        const size_t q = index >> seg_shift;
+        const size_t r = index & seg_mask;
+        const size_t seg_idx = get_segment_index(index);
+        return ((q - ((size_t { 1 } << seg_idx) - 1)) << seg_shift) + r;
     }
 
-    static size_t get_offset(size_t pos)
+    void resize_to_fit(size_t n)
     {
-        constexpr size_t k = std::countr_zero(INITIAL_SEGMENT_SIZE);
-        return pos - (((std::bit_floor(pos + INITIAL_SEGMENT_SIZE) >> k) - 1) << k);
-    }
-
-    void resize_to_fit()
-    {
-        const auto remaining_entries = m_segments.back().capacity() - m_offset;
-
-        if (remaining_entries == 0)
+        if (m_segments.empty())
         {
-            const auto new_segment_size = m_segments.back().size() * 2;
-
             m_segments.emplace_back();
-            m_segments.back().reserve(new_segment_size);
-            m_offset = 0;
+            m_segments.back().resize(FirstSegmentSize);
+            m_capacity += FirstSegmentSize;
+        }
+
+        while (m_capacity < n)
+        {
+            const size_t new_segment_size = FirstSegmentSize << m_segments.size();
+            m_segments.emplace_back();
+            m_segments.back().resize(new_segment_size);
             m_capacity += new_segment_size;
         }
     }
 
 public:
-    SegmentedVector() : m_segments(), m_offset(0), m_capacity(0), m_size(0)
-    {
-        m_segments.emplace_back();
-        m_segments.back().reserve(INITIAL_SEGMENT_SIZE);
-    }
+    SegmentedVector() : m_segments(), m_capacity(0), m_size(0) {}
+
+    void clear() noexcept { m_size = 0; }
 
     void push_back(const T& element)
     {
-        resize_to_fit();
+        resize_to_fit(m_size + 1);
 
-        m_segments.back().push_back(element);
+        const auto index = get_segment_index(m_size);
+        const auto offset = get_segment_pos(m_size);
+        m_segments[index][offset] = element;
 
-        ++m_offset;
-        ++m_size;
-    }
-    void push_back(T&& element)
-    {
-        resize_to_fit();
-
-        m_segments.back().push_back(std::move(element));
-
-        ++m_offset;
         ++m_size;
     }
 
     void pop_back()
     {
-        m_segments.back().pop_back();
-
-        --m_offset;
+        assert(m_size > 0);
         --m_size;
     }
 
     const T& operator[](size_t pos) const
     {
-        const auto index = get_index(pos);
-        const auto offset = get_offset(pos);
+        assert(pos < m_size);
 
-        assert(index < m_segments.size() && offset < m_segments[index].size());
-
+        const auto index = get_segment_index(pos);
+        const auto offset = get_segment_pos(pos);
         return m_segments[index][offset];
     }
+
     T& operator[](size_t pos)
     {
-        const auto index = get_index(pos);
-        const auto offset = get_offset(pos);
+        assert(pos < m_size);
 
-        assert(index < m_segments.size() && offset < m_segments[index].size());
-
+        const auto index = get_segment_index(pos);
+        const auto offset = get_segment_pos(pos);
         return m_segments[index][offset];
     }
 
     const T& at(size_t pos) const
     {
-        const auto index = get_index(pos);
-        const auto offset = get_offset(pos);
+        if (pos >= m_size)
+            throw std::out_of_range("SegmentedVector::at");
 
+        const auto index = get_segment_index(pos);
+        const auto offset = get_segment_pos(pos);
         return m_segments.at(index).at(offset);
     }
+
     T& at(size_t pos)
     {
-        const auto index = get_index(pos);
-        const auto offset = get_offset(pos);
+        if (pos >= m_size)
+            throw std::out_of_range("SegmentedVector::at");
 
+        const auto index = get_segment_index(pos);
+        const auto offset = get_segment_pos(pos);
         return m_segments.at(index).at(offset);
     }
 
-    const T& back() const { return m_segments.back().back(); }
-    T& back() { return m_segments.back().back(); }
+    const T& back() const
+    {
+        assert(m_size > 0);
+        return (*this)[m_size - 1];
+    }
 
-    size_t capacity() const { return m_capacity; }
-    size_t size() const { return m_size; }
+    T& back()
+    {
+        assert(m_size > 0);
+        return (*this)[m_size - 1];
+    }
+
+    size_t capacity() const noexcept { return m_capacity; }
+    size_t size() const noexcept { return m_size; }
+    bool empty() const noexcept { return m_size == 0; }
+
+private:
+    // Segments grow geometrically, i.e., FirstSegmentSize, 2*FirstSegmentSize, 4*FirstSegmentSize, ...
+    std::vector<std::vector<T>> m_segments;
+    size_t m_capacity;
+    size_t m_size;
 };
+
 }
 
 #endif

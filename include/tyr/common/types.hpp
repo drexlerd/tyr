@@ -56,11 +56,6 @@ concept ViewConcept = requires(T type, const C& context) {
     { View<T, C>(type, context).get_handle() } -> std::same_as<const T&>;
 };
 
-template<typename T>
-concept Indexable = requires(T a) {
-    { a.get_value() } -> std::same_as<uint_t>;
-};
-
 /// @brief Helper to create a view
 template<typename T, typename C>
 auto make_view(const T& element, const C& context) noexcept

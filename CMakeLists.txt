@@ -21,6 +21,8 @@ if(TYR_ENABLE_INNER_PARALLELISM)
     add_compile_definitions(TYR_ENABLE_INNER_PARALLELISM)
 endif()
 
+option(TYR_USE_LLD "Use LLVM lld linker when available" ON)
+
 ##############################################################
 # Build Targets
 ##############################################################
@@ -57,10 +59,14 @@ else()
 
     add_compile_options(-Wall)
 
-    # Use lld if present (won't error if missing)
-    find_program(LLD_LINKER NAMES ld.lld lld)
-    if(LLD_LINKER)
-        add_link_options(-fuse-ld=lld)
+    if(TYR_USE_LLD)
+        find_program(LLD_LINKER NAMES ld.lld)
+        if(LLD_LINKER)
+            message(STATUS "Using lld: ${LLD_LINKER}")
+            add_link_options(-fuse-ld=lld)
+        else()
+            message(STATUS "lld not found, falling back to default linker")
+        endif()
     endif()
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

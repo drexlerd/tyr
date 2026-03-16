@@ -20,6 +20,8 @@
 
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
+#include "tyr/common/index_mixins.hpp"
+#include "tyr/common/segmented_vector.hpp"
 #include "tyr/common/types.hpp"
 
 #include <concepts>
@@ -31,15 +33,22 @@
 namespace tyr
 {
 
-template<typename T, Indexable I, typename H = Hash<T>, typename E = EqualTo<T>>
+template<typename T, IndexConcept I, typename H = Hash<T>, typename E = EqualTo<T>, size_t FirstSegmentSize = 32>
 class IndexedHashSet
 {
+    static_assert(bit::is_power_of_two(FirstSegmentSize));
+    static_assert(std::is_trivially_copyable_v<T>);
+    static_assert(std::is_default_constructible_v<T>);
+
 private:
     struct IndexableHash;
     struct IndexableEqualTo;
 
+    template<typename T_>
+    using VectorType = SegmentedVector<T_, FirstSegmentSize>;
+
 public:
-    IndexedHashSet() : m_vec(std::make_shared<std::vector<T>>()), m_set(0, IndexableHash(m_vec), IndexableEqualTo(m_vec)) {}
+    IndexedHashSet() : m_storage(std::make_unique<VectorType<T>>()), m_set(0, IndexableHash(*m_storage), IndexableEqualTo(*m_storage)) {}
     IndexedHashSet(const IndexedHashSet& other) = delete;
     IndexedHashSet& operator=(const IndexedHashSet& other) = delete;
     IndexedHashSet(IndexedHashSet&& other) = default;
@@ -58,49 +67,52 @@ public:
         if (auto it = m_set.find(value); it != m_set.end())
             return *it;
 
-        I idx(static_cast<uint_t>(m_vec->size()));
-        m_vec->push_back(value);
+        I idx(static_cast<uint_t>(m_storage->size()));
+        m_storage->push_back(value);
         m_set.emplace(idx);
         return idx;
     }
 
-    const T& operator[](I idx) const noexcept { return (*m_vec)[idx.get_value()]; }
+    const T& operator[](I idx) const noexcept { return (*m_storage)[uint_t(idx)]; }
 
-    std::size_t size() const noexcept { return m_vec->size(); }
+    std::size_t size() const noexcept { return m_storage->size(); }
 
 private:
-    struct IndexableHash
+    class IndexableHash
     {
+    private:
+        const VectorType<T>* m_storage;
+        H m_hash;
+
+    public:
         using is_transparent = void;
 
-        std::shared_ptr<const std::vector<T>> vec;
-        H hash;
+        IndexableHash() noexcept : m_storage(nullptr) {}
+        explicit IndexableHash(const VectorType<T>& storage) noexcept : m_storage(&storage) {}
 
-        IndexableHash() noexcept : vec(nullptr) {}
-        explicit IndexableHash(std::shared_ptr<const std::vector<T>> vec) noexcept : vec(std::move(vec)) {}
-
-        size_t operator()(I el) const noexcept { return hash((*vec)[el.get_value()]); }
-        size_t operator()(const T& el) const noexcept { return hash(el); }
+        size_t operator()(I el) const noexcept { return m_hash((*m_storage)[uint_t(el)]); }
+        size_t operator()(const T& el) const noexcept { return m_hash(el); }
     };
 
-    struct IndexableEqualTo
+    class IndexableEqualTo
     {
+    private:
+        const VectorType<T>* m_storage;
+        E m_equal_to;
+
+    public:
         using is_transparent = void;
 
-        std::shared_ptr<const std::vector<T>> vec;
-        E equal_to;
+        IndexableEqualTo() noexcept : m_storage(nullptr), m_equal_to() {}
+        explicit IndexableEqualTo(const VectorType<T>& storage) noexcept : m_storage(&storage), m_equal_to() {}
 
-        IndexableEqualTo() noexcept : vec(nullptr), equal_to() {}
-        explicit IndexableEqualTo(std::shared_ptr<const std::vector<T>> vec) noexcept : vec(std::move(vec)), equal_to() {}
-
-        bool operator()(I lhs, I rhs) const noexcept { return equal_to((*vec)[lhs.get_value()], (*vec)[rhs.get_value()]); }
-
-        bool operator()(const T& lhs, I rhs) const noexcept { return equal_to(lhs, (*vec)[rhs.get_value()]); }
-        bool operator()(I lhs, const T& rhs) const noexcept { return equal_to((*vec)[lhs.get_value()], rhs); }
-        bool operator()(const T& lhs, const T& rhs) const noexcept { return equal_to(lhs, rhs); }
+        bool operator()(I lhs, I rhs) const noexcept { return m_equal_to((*m_storage)[uint_t(lhs)], (*m_storage)[uint_t(rhs)]); }
+        bool operator()(const T& lhs, I rhs) const noexcept { return m_equal_to(lhs, (*m_storage)[uint_t(rhs)]); }
+        bool operator()(I lhs, const T& rhs) const noexcept { return m_equal_to((*m_storage)[uint_t(lhs)], rhs); }
+        bool operator()(const T& lhs, const T& rhs) const noexcept { return m_equal_to(lhs, rhs); }
     };
 
-    std::shared_ptr<std::vector<T>> m_vec;
+    std::unique_ptr<VectorType<T>> m_storage;
     gtl::flat_hash_set<I, IndexableHash, IndexableEqualTo> m_set;
 };
 }
