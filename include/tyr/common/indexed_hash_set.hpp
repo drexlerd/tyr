@@ -33,28 +33,27 @@
 namespace tyr
 {
 
-template<typename T, IndexConcept I, typename H = Hash<T>, typename E = EqualTo<T>, size_t FirstSegmentSize = 32>
+template<typename T, typename H = Hash<Data<T>>, typename E = EqualTo<Data<T>>, size_t FirstSegmentSize = 32>
 class IndexedHashSet
 {
     static_assert(bit::is_power_of_two(FirstSegmentSize));
-    static_assert(std::is_trivially_copyable_v<T>);
-    static_assert(std::is_default_constructible_v<T>);
+    static_assert(std::is_trivially_copyable_v<Data<T>>);
+    static_assert(std::is_default_constructible_v<Data<T>>);
 
 private:
     struct IndexableHash;
     struct IndexableEqualTo;
 
-    template<typename T_>
-    using VectorType = SegmentedVector<T_, FirstSegmentSize>;
+    using VectorType = SegmentedVector<Data<T>, FirstSegmentSize>;
 
 public:
-    IndexedHashSet() : m_storage(std::make_unique<VectorType<T>>()), m_set(0, IndexableHash(*m_storage), IndexableEqualTo(*m_storage)) {}
+    IndexedHashSet() : m_storage(std::make_unique<VectorType>()), m_set(0, IndexableHash(*m_storage), IndexableEqualTo(*m_storage)) {}
     IndexedHashSet(const IndexedHashSet& other) = delete;
     IndexedHashSet& operator=(const IndexedHashSet& other) = delete;
     IndexedHashSet(IndexedHashSet&& other) = default;
     IndexedHashSet& operator=(IndexedHashSet&& other) = default;
 
-    std::optional<I> find(const T& value) const
+    std::optional<Index<T>> find(const Data<T>& value) const
     {
         if (auto it = m_set.find(value); it != m_set.end())
             return *it;
@@ -62,18 +61,18 @@ public:
         return std::nullopt;
     }
 
-    I insert(const T& value)
+    Index<T> insert(const Data<T>& value)
     {
         if (auto it = m_set.find(value); it != m_set.end())
             return *it;
 
-        I idx(static_cast<uint_t>(m_storage->size()));
+        Index<T> idx(static_cast<uint_t>(m_storage->size()));
         m_storage->push_back(value);
         m_set.emplace(idx);
         return idx;
     }
 
-    const T& operator[](I idx) const noexcept { return (*m_storage)[uint_t(idx)]; }
+    const Data<T>& operator[](Index<T> idx) const noexcept { return (*m_storage)[uint_t(idx)]; }
 
     std::size_t size() const noexcept { return m_storage->size(); }
 
@@ -81,39 +80,39 @@ private:
     class IndexableHash
     {
     private:
-        const VectorType<T>* m_storage;
+        const VectorType* m_storage;
         H m_hash;
 
     public:
         using is_transparent = void;
 
         IndexableHash() noexcept : m_storage(nullptr) {}
-        explicit IndexableHash(const VectorType<T>& storage) noexcept : m_storage(&storage) {}
+        explicit IndexableHash(const VectorType& storage) noexcept : m_storage(&storage) {}
 
-        size_t operator()(I el) const noexcept { return m_hash((*m_storage)[uint_t(el)]); }
-        size_t operator()(const T& el) const noexcept { return m_hash(el); }
+        size_t operator()(Index<T> el) const noexcept { return m_hash((*m_storage)[uint_t(el)]); }
+        size_t operator()(const Data<T>& el) const noexcept { return m_hash(el); }
     };
 
     class IndexableEqualTo
     {
     private:
-        const VectorType<T>* m_storage;
+        const VectorType* m_storage;
         E m_equal_to;
 
     public:
         using is_transparent = void;
 
         IndexableEqualTo() noexcept : m_storage(nullptr), m_equal_to() {}
-        explicit IndexableEqualTo(const VectorType<T>& storage) noexcept : m_storage(&storage), m_equal_to() {}
+        explicit IndexableEqualTo(const VectorType& storage) noexcept : m_storage(&storage), m_equal_to() {}
 
-        bool operator()(I lhs, I rhs) const noexcept { return m_equal_to((*m_storage)[uint_t(lhs)], (*m_storage)[uint_t(rhs)]); }
-        bool operator()(const T& lhs, I rhs) const noexcept { return m_equal_to(lhs, (*m_storage)[uint_t(rhs)]); }
-        bool operator()(I lhs, const T& rhs) const noexcept { return m_equal_to((*m_storage)[uint_t(lhs)], rhs); }
-        bool operator()(const T& lhs, const T& rhs) const noexcept { return m_equal_to(lhs, rhs); }
+        bool operator()(Index<T> lhs, Index<T> rhs) const noexcept { return m_equal_to((*m_storage)[uint_t(lhs)], (*m_storage)[uint_t(rhs)]); }
+        bool operator()(const Data<T>& lhs, Index<T> rhs) const noexcept { return m_equal_to(lhs, (*m_storage)[uint_t(rhs)]); }
+        bool operator()(Index<T> lhs, const Data<T>& rhs) const noexcept { return m_equal_to((*m_storage)[uint_t(lhs)], rhs); }
+        bool operator()(const Data<T>& lhs, const Data<T>& rhs) const noexcept { return m_equal_to(lhs, rhs); }
     };
 
-    std::unique_ptr<VectorType<T>> m_storage;
-    gtl::flat_hash_set<I, IndexableHash, IndexableEqualTo> m_set;
+    std::unique_ptr<VectorType> m_storage;
+    gtl::flat_hash_set<Index<T>, IndexableHash, IndexableEqualTo> m_set;
 };
 }
 

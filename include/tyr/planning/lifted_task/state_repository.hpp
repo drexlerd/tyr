@@ -66,7 +66,7 @@ private:
     valla::IndexedHashSet<valla::Slot<uint_t>, uint_t> m_uint_nodes;
     valla::IndexedHashSet<float_t, uint_t> m_float_nodes;
     std::vector<uint_t> m_nodes_buffer;
-    IndexedHashSet<Data<State<LiftedTask>>, Index<State<LiftedTask>>> m_packed_states;
+    IndexedHashSet<State<LiftedTask>> m_packed_states;
     SharedObjectPool<UnpackedState<LiftedTask>> m_unpacked_state_pool;
 
     std::shared_ptr<AxiomEvaluator<LiftedTask>> m_axiom_evaluator;

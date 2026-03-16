@@ -2,7 +2,6 @@
 
 from pytyr.pytyr.planning import (
     SearchStatus,
-    StateIndex,
 )
 
 from . import (

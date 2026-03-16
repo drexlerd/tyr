@@ -71,7 +71,7 @@ private:
     valla::IndexedHashSet<valla::Slot<uint_t>, uint_t> m_uint_nodes;
     valla::IndexedHashSet<float_t, uint_t> m_float_nodes;
     std::vector<uint_t> m_nodes_buffer;
-    IndexedHashSet<Data<State<GroundTask>>, Index<State<GroundTask>>> m_packed_states;
+    IndexedHashSet<State<GroundTask>> m_packed_states;
     RawArraySet<uint_t> m_fluent_repository;
     RawArraySet<uint_t> m_derived_repository;
     std::vector<uint_t> m_fluent_buffer;

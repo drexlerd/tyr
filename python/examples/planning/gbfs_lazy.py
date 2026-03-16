@@ -22,8 +22,8 @@ from dataclasses import dataclass
 from enum import Enum
 
 from pytyr.formalism.planning import ParserOptions, Parser
-from pytyr.planning import SearchStatus, StateIndex
-from pytyr.planning.lifted import SearchResult, SuccessorGenerator, Heuristic, FFHeuristic, PruningStrategy, GoalStrategy, TaskGoalStrategy, State, Node, LabeledNode, Plan, Task
+from pytyr.planning import SearchStatus
+from pytyr.planning.lifted import StateIndex, SearchResult, SuccessorGenerator, Heuristic, FFHeuristic, PruningStrategy, GoalStrategy, TaskGoalStrategy, State, Node, LabeledNode, Plan, Task
 
 
 class SearchNodeStatus(Enum):

@@ -3,6 +3,7 @@
 from pytyr.pytyr.planning.lifted import (
     Task,
     State,    
+    StateIndex,
     Node,    
     LabeledNode,
     Plan,
