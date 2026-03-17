@@ -35,8 +35,8 @@ struct Data<formalism::datalog::Literal<T>>
 
     Data() = default;
     Data(Index<formalism::datalog::Literal<T>> index, Index<formalism::datalog::Atom<T>> atom, bool polarity) : index(index), atom(atom), polarity(polarity) {}
-    Data(const Data& other) = delete;
-    Data& operator=(const Data& other) = delete;
+    Data(const Data& other) = default;
+    Data& operator=(const Data& other) = default;
     Data(Data&& other) = default;
     Data& operator=(Data&& other) = default;
 

@@ -142,7 +142,7 @@ inline auto merge_p2d(VariableView element, MergeDatalogContext& context)
     variable.name = element.get_name();
 
     canonicalize(variable);
-    return context.destination.get_or_create(variable, context.builder.get_buffer());
+    return context.destination.get_or_create(variable);
 }
 
 inline auto merge_p2d(ObjectView element, MergeDatalogContext& context)
@@ -154,7 +154,7 @@ inline auto merge_p2d(ObjectView element, MergeDatalogContext& context)
     object.name = element.get_name();
 
     canonicalize(object);
-    return context.destination.get_or_create(object, context.builder.get_buffer());
+    return context.destination.get_or_create(object);
 }
 
 inline auto merge_p2d(BindingView element, MergeDatalogContext& context)
@@ -166,7 +166,7 @@ inline auto merge_p2d(BindingView element, MergeDatalogContext& context)
     binding.objects = element.get_data().objects;
 
     canonicalize(binding);
-    return context.destination.get_or_create(binding, context.builder.get_buffer());
+    return context.destination.get_or_create(binding);
 }
 
 inline auto merge_p2d(TermView element, MergeDatalogContext& context)
@@ -199,7 +199,7 @@ inline auto merge_p2d(PredicateView<T_SRC> element, MergeDatalogContext& context
     predicate.arity = element.get_arity();
 
     canonicalize(predicate);
-    return context.destination.get_or_create(predicate, context.builder.get_buffer());
+    return context.destination.get_or_create(predicate);
 }
 
 template<FactKind T_SRC, FactKind T_DST>
@@ -214,7 +214,7 @@ inline auto merge_p2d(AtomView<T_SRC> element, MergeDatalogContext& context)
         atom.terms.push_back(merge_p2d(term, context));
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 template<FactKind T>
@@ -249,7 +249,7 @@ inline auto merge_p2d(GroundAtomView<T_SRC> element, MergeDatalogContext& contex
     atom.row = merge_p2d(predicate_view, element.get_row(), context).first.get_index().second;
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 template<FactKind T_SRC, FactKind T_DST>
@@ -263,7 +263,7 @@ inline auto merge_p2d(LiteralView<T_SRC> element, MergeDatalogContext& context)
     literal.atom = merge_p2d<T_SRC, T_DST>(element.get_atom(), context).first.get_index();
 
     canonicalize(literal);
-    return context.destination.get_or_create(literal, context.builder.get_buffer());
+    return context.destination.get_or_create(literal);
 }
 
 template<FactKind T_SRC, FactKind T_DST>
@@ -277,7 +277,7 @@ inline auto merge_p2d(GroundLiteralView<T_SRC> element, MergeDatalogContext& con
     literal.atom = merge_p2d<T_SRC, T_DST>(element.get_atom(), context).first.get_index();
 
     canonicalize(literal);
-    return context.destination.get_or_create(literal, context.builder.get_buffer());
+    return context.destination.get_or_create(literal);
 }
 
 // Numeric
@@ -294,7 +294,7 @@ inline auto merge_p2d(FunctionView<T> element, MergeDatalogContext& context)
     function.arity = element.get_arity();
 
     canonicalize(function);
-    return context.destination.get_or_create(function, context.builder.get_buffer());
+    return context.destination.get_or_create(function);
 }
 
 template<FactKind T>
@@ -317,7 +317,7 @@ inline auto merge_p2d(FunctionTermView<T> element, MergeDatalogContext& context)
         fterm.terms.push_back(merge_p2d(term, context));
 
     canonicalize(fterm);
-    return context.destination.get_or_create(fterm, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm);
 }
 
 template<FactKind T>
@@ -360,7 +360,7 @@ inline auto merge_p2d(GroundFunctionTermView<T> element, MergeDatalogContext& co
     fterm.row = merge_p2d(function_view, element.get_row(), context).first.get_index().second;
 
     canonicalize(fterm);
-    return context.destination.get_or_create(fterm, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm);
 }
 
 template<FactKind T>
@@ -382,7 +382,7 @@ inline auto merge_p2d(GroundFunctionTermValueView<T> element, MergeDatalogContex
     fterm_value.value = element.get_value();
 
     canonicalize(fterm_value);
-    return context.destination.get_or_create(fterm_value, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm_value);
 }
 
 template<FactKind T>
@@ -442,7 +442,7 @@ inline auto merge_p2d(UnaryOperatorView<O, T> element, MergeDatalogContext& cont
     unary.arg = merge_p2d(element.get_arg(), context);
 
     canonicalize(unary);
-    return context.destination.get_or_create(unary, context.builder.get_buffer());
+    return context.destination.get_or_create(unary);
 }
 
 template<OpKind O, typename T>
@@ -458,7 +458,7 @@ inline auto merge_p2d(BinaryOperatorView<O, T> element, MergeDatalogContext& con
     binary.rhs = merge_p2d(element.get_rhs(), context);
 
     canonicalize(binary);
-    return context.destination.get_or_create(binary, context.builder.get_buffer());
+    return context.destination.get_or_create(binary);
 }
 
 template<OpKind O, typename T>
@@ -474,7 +474,7 @@ inline auto merge_p2d(MultiOperatorView<O, T> element, MergeDatalogContext& cont
         multi.args.push_back(merge_p2d(arg, context));
 
     canonicalize(multi);
-    return context.destination.get_or_create(multi, context.builder.get_buffer());
+    return context.destination.get_or_create(multi);
 }
 
 template<typename T>

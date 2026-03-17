@@ -44,14 +44,9 @@ namespace tyr::formalism::planning
 class BinaryFDRContext
 {
 public:
-    explicit BinaryFDRContext(Repository& context) : m_context(context), m_builder(), m_buffer(), m_variables(), m_mapping() {}
+    explicit BinaryFDRContext(Repository& context) : m_context(context), m_builder(), m_variables(), m_mapping() {}
 
-    BinaryFDRContext(const BinaryFDRContext& other, Builder& builder, Repository& context) :
-        m_context(context),
-        m_builder(),
-        m_buffer(),
-        m_variables(),
-        m_mapping()
+    BinaryFDRContext(const BinaryFDRContext& other, Builder& builder, Repository& context) : m_context(context), m_builder(), m_variables(), m_mapping()
     {
         auto merge_context = MergeContext { builder, context };
 
@@ -72,7 +67,7 @@ public:
         m_builder.domain_size = 2;
         m_builder.atoms.push_back(atom);
         canonicalize(m_builder);
-        const auto var_index = m_context.get_or_create(m_builder, m_buffer).first.get_index();
+        const auto var_index = m_context.get_or_create(m_builder).first.get_index();
 
         m_variables.push_back(var_index);
         const auto fact = Data<FDRFact<FluentTag>>(var_index, FDRValue { 1 });
@@ -104,7 +99,6 @@ public:
 private:
     Repository& m_context;
     Data<FDRVariable<FluentTag>> m_builder;
-    buffer::Buffer m_buffer;
     IndexList<FDRVariable<FluentTag>> m_variables;
     UnorderedMap<Index<GroundAtom<FluentTag>>, Data<FDRFact<FluentTag>>> m_mapping;
 };
@@ -115,7 +109,6 @@ public:
     // Create mapping based on mutexes.
     GeneralFDRContext(const std::vector<std::vector<GroundAtomView<FluentTag>>>& mutexes, Repository& context) : m_context(context), m_variables(), m_mapping()
     {
-        auto buffer = buffer::Buffer();
         auto variable = Data<FDRVariable<FluentTag>>();
 
         for (const auto& group : mutexes)
@@ -125,7 +118,7 @@ public:
             for (const auto& atom : group)
                 variable.atoms.push_back(atom.get_index());
             canonicalize(variable);
-            const auto var_index = context.get_or_create(variable, buffer).first.get_index();
+            const auto var_index = context.get_or_create(variable).first.get_index();
             m_variables.push_back(var_index);
             for (uint_t i = 0; i < group.size(); ++i)
                 m_mapping.emplace(group[i].get_index(), Data<FDRFact<FluentTag>>(var_index, FDRValue { i + 1 }));

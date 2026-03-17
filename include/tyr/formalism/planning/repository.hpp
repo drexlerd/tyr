@@ -124,8 +124,6 @@ using SymbolRepository = tyr::formalism::SymbolRepository<Variable,
                                                           Task,
                                                           FDRVariable<FluentTag>,
                                                           FDRVariable<DerivedTag>,
-                                                          FDRFact<FluentTag>,
-                                                          FDRFact<DerivedTag>,
                                                           ConjunctiveCondition,
                                                           GroundConjunctiveCondition,
                                                           FDRTask>;

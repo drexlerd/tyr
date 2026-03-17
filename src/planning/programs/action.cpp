@@ -46,7 +46,7 @@ static auto create_applicability_predicate(fp::ActionView action, fp::MergeDatal
     predicate.arity = action.get_arity();
 
     canonicalize(predicate);
-    return context.destination.get_or_create(predicate, context.builder.get_buffer());
+    return context.destination.get_or_create(predicate);
 }
 
 static auto create_applicability_atom(fp::ActionView action, fp::MergeDatalogContext& context)
@@ -62,7 +62,7 @@ static auto create_applicability_atom(fp::ActionView action, fp::MergeDatalogCon
         atom.terms.push_back(Data<f::Term>(f::ParameterIndex(i)));
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 static auto create_program(fp::TaskView task, ApplicableActionProgram::AppPredicateToActionsMapping& predicate_to_actions, fd::Repository& repository)
@@ -143,7 +143,7 @@ static auto create_program(fp::TaskView task, ApplicableActionProgram::AppPredic
             conj_cond.numeric_constraints.push_back(fp::merge_p2d(numeric_constraint, context));
 
         canonicalize(conj_cond);
-        const auto new_conj_cond = repository.get_or_create(conj_cond, builder.get_buffer()).first.get_index();
+        const auto new_conj_cond = repository.get_or_create(conj_cond).first.get_index();
 
         rule.body = new_conj_cond;
 
@@ -152,13 +152,13 @@ static auto create_program(fp::TaskView task, ApplicableActionProgram::AppPredic
         rule.head = applicability_atom;
 
         canonicalize(rule);
-        const auto new_rule = repository.get_or_create(rule, builder.get_buffer()).first.get_index();
+        const auto new_rule = repository.get_or_create(rule).first.get_index();
 
         program.rules.push_back(new_rule);
     }
 
     canonicalize(program);
-    return repository.get_or_create(program, builder.get_buffer()).first;
+    return repository.get_or_create(program).first;
 }
 
 static auto create_program_context(fp::TaskView task, ApplicableActionProgram::AppPredicateToActionsMapping& mapping)

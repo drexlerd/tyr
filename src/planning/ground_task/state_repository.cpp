@@ -176,8 +176,10 @@ StateView<GroundTask> StateRepository<GroundTask>::register_state(SharedObjectPo
 
     auto numeric_variables_slot = create_numeric_variables_slot(state->get_numeric_variables(), m_nodes_buffer, m_uint_nodes, m_float_nodes);
 
-    state->set(m_packed_states.insert(
-        Data<State<GroundTask>>(Index<State<GroundTask>>(m_packed_states.size()), fluent_facts_index, derived_atoms_index, numeric_variables_slot)));
+    state->set(
+        m_packed_states
+            .insert(Data<State<GroundTask>>(Index<State<GroundTask>>(m_packed_states.size()), fluent_facts_index, derived_atoms_index, numeric_variables_slot))
+            .first);
 
     return StateView<GroundTask>(shared_from_this(), std::move(state));
 }

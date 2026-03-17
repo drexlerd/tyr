@@ -137,7 +137,7 @@ inline auto merge_p2p(VariableView element, MergeContext& context)
     variable.name = element.get_name();
 
     canonicalize(variable);
-    return context.destination.get_or_create(variable, context.builder.get_buffer());
+    return context.destination.get_or_create(variable);
 }
 
 inline auto merge_p2p(ObjectView element, MergeContext& context)
@@ -149,7 +149,7 @@ inline auto merge_p2p(ObjectView element, MergeContext& context)
     object.name = element.get_name();
 
     canonicalize(object);
-    return context.destination.get_or_create(object, context.builder.get_buffer());
+    return context.destination.get_or_create(object);
 }
 
 inline auto merge_p2p(BindingView element, MergeContext& context)
@@ -161,7 +161,7 @@ inline auto merge_p2p(BindingView element, MergeContext& context)
     binding.objects = element.get_data().objects;
 
     canonicalize(binding);
-    return context.destination.get_or_create(binding, context.builder.get_buffer());
+    return context.destination.get_or_create(binding);
 }
 
 template<FactKind T>
@@ -248,7 +248,7 @@ inline auto merge_p2p(PredicateView<T> element, MergeContext& context)
     predicate.arity = element.get_arity();
 
     canonicalize(predicate);
-    return context.destination.get_or_create(predicate, context.builder.get_buffer());
+    return context.destination.get_or_create(predicate);
 }
 
 template<FactKind T>
@@ -263,7 +263,7 @@ inline auto merge_p2p(AtomView<T> element, MergeContext& context)
         atom.terms.push_back(merge_p2p(term, context));
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 template<FactKind T>
@@ -277,7 +277,7 @@ inline auto merge_p2p(GroundAtomView<T> element, MergeContext& context)
     atom.row = merge_p2p(element.get_predicate(), element.get_row(), context).first.get_index().second;
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 inline auto merge_p2p(FDRVariableView<FluentTag> element, MergeContext& context)
@@ -291,7 +291,7 @@ inline auto merge_p2p(FDRVariableView<FluentTag> element, MergeContext& context)
         variable.atoms.push_back(merge_p2p(atom, context).first.get_index());
 
     canonicalize(variable);
-    return context.destination.get_or_create(variable, context.builder.get_buffer());
+    return context.destination.get_or_create(variable);
 }
 
 inline auto merge_p2p(FDRFactView<FluentTag> element, MergeContext& context)
@@ -310,7 +310,7 @@ inline auto merge_p2p(LiteralView<T> element, MergeContext& context)
     literal.atom = merge_p2p(element.get_atom(), context).first.get_index();
 
     canonicalize(literal);
-    return context.destination.get_or_create(literal, context.builder.get_buffer());
+    return context.destination.get_or_create(literal);
 }
 
 template<FactKind T>
@@ -324,7 +324,7 @@ inline auto merge_p2p(GroundLiteralView<T> element, MergeContext& context)
     literal.atom = merge_p2p(element.get_atom(), context).first.get_index();
 
     canonicalize(literal);
-    return context.destination.get_or_create(literal, context.builder.get_buffer());
+    return context.destination.get_or_create(literal);
 }
 
 // Numeric
@@ -340,7 +340,7 @@ inline auto merge_p2p(FunctionView<T> element, MergeContext& context)
     function.arity = element.get_arity();
 
     canonicalize(function);
-    return context.destination.get_or_create(function, context.builder.get_buffer());
+    return context.destination.get_or_create(function);
 }
 
 template<FactKind T>
@@ -355,7 +355,7 @@ inline auto merge_p2p(FunctionTermView<T> element, MergeContext& context)
         fterm.terms.push_back(merge_p2p(term, context));
 
     canonicalize(fterm);
-    return context.destination.get_or_create(fterm, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm);
 }
 
 template<FactKind T>
@@ -369,7 +369,7 @@ inline auto merge_p2p(GroundFunctionTermView<T> element, MergeContext& context)
     fterm.row = merge_p2p(element.get_function(), element.get_row(), context).first.get_index().second;
 
     canonicalize(fterm);
-    return context.destination.get_or_create(fterm, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm);
 }
 
 template<FactKind T>
@@ -383,7 +383,7 @@ inline auto merge_p2p(GroundFunctionTermValueView<T> element, MergeContext& cont
     fterm_value.value = element.get_value();
 
     canonicalize(fterm_value);
-    return context.destination.get_or_create(fterm_value, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm_value);
 }
 
 inline auto merge_p2p(FunctionExpressionView element, MergeContext& context)
@@ -430,7 +430,7 @@ inline auto merge_p2p(UnaryOperatorView<O, T> element, MergeContext& context)
     unary.arg = merge_p2p(element.get_arg(), context);
 
     canonicalize(unary);
-    return context.destination.get_or_create(unary, context.builder.get_buffer());
+    return context.destination.get_or_create(unary);
 }
 
 template<OpKind O, typename T>
@@ -444,7 +444,7 @@ inline auto merge_p2p(BinaryOperatorView<O, T> element, MergeContext& context)
     binary.rhs = merge_p2p(element.get_rhs(), context);
 
     canonicalize(binary);
-    return context.destination.get_or_create(binary, context.builder.get_buffer());
+    return context.destination.get_or_create(binary);
 }
 
 template<OpKind O, typename T>
@@ -458,7 +458,7 @@ inline auto merge_p2p(MultiOperatorView<O, T> element, MergeContext& context)
         multi.args.push_back(merge_p2p(arg, context));
 
     canonicalize(multi);
-    return context.destination.get_or_create(multi, context.builder.get_buffer());
+    return context.destination.get_or_create(multi);
 }
 
 template<typename T>
@@ -484,7 +484,7 @@ inline auto merge_p2p(NumericEffectView<O, T> element, MergeContext& context)
     numeric_effect.fexpr = merge_p2p(element.get_fexpr(), context);
 
     canonicalize(numeric_effect);
-    return context.destination.get_or_create(numeric_effect, context.builder.get_buffer());
+    return context.destination.get_or_create(numeric_effect);
 }
 
 template<FactKind T>
@@ -504,7 +504,7 @@ inline auto merge_p2p(GroundNumericEffectView<O, T> element, MergeContext& conte
     numeric_effect.fexpr = merge_p2p(element.get_fexpr(), context);
 
     canonicalize(numeric_effect);
-    return context.destination.get_or_create(numeric_effect, context.builder.get_buffer());
+    return context.destination.get_or_create(numeric_effect);
 }
 
 template<FactKind T>
@@ -533,7 +533,7 @@ inline auto merge_p2p(ConjunctiveConditionView element, MergeContext& context)
         conj_cond.numeric_constraints.push_back(merge_p2p(numeric_constraint, context));
 
     canonicalize(conj_cond);
-    return context.destination.get_or_create(conj_cond, context.builder.get_buffer());
+    return context.destination.get_or_create(conj_cond);
 }
 
 inline auto merge_p2p(AxiomView element, MergeContext& context)
@@ -548,7 +548,7 @@ inline auto merge_p2p(AxiomView element, MergeContext& context)
     axiom.head = merge_p2p(element.get_head(), context).first.get_index();
 
     canonicalize(axiom);
-    return context.destination.get_or_create(axiom, context.builder.get_buffer());
+    return context.destination.get_or_create(axiom);
 }
 
 inline auto merge_p2p(MetricView element, MergeContext& context)
@@ -561,7 +561,7 @@ inline auto merge_p2p(MetricView element, MergeContext& context)
     metric.fexpr = merge_p2p(element.get_fexpr(), context);
 
     canonicalize(metric);
-    return context.destination.get_or_create(metric, context.builder.get_buffer());
+    return context.destination.get_or_create(metric);
 }
 
 }

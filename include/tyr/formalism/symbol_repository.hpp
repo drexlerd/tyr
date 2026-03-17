@@ -23,6 +23,7 @@
 #include "tyr/buffer/segmented_buffer.hpp"
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
+#include "tyr/common/indexed_hash_set.hpp"
 #include "tyr/common/tuple.hpp"
 #include "tyr/common/types.hpp"
 #include "tyr/formalism/declarations.hpp"
@@ -40,26 +41,47 @@ template<typename... Ts>
 class SymbolRepository
 {
 private:
+    template<typename T, bool Trivial = uses_trivial_storage_v<T>>
+    struct Slot;
+
     template<typename T>
-    struct Slot
+    struct Slot<T, true>
     {
-        buffer::IndexedHashSet<T> container {};
+        //::tyr::IndexedHashSet<T> container;
+        // size_t parent_size = 0;
+
+        // Slot(buffer::Buffer&, buffer::SegmentedBuffer&) : container(), parent_size(0) {}
+
+        buffer::IndexedHashSet<T> container;
         size_t parent_size = 0;
+
+        Slot(buffer::Buffer& buffer, buffer::SegmentedBuffer& arena) : container(buffer, arena), parent_size(0) {}
+    };
+
+    template<typename T>
+    struct Slot<T, false>
+    {
+        buffer::IndexedHashSet<T> container;
+        size_t parent_size = 0;
+
+        Slot(buffer::Buffer& buffer, buffer::SegmentedBuffer& arena) : container(buffer, arena), parent_size(0) {}
     };
 
     template<typename T>
     struct Entry
     {
         using slot_type = Slot<T>;
-
         slot_type slot;
+
+        Entry(buffer::Buffer& buffer, buffer::SegmentedBuffer& arena) : slot(buffer, arena) {}
     };
 
     using RepositoryStorage = std::tuple<Entry<Ts>...>;
 
     const SymbolRepository* m_parent;
-    RepositoryStorage m_repository;
     buffer::SegmentedBuffer m_arena;
+    buffer::Buffer m_buffer;
+    RepositoryStorage m_repository;
 
     /**
      * Clear
@@ -78,7 +100,14 @@ private:
     }
 
 public:
-    SymbolRepository(const SymbolRepository* parent = nullptr) : m_parent(parent), m_repository(), m_arena() { clear_entries(); }
+    SymbolRepository(const SymbolRepository* parent = nullptr) : m_parent(parent), m_arena(), m_buffer(), m_repository(Entry<Ts>(m_buffer, m_arena)...)
+    {
+        clear_entries();
+    }
+    SymbolRepository(const SymbolRepository& other) = delete;
+    SymbolRepository& operator=(const SymbolRepository& other) = delete;
+    SymbolRepository(SymbolRepository&& other) = delete;
+    SymbolRepository& operator=(SymbolRepository&& other) = delete;
 
     /**
      * Common methods
@@ -122,7 +151,7 @@ public:
     }
 
     template<typename T>
-    std::pair<View<Index<T>, SymbolRepository>, bool> get_or_create_with_hash(Data<T>& builder, size_t h, buffer::Buffer& buf)
+    std::pair<View<Index<T>, SymbolRepository>, bool> get_or_create_with_hash(Data<T>& builder, size_t h)
     {
         auto& entry = std::get<Entry<T>>(m_repository);
         auto& slot = entry.slot;
@@ -135,15 +164,15 @@ public:
         // Manually assign index to continue indexing.
         builder.index.value = slot.parent_size + container.size();
 
-        const auto [index, success] = container.insert_with_hash(h, builder, buf, m_arena);
+        const auto [index, success] = container.insert_with_hash(h, builder);
 
         return { View<Index<T>, SymbolRepository>(index, *this), success };
     }
 
     template<typename T>
-    std::pair<View<Index<T>, SymbolRepository>, bool> get_or_create(Data<T>& builder, buffer::Buffer& buf)
+    std::pair<View<Index<T>, SymbolRepository>, bool> get_or_create(Data<T>& builder)
     {
-        return get_or_create_with_hash(builder, hash(builder), buf);
+        return get_or_create_with_hash(builder, hash(builder));
     }
 
     /// @brief Access the element with the given index.
@@ -235,7 +264,7 @@ public:
     }
 
     template<typename T>
-    std::pair<Index<T>, bool> get_or_create_local_with_hash(Data<T>& builder, size_t h, buffer::Buffer& buf)
+    std::pair<Index<T>, bool> get_or_create_local_with_hash(Data<T>& builder, size_t h)
     {
         auto& entry = std::get<Entry<T>>(m_repository);
         auto& slot = entry.slot;
@@ -246,14 +275,14 @@ public:
 
         builder.index.value = slot.parent_size + container.size();
 
-        const auto [index, success] = container.insert_with_hash(h, builder, buf, m_arena);
+        const auto [index, success] = container.insert_with_hash(h, builder);
         return { index, success };
     }
 
     template<typename T>
-    std::pair<Index<T>, bool> get_or_create_local(Data<T>& builder, buffer::Buffer& buf)
+    std::pair<Index<T>, bool> get_or_create_local(Data<T>& builder)
     {
-        return get_or_create_local_with_hash(builder, hash(builder), buf);
+        return get_or_create_local_with_hash(builder, hash(builder));
     }
 
     template<typename T>

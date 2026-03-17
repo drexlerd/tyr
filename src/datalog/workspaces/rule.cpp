@@ -51,7 +51,7 @@ static auto create_witness_condition(fd::ConjunctiveConditionView element, fd::R
             conj_cond.fluent_literals.push_back(literal.get_index());
 
     canonicalize(conj_cond);
-    return context.get_or_create(conj_cond, builder.get_buffer());
+    return context.get_or_create(conj_cond);
 }
 
 ConstRuleWorkspace::ConstRuleWorkspace(fd::RuleView rule,

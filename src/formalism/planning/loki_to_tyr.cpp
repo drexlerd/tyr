@@ -317,7 +317,7 @@ PlanningDomain LokiToTyrTranslator::translate(const loki::Domain& element)
     domain.axioms = translate_lifted(element->get_axioms(), builder, *context);
 
     canonicalize(domain);
-    return PlanningDomain(context->get_or_create(domain, builder.get_buffer()).first, context);
+    return PlanningDomain(context->get_or_create(domain).first, context);
 }
 
 PlanningTask LokiToTyrTranslator::translate(const loki::Problem& element, PlanningDomain domain)
@@ -442,7 +442,7 @@ PlanningTask LokiToTyrTranslator::translate(const loki::Problem& element, Planni
         auto& conj_cond = *conj_cond_ptr;
         conj_cond.clear();
         canonicalize(conj_cond);
-        task.goal = task_context->get_or_create(conj_cond, builder.get_buffer()).first.get_index();
+        task.goal = task_context->get_or_create(conj_cond).first.get_index();
     }
 
     /* Metric section */
@@ -459,7 +459,7 @@ PlanningTask LokiToTyrTranslator::translate(const loki::Problem& element, Planni
     task.axioms = translate_lifted(element->get_axioms(), builder, *task_context);
 
     canonicalize(task);
-    return PlanningTask(task_context->get_or_create(task, builder.get_buffer()).first, std::move(fdr_context), task_context, std::move(domain));
+    return PlanningTask(task_context->get_or_create(task).first, std::move(fdr_context), task_context, std::move(domain));
 }
 
 }

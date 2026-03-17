@@ -1438,7 +1438,7 @@ std::pair<fd::GroundConjunctiveConditionView, bool> create_ground_nullary_condit
             conj_cond.numeric_constraints.push_back(ground(numeric_constraint, grounder_context));
 
     canonicalize(conj_cond);
-    return context.get_or_create(conj_cond, builder.get_buffer());
+    return context.get_or_create(conj_cond);
 }
 
 std::pair<fd::ConjunctiveConditionView, bool>
@@ -1465,7 +1465,7 @@ create_overapproximation_conjunctive_condition(size_t k, fd::ConjunctiveConditio
             conj_cond.numeric_constraints.push_back(numeric_constraint.get_data());
 
     canonicalize(conj_cond);
-    return context.get_or_create(conj_cond, builder.get_buffer());
+    return context.get_or_create(conj_cond);
 }
 
 std::pair<fd::ConjunctiveConditionView, bool>
@@ -1484,7 +1484,7 @@ create_static_overapproximation_conjunctive_condition(size_t k, fd::ConjunctiveC
             conj_cond.static_literals.push_back(literal.get_index());
 
     canonicalize(conj_cond);
-    return context.get_or_create(conj_cond, builder.get_buffer());
+    return context.get_or_create(conj_cond);
 }
 
 std::pair<fd::ConjunctiveConditionView, bool>
@@ -1511,6 +1511,6 @@ create_overapproximation_conflicting_conjunctive_condition(size_t k, fd::Conjunc
             conj_cond.numeric_constraints.push_back(numeric_constraint.get_data());
 
     canonicalize(conj_cond);
-    return context.get_or_create(conj_cond, builder.get_buffer());
+    return context.get_or_create(conj_cond);
 }
 }

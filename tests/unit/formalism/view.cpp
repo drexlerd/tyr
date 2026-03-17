@@ -30,7 +30,6 @@ TEST(TyrTests, TyrFormalismView)
 {
     const auto num_objects = 3;
     auto repository = fp::Repository(num_objects);
-    auto buffer = b::Buffer();
     auto predicate_builder = Data<f::Predicate<f::FluentTag>>();
     auto object_builder = Data<f::Object>();
     auto variable_builder = Data<f::Variable>();
@@ -40,12 +39,12 @@ TEST(TyrTests, TyrFormalismView)
     predicate_builder.name = "predicate";
     predicate_builder.arity = 2;
     canonicalize(predicate_builder);
-    auto [predicate, predicate_success] = repository.get_or_create(predicate_builder, buffer);
+    auto [predicate, predicate_success] = repository.get_or_create(predicate_builder);
 
     // Create object and variable
     object_builder.name = "a";
     canonicalize(object_builder);
-    auto [object, object_success] = repository.get_or_create(object_builder, buffer);
+    auto [object, object_success] = repository.get_or_create(object_builder);
 
     // Create atom
     atom_builder.terms.clear();
@@ -53,7 +52,7 @@ TEST(TyrTests, TyrFormalismView)
     atom_builder.terms.push_back(Data<f::Term>(object.get_index()));
     atom_builder.terms.push_back(Data<f::Term>(f::ParameterIndex(0)));
     canonicalize(atom_builder);
-    auto [atom, atom_success] = repository.get_or_create(atom_builder, buffer);
+    auto [atom, atom_success] = repository.get_or_create(atom_builder);
 
     // Recurse through proxy
     auto atom_predicate = atom.get_predicate();

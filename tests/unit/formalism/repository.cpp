@@ -30,7 +30,6 @@ TEST(TyrTests, TyrFormalismRepository)
 {
     const auto num_objects = 3;
     auto repository = fp::Repository(num_objects);
-    auto buffer = b::Buffer();
     auto predicate_builder = Data<f::Predicate<f::FluentTag>>();
     auto object_builder = Data<f::Object>();
     auto atom_builder = Data<fp::Atom<f::FluentTag>>();
@@ -40,7 +39,7 @@ TEST(TyrTests, TyrFormalismRepository)
     predicate_builder.arity = 2;
 
     canonicalize(predicate_builder);
-    const auto [predicate_0, predicate_success_0] = repository.get_or_create(predicate_builder, buffer);
+    const auto [predicate_0, predicate_success_0] = repository.get_or_create(predicate_builder);
 
     EXPECT_TRUE(predicate_success_0);
     EXPECT_EQ(predicate_0.get_index().get_value(), 0);
@@ -52,7 +51,7 @@ TEST(TyrTests, TyrFormalismRepository)
     predicate_builder.arity = 3;
 
     canonicalize(predicate_builder);
-    const auto [predicate_1, predicate_success_1] = repository.get_or_create(predicate_builder, buffer);
+    const auto [predicate_1, predicate_success_1] = repository.get_or_create(predicate_builder);
 
     EXPECT_TRUE(predicate_success_1);
     EXPECT_EQ(predicate_1.get_index().get_value(), 1);
@@ -64,7 +63,7 @@ TEST(TyrTests, TyrFormalismRepository)
     predicate_builder.arity = 3;
 
     canonicalize(predicate_builder);
-    const auto [predicate_2, predicate_success_2] = repository.get_or_create(predicate_builder, buffer);
+    const auto [predicate_2, predicate_success_2] = repository.get_or_create(predicate_builder);
 
     EXPECT_FALSE(predicate_success_2);
     EXPECT_EQ(predicate_2.get_index().get_value(), 1);
@@ -74,19 +73,19 @@ TEST(TyrTests, TyrFormalismRepository)
     // Create objects
     object_builder.name = "a";
     canonicalize(object_builder);
-    const auto [object_0, object_success_0] = repository.get_or_create(object_builder, buffer);
+    const auto [object_0, object_success_0] = repository.get_or_create(object_builder);
     EXPECT_TRUE(object_success_0);
     EXPECT_EQ(object_0.get_name(), object_builder.name);
 
     object_builder.name = "b";
     canonicalize(object_builder);
-    const auto [object_1, object_success_1] = repository.get_or_create(object_builder, buffer);
+    const auto [object_1, object_success_1] = repository.get_or_create(object_builder);
     EXPECT_TRUE(object_success_1);
     EXPECT_EQ(object_1.get_name(), object_builder.name);
 
     object_builder.name = "c";
     canonicalize(object_builder);
-    const auto [object_2, object_success_2] = repository.get_or_create(object_builder, buffer);
+    const auto [object_2, object_success_2] = repository.get_or_create(object_builder);
     EXPECT_TRUE(object_success_2);
     EXPECT_EQ(object_2.get_name(), object_builder.name);
 
@@ -96,14 +95,14 @@ TEST(TyrTests, TyrFormalismRepository)
     atom_builder.terms.push_back(Data<f::Term>(object_0.get_index()));
     atom_builder.terms.push_back(Data<f::Term>(object_1.get_index()));
     canonicalize(atom_builder);
-    auto [atom_0, atom_success_0] = repository.get_or_create(atom_builder, buffer);
+    auto [atom_0, atom_success_0] = repository.get_or_create(atom_builder);
 
     EXPECT_TRUE(atom_success_0);
     // EXPECT_EQ(atom_0.get_terms(), atom_builder.terms);
 
     // Create same atom again
     canonicalize(atom_builder);
-    auto [atom_1, atom_success_1] = repository.get_or_create(atom_builder, buffer);
+    auto [atom_1, atom_success_1] = repository.get_or_create(atom_builder);
     EXPECT_FALSE(atom_success_1);
 }
 
@@ -111,7 +110,6 @@ TEST(TyrTests, TyrFormalismView)
 {
     const auto num_objects = 3;
     auto repository = fp::Repository(num_objects);
-    auto buffer = b::Buffer();
     auto predicate_builder = Data<f::Predicate<f::FluentTag>>();
     auto object_builder = Data<f::Object>();
     auto atom_builder = Data<fp::Atom<f::FluentTag>>();
@@ -120,15 +118,15 @@ TEST(TyrTests, TyrFormalismView)
     predicate_builder.name = "predicate_0";
     predicate_builder.arity = 2;
     canonicalize(predicate_builder);
-    const auto [predicate_0, predicate_success_0] = repository.get_or_create(predicate_builder, buffer);
+    const auto [predicate_0, predicate_success_0] = repository.get_or_create(predicate_builder);
 
     // Create objects
     object_builder.name = "a";
     canonicalize(object_builder);
-    const auto [object_0, object_success_0] = repository.get_or_create(object_builder, buffer);
+    const auto [object_0, object_success_0] = repository.get_or_create(object_builder);
     object_builder.name = "b";
     canonicalize(object_builder);
-    const auto [object_1, object_success_1] = repository.get_or_create(object_builder, buffer);
+    const auto [object_1, object_success_1] = repository.get_or_create(object_builder);
 
     // Create atom
     atom_builder.terms.clear();
@@ -136,7 +134,7 @@ TEST(TyrTests, TyrFormalismView)
     atom_builder.terms.push_back(Data<f::Term>(object_0.get_index()));
     atom_builder.terms.push_back(Data<f::Term>(object_1.get_index()));
     canonicalize(atom_builder);
-    [[maybe_unused]] auto [atom_0, atom_success_0] = repository.get_or_create(atom_builder, buffer);
+    [[maybe_unused]] auto [atom_0, atom_success_0] = repository.get_or_create(atom_builder);
 }
 
 }

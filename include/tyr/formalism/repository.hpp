@@ -54,6 +54,10 @@ public:
     {
         clear();
     }
+    Repository(const Repository& other) = delete;
+    Repository& operator=(const Repository& other) = delete;
+    Repository(Repository&& other) = delete;
+    Repository& operator=(Repository&& other) = delete;
 
     auto get_num_objects() const noexcept { return m_num_objects; }
 
@@ -77,7 +81,7 @@ public:
     }
 
     template<typename T>
-    std::pair<View<Index<T>, Repository>, bool> get_or_create_with_hash(Data<T>& builder, size_t h, buffer::Buffer& buf)
+    std::pair<View<Index<T>, Repository>, bool> get_or_create_with_hash(Data<T>& builder, size_t h)
     {
         if (auto index_or_nullopt = m_symbol_repository.find_local_with_hash(builder, h))
             return { View<Index<T>, Repository>(*index_or_nullopt, *this), false };
@@ -86,14 +90,14 @@ public:
             if (auto ptr = m_parent->template find_with_hash<T>(builder, h))
                 return { *ptr, false };
 
-        const auto [index, success] = m_symbol_repository.get_or_create_local_with_hash(builder, h, buf);
+        const auto [index, success] = m_symbol_repository.get_or_create_local_with_hash(builder, h);
         return { View<Index<T>, Repository>(index, *this), success };
     }
 
     template<typename T>
-    std::pair<View<Index<T>, Repository>, bool> get_or_create(Data<T>& builder, buffer::Buffer& buf)
+    std::pair<View<Index<T>, Repository>, bool> get_or_create(Data<T>& builder)
     {
-        return get_or_create_with_hash(builder, m_symbol_repository.hash(builder), buf);
+        return get_or_create_with_hash(builder, m_symbol_repository.hash(builder));
     }
 
     template<typename T>

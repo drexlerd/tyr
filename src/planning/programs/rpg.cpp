@@ -68,7 +68,7 @@ static auto create_cond_effect_rule(fp::ActionView action,
             conj_cond.fluent_literals.push_back(merge_p2d(literal, context).first.get_index());
 
     canonicalize(conj_cond);
-    const auto new_conj_cond = context.destination.get_or_create(conj_cond, context.builder.get_buffer()).first;
+    const auto new_conj_cond = context.destination.get_or_create(conj_cond).first;
 
     rule.variables = new_conj_cond.get_variables().get_data();
     rule.body = new_conj_cond.get_index();
@@ -76,7 +76,7 @@ static auto create_cond_effect_rule(fp::ActionView action,
     rule.cost = 1;
 
     canonicalize(rule);
-    return context.destination.get_or_create(rule, context.builder.get_buffer());
+    return context.destination.get_or_create(rule);
 }
 
 static void translate_action_to_delete_free_rules(fp::ActionView action,
@@ -130,7 +130,7 @@ static auto create_program(fp::TaskView task, fd::Repository& destination, RPGPr
         translate_action_to_delete_free_rules(action, program, context, rule_to_action);
 
     canonicalize(program);
-    return destination.get_or_create(program, builder.get_buffer()).first;
+    return destination.get_or_create(program).first;
 }
 
 static auto create_program_context(fp::TaskView task, RPGProgram::RuleToActionMapping& rule_to_action)

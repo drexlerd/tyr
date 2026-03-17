@@ -144,7 +144,7 @@ inline auto merge_d2p(formalism::datalog::VariableView element, MergePlanningCon
     variable.name = element.get_name();
 
     canonicalize(variable);
-    return context.destination.get_or_create(variable, context.builder.get_buffer());
+    return context.destination.get_or_create(variable);
 }
 
 inline auto merge_d2p(formalism::datalog::ObjectView element, MergePlanningContext& context)
@@ -156,7 +156,7 @@ inline auto merge_d2p(formalism::datalog::ObjectView element, MergePlanningConte
     object.name = element.get_name();
 
     canonicalize(object);
-    return context.destination.get_or_create(object, context.builder.get_buffer());
+    return context.destination.get_or_create(object);
 }
 
 inline auto merge_d2p(formalism::datalog::BindingView element, MergePlanningContext& context)
@@ -168,7 +168,7 @@ inline auto merge_d2p(formalism::datalog::BindingView element, MergePlanningCont
     binding.objects = element.get_data().objects;
 
     canonicalize(binding);
-    return context.destination.get_or_create(binding, context.builder.get_buffer());
+    return context.destination.get_or_create(binding);
 }
 
 inline auto merge_d2p(formalism::datalog::TermView element, MergePlanningContext& context)
@@ -201,7 +201,7 @@ inline auto merge_d2p(formalism::datalog::PredicateView<T_SRC> element, MergePla
     predicate.arity = element.get_arity();
 
     canonicalize(predicate);
-    return context.destination.get_or_create(predicate, context.builder.get_buffer());
+    return context.destination.get_or_create(predicate);
 }
 
 template<FactKind T_SRC, FactKind T_DST>
@@ -216,7 +216,7 @@ inline auto merge_d2p(formalism::datalog::AtomView<T_SRC> element, MergePlanning
         atom.terms.push_back(merge_d2p(term, context));
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 template<FactKind T_SRC, FactKind T_DST>
@@ -245,7 +245,7 @@ inline auto merge_d2p(formalism::datalog::GroundAtomView<T_SRC> element, MergePl
     atom.row = merge_d2p(predicate_view, element.get_row(), context).first.get_index().second;
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 template<FactKind T_SRC, FactKind T_DST>
@@ -259,7 +259,7 @@ inline auto merge_d2p(formalism::datalog::LiteralView<T_SRC> element, MergePlann
     literal.atom = merge_d2p<T_SRC, T_DST>(element.get_atom(), context).first.get_index();
 
     canonicalize(literal);
-    return context.destination.get_or_create(literal, context.builder.get_buffer());
+    return context.destination.get_or_create(literal);
 }
 
 template<FactKind T_SRC, FactKind T_DST>
@@ -273,7 +273,7 @@ inline auto merge_d2p(formalism::datalog::GroundLiteralView<T_SRC> element, Merg
     literal.atom = merge_d2p<T_SRC, T_DST>(element.get_atom(), context).first.get_index();
 
     canonicalize(literal);
-    return context.destination.get_or_create(literal, context.builder.get_buffer());
+    return context.destination.get_or_create(literal);
 }
 
 // Numeric
@@ -289,7 +289,7 @@ inline auto merge_d2p(formalism::datalog::FunctionView<T> element, MergePlanning
     function.arity = element.get_arity();
 
     canonicalize(function);
-    return context.destination.get_or_create(function, context.builder.get_buffer());
+    return context.destination.get_or_create(function);
 }
 
 template<FactKind T>
@@ -304,7 +304,7 @@ inline auto merge_d2p(formalism::datalog::FunctionTermView<T> element, MergePlan
         fterm.terms.push_back(merge_d2p(term, context));
 
     canonicalize(fterm);
-    return context.destination.get_or_create(fterm, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm);
 }
 
 template<FactKind T>
@@ -333,7 +333,7 @@ inline auto merge_d2p(formalism::datalog::GroundFunctionTermView<T> element, Mer
     fterm.row = merge_d2p(function_view, element.get_row(), context).first.get_index().second;
 
     canonicalize(fterm);
-    return context.destination.get_or_create(fterm, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm);
 }
 
 template<FactKind T>
@@ -347,7 +347,7 @@ inline auto merge_d2p(formalism::datalog::GroundFunctionTermValueView<T> element
     fterm_value.value = element.get_value();
 
     canonicalize(fterm_value);
-    return context.destination.get_or_create(fterm_value, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm_value);
 }
 
 inline auto merge_d2p(formalism::datalog::FunctionExpressionView element, MergePlanningContext& context)
@@ -400,7 +400,7 @@ inline auto merge_d2p(formalism::datalog::UnaryOperatorView<O, T> element, Merge
     unary.arg = merge_d2p(element.get_arg(), context);
 
     canonicalize(unary);
-    return context.destination.get_or_create(unary, context.builder.get_buffer());
+    return context.destination.get_or_create(unary);
 }
 
 template<OpKind O, typename T>
@@ -416,7 +416,7 @@ inline auto merge_d2p(formalism::datalog::BinaryOperatorView<O, T> element, Merg
     binary.rhs = merge_d2p(element.get_rhs(), context);
 
     canonicalize(binary);
-    return context.destination.get_or_create(binary, context.builder.get_buffer());
+    return context.destination.get_or_create(binary);
 }
 
 template<OpKind O, typename T>
@@ -432,7 +432,7 @@ inline auto merge_d2p(formalism::datalog::MultiOperatorView<O, T> element, Merge
         multi.args.push_back(merge_d2p(arg, context));
 
     canonicalize(multi);
-    return context.destination.get_or_create(multi, context.builder.get_buffer());
+    return context.destination.get_or_create(multi);
 }
 
 template<typename T>

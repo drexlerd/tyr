@@ -218,7 +218,7 @@ template<typename Tag>
 Data<Node<Tag>> get_result(AtomStackEntry<Tag>& el, GetResultContext<Tag>& context)
 {
     canonicalize(el.result);
-    return Data<Node<Tag>>(context.destination.get_or_create(el.result, context.buffer).first);
+    return Data<Node<Tag>>(context.destination.get_or_create(el.result).first);
 }
 
 template<typename Tag>
@@ -261,7 +261,7 @@ template<typename Tag>
 Data<Node<Tag>> get_result(VariableStackEntry<Tag>& el, GetResultContext<Tag>& context)
 {
     canonicalize(el.result);
-    return Data<Node<Tag>>(context.destination.get_or_create(el.result, context.buffer).first);
+    return Data<Node<Tag>>(context.destination.get_or_create(el.result).first);
 }
 
 template<typename Tag>
@@ -302,7 +302,7 @@ template<typename Tag>
 Data<Node<Tag>> get_result(ConstraintStackEntry<Tag>& el, GetResultContext<Tag>& context)
 {
     canonicalize(el.result);
-    return Data<Node<Tag>>(context.destination.get_or_create(el.result, context.buffer).first);
+    return Data<Node<Tag>>(context.destination.get_or_create(el.result).first);
 }
 
 template<typename Tag>
@@ -335,7 +335,7 @@ template<typename Tag>
 Data<Node<Tag>> get_result(GeneratorStackEntry<Tag>& el, GetResultContext<Tag>& context)
 {
     canonicalize(el.result);
-    return Data<Node<Tag>>(context.destination.get_or_create(el.result, context.buffer).first);
+    return Data<Node<Tag>>(context.destination.get_or_create(el.result).first);
 }
 
 template<typename Tag>

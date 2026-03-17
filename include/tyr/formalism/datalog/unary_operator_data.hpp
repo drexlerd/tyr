@@ -35,8 +35,8 @@ struct Data<formalism::datalog::UnaryOperator<Op, T>>
 
     Data() = default;
     Data(Index<formalism::datalog::UnaryOperator<Op, T>> index, T arg) : index(index), arg(arg) {}
-    Data(const Data& other) = delete;
-    Data& operator=(const Data& other) = delete;
+    Data(const Data& other) = default;
+    Data& operator=(const Data& other) = default;
     Data(Data&& other) = default;
     Data& operator=(Data&& other) = default;
 

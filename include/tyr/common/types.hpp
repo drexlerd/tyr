@@ -77,6 +77,9 @@ auto make_view(const T& element, const C& context) noexcept
     return View<T, C>(element, context.get_canonical_context(element));
 }
 
+template<typename T>
+inline constexpr bool uses_trivial_storage_v = std::is_trivially_copyable_v<Data<T>> && std::is_default_constructible_v<Data<T>>;
+
 }
 
 #endif

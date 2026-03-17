@@ -36,8 +36,8 @@ struct Data<formalism::planning::BinaryOperator<Op, T>>
 
     Data() = default;
     Data(Index<formalism::planning::BinaryOperator<Op, T>> index, T lhs, T rhs) : index(index), lhs(lhs), rhs(rhs) {}
-    Data(const Data& other) = delete;
-    Data& operator=(const Data& other) = delete;
+    Data(const Data& other) = default;
+    Data& operator=(const Data& other) = default;
     Data(Data&& other) = default;
     Data& operator=(Data&& other) = default;
 

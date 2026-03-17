@@ -37,8 +37,8 @@ struct Data<formalism::planning::Literal<T>>
     Data(Index<formalism::planning::Literal<T>> index, Index<formalism::planning::Atom<T>> atom, bool polarity) : index(index), atom(atom), polarity(polarity)
     {
     }
-    Data(const Data& other) = delete;
-    Data& operator=(const Data& other) = delete;
+    Data(const Data& other) = default;
+    Data& operator=(const Data& other) = default;
     Data(Data&& other) = default;
     Data& operator=(Data&& other) = default;
 

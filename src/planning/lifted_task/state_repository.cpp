@@ -123,8 +123,8 @@ StateView<LiftedTask> StateRepository<LiftedTask>::register_state(SharedObjectPo
     auto derived_atoms = create_atoms_slot(state->template get_atoms<formalism::DerivedTag>(), m_nodes_buffer, m_uint_nodes);
     auto numeric_variables = create_numeric_variables_slot(state->get_numeric_variables(), m_nodes_buffer, m_uint_nodes, m_float_nodes);
 
-    state->set(
-        m_packed_states.insert(Data<State<LiftedTask>>(Index<State<LiftedTask>>(m_packed_states.size()), fluent_atoms, derived_atoms, numeric_variables)));
+    state->set(m_packed_states.insert(Data<State<LiftedTask>>(Index<State<LiftedTask>>(m_packed_states.size()), fluent_atoms, derived_atoms, numeric_variables))
+                   .first);
 
     return StateView<LiftedTask>(shared_from_this(), std::move(state));
 }

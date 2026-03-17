@@ -51,35 +51,50 @@ class Repository
 {
 private:
     template<typename T>
-    struct RepositoryEntry
+    struct Entry
     {
         using value_type = T;
         using container_type = buffer::IndexedHashSet<T>;
 
         container_type container;
+
+        Entry(buffer::Buffer& buffer, buffer::SegmentedBuffer& arena) : container(buffer, arena) {}
     };
 
-    using RepositoryStorage = std::tuple<RepositoryEntry<AtomSelectorNode<Tag>>,
-                                         RepositoryEntry<VariableSelectorNode<Tag>>,
-                                         RepositoryEntry<NumericConstraintSelectorNode<Tag>>,
-                                         RepositoryEntry<ElementGeneratorNode<Tag>>,
-                                         RepositoryEntry<Node<Tag>>>;
+    using RepositoryStorage = std::tuple<Entry<AtomSelectorNode<Tag>>,
+                                         Entry<VariableSelectorNode<Tag>>,
+                                         Entry<NumericConstraintSelectorNode<Tag>>,
+                                         Entry<ElementGeneratorNode<Tag>>,
+                                         Entry<Node<Tag>>>;
 
     const formalism::planning::Repository& m_formalism_repository;
-    RepositoryStorage m_repository;
     buffer::SegmentedBuffer m_arena;
+    buffer::Buffer m_buffer;
+    RepositoryStorage m_repository;
 
 public:
-    explicit Repository(const formalism::planning::Repository& formalism_repository) : m_formalism_repository(formalism_repository), m_repository(), m_arena()
+    explicit Repository(const formalism::planning::Repository& formalism_repository) :
+        m_formalism_repository(formalism_repository),
+        m_arena(),
+        m_buffer(),
+        m_repository(Entry<AtomSelectorNode<Tag>>(m_buffer, m_arena),
+                     Entry<VariableSelectorNode<Tag>>(m_buffer, m_arena),
+                     Entry<NumericConstraintSelectorNode<Tag>>(m_buffer, m_arena),
+                     Entry<ElementGeneratorNode<Tag>>(m_buffer, m_arena),
+                     Entry<Node<Tag>>(m_buffer, m_arena))
     {
     }
+    Repository(const Repository& other) = delete;
+    Repository& operator=(const Repository& other) = delete;
+    Repository(Repository&& other) = delete;
+    Repository& operator=(Repository&& other) = delete;
 
     const formalism::planning::Repository& get_formalism_repository() const noexcept { return m_formalism_repository; }
 
     template<typename T>
     std::optional<Index<T>> find(const Data<T>& builder) const noexcept
     {
-        const auto& indexed_hash_set = std::get<RepositoryEntry<T>>(m_repository).container;
+        const auto& indexed_hash_set = std::get<Entry<T>>(m_repository).container;
 
         if (const auto index_or_nullopt = indexed_hash_set.find(builder))
             return *index_or_nullopt;
@@ -87,15 +102,14 @@ public:
         return std::nullopt;
     }
 
-    template<typename T, bool AssignIndex = true>
-    std::pair<Index<T>, bool> get_or_create(Data<T>& builder, buffer::Buffer& buf)
+    template<typename T>
+    std::pair<Index<T>, bool> get_or_create(Data<T>& builder)
     {
-        auto& indexed_hash_set = std::get<RepositoryEntry<T>>(m_repository).container;
+        auto& indexed_hash_set = std::get<Entry<T>>(m_repository).container;
 
-        if constexpr (AssignIndex)
-            builder.index.value = indexed_hash_set.size();
+        builder.index.value = indexed_hash_set.size();
 
-        const auto [index, success] = indexed_hash_set.insert(builder, buf, m_arena);
+        const auto [index, success] = indexed_hash_set.insert(builder);
 
         return std::make_pair(index, success);
     }
@@ -106,7 +120,7 @@ public:
     {
         assert(index != Index<T>::max() && "Unassigned index.");
 
-        const auto& repository = std::get<RepositoryEntry<T>>(m_repository).container;
+        const auto& repository = std::get<Entry<T>>(m_repository).container;
 
         return repository[index];
     }
@@ -114,7 +128,7 @@ public:
     template<typename T>
     const Data<T>& front() const
     {
-        const auto& repository = std::get<RepositoryEntry<T>>(m_repository).container;
+        const auto& repository = std::get<Entry<T>>(m_repository).container;
 
         return repository.front();
     }
@@ -123,7 +137,7 @@ public:
     template<typename T>
     size_t size() const noexcept
     {
-        const auto& repository = std::get<RepositoryEntry<T>>(m_repository).container;
+        const auto& repository = std::get<Entry<T>>(m_repository).container;
 
         return repository.size();
     }

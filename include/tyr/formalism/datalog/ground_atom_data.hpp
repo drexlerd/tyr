@@ -42,8 +42,8 @@ struct Data<formalism::datalog::GroundAtom<T>>
         row(row)
     {
     }
-    Data(const Data& other) = delete;
-    Data& operator=(const Data& other) = delete;
+    Data(const Data& other) = default;
+    Data& operator=(const Data& other) = default;
     Data(Data&& other) = default;
     Data& operator=(Data&& other) = default;
 
@@ -57,6 +57,9 @@ struct Data<formalism::datalog::GroundAtom<T>>
     auto cista_members() const noexcept { return std::tie(index, predicate, row); }
     auto identifying_members() const noexcept { return std::tie(predicate, row); }
 };
+
+static_assert(std::is_trivially_copyable_v<Data<formalism::datalog::GroundAtom<formalism::StaticTag>>>);
+static_assert(std::is_default_constructible_v<Data<formalism::datalog::GroundAtom<formalism::StaticTag>>>);
 
 }
 

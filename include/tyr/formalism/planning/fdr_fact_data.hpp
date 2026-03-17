@@ -35,6 +35,10 @@ struct Data<formalism::planning::FDRFact<T>>
 
     Data() = default;
     Data(Index<formalism::planning::FDRVariable<T>> variable, formalism::planning::FDRValue value) : variable(variable), value(value) {}
+    Data(const Data& other) = default;
+    Data& operator=(const Data& other) = default;
+    Data(Data&& other) = default;
+    Data& operator=(Data&& other) = default;
 
     void clear() noexcept
     {

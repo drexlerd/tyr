@@ -110,7 +110,7 @@ inline auto ground(TermListView element, GrounderContext& context)
 
     // Canonicalize and Serialize
     canonicalize(binding);
-    return context.destination.get_or_create(binding, context.builder.get_buffer());
+    return context.destination.get_or_create(binding);
 }
 
 inline auto ground(const IndexList<Object>& element, GrounderContext& context)
@@ -125,7 +125,7 @@ inline auto ground(const IndexList<Object>& element, GrounderContext& context)
 
     // Canonicalize and Serialize
     canonicalize(binding);
-    return context.destination.get_or_create(binding, context.builder.get_buffer());
+    return context.destination.get_or_create(binding);
 }
 
 template<FactKind T>
@@ -171,7 +171,7 @@ inline auto ground(FunctionTermView<T> element, GrounderContext& context)
 
     // Canonicalize and Serialize
     canonicalize(fterm);
-    return context.destination.get_or_create(fterm, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm);
 }
 
 inline auto ground(FunctionExpressionView element, GrounderContext& context)
@@ -204,7 +204,7 @@ inline auto ground(LiftedUnaryOperatorView<O> element, GrounderContext& context)
 
     // Canonicalize and Serialize
     canonicalize(unary);
-    return context.destination.get_or_create(unary, context.builder.get_buffer());
+    return context.destination.get_or_create(unary);
 }
 
 template<OpKind O>
@@ -221,7 +221,7 @@ inline auto ground(LiftedBinaryOperatorView<O> element, GrounderContext& context
 
     // Canonicalize and Serialize
     canonicalize(binary);
-    return context.destination.get_or_create(binary, context.builder.get_buffer());
+    return context.destination.get_or_create(binary);
 }
 
 template<OpKind O>
@@ -238,7 +238,7 @@ inline auto ground(LiftedMultiOperatorView<O> element, GrounderContext& context)
 
     // Canonicalize and Serialize
     canonicalize(multi);
-    return context.destination.get_or_create(multi, context.builder.get_buffer());
+    return context.destination.get_or_create(multi);
 }
 
 inline auto ground(LiftedBooleanOperatorView element, GrounderContext& context)
@@ -296,7 +296,7 @@ inline auto ground(AtomView<T> element, GrounderContext& context)
 
     // Canonicalize and Serialize
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 template<FactKind T>
@@ -313,7 +313,7 @@ inline auto ground(LiteralView<T> element, GrounderContext& context)
 
     // Canonicalize and Serialize
     canonicalize(ground_literal);
-    return context.destination.get_or_create(ground_literal, context.builder.get_buffer());
+    return context.destination.get_or_create(ground_literal);
 }
 
 inline auto ground(ConjunctiveConditionView element, GrounderContext& context)
@@ -333,7 +333,7 @@ inline auto ground(ConjunctiveConditionView element, GrounderContext& context)
 
     // Canonicalize and Serialize
     canonicalize(conj_cond);
-    return context.destination.get_or_create(conj_cond, context.builder.get_buffer());
+    return context.destination.get_or_create(conj_cond);
 }
 
 inline auto ground(RuleView element, GrounderContext& context)
@@ -351,7 +351,7 @@ inline auto ground(RuleView element, GrounderContext& context)
 
     // Canonicalize and Serialize
     canonicalize(rule);
-    return context.destination.get_or_create(rule, context.builder.get_buffer());
+    return context.destination.get_or_create(rule);
 }
 
 }

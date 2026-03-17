@@ -122,7 +122,7 @@ inline auto merge_d2d(VariableView element, MergeContext& context)
     variable.name = element.get_name();
 
     canonicalize(variable);
-    return context.destination.get_or_create(variable, context.builder.get_buffer());
+    return context.destination.get_or_create(variable);
 }
 
 inline auto merge_d2d(ObjectView element, MergeContext& context)
@@ -134,7 +134,7 @@ inline auto merge_d2d(ObjectView element, MergeContext& context)
     object.name = element.get_name();
 
     canonicalize(object);
-    return context.destination.get_or_create(object, context.builder.get_buffer());
+    return context.destination.get_or_create(object);
 }
 
 inline auto merge_d2d(BindingView element, MergeContext& context)
@@ -146,7 +146,7 @@ inline auto merge_d2d(BindingView element, MergeContext& context)
     binding.objects = element.get_data().objects;
 
     canonicalize(binding);
-    return context.destination.get_or_create(binding, context.builder.get_buffer());
+    return context.destination.get_or_create(binding);
 }
 
 inline auto merge_d2d(TermView element, MergeContext& context)
@@ -179,7 +179,7 @@ inline auto merge_d2d(PredicateView<T> element, MergeContext& context)
     predicate.arity = element.get_arity();
 
     canonicalize(predicate);
-    return context.destination.get_or_create(predicate, context.builder.get_buffer());
+    return context.destination.get_or_create(predicate);
 }
 
 template<FactKind T>
@@ -194,7 +194,7 @@ inline auto merge_d2d(AtomView<T> element, MergeContext& context)
         atom.terms.push_back(merge_d2d(term, context));
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 template<FactKind T>
@@ -222,7 +222,7 @@ inline auto merge_d2d(GroundAtomView<T> element, MergeContext& context)
     atom.row = merge_d2d(element.get_predicate(), element.get_row(), context).first.get_index().second;
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 template<FactKind T>
@@ -236,7 +236,7 @@ inline auto merge_d2d(LiteralView<T> element, MergeContext& context)
     literal.atom = merge_d2d(element.get_atom(), context).first.get_index();
 
     canonicalize(literal);
-    return context.destination.get_or_create(literal, context.builder.get_buffer());
+    return context.destination.get_or_create(literal);
 }
 
 template<FactKind T>
@@ -250,7 +250,7 @@ inline auto merge_d2d(GroundLiteralView<T> element, MergeContext& context)
     literal.atom = merge_d2d(element.get_atom(), context).first.get_index();
 
     canonicalize(literal);
-    return context.destination.get_or_create(literal, context.builder.get_buffer());
+    return context.destination.get_or_create(literal);
 }
 
 // Numeric
@@ -266,7 +266,7 @@ inline auto merge_d2d(FunctionView<T> element, MergeContext& context)
     function.arity = element.get_arity();
 
     canonicalize(function);
-    return context.destination.get_or_create(function, context.builder.get_buffer());
+    return context.destination.get_or_create(function);
 }
 
 template<FactKind T>
@@ -281,7 +281,7 @@ inline auto merge_d2d(FunctionTermView<T> element, MergeContext& context)
         fterm.terms.push_back(merge_d2d(term, context));
 
     canonicalize(fterm);
-    return context.destination.get_or_create(fterm, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm);
 }
 
 template<FactKind T>
@@ -309,7 +309,7 @@ inline auto merge_d2d(GroundFunctionTermView<T> element, MergeContext& context)
     fterm.row = merge_d2d(element.get_function(), element.get_row(), context).first.get_index().second;
 
     canonicalize(fterm);
-    return context.destination.get_or_create(fterm, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm);
 }
 
 template<FactKind T>
@@ -323,7 +323,7 @@ inline auto merge_d2d(GroundFunctionTermValueView<T> element, MergeContext& cont
     fterm_value.value = element.get_value();
 
     canonicalize(fterm_value);
-    return context.destination.get_or_create(fterm_value, context.builder.get_buffer());
+    return context.destination.get_or_create(fterm_value);
 }
 
 inline auto merge_d2d(FunctionExpressionView element, MergeContext& context)
@@ -370,7 +370,7 @@ inline auto merge_d2d(UnaryOperatorView<O, T> element, MergeContext& context)
     unary.arg = merge_d2d(element.get_arg(), context);
 
     canonicalize(unary);
-    return context.destination.get_or_create(unary, context.builder.get_buffer());
+    return context.destination.get_or_create(unary);
 }
 
 template<OpKind O, typename T>
@@ -384,7 +384,7 @@ inline auto merge_d2d(BinaryOperatorView<O, T> element, MergeContext& context)
     binary.rhs = merge_d2d(element.get_rhs(), context);
 
     canonicalize(binary);
-    return context.destination.get_or_create(binary, context.builder.get_buffer());
+    return context.destination.get_or_create(binary);
 }
 
 template<OpKind O, typename T>
@@ -398,7 +398,7 @@ inline auto merge_d2d(MultiOperatorView<O, T> element, MergeContext& context)
         multi.args.push_back(merge_d2d(arg, context));
 
     canonicalize(multi);
-    return context.destination.get_or_create(multi, context.builder.get_buffer());
+    return context.destination.get_or_create(multi);
 }
 
 template<typename T>
@@ -427,7 +427,7 @@ inline auto merge_d2d(ConjunctiveConditionView element, MergeContext& context)
         conj_cond.numeric_constraints.push_back(merge_d2d(numeric_constraint, context));
 
     canonicalize(conj_cond);
-    return context.destination.get_or_create(conj_cond, context.builder.get_buffer());
+    return context.destination.get_or_create(conj_cond);
 }
 
 inline auto merge_d2d(GroundConjunctiveConditionView element, MergeContext& context)
@@ -444,7 +444,7 @@ inline auto merge_d2d(GroundConjunctiveConditionView element, MergeContext& cont
         conj_cond.numeric_constraints.push_back(merge_d2d(numeric_constraint, context));
 
     canonicalize(conj_cond);
-    return context.destination.get_or_create(conj_cond, context.builder.get_buffer());
+    return context.destination.get_or_create(conj_cond);
 }
 
 inline auto merge_d2d(RuleView element, MergeContext& context)
@@ -459,7 +459,7 @@ inline auto merge_d2d(RuleView element, MergeContext& context)
     rule.head = merge_d2d(element.get_head(), context).first.get_index();
 
     canonicalize(rule);
-    return context.destination.get_or_create(rule, context.builder.get_buffer());
+    return context.destination.get_or_create(rule);
 }
 
 inline auto merge_d2d(GroundRuleView element, MergeContext& context)
@@ -473,7 +473,7 @@ inline auto merge_d2d(GroundRuleView element, MergeContext& context)
     rule.head = merge_d2d(element.get_head(), context).first.get_index();
 
     canonicalize(rule);
-    return context.destination.get_or_create(rule, context.builder.get_buffer());
+    return context.destination.get_or_create(rule);
 }
 
 }

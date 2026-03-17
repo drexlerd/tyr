@@ -25,6 +25,7 @@
 #include "tyr/formalism/datalog/boolean_operator_data.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 #include "tyr/formalism/datalog/ground_atom_index.hpp"
+#include "tyr/formalism/datalog/ground_conjunctive_condition_index.hpp"
 #include "tyr/formalism/datalog/ground_literal_index.hpp"
 #include "tyr/formalism/datalog/ground_rule_index.hpp"
 #include "tyr/formalism/datalog/rule_index.hpp"
@@ -53,8 +54,8 @@ struct Data<formalism::datalog::GroundRule>
         head(head)
     {
     }
-    Data(const Data& other) = delete;
-    Data& operator=(const Data& other) = delete;
+    Data(const Data& other) = default;
+    Data& operator=(const Data& other) = default;
     Data(Data&& other) = default;
     Data& operator=(Data&& other) = default;
 

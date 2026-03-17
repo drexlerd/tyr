@@ -53,7 +53,7 @@ static auto create_applicability_predicate(fp::ActionView action, fp::MergeDatal
     predicate.arity = action.get_arity();
 
     canonicalize(predicate);
-    return context.destination.get_or_create(predicate, context.builder.get_buffer());
+    return context.destination.get_or_create(predicate);
 }
 
 static auto create_applicability_atom(fp::ActionView action, fp::MergeDatalogContext& context)
@@ -69,7 +69,7 @@ static auto create_applicability_atom(fp::ActionView action, fp::MergeDatalogCon
         atom.terms.push_back(Data<f::Term>(f::ParameterIndex(i)));
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 static auto create_applicability_predicate(fp::AxiomView axiom, fp::MergeDatalogContext& context)
@@ -82,7 +82,7 @@ static auto create_applicability_predicate(fp::AxiomView axiom, fp::MergeDatalog
     predicate.arity = axiom.get_arity();
 
     canonicalize(predicate);
-    return context.destination.get_or_create(predicate, context.builder.get_buffer());
+    return context.destination.get_or_create(predicate);
 }
 
 static auto create_applicability_atom(fp::AxiomView axiom, fp::MergeDatalogContext& context)
@@ -98,7 +98,7 @@ static auto create_applicability_atom(fp::AxiomView axiom, fp::MergeDatalogConte
         atom.terms.push_back(Data<f::Term>(f::ParameterIndex(i)));
 
     canonicalize(atom);
-    return context.destination.get_or_create(atom, context.builder.get_buffer());
+    return context.destination.get_or_create(atom);
 }
 
 static void append_from_condition(fp::ConjunctiveConditionView cond, fp::MergeDatalogContext& context, Data<fd::ConjunctiveCondition>& conj_cond)
@@ -126,7 +126,7 @@ static auto create_applicability_literal(fp::ActionView action, fp::MergeDatalog
     literal.atom = create_applicability_atom(action, context).first.get_index();
 
     canonicalize(literal);
-    return context.destination.get_or_create(literal, context.builder.get_buffer());
+    return context.destination.get_or_create(literal);
 }
 
 static auto create_applicability_rule(fp::ActionView action, fp::MergeDatalogContext& context)
@@ -144,14 +144,14 @@ static auto create_applicability_rule(fp::ActionView action, fp::MergeDatalogCon
     append_from_condition(action.get_condition(), context, conj_cond);
 
     canonicalize(conj_cond);
-    const auto new_conj_cond = context.destination.get_or_create(conj_cond, context.builder.get_buffer()).first;
+    const auto new_conj_cond = context.destination.get_or_create(conj_cond).first;
 
     rule.variables = new_conj_cond.get_variables().get_data();
     rule.body = new_conj_cond.get_index();
     rule.head = create_applicability_atom(action, context).first.get_index();
 
     canonicalize(rule);
-    return context.destination.get_or_create(rule, context.builder.get_buffer());
+    return context.destination.get_or_create(rule);
 }
 
 static auto create_applicability_literal(fp::AxiomView axiom, fp::MergeDatalogContext& context)
@@ -164,7 +164,7 @@ static auto create_applicability_literal(fp::AxiomView axiom, fp::MergeDatalogCo
     literal.atom = create_applicability_atom(axiom, context).first.get_index();
 
     canonicalize(literal);
-    return context.destination.get_or_create(literal, context.builder.get_buffer());
+    return context.destination.get_or_create(literal);
 }
 
 static auto create_applicability_rule(fp::AxiomView axiom, fp::MergeDatalogContext& context)
@@ -182,14 +182,14 @@ static auto create_applicability_rule(fp::AxiomView axiom, fp::MergeDatalogConte
     append_from_condition(axiom.get_body(), context, conj_cond);
 
     canonicalize(conj_cond);
-    const auto new_conj_cond = context.destination.get_or_create(conj_cond, context.builder.get_buffer()).first;
+    const auto new_conj_cond = context.destination.get_or_create(conj_cond).first;
 
     rule.variables = new_conj_cond.get_variables().get_data();
     rule.body = new_conj_cond.get_index();
     rule.head = create_applicability_atom(axiom, context).first.get_index();
 
     canonicalize(rule);
-    return context.destination.get_or_create(rule, context.builder.get_buffer());
+    return context.destination.get_or_create(rule);
 }
 
 static auto
@@ -214,14 +214,14 @@ create_cond_effect_rule(fp::ActionView action, fp::ConditionalEffectView cond_ef
     append_from_condition(cond_eff.get_condition(), context, conj_cond);
 
     canonicalize(conj_cond);
-    const auto new_conj_cond = context.destination.get_or_create(conj_cond, context.builder.get_buffer()).first;
+    const auto new_conj_cond = context.destination.get_or_create(conj_cond).first;
 
     rule.variables = new_conj_cond.get_variables().get_data();
     rule.body = new_conj_cond.get_index();
     rule.head = effect.get_index();
 
     canonicalize(rule);
-    return context.destination.get_or_create(rule, context.builder.get_buffer());
+    return context.destination.get_or_create(rule);
 }
 
 static auto create_effect_rule(fp::AxiomView axiom, fd::AtomView<f::FluentTag> effect, fp::MergeDatalogContext& context)
@@ -241,14 +241,14 @@ static auto create_effect_rule(fp::AxiomView axiom, fd::AtomView<f::FluentTag> e
     conj_cond.fluent_literals.push_back(create_applicability_literal(axiom, context).first.get_index());
 
     canonicalize(conj_cond);
-    const auto new_conj_cond = context.destination.get_or_create(conj_cond, context.builder.get_buffer()).first;
+    const auto new_conj_cond = context.destination.get_or_create(conj_cond).first;
 
     rule.variables = new_conj_cond.get_variables().get_data();
     rule.body = new_conj_cond.get_index();
     rule.head = effect.get_index();
 
     canonicalize(rule);
-    return context.destination.get_or_create(rule, context.builder.get_buffer());
+    return context.destination.get_or_create(rule);
 }
 
 static void translate_action_to_delete_free_rules(fp::ActionView action,
@@ -356,7 +356,7 @@ static auto create_program(fp::TaskView task,
         translate_axiom_to_delete_free_axiom_rules(axiom, program, context, predicate_to_axioms);
 
     canonicalize(program);
-    return destination.get_or_create(program, builder.get_buffer()).first;
+    return destination.get_or_create(program).first;
 }
 
 static auto create_program_context(fp::TaskView task,

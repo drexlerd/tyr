@@ -278,7 +278,7 @@ private:
             function.name = element->get_name();
             function.arity = element->get_parameters().size();
             canonicalize(function);
-            return context.get_or_create(function, builder.get_buffer()).first.get_index();
+            return context.get_or_create(function).first.get_index();
         };
 
         if (element->get_name() == "total-cost")
@@ -296,7 +296,7 @@ private:
         object.clear();
         object.name = element->get_name();
         canonicalize(object);
-        return context.get_or_create(object, builder.get_buffer()).first.get_index();
+        return context.get_or_create(object).first.get_index();
     }
 
     Index<Variable> translate_common(loki::Parameter element, Builder& builder, Repository& context)
@@ -316,7 +316,7 @@ private:
             predicate.name = element->get_name();
             predicate.arity = element->get_parameters().size();
             canonicalize(predicate);
-            return context.get_or_create(predicate, builder.get_buffer()).first.get_index();
+            return context.get_or_create(predicate).first.get_index();
         };
 
         if (m_fluent_predicates.count(element->get_name()) && !m_derived_predicates.count(element->get_name()))
@@ -334,7 +334,7 @@ private:
         variable.clear();
         variable.name = element->get_name();
         canonicalize(variable);
-        return context.get_or_create(variable, builder.get_buffer()).first.get_index();
+        return context.get_or_create(variable).first.get_index();
     }
 
     /**
@@ -384,7 +384,7 @@ private:
             atom.predicate = predicate_index;
             atom.terms = this->translate_lifted(element->get_terms(), builder, context);
             canonicalize(atom);
-            return context.get_or_create(atom, builder.get_buffer()).first.get_index();
+            return context.get_or_create(atom).first.get_index();
         };
 
         return std::visit(
@@ -417,7 +417,7 @@ private:
             literal.atom = atom_index;
             literal.polarity = element->get_polarity();
             canonicalize(literal);
-            return context.get_or_create(literal, builder.get_buffer()).first.get_index();
+            return context.get_or_create(literal).first.get_index();
         };
 
         return std::visit(
@@ -453,8 +453,7 @@ private:
             binary.lhs = translate_lifted(element->get_left_function_expression(), builder, context);
             binary.rhs = translate_lifted(element->get_right_function_expression(), builder, context);
             canonicalize(binary);
-            return Data<FunctionExpression>(
-                Data<ArithmeticOperator<Data<FunctionExpression>>>(context.get_or_create(binary, builder.get_buffer()).first.get_index()));
+            return Data<FunctionExpression>(Data<ArithmeticOperator<Data<FunctionExpression>>>(context.get_or_create(binary).first.get_index()));
         };
 
         switch (element->get_binary_operator())
@@ -483,8 +482,7 @@ private:
             multi.clear();
             multi.args = translate_lifted(element->get_function_expressions(), builder, context);
             canonicalize(multi);
-            return Data<FunctionExpression>(
-                Data<ArithmeticOperator<Data<FunctionExpression>>>(context.get_or_create(multi, builder.get_buffer()).first.get_index()));
+            return Data<FunctionExpression>(Data<ArithmeticOperator<Data<FunctionExpression>>>(context.get_or_create(multi).first.get_index()));
         };
 
         switch (element->get_multi_operator())
@@ -505,8 +503,7 @@ private:
         minus.clear();
         minus.arg = translate_lifted(element->get_function_expression(), builder, context);
         canonicalize(minus);
-        return Data<FunctionExpression>(
-            Data<ArithmeticOperator<Data<FunctionExpression>>>(context.get_or_create(minus, builder.get_buffer()).first.get_index()));
+        return Data<FunctionExpression>(Data<ArithmeticOperator<Data<FunctionExpression>>>(context.get_or_create(minus).first.get_index()));
     }
 
     Data<FunctionExpression> translate_lifted(loki::FunctionExpressionFunction element, Builder& builder, Repository& context)
@@ -549,7 +546,7 @@ private:
             fterm.function = function_index;
             fterm.terms = this->translate_lifted(element->get_terms(), builder, context);
             canonicalize(fterm);
-            return context.get_or_create(fterm, builder.get_buffer()).first.get_index();
+            return context.get_or_create(fterm).first.get_index();
         };
 
         return std::visit(
@@ -581,7 +578,7 @@ private:
             binary.lhs = translate_lifted(element->get_left_function_expression(), builder, context);
             binary.rhs = translate_lifted(element->get_right_function_expression(), builder, context);
             canonicalize(binary);
-            return Data<BooleanOperator<Data<FunctionExpression>>>(context.get_or_create(binary, builder.get_buffer()).first.get_index());
+            return Data<BooleanOperator<Data<FunctionExpression>>>(context.get_or_create(binary).first.get_index());
         };
 
         switch (element->get_binary_comparator())
@@ -672,7 +669,7 @@ private:
                     }
 
                     canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
+                    return context.get_or_create(conj_condition).first.get_index();
                 }
                 else if constexpr (std::is_same_v<ConditionT, loki::ConditionLiteral>)
                 {
@@ -681,7 +678,7 @@ private:
                     func_insert_literal(index_literal_variant, conj_condition.static_literals, conj_condition.fluent_literals, conj_condition.derived_literals);
 
                     canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
+                    return context.get_or_create(conj_condition).first.get_index();
                 }
                 else if constexpr (std::is_same_v<ConditionT, loki::ConditionNumericConstraint>)
                 {
@@ -690,7 +687,7 @@ private:
                     conj_condition.numeric_constraints.push_back(numeric_constraint);
 
                     canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
+                    return context.get_or_create(conj_condition).first.get_index();
                 }
                 else
                 {
@@ -717,7 +714,7 @@ private:
             numeric_effect.fterm = fterm_index;
             numeric_effect.fexpr = this->translate_lifted(element->get_function_expression(), builder, context);
             canonicalize(numeric_effect);
-            return context.get_or_create(numeric_effect, builder.get_buffer()).first.get_index();
+            return context.get_or_create(numeric_effect).first.get_index();
         };
 
         auto build_numeric_effect_term = [&](auto fact_tag, auto fterm_index) -> IndexNumericEffectVariant
@@ -825,7 +822,7 @@ private:
                             auto& conj_cond = *conj_cond_ptr;
                             conj_cond.clear();
                             canonicalize(conj_cond);
-                            return context.get_or_create(conj_cond, builder.get_buffer()).first.get_index();
+                            return context.get_or_create(conj_cond).first.get_index();
                         }
                     },
                     tmp_effect->get_effect());
@@ -946,7 +943,7 @@ private:
             conj_effect.numeric_effects = cond_effect_fluent_numeric_effects;
             conj_effect.auxiliary_numeric_effect = cond_effect_auxiliary_numeric_effects;
             canonicalize(conj_effect);
-            const auto conj_effect_index = context.get_or_create(conj_effect, builder.get_buffer()).first.get_index();
+            const auto conj_effect_index = context.get_or_create(conj_effect).first.get_index();
 
             auto cond_effect_ptr = builder.template get_builder<ConditionalEffect>();
             auto& cond_effect = *cond_effect_ptr;
@@ -955,7 +952,7 @@ private:
             cond_effect.condition = cond_conjunctive_condition;
             cond_effect.effect = conj_effect_index;
             canonicalize(cond_effect);
-            const auto cond_effect_index = context.get_or_create(cond_effect, builder.get_buffer()).first.get_index();
+            const auto cond_effect_index = context.get_or_create(cond_effect).first.get_index();
 
             conditional_effects.push_back(cond_effect_index);
         }
@@ -990,7 +987,7 @@ private:
                 auto& conj_cond = *conj_cond_ptr;
                 conj_cond.clear();
                 canonicalize(conj_cond);
-                conjunctive_condition = context.get_or_create(conj_cond, builder.get_buffer()).first.get_index();
+                conjunctive_condition = context.get_or_create(conj_cond).first.get_index();
             }
             action.condition = conjunctive_condition;
 
@@ -1007,7 +1004,7 @@ private:
         m_param_map.pop_parameters(parameters);
 
         canonicalize(action);
-        return context.get_or_create(action, builder.get_buffer()).first.get_index();
+        return context.get_or_create(action).first.get_index();
     }
 
     Index<Axiom> translate_lifted(loki::Axiom element, Builder& builder, Repository& context)
@@ -1040,7 +1037,7 @@ private:
         m_param_map.pop_parameters(parameters);
 
         canonicalize(axiom);
-        return context.get_or_create(axiom, builder.get_buffer()).first.get_index();
+        return context.get_or_create(axiom).first.get_index();
     }
 
     /**
@@ -1083,7 +1080,7 @@ private:
         binding.clear();
         binding.objects = element;
         canonicalize(binding);
-        return context.get_or_create(binding, builder.get_buffer()).first.get_index();
+        return context.get_or_create(binding).first.get_index();
     }
 
     template<typename T>
@@ -1108,7 +1105,7 @@ private:
                            .first.get_index()
                            .second;
             canonicalize(atom);
-            return context.get_or_create(atom, builder.get_buffer()).first.get_index();
+            return context.get_or_create(atom).first.get_index();
         };
 
         return std::visit(
@@ -1161,7 +1158,7 @@ private:
             literal.atom = atom;
             literal.polarity = element->get_polarity();
             canonicalize(literal);
-            return context.get_or_create(literal, builder.get_buffer()).first.get_index();
+            return context.get_or_create(literal).first.get_index();
         };
 
         return std::visit(
@@ -1217,8 +1214,7 @@ private:
             binary.lhs = translate_grounded(element->get_left_function_expression(), builder, context);
             binary.rhs = translate_grounded(element->get_right_function_expression(), builder, context);
             canonicalize(binary);
-            return Data<GroundFunctionExpression>(
-                Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(context.get_or_create(binary, builder.get_buffer()).first.get_index()));
+            return Data<GroundFunctionExpression>(Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(context.get_or_create(binary).first.get_index()));
         };
 
         switch (element->get_binary_operator())
@@ -1247,8 +1243,7 @@ private:
             multi.clear();
             multi.args = translate_grounded(element->get_function_expressions(), builder, context);
             canonicalize(multi);
-            return Data<GroundFunctionExpression>(
-                Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(context.get_or_create(multi, builder.get_buffer()).first.get_index()));
+            return Data<GroundFunctionExpression>(Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(context.get_or_create(multi).first.get_index()));
         };
 
         switch (element->get_multi_operator())
@@ -1269,8 +1264,7 @@ private:
         minus.clear();
         minus.arg = translate_grounded(element->get_function_expression(), builder, context);
         canonicalize(minus);
-        return Data<GroundFunctionExpression>(
-            Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(context.get_or_create(minus, builder.get_buffer()).first.get_index()));
+        return Data<GroundFunctionExpression>(Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(context.get_or_create(minus).first.get_index()));
     }
 
     Data<GroundFunctionExpression> translate_grounded(loki::FunctionExpressionFunction element, Builder& builder, Repository& context)
@@ -1315,7 +1309,7 @@ private:
                             .first.get_index()
                             .second;
             canonicalize(fterm);
-            return context.get_or_create(fterm, builder.get_buffer()).first.get_index();
+            return context.get_or_create(fterm).first.get_index();
         };
 
         return std::visit(
@@ -1348,7 +1342,7 @@ private:
             fterm_value.fterm = fterm_index;
             fterm_value.value = element->get_number();
             canonicalize(fterm_value);
-            return context.get_or_create(fterm_value, builder.get_buffer()).first.get_index();
+            return context.get_or_create(fterm_value).first.get_index();
         };
 
         return std::visit(
@@ -1379,7 +1373,7 @@ private:
             binary.lhs = translate_grounded(element->get_left_function_expression(), builder, context);
             binary.rhs = translate_grounded(element->get_right_function_expression(), builder, context);
             canonicalize(binary);
-            return Data<BooleanOperator<Data<GroundFunctionExpression>>>(context.get_or_create(binary, builder.get_buffer()).first.get_index());
+            return Data<BooleanOperator<Data<GroundFunctionExpression>>>(context.get_or_create(binary).first.get_index());
         };
 
         switch (element->get_binary_comparator())
@@ -1466,7 +1460,7 @@ private:
                     }
 
                     canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
+                    return context.get_or_create(conj_condition).first.get_index();
                 }
                 else if constexpr (std::is_same_v<ConditionT, loki::ConditionLiteral>)
                 {
@@ -1475,7 +1469,7 @@ private:
                     func_insert_literal(index_literal_variant, conj_condition.static_literals, conj_condition.fluent_facts, conj_condition.derived_literals);
 
                     canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
+                    return context.get_or_create(conj_condition).first.get_index();
                 }
                 else if constexpr (std::is_same_v<ConditionT, loki::ConditionNumericConstraint>)
                 {
@@ -1484,7 +1478,7 @@ private:
                     conj_condition.numeric_constraints.push_back(numeric_constraint);
 
                     canonicalize(conj_condition);
-                    return context.get_or_create(conj_condition, builder.get_buffer()).first.get_index();
+                    return context.get_or_create(conj_condition).first.get_index();
                 }
                 else
                 {
@@ -1519,7 +1513,7 @@ private:
         }
 
         canonicalize(metric);
-        return context.get_or_create(metric, builder.get_buffer()).first.get_index();
+        return context.get_or_create(metric).first.get_index();
     }
 
 public:

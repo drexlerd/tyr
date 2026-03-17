@@ -66,7 +66,7 @@ static auto create_axiom_rule(fp::AxiomView axiom, fp::MergeDatalogContext& cont
     process_axiom_body(axiom.get_body(), context, conj_cond);
 
     canonicalize(conj_cond);
-    const auto new_conj_cond = context.destination.get_or_create(conj_cond, context.builder.get_buffer()).first.get_index();
+    const auto new_conj_cond = context.destination.get_or_create(conj_cond).first.get_index();
 
     rule.body = new_conj_cond;
 
@@ -75,7 +75,7 @@ static auto create_axiom_rule(fp::AxiomView axiom, fp::MergeDatalogContext& cont
     rule.head = new_head;
 
     canonicalize(rule);
-    return context.destination.get_or_create(rule, context.builder.get_buffer());
+    return context.destination.get_or_create(rule);
 }
 
 static auto create_program(fp::TaskView task, AxiomEvaluatorProgram::PredicateToPredicateMapping& predicate_to_predicate, fd::Repository& repository)
@@ -141,7 +141,7 @@ static auto create_program(fp::TaskView task, AxiomEvaluatorProgram::PredicateTo
         program.rules.push_back(create_axiom_rule(axiom, context).first.get_index());
 
     canonicalize(program);
-    return repository.get_or_create(program, builder.get_buffer()).first;
+    return repository.get_or_create(program).first;
 }
 
 static auto create_program_context(fp::TaskView task, AxiomEvaluatorProgram::PredicateToPredicateMapping& mapping)

@@ -115,6 +115,10 @@ public:
     {
         clear_entries();
     }
+    RelationRepository(const RelationRepository& other) = delete;
+    RelationRepository& operator=(const RelationRepository& other) = delete;
+    RelationRepository(RelationRepository&& other) = delete;
+    RelationRepository& operator=(RelationRepository&& other) = delete;
 
     /**
      * Common methods.

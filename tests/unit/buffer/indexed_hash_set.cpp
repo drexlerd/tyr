@@ -27,9 +27,9 @@ namespace tyr::tests
 
 TEST(TyrTests, TyrBufferIndexedHashSet)
 {
-    auto repository = b::IndexedHashSet<f::Predicate<f::FluentTag>>();
     auto arena = b::SegmentedBuffer();
     auto buffer = b::Buffer();
+    auto repository = b::IndexedHashSet<f::Predicate<f::FluentTag>>(buffer, arena);
     auto builder = Data<f::Predicate<f::FluentTag>>();
 
     // Create a unique predicate
@@ -38,7 +38,7 @@ TEST(TyrTests, TyrBufferIndexedHashSet)
     builder.arity = 2;
 
     canonicalize(builder);
-    auto [predicate_index_0, success_0] = repository.insert(builder, buffer, arena);
+    auto [predicate_index_0, success_0] = repository.insert(builder);
     const auto& predicate_0 = repository[predicate_index_0];
 
     EXPECT_EQ(predicate_0.index.value, 0);
@@ -51,7 +51,7 @@ TEST(TyrTests, TyrBufferIndexedHashSet)
     builder.arity = 3;
 
     canonicalize(builder);
-    auto [predicate_index_1, success_1] = repository.insert(builder, buffer, arena);
+    auto [predicate_index_1, success_1] = repository.insert(builder);
     const auto& predicate_1 = repository[predicate_index_1];
 
     EXPECT_EQ(predicate_1.index.value, 1);
@@ -64,7 +64,7 @@ TEST(TyrTests, TyrBufferIndexedHashSet)
     builder.arity = 3;
 
     canonicalize(builder);
-    auto [predicate_index_2, success_2] = repository.insert(builder, buffer, arena);
+    auto [predicate_index_2, success_2] = repository.insert(builder);
     const auto& predicate_2 = repository[predicate_index_2];
 
     EXPECT_EQ(predicate_2.index.value, 1);

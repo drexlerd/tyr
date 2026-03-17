@@ -82,7 +82,7 @@ static auto create_ground_fdr_conjunctive_condition(fp::GroundConjunctiveConditi
         fdr_conj_cond.numeric_constraints.push_back(merge_p2p(numeric_constraint, context));
 
     canonicalize(fdr_conj_cond);
-    return context.destination.get_or_create(fdr_conj_cond, context.builder.get_buffer());
+    return context.destination.get_or_create(fdr_conj_cond);
 }
 
 static auto create_ground_conjunctive_effect(fp::GroundConjunctiveEffectView element, fp::GeneralFDRContext& fdr_context, fp::MergeContext& context)
@@ -103,7 +103,7 @@ static auto create_ground_conjunctive_effect(fp::GroundConjunctiveEffectView ele
         fdr_conj_eff.auxiliary_numeric_effect = merge_p2p(element.get_auxiliary_numeric_effect().value(), context);
 
     canonicalize(fdr_conj_eff);
-    return context.destination.get_or_create(fdr_conj_eff, context.builder.get_buffer());
+    return context.destination.get_or_create(fdr_conj_eff);
 }
 
 static auto create_ground_conditional_effect(fp::GroundConditionalEffectView element, fp::GeneralFDRContext& fdr_context, fp::MergeContext& context)
@@ -116,7 +116,7 @@ static auto create_ground_conditional_effect(fp::GroundConditionalEffectView ele
     fdr_cond_eff.effect = create_ground_conjunctive_effect(element.get_effect(), fdr_context, context).first.get_index();
 
     canonicalize(fdr_cond_eff);
-    return context.destination.get_or_create(fdr_cond_eff, context.builder.get_buffer());
+    return context.destination.get_or_create(fdr_cond_eff);
 }
 
 static auto create_ground_action(fp::GroundActionView element, fp::GeneralFDRContext& fdr_context, fp::MergeContext& context)
@@ -132,7 +132,7 @@ static auto create_ground_action(fp::GroundActionView element, fp::GeneralFDRCon
         fdr_action.effects.push_back(create_ground_conditional_effect(cond_eff, fdr_context, context).first.get_index());
 
     canonicalize(fdr_action);
-    return context.destination.get_or_create(fdr_action, context.builder.get_buffer());
+    return context.destination.get_or_create(fdr_action);
 }
 
 static auto create_ground_axiom(fp::GroundAxiomView element, fp::GeneralFDRContext& fdr_context, fp::MergeContext& context)
@@ -147,7 +147,7 @@ static auto create_ground_axiom(fp::GroundAxiomView element, fp::GeneralFDRConte
     fdr_axiom.head = merge_p2p(element.get_head(), context).first.get_index();
 
     canonicalize(fdr_axiom);
-    return context.destination.get_or_create(fdr_axiom, context.builder.get_buffer());
+    return context.destination.get_or_create(fdr_axiom);
 }
 
 // TODO: create stronger mutex groups
@@ -233,7 +233,7 @@ static auto create_fdr_task(const fp::PlanningTask& planning_task,
     canonicalize(fdr_task);
 
     return std::make_shared<GroundTask>(
-        fp::PlanningFDRTask(repository->get_or_create(fdr_task, builder.get_buffer()).first, std::move(fdr_context), repository, planning_task.get_domain()));
+        fp::PlanningFDRTask(repository->get_or_create(fdr_task).first, std::move(fdr_context), repository, planning_task.get_domain()));
 }
 
 static auto create_fdr_task(const fp::PlanningTask& task,

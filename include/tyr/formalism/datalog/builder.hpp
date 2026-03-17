@@ -18,12 +18,9 @@
 #ifndef TYR_FORMALISM_DATALOG_BUILDER_HPP_
 #define TYR_FORMALISM_DATALOG_BUILDER_HPP_
 
-// Include specialization headers first
-#include "tyr/formalism/datalog/datas.hpp"
-//
-#include "tyr/buffer/declarations.hpp"
 #include "tyr/common/tuple.hpp"
 #include "tyr/common/unique_object_pool.hpp"
+#include "tyr/formalism/datalog/datas.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 
 namespace tyr::formalism::datalog
@@ -101,8 +98,6 @@ private:
 
     BuilderStorage m_builder;
 
-    buffer::Buffer m_buffer;
-
 public:
     Builder() = default;
 
@@ -111,8 +106,6 @@ public:
     {
         return std::get<BuilderEntry<T>>(m_builder).container.get_or_allocate();
     }
-
-    auto& get_buffer() noexcept { return m_buffer; }
 };
 
 }

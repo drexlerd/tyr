@@ -47,8 +47,8 @@ struct Data<formalism::planning::GroundNumericEffect<Op, T>>
         fexpr(fexpr)
     {
     }
-    Data(const Data& other) = delete;
-    Data& operator=(const Data& other) = delete;
+    Data(const Data& other) = default;
+    Data& operator=(const Data& other) = default;
     Data(Data&& other) = default;
     Data& operator=(Data&& other) = default;
 

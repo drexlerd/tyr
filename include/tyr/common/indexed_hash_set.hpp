@@ -56,7 +56,7 @@ public:
     void clear() noexcept
     {
         m_set.clear();
-        m_storage.clear();
+        m_storage->clear();
     }
 
     size_t hash(const Data<Tag>& element) const noexcept { return m_set.hash(element); }
@@ -71,18 +71,18 @@ public:
 
     std::optional<Index<Tag>> find(const Data<Tag>& value) const { return find_with_hash(value, hash(value)); }
 
-    Index<Tag> insert_with_hash(size_t h, const Data<Tag>& value)
+    std::pair<Index<Tag>, bool> insert_with_hash(size_t h, const Data<Tag>& value)
     {
         if (auto it = m_set.find(value, h); it != m_set.end())
-            return *it;
+            return { *it, false };
 
         Index<Tag> idx(static_cast<uint_t>(m_storage->size()));
         m_storage->push_back(value);
         m_set.emplace_with_hash(h, idx);
-        return idx;
+        return { idx, true };
     }
 
-    Index<Tag> insert(const Data<Tag>& value) { return insert_with_hash(hash(value), value); }
+    std::pair<Index<Tag>, bool> insert(const Data<Tag>& value) { return insert_with_hash(hash(value), value); }
 
     const Data<Tag>& operator[](Index<Tag> idx) const noexcept { return (*m_storage)[uint_t(idx)]; }
 
