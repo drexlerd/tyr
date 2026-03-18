@@ -21,6 +21,7 @@ Pytyr is available at [Pypi.org](https://pypi.org/project/pytyr/) and can be ins
 Detailed examples are available in the `python/examples` directory:
 
 - [`structures.py`](python/examples/formalism/planning/structures.py) – Parse and traverse all planning formalism structures.
+- [`builder.py`](python/examples/formalism/planning/builder.py) – Create new planning formalism structures (incomplete).
 - [`astar_eager.py`](python/examples/planning/astar_eager.py) – Use and customize off-the-shelf search algorithms.
 - [`gbfs_lazy.py`](python/examples/planning/gbfs_lazy.py) – Implement a custom search algorithm from scratch.
 
