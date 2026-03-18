@@ -127,6 +127,20 @@ void bind_module_definitions(nb::module_& m)
     bind_index<Index<MultiOperator<OpAdd, Data<FunctionExpression>>>>(m, "MultiOperatorAddIndex");
     bind_index<Index<MultiOperator<OpMul, Data<FunctionExpression>>>>(m, "MultiOperatorMulIndex");
 
+    bind_index<Index<ConjunctiveCondition>>(m, "ConjunctiveConditionIndex");
+
+    bind_index<Index<NumericEffect<OpAssign, FluentTag>>>(m, "FluentNumericEffectAssignIndex");
+    bind_index<Index<NumericEffect<OpIncrease, FluentTag>>>(m, "FluentNumericEffectIncreaseIndex");
+    bind_index<Index<NumericEffect<OpDecrease, FluentTag>>>(m, "FluentNumericEffectDecreaseIndex");
+    bind_index<Index<NumericEffect<OpScaleUp, FluentTag>>>(m, "FluentNumericEffectScaleUpIndex");
+    bind_index<Index<NumericEffect<OpScaleDown, FluentTag>>>(m, "FluentNumericEffectScaleDownIndex");
+    bind_index<Index<NumericEffect<OpIncrease, AuxiliaryTag>>>(m, "AuxiliaryNumericEffectIncreaseIndex");
+
+    bind_index<Index<ConjunctiveEffect>>(m, "ConjunctiveEffectIndex");
+    bind_index<Index<ConditionalEffect>>(m, "ConditionalEffectIndex");
+    bind_index<Index<Action>>(m, "ActionIndex");
+    bind_index<Index<Axiom>>(m, "AxiomIndex");
+
     bind_index<Index<GroundConjunctiveCondition>>(m, "GroundConjunctiveConditionIndex");
 
     bind_index<Index<GroundNumericEffect<OpAssign, FluentTag>>>(m, "FluentGroundNumericEffectAssignIndex");
