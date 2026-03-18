@@ -26,10 +26,13 @@ add_library(core STATIC ${TYR_PRIVATE_HEADER_FILES} ${TYR_PUBLIC_HEADER_FILES}
     analysis/task_domains.cpp
 
     formalism/datalog/builder.cpp
+    formalism/datalog/grounder.cpp
+    formalism/datalog/merge.cpp
     formalism/datalog/repository.cpp
     formalism/datalog/variable_dependency_graph.cpp
 
     formalism/planning/builder.cpp
+    formalism/planning/grounder.cpp
     formalism/planning/repository.cpp
     formalism/planning/loki_to_tyr.cpp
     formalism/planning/parser.cpp

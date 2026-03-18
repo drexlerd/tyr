@@ -41,441 +41,82 @@ struct MergeContext
 
 // Common
 
-auto merge_d2d(VariableView element, MergeContext& context);
+std::pair<VariableView, bool> merge_d2d(VariableView element, MergeContext& context);
 
-auto merge_d2d(ObjectView element, MergeContext& context);
+std::pair<ObjectView, bool> merge_d2d(ObjectView element, MergeContext& context);
 
-auto merge_d2d(BindingView element, MergeContext& context);
+std::pair<BindingView, bool> merge_d2d(BindingView element, MergeContext& context);
 
-auto merge_d2d(TermView element, MergeContext& context);
-
-// Propositional
-
-template<FactKind T>
-auto merge_d2d(PredicateView<T> element, MergeContext& context);
-
-template<FactKind T>
-auto merge_d2d(AtomView<T> element, MergeContext& context);
-
-template<FactKind T>
-auto merge_d2d(GroundAtomView<T> element, MergeContext& context);
-
-template<FactKind T>
-auto merge_d2d(LiteralView<T> element, MergeContext& context);
-
-template<FactKind T>
-auto merge_d2d(GroundLiteralView<T> element, MergeContext& context);
-
-// Numeric
-
-template<FactKind T>
-auto merge_d2d(FunctionView<T> element, MergeContext& context);
-
-template<FactKind T>
-auto merge_d2d(FunctionTermView<T> element, MergeContext& context);
-
-template<FactKind T>
-auto merge_d2d(GroundFunctionTermView<T> element, MergeContext& context);
-
-template<FactKind T>
-auto merge_d2d(GroundFunctionTermValueView<T> element, MergeContext& context);
-
-auto merge_d2d(FunctionExpressionView element, MergeContext& context);
-
-auto merge_d2d(GroundFunctionExpressionView element, MergeContext& context);
-
-template<OpKind O, typename T>
-auto merge_d2d(UnaryOperatorView<O, T> element, MergeContext& context);
-
-template<OpKind O, typename T>
-auto merge_d2d(BinaryOperatorView<O, T> element, MergeContext& context);
-
-template<OpKind O, typename T>
-auto merge_d2d(MultiOperatorView<O, T> element, MergeContext& context);
-
-template<typename T>
-auto merge_d2d(ArithmeticOperatorView<T> element, MergeContext& context);
-
-template<typename T>
-auto merge_d2d(BooleanOperatorView<T> element, MergeContext& context);
-
-auto merge_d2d(ConjunctiveConditionView element, MergeContext& context);
-
-auto merge_d2d(GroundConjunctiveConditionView element, MergeContext& context);
-
-auto merge_d2d(RuleView element, MergeContext& context);
-
-auto merge_d2d(GroundRuleView element, MergeContext& context);
-
-/**
- * Implementations
- */
-
-// Common
-
-inline auto merge_d2d(VariableView element, MergeContext& context)
-{
-    auto variable_ptr = context.builder.template get_builder<Variable>();
-    auto& variable = *variable_ptr;
-    variable.clear();
-
-    variable.name = element.get_name();
-
-    canonicalize(variable);
-    return context.destination.get_or_create(variable);
-}
-
-inline auto merge_d2d(ObjectView element, MergeContext& context)
-{
-    auto object_ptr = context.builder.template get_builder<Object>();
-    auto& object = *object_ptr;
-    object.clear();
-
-    object.name = element.get_name();
-
-    canonicalize(object);
-    return context.destination.get_or_create(object);
-}
-
-inline auto merge_d2d(BindingView element, MergeContext& context)
-{
-    auto binding_ptr = context.builder.template get_builder<Binding>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    binding.objects = element.get_data().objects;
-
-    canonicalize(binding);
-    return context.destination.get_or_create(binding);
-}
-
-inline auto merge_d2d(TermView element, MergeContext& context)
-{
-    return visit(
-        [&](auto&& arg)
-        {
-            using Alternative = std::decay_t<decltype(arg)>;
-
-            if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                return Data<Term>(arg);
-            else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                return Data<Term>(merge_d2d(arg, context).first.get_index());
-            else
-                static_assert(dependent_false<Alternative>::value, "Missing case");
-        },
-        element.get_variant());
-}
+Data<Term> merge_d2d(TermView element, MergeContext& context);
 
 // Propositional
 
 template<FactKind T>
-inline auto merge_d2d(PredicateView<T> element, MergeContext& context)
-{
-    auto predicate_ptr = context.builder.template get_builder<Predicate<T>>();
-    auto& predicate = *predicate_ptr;
-    predicate.clear();
-
-    predicate.name = element.get_name();
-    predicate.arity = element.get_arity();
-
-    canonicalize(predicate);
-    return context.destination.get_or_create(predicate);
-}
+std::pair<PredicateView<T>, bool> merge_d2d(PredicateView<T> element, MergeContext& context);
 
 template<FactKind T>
-inline auto merge_d2d(AtomView<T> element, MergeContext& context)
-{
-    auto atom_ptr = context.builder.template get_builder<Atom<T>>();
-    auto& atom = *atom_ptr;
-    atom.clear();
-
-    atom.predicate = element.get_predicate().get_index();
-    for (const auto term : element.get_terms())
-        atom.terms.push_back(merge_d2d(term, context));
-
-    canonicalize(atom);
-    return context.destination.get_or_create(atom);
-}
+std::pair<AtomView<T>, bool> merge_d2d(AtomView<T> element, MergeContext& context);
 
 template<FactKind T>
-inline auto merge_d2d(PredicateView<T> predicate, PredicateBindingView<T> element, MergeContext& context)
-{
-    auto binding_ptr = context.builder.template get_builder<Binding>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    for (const auto object : element.get_objects())
-        binding.objects.push_back(object.get_index());
-
-    canonicalize(binding);
-    return context.destination.get_or_create(predicate, binding.objects);
-}
+std::pair<PredicateBindingView<T>, bool> merge_d2d(PredicateView<T> predicate, PredicateBindingView<T> element, MergeContext& context);
 
 template<FactKind T>
-inline auto merge_d2d(GroundAtomView<T> element, MergeContext& context)
-{
-    auto atom_ptr = context.builder.template get_builder<GroundAtom<T>>();
-    auto& atom = *atom_ptr;
-    atom.clear();
-
-    atom.predicate = element.get_predicate().get_index();
-    atom.row = merge_d2d(element.get_predicate(), element.get_row(), context).first.get_index().second;
-
-    canonicalize(atom);
-    return context.destination.get_or_create(atom);
-}
+std::pair<GroundAtomView<T>, bool> merge_d2d(GroundAtomView<T> element, MergeContext& context);
 
 template<FactKind T>
-inline auto merge_d2d(LiteralView<T> element, MergeContext& context)
-{
-    auto literal_ptr = context.builder.template get_builder<Literal<T>>();
-    auto& literal = *literal_ptr;
-    literal.clear();
-
-    literal.polarity = element.get_polarity();
-    literal.atom = merge_d2d(element.get_atom(), context).first.get_index();
-
-    canonicalize(literal);
-    return context.destination.get_or_create(literal);
-}
+std::pair<LiteralView<T>, bool> merge_d2d(LiteralView<T> element, MergeContext& context);
 
 template<FactKind T>
-inline auto merge_d2d(GroundLiteralView<T> element, MergeContext& context)
-{
-    auto literal_ptr = context.builder.template get_builder<GroundLiteral<T>>();
-    auto& literal = *literal_ptr;
-    literal.clear();
-
-    literal.polarity = element.get_polarity();
-    literal.atom = merge_d2d(element.get_atom(), context).first.get_index();
-
-    canonicalize(literal);
-    return context.destination.get_or_create(literal);
-}
+std::pair<GroundLiteralView<T>, bool> merge_d2d(GroundLiteralView<T> element, MergeContext& context);
 
 // Numeric
 
 template<FactKind T>
-inline auto merge_d2d(FunctionView<T> element, MergeContext& context)
-{
-    auto function_ptr = context.builder.template get_builder<Function<T>>();
-    auto& function = *function_ptr;
-    function.clear();
-
-    function.name = element.get_name();
-    function.arity = element.get_arity();
-
-    canonicalize(function);
-    return context.destination.get_or_create(function);
-}
+std::pair<FunctionView<T>, bool> merge_d2d(FunctionView<T> element, MergeContext& context);
 
 template<FactKind T>
-inline auto merge_d2d(FunctionTermView<T> element, MergeContext& context)
-{
-    auto fterm_ptr = context.builder.template get_builder<FunctionTerm<T>>();
-    auto& fterm = *fterm_ptr;
-    fterm.clear();
-
-    fterm.function = element.get_function().get_index();
-    for (const auto term : element.get_terms())
-        fterm.terms.push_back(merge_d2d(term, context));
-
-    canonicalize(fterm);
-    return context.destination.get_or_create(fterm);
-}
+std::pair<FunctionTermView<T>, bool> merge_d2d(FunctionTermView<T> element, MergeContext& context);
 
 template<FactKind T>
-inline auto merge_d2d(FunctionView<T> function, FunctionBindingView<T> element, MergeContext& context)
-{
-    auto binding_ptr = context.builder.template get_builder<Binding>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    for (const auto object : element.get_objects())
-        binding.objects.push_back(object.get_index());
-
-    canonicalize(binding);
-    return context.destination.get_or_create(function, binding.objects);
-}
+std::pair<FunctionBindingView<T>, bool> merge_d2d(FunctionView<T> function, FunctionBindingView<T> element, MergeContext& context);
 
 template<FactKind T>
-inline auto merge_d2d(GroundFunctionTermView<T> element, MergeContext& context)
-{
-    auto fterm_ptr = context.builder.template get_builder<GroundFunctionTerm<T>>();
-    auto& fterm = *fterm_ptr;
-    fterm.clear();
-
-    fterm.function = element.get_function().get_index();
-    fterm.row = merge_d2d(element.get_function(), element.get_row(), context).first.get_index().second;
-
-    canonicalize(fterm);
-    return context.destination.get_or_create(fterm);
-}
+std::pair<GroundFunctionTermView<T>, bool> merge_d2d(GroundFunctionTermView<T> element, MergeContext& context);
 
 template<FactKind T>
-inline auto merge_d2d(GroundFunctionTermValueView<T> element, MergeContext& context)
-{
-    auto fterm_value_ptr = context.builder.template get_builder<GroundFunctionTermValue<T>>();
-    auto& fterm_value = *fterm_value_ptr;
-    fterm_value.clear();
+std::pair<GroundFunctionTermValueView<T>, bool> merge_d2d(GroundFunctionTermValueView<T> element, MergeContext& context);
 
-    fterm_value.fterm = merge_d2d(element.get_fterm(), context).first.get_index();
-    fterm_value.value = element.get_value();
+Data<FunctionExpression> merge_d2d(FunctionExpressionView element, MergeContext& context);
 
-    canonicalize(fterm_value);
-    return context.destination.get_or_create(fterm_value);
-}
-
-inline auto merge_d2d(FunctionExpressionView element, MergeContext& context)
-{
-    return visit(
-        [&](auto&& arg)
-        {
-            using Alternative = std::decay_t<decltype(arg)>;
-
-            if constexpr (std::is_same_v<Alternative, float_t>)
-                return Data<FunctionExpression>(arg);
-            else if constexpr (std::is_same_v<Alternative, LiftedArithmeticOperatorView>)
-                return Data<FunctionExpression>(merge_d2d(arg, context));
-            else
-                return Data<FunctionExpression>(merge_d2d(arg, context).first.get_index());
-        },
-        element.get_variant());
-}
-
-inline auto merge_d2d(GroundFunctionExpressionView element, MergeContext& context)
-{
-    return visit(
-        [&](auto&& arg)
-        {
-            using Alternative = std::decay_t<decltype(arg)>;
-
-            if constexpr (std::is_same_v<Alternative, float_t>)
-                return Data<GroundFunctionExpression>(arg);
-            else if constexpr (std::is_same_v<Alternative, GroundArithmeticOperatorView>)
-                return Data<GroundFunctionExpression>(merge_d2d(arg, context));
-            else
-                return Data<GroundFunctionExpression>(merge_d2d(arg, context).first.get_index());
-        },
-        element.get_variant());
-}
+Data<GroundFunctionExpression> merge_d2d(GroundFunctionExpressionView element, MergeContext& context);
 
 template<OpKind O, typename T>
-inline auto merge_d2d(UnaryOperatorView<O, T> element, MergeContext& context)
-{
-    auto unary_ptr = context.builder.template get_builder<UnaryOperator<O, T>>();
-    auto& unary = *unary_ptr;
-    unary.clear();
-
-    unary.arg = merge_d2d(element.get_arg(), context);
-
-    canonicalize(unary);
-    return context.destination.get_or_create(unary);
-}
+std::pair<UnaryOperatorView<O, T>, bool> merge_d2d(UnaryOperatorView<O, T> element, MergeContext& context);
 
 template<OpKind O, typename T>
-inline auto merge_d2d(BinaryOperatorView<O, T> element, MergeContext& context)
-{
-    auto binary_ptr = context.builder.template get_builder<BinaryOperator<O, T>>();
-    auto& binary = *binary_ptr;
-    binary.clear();
-
-    binary.lhs = merge_d2d(element.get_lhs(), context);
-    binary.rhs = merge_d2d(element.get_rhs(), context);
-
-    canonicalize(binary);
-    return context.destination.get_or_create(binary);
-}
+std::pair<BinaryOperatorView<O, T>, bool> merge_d2d(BinaryOperatorView<O, T> element, MergeContext& context);
 
 template<OpKind O, typename T>
-inline auto merge_d2d(MultiOperatorView<O, T> element, MergeContext& context)
-{
-    auto multi_ptr = context.builder.template get_builder<MultiOperator<O, T>>();
-    auto& multi = *multi_ptr;
-    multi.clear();
-
-    for (const auto arg : element.get_args())
-        multi.args.push_back(merge_d2d(arg, context));
-
-    canonicalize(multi);
-    return context.destination.get_or_create(multi);
-}
+std::pair<MultiOperatorView<O, T>, bool> merge_d2d(MultiOperatorView<O, T> element, MergeContext& context);
 
 template<typename T>
-inline auto merge_d2d(ArithmeticOperatorView<T> element, MergeContext& context)
-{
-    return visit([&](auto&& arg) { return Data<ArithmeticOperator<T>>(merge_d2d(arg, context).first.get_index()); }, element.get_variant());
-}
+Data<ArithmeticOperator<T>> merge_d2d(ArithmeticOperatorView<T> element, MergeContext& context);
 
 template<typename T>
-inline auto merge_d2d(BooleanOperatorView<T> element, MergeContext& context)
-{
-    return visit([&](auto&& arg) { return Data<BooleanOperator<T>>(merge_d2d(arg, context).first.get_index()); }, element.get_variant());
-}
+Data<BooleanOperator<T>> merge_d2d(BooleanOperatorView<T> element, MergeContext& context);
 
-inline auto merge_d2d(ConjunctiveConditionView element, MergeContext& context)
-{
-    auto conj_cond_ptr = context.builder.template get_builder<ConjunctiveCondition>();
-    auto& conj_cond = *conj_cond_ptr;
-    conj_cond.clear();
+std::pair<ConjunctiveConditionView, bool> merge_d2d(ConjunctiveConditionView element, MergeContext& context);
 
-    for (const auto literal : element.template get_literals<StaticTag>())
-        conj_cond.static_literals.push_back(merge_d2d(literal, context).first.get_index());
-    for (const auto literal : element.template get_literals<FluentTag>())
-        conj_cond.fluent_literals.push_back(merge_d2d(literal, context).first.get_index());
-    for (const auto numeric_constraint : element.get_numeric_constraints())
-        conj_cond.numeric_constraints.push_back(merge_d2d(numeric_constraint, context));
+std::pair<GroundConjunctiveConditionView, bool> merge_d2d(GroundConjunctiveConditionView element, MergeContext& context);
 
-    canonicalize(conj_cond);
-    return context.destination.get_or_create(conj_cond);
-}
+std::pair<RuleView, bool> merge_d2d(RuleView element, MergeContext& context);
 
-inline auto merge_d2d(GroundConjunctiveConditionView element, MergeContext& context)
-{
-    auto conj_cond_ptr = context.builder.template get_builder<GroundConjunctiveCondition>();
-    auto& conj_cond = *conj_cond_ptr;
-    conj_cond.clear();
-
-    for (const auto literal : element.template get_literals<StaticTag>())
-        conj_cond.static_literals.push_back(merge_d2d(literal, context).first.get_index());
-    for (const auto literal : element.template get_literals<FluentTag>())
-        conj_cond.fluent_literals.push_back(merge_d2d(literal, context).first.get_index());
-    for (const auto numeric_constraint : element.get_numeric_constraints())
-        conj_cond.numeric_constraints.push_back(merge_d2d(numeric_constraint, context));
-
-    canonicalize(conj_cond);
-    return context.destination.get_or_create(conj_cond);
-}
-
-inline auto merge_d2d(RuleView element, MergeContext& context)
-{
-    auto rule_ptr = context.builder.template get_builder<Rule>();
-    auto& rule = *rule_ptr;
-    rule.clear();
-
-    for (const auto variable : element.get_variables())
-        rule.variables.push_back(merge_d2d(variable, context).first.get_index());
-    rule.body = merge_d2d(element.get_body(), context).first.get_index();
-    rule.head = merge_d2d(element.get_head(), context).first.get_index();
-
-    canonicalize(rule);
-    return context.destination.get_or_create(rule);
-}
-
-inline auto merge_d2d(GroundRuleView element, MergeContext& context)
-{
-    auto rule_ptr = context.builder.template get_builder<GroundRule>();
-    auto& rule = *rule_ptr;
-    rule.clear();
-
-    rule.rule = element.get_rule().get_index();
-    rule.body = merge_d2d(element.get_body(), context).first.get_index();
-    rule.head = merge_d2d(element.get_head(), context).first.get_index();
-
-    canonicalize(rule);
-    return context.destination.get_or_create(rule);
-}
+std::pair<GroundRuleView, bool> merge_d2d(GroundRuleView element, MergeContext& context);
 
 }
+
+#ifdef TYR_HEADER_INSTANTIATION
+#include "tyr/formalism/datalog/merge.ipp"
+#endif
 
 #endif

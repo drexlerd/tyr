@@ -40,320 +40,51 @@ struct GrounderContext
 };
 
 /**
- * ground
+ * Declarations
  */
 
-auto ground(TermListView element, GrounderContext& context);
+std::pair<BindingView, bool> ground(TermListView element, GrounderContext& context);
 
-auto ground(const IndexList<Object>& element, GrounderContext& context);
+std::pair<BindingView, bool> ground(const IndexList<Object>& element, GrounderContext& context);
 
 template<FactKind T>
-auto ground(FunctionTermView<T> element, GrounderContext& context);
+std::pair<FunctionBindingView<T>, bool> ground(TermListView terms, FunctionView<T> function, GrounderContext& context);
 
-auto ground(FunctionExpressionView element, GrounderContext& context);
+template<FactKind T>
+std::pair<GroundFunctionTermView<T>, bool> ground(FunctionTermView<T> element, GrounderContext& context);
+
+Data<GroundFunctionExpression> ground(FunctionExpressionView element, GrounderContext& context);
 
 template<OpKind O>
-auto ground(LiftedUnaryOperatorView<O> element, GrounderContext& context);
+std::pair<GroundUnaryOperatorView<O>, bool> ground(LiftedUnaryOperatorView<O> element, GrounderContext& context);
 
 template<OpKind O>
-auto ground(LiftedBinaryOperatorView<O> element, GrounderContext& context);
+std::pair<GroundBinaryOperatorView<O>, bool> ground(LiftedBinaryOperatorView<O> element, GrounderContext& context);
 
 template<OpKind O>
-auto ground(LiftedMultiOperatorView<O> element, GrounderContext& context);
+std::pair<GroundMultiOperatorView<O>, bool> ground(LiftedMultiOperatorView<O> element, GrounderContext& context);
 
-auto ground(LiftedBooleanOperatorView element, GrounderContext& context);
+Data<BooleanOperator<Data<GroundFunctionExpression>>> ground(LiftedBooleanOperatorView element, GrounderContext& context);
 
-auto ground(LiftedArithmeticOperatorView element, GrounderContext& context);
-
-template<FactKind T>
-auto ground(AtomView<T> element, GrounderContext& context);
+Data<ArithmeticOperator<Data<GroundFunctionExpression>>> ground(LiftedArithmeticOperatorView element, GrounderContext& context);
 
 template<FactKind T>
-auto ground(LiteralView<T> element, GrounderContext& context);
-
-auto ground(ConjunctiveConditionView element, GrounderContext& context);
-
-auto ground(RuleView element, GrounderContext& context);
-
-/**
- * Implementations
- */
-
-/**
- * ground
- */
-
-inline auto ground(TermListView element, GrounderContext& context)
-{
-    // Fetch and clear
-    auto binding_ptr = context.builder.template get_builder<Binding>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    // Fill data
-    for (const auto term : element)
-    {
-        visit(
-            [&](auto&& arg)
-            {
-                using Alternative = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                    binding.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                    binding.objects.push_back(arg.get_index());
-                else
-                    static_assert(dependent_false<Alternative>::value, "Missing case");
-            },
-            term.get_variant());
-    }
-
-    // Canonicalize and Serialize
-    canonicalize(binding);
-    return context.destination.get_or_create(binding);
-}
-
-inline auto ground(const IndexList<Object>& element, GrounderContext& context)
-{
-    // Fetch and clear
-    auto binding_ptr = context.builder.template get_builder<Binding>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    // Fill data
-    binding.objects = element;
-
-    // Canonicalize and Serialize
-    canonicalize(binding);
-    return context.destination.get_or_create(binding);
-}
+std::pair<PredicateBindingView<T>, bool> ground(TermListView terms, PredicateView<T> predicate, GrounderContext& context);
 
 template<FactKind T>
-inline auto ground(TermListView terms, FunctionView<T> function, GrounderContext& context)
-{
-    auto binding_ptr = context.builder.template get_builder<Binding>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    for (const auto term : terms)
-    {
-        visit(
-            [&](auto&& arg)
-            {
-                using Alternative = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                    binding.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                    binding.objects.push_back(arg.get_index());
-                else
-                    static_assert(dependent_false<Alternative>::value, "Missing case");
-            },
-            term.get_variant());
-    }
-
-    // Canonicalize and Serialize
-    canonicalize(binding);
-    return context.destination.get_or_create(function, binding.objects);
-}
+std::pair<GroundAtomView<T>, bool> ground(AtomView<T> element, GrounderContext& context);
 
 template<FactKind T>
-inline auto ground(FunctionTermView<T> element, GrounderContext& context)
-{
-    // Fetch and clear
-    auto fterm_ptr = context.builder.template get_builder<GroundFunctionTerm<T>>();
-    auto& fterm = *fterm_ptr;
-    fterm.clear();
+std::pair<GroundLiteralView<T>, bool> ground(LiteralView<T> element, GrounderContext& context);
 
-    // Fill data
-    fterm.function = element.get_function().get_index();
-    fterm.row = ground(element.get_terms(), element.get_function(), context).first.get_index().second;
+std::pair<GroundConjunctiveConditionView, bool> ground(ConjunctiveConditionView element, GrounderContext& context);
 
-    // Canonicalize and Serialize
-    canonicalize(fterm);
-    return context.destination.get_or_create(fterm);
-}
-
-inline auto ground(FunctionExpressionView element, GrounderContext& context)
-{
-    return visit(
-        [&](auto&& arg)
-        {
-            using Alternative = std::decay_t<decltype(arg)>;
-
-            if constexpr (std::is_same_v<Alternative, float_t>)
-                return Data<GroundFunctionExpression>(arg);
-            else if constexpr (std::is_same_v<Alternative, LiftedArithmeticOperatorView>)
-                return Data<GroundFunctionExpression>(ground(arg, context));
-            else
-                return Data<GroundFunctionExpression>(ground(arg, context).first.get_index());
-        },
-        element.get_variant());
-}
-
-template<OpKind O>
-inline auto ground(LiftedUnaryOperatorView<O> element, GrounderContext& context)
-{
-    // Fetch and clear
-    auto unary_ptr = context.builder.template get_builder<UnaryOperator<O, Data<GroundFunctionExpression>>>();
-    auto& unary = *unary_ptr;
-    unary.clear();
-
-    // Fill data
-    unary.arg = ground(element.get_arg(), context);
-
-    // Canonicalize and Serialize
-    canonicalize(unary);
-    return context.destination.get_or_create(unary);
-}
-
-template<OpKind O>
-inline auto ground(LiftedBinaryOperatorView<O> element, GrounderContext& context)
-{
-    // Fetch and clear
-    auto binary_ptr = context.builder.template get_builder<BinaryOperator<O, Data<GroundFunctionExpression>>>();
-    auto& binary = *binary_ptr;
-    binary.clear();
-
-    // Fill data
-    binary.lhs = ground(element.get_lhs(), context);
-    binary.rhs = ground(element.get_rhs(), context);
-
-    // Canonicalize and Serialize
-    canonicalize(binary);
-    return context.destination.get_or_create(binary);
-}
-
-template<OpKind O>
-inline auto ground(LiftedMultiOperatorView<O> element, GrounderContext& context)
-{
-    // Fetch and clear
-    auto multi_ptr = context.builder.template get_builder<MultiOperator<O, Data<GroundFunctionExpression>>>();
-    auto& multi = *multi_ptr;
-    multi.clear();
-
-    // Fill data
-    for (const auto arg : element.get_args())
-        multi.args.push_back(ground(arg, context));
-
-    // Canonicalize and Serialize
-    canonicalize(multi);
-    return context.destination.get_or_create(multi);
-}
-
-inline auto ground(LiftedBooleanOperatorView element, GrounderContext& context)
-{
-    return visit([&](auto&& arg) { return Data<BooleanOperator<Data<GroundFunctionExpression>>>(ground(arg, context).first.get_index()); },
-                 element.get_variant());
-}
-
-inline auto ground(LiftedArithmeticOperatorView element, GrounderContext& context)
-{
-    return visit([&](auto&& arg) { return Data<ArithmeticOperator<Data<GroundFunctionExpression>>>(ground(arg, context).first.get_index()); },
-                 element.get_variant());
-}
-
-template<FactKind T>
-inline auto ground(TermListView terms, PredicateView<T> predicate, GrounderContext& context)
-{
-    auto binding_ptr = context.builder.template get_builder<Binding>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    for (const auto term : terms)
-    {
-        visit(
-            [&](auto&& arg)
-            {
-                using Alternative = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                    binding.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                    binding.objects.push_back(arg.get_index());
-                else
-                    static_assert(dependent_false<Alternative>::value, "Missing case");
-            },
-            term.get_variant());
-    }
-
-    // Canonicalize and Serialize
-    canonicalize(binding);
-    return context.destination.get_or_create(predicate, binding.objects);
-}
-
-template<FactKind T>
-inline auto ground(AtomView<T> element, GrounderContext& context)
-{
-    // Fetch and clear
-    auto atom_ptr = context.builder.template get_builder<GroundAtom<T>>();
-    auto& atom = *atom_ptr;
-    atom.clear();
-
-    // Fill data
-    atom.predicate = element.get_predicate().get_index();
-    atom.row = ground(element.get_terms(), element.get_predicate(), context).first.get_index().second;
-
-    // Canonicalize and Serialize
-    canonicalize(atom);
-    return context.destination.get_or_create(atom);
-}
-
-template<FactKind T>
-inline auto ground(LiteralView<T> element, GrounderContext& context)
-{
-    // Fetch and clear
-    auto ground_literal_ptr = context.builder.template get_builder<GroundLiteral<T>>();
-    auto& ground_literal = *ground_literal_ptr;
-    ground_literal.clear();
-
-    // Fill data
-    ground_literal.polarity = element.get_polarity();
-    ground_literal.atom = ground(element.get_atom(), context).first.get_index();
-
-    // Canonicalize and Serialize
-    canonicalize(ground_literal);
-    return context.destination.get_or_create(ground_literal);
-}
-
-inline auto ground(ConjunctiveConditionView element, GrounderContext& context)
-{
-    // Fetch and clear
-    auto conj_cond_ptr = context.builder.template get_builder<GroundConjunctiveCondition>();
-    auto& conj_cond = *conj_cond_ptr;
-    conj_cond.clear();
-
-    // Fill data
-    for (const auto literal : element.template get_literals<StaticTag>())
-        conj_cond.static_literals.push_back(ground(literal, context).first.get_index());
-    for (const auto literal : element.template get_literals<FluentTag>())
-        conj_cond.fluent_literals.push_back(ground(literal, context).first.get_index());
-    for (const auto numeric_constraint : element.get_numeric_constraints())
-        conj_cond.numeric_constraints.push_back(ground(numeric_constraint, context));
-
-    // Canonicalize and Serialize
-    canonicalize(conj_cond);
-    return context.destination.get_or_create(conj_cond);
-}
-
-inline auto ground(RuleView element, GrounderContext& context)
-{
-    // Fetch and clear
-    auto rule_ptr = context.builder.template get_builder<GroundRule>();
-    auto& rule = *rule_ptr;
-    rule.clear();
-
-    // Fill data
-    rule.rule = element.get_index();
-    rule.row = context.destination.get_or_create(element, context.binding).first.get_index().second;
-    rule.body = ground(element.get_body(), context).first.get_index();
-    rule.head = ground(element.get_head(), context).first.get_index();
-
-    // Canonicalize and Serialize
-    canonicalize(rule);
-    return context.destination.get_or_create(rule);
-}
+std::pair<GroundRuleView, bool> ground(RuleView element, GrounderContext& context);
 
 }
+
+#ifdef TYR_HEADER_INSTANTIATION
+#include "tyr/formalism/datalog/grounder.ipp"
+#endif
 
 #endif
