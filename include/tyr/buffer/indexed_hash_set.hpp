@@ -45,12 +45,17 @@ private:
     using VectorType = std::vector<const Data<Tag>*>;
 
 public:
+    using HashFunctionType = H;
+    using EqualToFunctionType = E;
+
     IndexedHashSet() = default;
     IndexedHashSet(::cista::buf<std::vector<uint8_t>>& buf, SegmentedBuffer& arena) :
         m_storage(std::make_unique<VectorType>()),
         m_set(0, IndexableHash(*m_storage), IndexableEqualTo(*m_storage)),
         m_buf(&buf),
-        m_arena(&arena)
+        m_arena(&arena),
+        m_hash(),
+        m_equal_to()
     {
     }
     IndexedHashSet(const IndexedHashSet& other) = delete;
@@ -75,12 +80,15 @@ public:
         m_storage->clear();
     }
 
-    size_t hash(const Data<Tag>& element) const noexcept { return m_set.hash(element); }
+    static size_t compute_hash(const Data<Tag>& element) noexcept { return gtl::phmap_mix<sizeof(size_t)>()(H {}(element)); }
+
+    size_t hash(const Data<Tag>& element) const noexcept { return gtl::phmap_mix<sizeof(size_t)>()(m_hash(element)); }
 
     std::optional<Index<Tag>> find_with_hash(const Data<Tag>& element, size_t h) const noexcept
     {
         assert(is_canonical(element) && "The given element is not canonical. Did you forget to call canonicalize?");
         assert(h == hash(element) && "The given hash does not match container internal's hash.");
+        assert(h == m_set.hash(element));
 
         const auto it = m_set.find(element, h);
         if (it != m_set.end())
@@ -92,6 +100,7 @@ public:
     std::optional<Index<Tag>> find(const Data<Tag>& element) const noexcept
     {
         assert(is_canonical(element));
+        assert(hash(element) == m_set.hash(element));
 
         return find_with_hash(element, hash(element));
     }
@@ -101,6 +110,7 @@ public:
     {
         assert(is_canonical(element) && "The given element is not canonical. Did you forget to call canonicalize?");
         assert(h == hash(element) && "The given hash does not match container internal's hash.");
+        assert(h == m_set.hash(element));
 
         // 1. Check if element already exists
 
@@ -134,6 +144,7 @@ public:
     std::pair<Index<Tag>, bool> insert(const Data<Tag>& element)
     {
         assert(is_canonical(element));
+        assert(hash(element) == m_set.hash(element));
 
         return insert_with_hash<Mode>(hash(element), element);
     }
@@ -194,6 +205,9 @@ private:
 
     ::cista::buf<std::vector<uint8_t>>* m_buf;
     SegmentedBuffer* m_arena;
+
+    H m_hash;
+    E m_equal_to;
 };
 
 }

@@ -74,6 +74,12 @@ public:
     }
 
     template<typename T>
+    static size_t compute_hash(Index<T>, const IndexList<Object>& builder) noexcept
+    {
+        return BasicRelationRepository<T>::compute_hash(builder);
+    }
+
+    template<typename T>
     auto find_with_hash(Index<T> g, const IndexList<Object>& builder, size_t h) const noexcept
     {
         return get<T>().find_with_hash(g, builder, h);
@@ -119,6 +125,12 @@ public:
     auto find_local(Index<T> g, const IndexList<Object>& builder) const noexcept
     {
         return get<T>().find_local(g, builder);
+    }
+
+    template<typename T>
+    auto get_or_create_local_with_hash(Index<T> g, size_t arity, const IndexList<Object>& builder, size_t h)
+    {
+        return get<T>().get_or_create_local_with_hash(g, arity, builder, h);
     }
 
     template<typename T>

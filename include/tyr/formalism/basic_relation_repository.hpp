@@ -147,6 +147,8 @@ public:
      * Local methods
      */
 
+    static size_t compute_hash(const IndexList<Object>& builder) noexcept { return BlockArraySet<uint_t, Coder<uint_t>>::compute_hash(builder); }
+
     std::optional<Index<Binding>> find_local_with_hash(Index<T> g, const IndexList<Object>& builder, size_t h) const noexcept
     {
         const auto* slot = find_slot(g);
@@ -161,28 +163,24 @@ public:
 
     std::optional<Index<Binding>> find_local(Index<T> g, const IndexList<Object>& builder) const noexcept
     {
-        const auto* slot = find_slot(g);
-        if (!slot)
-            return std::nullopt;
-
-        const auto h = slot->container.hash(builder);
-        if (auto row_or_nullopt = slot->container.find_with_hash(builder, h))
-            return Index<Binding>(slot->parent_size + *row_or_nullopt);
-
-        return std::nullopt;
+        return find_local_with_hash(g, builder, BasicRelationRepository::compute_hash(builder));
     }
 
-    std::pair<Index<Binding>, bool> get_or_create_local(Index<T> g, size_t arity, const IndexList<Object>& builder)
+    std::pair<Index<Binding>, bool> get_or_create_local_with_hash(Index<T> g, size_t arity, const IndexList<Object>& builder, size_t h)
     {
         auto& slot = get_or_create_slot(g, arity);
         auto& container = slot.container;
-        const auto h = container.hash(builder);
 
         if (auto row_or_nullopt = container.find_with_hash(builder, h))
             return { Index<Binding>(slot.parent_size + *row_or_nullopt), false };
 
         const auto [row, success] = container.insert_with_hash(h, builder);
         return { Index<Binding>(slot.parent_size + row), success };
+    }
+
+    std::pair<Index<Binding>, bool> get_or_create_local(Index<T> g, size_t arity, const IndexList<Object>& builder)
+    {
+        return get_or_create_local_with_hash(g, arity, builder, BasicRelationRepository::compute_hash(builder));
     }
 
     ConstViewType at_local(std::pair<Index<T>, Index<Binding>> index) const noexcept

@@ -164,27 +164,32 @@ public:
     template<IndexConcept I>
     std::optional<View<std::pair<I, Index<Binding>>, Repository>> find(I g, const IndexList<Object>& builder) const noexcept
     {
-        const auto row_or_nullopt = m_relation_repository.find_local(g, builder);
+        const auto h = RelationRepo::compute_hash(g.get_index(), builder);
 
-        if (row_or_nullopt)
-            return View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g, *row_or_nullopt), *this);
+        return find_with_hash(g, builder, h);
+    }
 
-        return m_parent ? m_parent->find(g, builder) : std::nullopt;
+    template<IndexConcept I>
+    std::pair<View<std::pair<I, Index<Binding>>, Repository>, bool> get_or_create_with_hash(View<I, Repository> g, const IndexList<Object>& builder, size_t h)
+    {
+        if (auto row_or_nullopt = m_relation_repository.find_local_with_hash(g.get_index(), builder, h))
+            return { View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g.get_index(), *row_or_nullopt), *this), false };
+
+        if (m_parent)
+            if (auto ptr = m_parent->find_with_hash(g.get_index(), builder, h))
+                return { *ptr, false };
+
+        const auto [row, success] = m_relation_repository.get_or_create_local_with_hash(g.get_index(), g.get_arity(), builder, h);
+
+        return { View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g.get_index(), row), *this), success };
     }
 
     template<IndexConcept I>
     std::pair<View<std::pair<I, Index<Binding>>, Repository>, bool> get_or_create(View<I, Repository> g, const IndexList<Object>& builder)
     {
-        if (auto row_or_nullopt = m_relation_repository.find_local(g.get_index(), builder))
-            return { View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g.get_index(), *row_or_nullopt), *this), false };
+        const auto h = RelationRepo::compute_hash(g.get_index(), builder);
 
-        if (m_parent)
-            if (auto ptr = m_parent->find(g.get_index(), builder))
-                return { *ptr, false };
-
-        const auto [row, success] = m_relation_repository.get_or_create_local(g.get_index(), g.get_arity(), builder);
-
-        return { View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g.get_index(), row), *this), success };
+        return get_or_create_with_hash(g, builder, h);
     }
 
     template<IndexConcept I>

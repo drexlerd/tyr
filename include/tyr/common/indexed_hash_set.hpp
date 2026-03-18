@@ -47,7 +47,10 @@ private:
     using VectorType = SegmentedVector<Data<Tag>, FirstSegmentSize>;
 
 public:
-    IndexedHashSet() : m_storage(std::make_unique<VectorType>()), m_set(0, IndexableHash(*m_storage), IndexableEqualTo(*m_storage)) {}
+    using HashFunctionType = H;
+    using EqualToFunctionType = E;
+
+    IndexedHashSet() : m_storage(std::make_unique<VectorType>()), m_set(0, IndexableHash(*m_storage), IndexableEqualTo(*m_storage)), m_hash(), m_equal_to() {}
     IndexedHashSet(const IndexedHashSet& other) = delete;
     IndexedHashSet& operator=(const IndexedHashSet& other) = delete;
     IndexedHashSet(IndexedHashSet&& other) = default;
@@ -59,30 +62,52 @@ public:
         m_storage->clear();
     }
 
-    size_t hash(const Data<Tag>& element) const noexcept { return m_set.hash(element); }
+    static size_t compute_hash(const Data<Tag>& element) noexcept { return gtl::phmap_mix<sizeof(size_t)>()(H {}(element)); }
 
-    std::optional<Index<Tag>> find_with_hash(const Data<Tag>& value, size_t h) const
+    size_t hash(const Data<Tag>& element) const noexcept { return gtl::phmap_mix<sizeof(size_t)>()(m_hash(element)); }
+
+    std::optional<Index<Tag>> find_with_hash(const Data<Tag>& element, size_t h) const
     {
-        if (auto it = m_set.find(value, h); it != m_set.end())
+        assert(is_canonical(element) && "The given element is not canonical. Did you forget to call canonicalize?");
+        assert(h == hash(element) && "The given hash does not match container internal's hash.");
+        assert(h == m_set.hash(element));
+
+        if (auto it = m_set.find(element, h); it != m_set.end())
             return *it;
 
         return std::nullopt;
     }
 
-    std::optional<Index<Tag>> find(const Data<Tag>& value) const { return find_with_hash(value, hash(value)); }
-
-    std::pair<Index<Tag>, bool> insert_with_hash(size_t h, const Data<Tag>& value)
+    std::optional<Index<Tag>> find(const Data<Tag>& element) const
     {
-        if (auto it = m_set.find(value, h); it != m_set.end())
+        // assert(is_canonical(element));
+        assert(hash(element) == m_set.hash(element));
+
+        return find_with_hash(element, hash(element));
+    }
+
+    std::pair<Index<Tag>, bool> insert_with_hash(size_t h, const Data<Tag>& element)
+    {
+        // assert(is_canonical(element) && "The given element is not canonical. Did you forget to call canonicalize?");
+        assert(h == hash(element) && "The given hash does not match container internal's hash.");
+        assert(h == m_set.hash(element));
+
+        if (auto it = m_set.find(element, h); it != m_set.end())
             return { *it, false };
 
         Index<Tag> idx(static_cast<uint_t>(m_storage->size()));
-        m_storage->push_back(value);
+        m_storage->push_back(element);
         m_set.emplace_with_hash(h, idx);
         return { idx, true };
     }
 
-    std::pair<Index<Tag>, bool> insert(const Data<Tag>& value) { return insert_with_hash(hash(value), value); }
+    std::pair<Index<Tag>, bool> insert(const Data<Tag>& element)
+    {
+        // assert(is_canonical(element));
+        assert(hash(element) == m_set.hash(element));
+
+        return insert_with_hash(hash(element), element);
+    }
 
     const Data<Tag>& operator[](Index<Tag> idx) const noexcept { return (*m_storage)[uint_t(idx)]; }
 
@@ -127,6 +152,9 @@ private:
 
     std::unique_ptr<VectorType> m_storage;
     gtl::flat_hash_set<Index<Tag>, IndexableHash, IndexableEqualTo> m_set;
+
+    H m_hash;
+    E m_equal_to;
 };
 }
 
