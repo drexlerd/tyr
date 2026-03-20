@@ -186,6 +186,13 @@ public:
         return slot->container[row.value - slot->parent_size];
     }
 
+    ConstViewType front_local(Index<T> g) const noexcept
+    {
+        const auto* slot = find_slot(g);
+        assert(slot);
+        return slot->container.front();
+    }
+
     size_t local_size(Index<T> g) const noexcept
     {
         const auto* slot = find_slot(g);
@@ -218,6 +225,18 @@ public:
             return false;
 
         return uint_t(row) >= slot->parent_size;
+    }
+
+    bool exists_parent_mutation(Index<T> g) const noexcept
+    {
+        if (!m_parent)
+            return false;
+
+        const auto* slot = find_slot(g);
+        if (!slot)
+            return false;
+
+        return m_parent->size(g) > slot->parent_size;
     }
 };
 }

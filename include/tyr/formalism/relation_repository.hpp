@@ -144,6 +144,12 @@ public:
     }
 
     template<typename T>
+    auto front_local(Index<T> g) const noexcept
+    {
+        return get<T>().front_local(g);
+    }
+
+    template<typename T>
     size_t local_size(Index<T> g) const noexcept
     {
         return get<T>().local_size(g);
@@ -159,6 +165,12 @@ public:
     bool is_local(std::pair<Index<T>, Index<Binding>> index) const noexcept
     {
         return get<T>().is_local(index);
+    }
+
+    template<typename T>
+    bool exists_parent_mutation(Index<T> g) const noexcept
+    {
+        return get<T>().exists_parent_mutation(g);
     }
 };
 }

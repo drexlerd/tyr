@@ -45,6 +45,78 @@ private:
     RelationRepo m_relation_repository;
     size_t m_index;
 
+    /**
+     * SymbolRepository forwarding.
+     */
+
+    template<typename T>
+    std::optional<View<Index<T>, Repository>> find_with_hash(const Data<T>& builder, size_t h) const noexcept
+    {
+        const Repository* current = this;
+        while (current != nullptr)
+        {
+            if (auto index_or_nullopt = current->m_symbol_repository.find_local_with_hash(builder, h))
+                return { View<Index<T>, Repository>(*index_or_nullopt, *current), false };
+
+            current = current->m_parent;
+        }
+
+        return std::nullopt;
+    }
+
+    template<typename T>
+    std::pair<View<Index<T>, Repository>, bool> get_or_create_with_hash(Data<T>& builder, size_t h)
+    {
+        const Repository* current = this;
+        while (current != nullptr)
+        {
+            if (auto index_or_nullopt = current->m_symbol_repository.find_local_with_hash(builder, h))
+                return { View<Index<T>, Repository>(*index_or_nullopt, *current), false };
+            current = current->m_parent;
+        }
+
+        assert(!m_symbol_repository.template exists_parent_mutation<T>() && "Integrity error: Parent SymbolRepository modified after child branching!");
+
+        const auto [index, success] = m_symbol_repository.get_or_create_local_with_hash(builder, h);
+        return { View<Index<T>, Repository>(index, *this), success };
+    }
+
+    /**
+     * RelationRepository forwarding
+     */
+
+    template<IndexConcept I>
+    std::optional<View<std::pair<I, Index<Binding>>, Repository>> find_with_hash(I g, const IndexList<Object>& builder, size_t h) const noexcept
+    {
+        const Repository* current = this;
+        while (current != nullptr)
+        {
+            if (auto row_or_nullopt = current->m_relation_repository.find_local_with_hash(g, builder, h))
+                return View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g, *row_or_nullopt), *current);
+
+            current = current->m_parent;
+        }
+
+        return std::nullopt;
+    }
+
+    template<IndexConcept I>
+    std::pair<View<std::pair<I, Index<Binding>>, Repository>, bool> get_or_create_with_hash(View<I, Repository> g, const IndexList<Object>& builder, size_t h)
+    {
+        const Repository* current = this;
+        while (current != nullptr)
+        {
+            if (auto row_or_nullopt = current->m_relation_repository.find_local_with_hash(g.get_index(), builder, h))
+                return { View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g.get_index(), *row_or_nullopt), *current), false };
+            current = current->m_parent;
+        }
+
+        assert(!m_relation_repository.exists_parent_mutation(g.get_index()) && "Integrity error: Parent RelationRepository modified after child branching!");
+
+        const auto [row, success] = m_relation_repository.get_or_create_local_with_hash(g.get_index(), g.get_arity(), builder, h);
+        return { View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g.get_index(), row), *this), success };
+    }
+
 public:
     Repository(size_t index, const Repository* parent = nullptr) :
         m_parent(parent),
@@ -66,32 +138,9 @@ public:
      */
 
     template<typename T>
-    std::optional<View<Index<T>, Repository>> find_with_hash(const Data<T>& builder, size_t h) const noexcept
-    {
-        if (auto index_or_nullopt = m_symbol_repository.find_local_with_hash(builder, h))
-            return View<Index<T>, Repository>(*index_or_nullopt, *this);
-
-        return m_parent ? m_parent->template find_with_hash<T>(builder, h) : std::nullopt;
-    }
-
-    template<typename T>
     std::optional<View<Index<T>, Repository>> find(const Data<T>& builder) const noexcept
     {
         return find_with_hash(builder, SymbolRepo::hash(builder));
-    }
-
-    template<typename T>
-    std::pair<View<Index<T>, Repository>, bool> get_or_create_with_hash(Data<T>& builder, size_t h)
-    {
-        if (auto index_or_nullopt = m_symbol_repository.find_local_with_hash(builder, h))
-            return { View<Index<T>, Repository>(*index_or_nullopt, *this), false };
-
-        if (m_parent)
-            if (auto ptr = m_parent->template find_with_hash<T>(builder, h))
-                return { *ptr, false };
-
-        const auto [index, success] = m_symbol_repository.get_or_create_local_with_hash(builder, h);
-        return { View<Index<T>, Repository>(index, *this), success };
     }
 
     template<typename T>
@@ -103,25 +152,30 @@ public:
     template<typename T>
     const Data<T>& operator[](Index<T> index) const noexcept
     {
-        if (!m_symbol_repository.is_local(index))
+        const Repository* current = this;
+        while (current != nullptr)
         {
-            assert(m_parent);
-            return (*m_parent)[index];
-        }
+            if (current->m_symbol_repository.is_local(index))
+                return current->m_symbol_repository.at_local(index);
 
-        return m_symbol_repository.at_local(index);
+            current = current->m_parent;
+        }
+        assert(false && "Index not found in any repository layer.");
+        __builtin_unreachable();
     }
 
     template<typename T>
     const Data<T>& front() const
     {
-        if (m_symbol_repository.template parent_size<T>() > 0)
+        const Repository* current = this;
+        while (current->m_parent != nullptr)
         {
-            assert(m_parent);
-            return m_parent->template front<T>();
+            if (current->m_symbol_repository.template parent_size<T>() == 0)
+                break;
+            current = current->m_parent;
         }
 
-        return m_symbol_repository.template front_local<T>();
+        return current->m_symbol_repository.template front_local<T>();
     }
 
     template<typename T>
@@ -139,12 +193,17 @@ public:
     template<typename T>
     const Repository& get_canonical_context(Index<T> index) const noexcept
     {
-        if (!m_symbol_repository.is_local(index))
+        const Repository* current = this;
+        while (current != nullptr)
         {
-            assert(m_parent && "Element not found in the repository chain.");
-            return m_parent->get_canonical_context(index);
+            if (current->m_symbol_repository.is_local(index))
+                return *current;
+
+            assert(current->m_parent && "Index not found in any repository layer.");
+            current = current->m_parent;
         }
-        return *this;
+        assert(false && "Index not found in any repository layer.");
+        __builtin_unreachable();
     }
 
     /**
@@ -152,54 +211,44 @@ public:
      */
 
     template<IndexConcept I>
-    std::optional<View<std::pair<I, Index<Binding>>, Repository>> find_with_hash(I g, const IndexList<Object>& builder, size_t h) const noexcept
-    {
-        const auto row_or_nullopt = m_relation_repository.find_local_with_hash(g, builder, h);
-        if (row_or_nullopt)
-            return View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g, *row_or_nullopt), *this);
-
-        return m_parent ? m_parent->find_with_hash(g, builder, h) : std::nullopt;
-    }
-
-    template<IndexConcept I>
     std::optional<View<std::pair<I, Index<Binding>>, Repository>> find(I g, const IndexList<Object>& builder) const noexcept
     {
-        const auto h = RelationRepo::hash(g.get_index(), builder);
-
-        return find_with_hash(g, builder, h);
-    }
-
-    template<IndexConcept I>
-    std::pair<View<std::pair<I, Index<Binding>>, Repository>, bool> get_or_create_with_hash(View<I, Repository> g, const IndexList<Object>& builder, size_t h)
-    {
-        if (auto row_or_nullopt = m_relation_repository.find_local_with_hash(g.get_index(), builder, h))
-            return { View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g.get_index(), *row_or_nullopt), *this), false };
-
-        if (m_parent)
-            if (auto ptr = m_parent->find_with_hash(g.get_index(), builder, h))
-                return { *ptr, false };
-
-        const auto [row, success] = m_relation_repository.get_or_create_local_with_hash(g.get_index(), g.get_arity(), builder, h);
-
-        return { View<std::pair<I, Index<Binding>>, Repository>(std::make_pair(g.get_index(), row), *this), success };
+        return find_with_hash(g, builder, RelationRepo::hash(g.get_index(), builder));
     }
 
     template<IndexConcept I>
     std::pair<View<std::pair<I, Index<Binding>>, Repository>, bool> get_or_create(View<I, Repository> g, const IndexList<Object>& builder)
     {
-        const auto h = RelationRepo::hash(g.get_index(), builder);
-
-        return get_or_create_with_hash(g, builder, h);
+        return get_or_create_with_hash(g, builder, RelationRepo::hash(g.get_index(), builder));
     }
 
     template<IndexConcept I>
     auto operator[](std::pair<I, Index<Binding>> index) const noexcept
     {
-        if (m_relation_repository.is_local(index))
-            return m_relation_repository.at_local(index);
+        const Repository* current = this;
+        while (current != nullptr)
+        {
+            if (current->m_relation_repository.is_local(index))
+                return current->m_relation_repository.at_local(index);
 
-        assert(m_parent);
-        return (*m_parent)[index];
+            current = current->m_parent;
+        }
+        assert(false && "Index not found in any repository layer.");
+        __builtin_unreachable();
+    }
+
+    template<IndexConcept I>
+    auto front(I g) const noexcept
+    {
+        const Repository* current = this;
+        while (current->m_parent != nullptr)
+        {
+            if (current->m_relation_repository.parent_size(g) == 0)
+                break;
+            current = current->m_parent;
+        }
+
+        return current->m_relation_repository.front_local(g);
     }
 
     template<IndexConcept I>
@@ -211,12 +260,17 @@ public:
     template<IndexConcept I>
     const Repository& get_canonical_context(std::pair<I, Index<Binding>> index) const noexcept
     {
-        if (!m_relation_repository.is_local(index))
+        const Repository* current = this;
+        while (current != nullptr)
         {
-            assert(m_parent && "Element not found in the repository chain.");
-            return m_parent->get_canonical_context(index);
+            if (current->m_relation_repository.is_local(index))
+                return *current;
+
+            assert(current->m_parent && "Index not found in any repository layer.");
+            current = current->m_parent;
         }
-        return *this;
+        assert(false && "Index not found in any repository layer.");
+        __builtin_unreachable();
     }
 };
 

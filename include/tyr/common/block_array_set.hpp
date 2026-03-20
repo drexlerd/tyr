@@ -109,6 +109,12 @@ public:
 
     ConstArrayView operator[](index_type index) const { return std::as_const(*m_pool)[index]; }
 
+    ConstArrayView front() const
+    {
+        assert(!empty());
+        return (*this)[0];
+    }
+
     size_t size() const noexcept { return m_pool->size(); }
     size_t capacity() const noexcept { return m_pool->capacity(); }
     bool empty() const noexcept { return m_pool->empty(); }

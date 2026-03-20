@@ -153,6 +153,14 @@ public:
         assert(index != Index<T>::max() && "Unassigned index.");
         return uint_t(index) >= m_slot.parent_size;
     }
+
+    bool exists_parent_mutation() const noexcept
+    {
+        if (!m_parent)
+            return false;
+
+        return m_parent->size() > m_slot.parent_size;
+    }
 };
 }
 
