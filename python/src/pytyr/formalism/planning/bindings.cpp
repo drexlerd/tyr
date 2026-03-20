@@ -25,28 +25,6 @@ namespace tyr::formalism::planning
 void bind_module_definitions(nb::module_& m)
 {
     {
-        nb::class_<PlanningDomain>(m, "PlanningDomain")  //
-            .def("get_repository", &PlanningDomain::get_repository)
-            .def("get_domain", &PlanningDomain::get_domain);
-    }
-
-    {
-        nb::class_<PlanningTask>(m, "PlanningTask")  //
-            .def("get_repository", &PlanningTask::get_repository)
-            .def("get_domain", &PlanningTask::get_domain)
-            .def("get_task", &PlanningTask::get_task)
-            .def("get_fdr_context", nb::overload_cast<>(&PlanningTask::get_fdr_context, nb::const_), nb::rv_policy::reference_internal);
-    }
-
-    {
-        nb::class_<PlanningFDRTask>(m, "PlanningFDRTask")  //
-            .def("get_repository", &PlanningFDRTask::get_repository)
-            .def("get_domain", &PlanningFDRTask::get_domain)
-            .def("get_task", &PlanningFDRTask::get_task)
-            .def("get_fdr_context", &PlanningFDRTask::get_fdr_context, nb::rv_policy::reference_internal);
-    }
-
-    {
         nb::class_<loki::ParserOptions>(m, "ParserOptions")
             .def(nb::init<>())
             .def_rw("strict", &loki::ParserOptions::strict, "Enable strict mode")
@@ -344,6 +322,14 @@ void bind_module_definitions(nb::module_& m)
     bind_ground_task(m, "GroundTask");
 
     /**
+     * RepositoryFactory
+     */
+
+    nb::class_<RepositoryFactory>(m, "RepositoryFactory")  //
+        .def(nb::new_([]() { return std::make_shared<RepositoryFactory>(); }))
+        .def("create_repository", &RepositoryFactory::create_shared, "parent_repository"_a = nullptr);
+
+    /**
      * Repository
      */
 
@@ -374,13 +360,52 @@ void bind_module_definitions(nb::module_& m)
              "predicate"_a,
              "object_indices"_a);
 
+    /**
+     * FDRContexts
+     */
+
     nb::class_<BinaryFDRContext>(m, "BinaryFDRContext")  //
+        .def(nb::init<Repository&>(), "repository")
         .def("get_fact", nb::overload_cast<GroundAtomView<FluentTag>>(&BinaryFDRContext::get_fact_view), "atom"_a)
         .def("get_fact", nb::overload_cast<GroundLiteralView<FluentTag>>(&BinaryFDRContext::get_fact_view), "literal"_a);
 
     nb::class_<GeneralFDRContext>(m, "GeneralFDRContext")  //
         .def("get_fact", nb::overload_cast<GroundAtomView<FluentTag>>(&GeneralFDRContext::get_fact_view), "atom"_a)
         .def("get_fact", nb::overload_cast<GroundLiteralView<FluentTag>>(&GeneralFDRContext::get_fact_view), "literal"_a);
+
+    /**
+     * PlanningDomain
+     */
+
+    {
+        nb::class_<PlanningDomain>(m, "PlanningDomain")  //
+            .def(nb::init<DomainView, RepositoryPtr, RepositoryFactoryPtr>(), "domain"_a, "repository"_a, "repository_factory"_a)
+            .def("get_domain", &PlanningDomain::get_domain)
+            .def("get_repository", &PlanningDomain::get_repository)
+            .def("get_repository_factory", &PlanningDomain::get_repository_factory);
+    }
+
+    {
+        nb::class_<PlanningTask>(m, "PlanningTask")  //
+            .def(nb::new_([](TaskView task, BinaryFDRContext&& fdr_context, std::shared_ptr<Repository> repository, PlanningDomain planning_domain)
+                          { return PlanningTask(task, std::move(fdr_context), std::move(repository), std::move(planning_domain)); }),
+                 "task"_a,
+                 "fdr_context"_a,
+                 "repository"_a,
+                 "planning_domain"_a)
+            .def("get_task", &PlanningTask::get_task)
+            .def("get_repository", &PlanningTask::get_repository)
+            .def("get_fdr_context", nb::overload_cast<>(&PlanningTask::get_fdr_context), nb::rv_policy::reference_internal)
+            .def("get_domain", &PlanningTask::get_domain);
+    }
+
+    {
+        nb::class_<PlanningFDRTask>(m, "PlanningFDRTask")  //
+            .def("get_task", &PlanningFDRTask::get_task)
+            .def("get_repository", &PlanningFDRTask::get_repository)
+            .def("get_fdr_context", &PlanningFDRTask::get_fdr_context, nb::rv_policy::reference_internal)
+            .def("get_domain", &PlanningFDRTask::get_domain);
+    }
 }
 
 }

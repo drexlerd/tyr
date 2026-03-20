@@ -251,6 +251,7 @@ from pytyr.pytyr.formalism.planning import (
     Parser,
 
     # Repository,
+    RepositoryFactory,
     Repository,
 
     # FDRContext
