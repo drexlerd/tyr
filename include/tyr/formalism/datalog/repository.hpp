@@ -355,119 +355,119 @@ namespace tyr
  * Views
  */
 
-extern template class View<Index<formalism::Variable>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::Object>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::Variable>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::Object>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::Predicate<formalism::StaticTag>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::Predicate<formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::Predicate<formalism::StaticTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::Predicate<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::Atom<formalism::StaticTag>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::Atom<formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::Atom<formalism::StaticTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::Atom<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::GroundAtom<formalism::StaticTag>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::GroundAtom<formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundAtom<formalism::StaticTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundAtom<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::Literal<formalism::StaticTag>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::Literal<formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::Literal<formalism::StaticTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::Literal<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::GroundLiteral<formalism::StaticTag>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::GroundLiteral<formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundLiteral<formalism::StaticTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundLiteral<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::Function<formalism::StaticTag>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::Function<formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::Function<formalism::StaticTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::Function<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::FunctionTerm<formalism::StaticTag>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::FunctionTerm<formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::FunctionTerm<formalism::StaticTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::FunctionTerm<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::GroundFunctionTerm<formalism::StaticTag>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::GroundFunctionTerm<formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundFunctionTerm<formalism::StaticTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundFunctionTerm<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::GroundFunctionTermValue<formalism::StaticTag>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::GroundFunctionTermValue<formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundFunctionTermValue<formalism::StaticTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundFunctionTermValue<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::UnaryOperator<formalism::OpSub, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::UnaryOperator<formalism::OpSub, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpAdd, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpSub, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpMul, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpDiv, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpEq, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpNe, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpLe, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpLt, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpGe, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpGt, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpAdd, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpSub, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpMul, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpDiv, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpEq, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpNe, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLe, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLt, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGe, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGt, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::MultiOperator<formalism::OpAdd, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::MultiOperator<formalism::OpMul, Data<formalism::datalog::FunctionExpression>>>,
-                           formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::MultiOperator<formalism::OpAdd, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::MultiOperator<formalism::OpMul, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::UnaryOperator<formalism::OpSub, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::UnaryOperator<formalism::OpSub, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpAdd, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpSub, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpMul, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpDiv, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpEq, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpNe, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpLe, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpLt, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpGe, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::BinaryOperator<formalism::OpGt, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpAdd, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpSub, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpMul, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpDiv, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpEq, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpNe, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLe, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLt, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGe, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGt, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::MultiOperator<formalism::OpAdd, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::MultiOperator<formalism::OpMul, Data<formalism::datalog::GroundFunctionExpression>>>,
-                           formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::MultiOperator<formalism::OpAdd, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::MultiOperator<formalism::OpMul, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
 
-extern template class View<Data<formalism::datalog::ArithmeticOperator<Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-extern template class View<Data<formalism::datalog::ArithmeticOperator<Data<formalism::datalog::GroundFunctionExpression>>>, formalism::datalog::Repository>;
+extern template struct View<Data<formalism::datalog::ArithmeticOperator<Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+extern template struct View<Data<formalism::datalog::ArithmeticOperator<Data<formalism::datalog::GroundFunctionExpression>>>, formalism::datalog::Repository>;
 
-extern template class View<Data<formalism::datalog::BooleanOperator<Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-extern template class View<Data<formalism::datalog::BooleanOperator<Data<formalism::datalog::GroundFunctionExpression>>>, formalism::datalog::Repository>;
+extern template struct View<Data<formalism::datalog::BooleanOperator<Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+extern template struct View<Data<formalism::datalog::BooleanOperator<Data<formalism::datalog::GroundFunctionExpression>>>, formalism::datalog::Repository>;
 
-extern template class View<Data<formalism::datalog::FunctionExpression>, formalism::datalog::Repository>;
-extern template class View<Data<formalism::datalog::GroundFunctionExpression>, formalism::datalog::Repository>;
+extern template struct View<Data<formalism::datalog::FunctionExpression>, formalism::datalog::Repository>;
+extern template struct View<Data<formalism::datalog::GroundFunctionExpression>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::ConjunctiveCondition>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::GroundConjunctiveCondition>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::ConjunctiveCondition>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundConjunctiveCondition>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::datalog::Rule>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::GroundRule>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::datalog::Program>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::Rule>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundRule>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::Program>, formalism::datalog::Repository>;
 
-extern template class View<Data<formalism::Term>, formalism::datalog::Repository>;
+extern template struct View<Data<formalism::Term>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::RelationBinding<formalism::Predicate<formalism::StaticTag>>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::RelationBinding<formalism::Predicate<formalism::FluentTag>>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::RelationBinding<formalism::Predicate<formalism::StaticTag>>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::RelationBinding<formalism::Predicate<formalism::FluentTag>>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::RelationBinding<formalism::Function<formalism::StaticTag>>>, formalism::datalog::Repository>;
-extern template class View<Index<formalism::RelationBinding<formalism::Function<formalism::FluentTag>>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::RelationBinding<formalism::Function<formalism::StaticTag>>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::RelationBinding<formalism::Function<formalism::FluentTag>>>, formalism::datalog::Repository>;
 
-extern template class View<Index<formalism::RelationBinding<formalism::datalog::Rule>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::RelationBinding<formalism::datalog::Rule>>, formalism::datalog::Repository>;
 
 #endif
 }

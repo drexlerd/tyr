@@ -49,7 +49,7 @@ void bind_term_builder(nb::module_& m, const std::string& name)
     using V = Data<Term>;
 
     auto cls = nb::class_<V>(m, name.c_str())  //
-                   .def(nb::init<typename V::ViewVariant<Repository>>(), "value"_a);
+                   .def(nb::init<typename V::template ViewVariant<Repository>>(), "value"_a);
     add_print(cls);
     add_hash(cls);
 }
@@ -218,7 +218,7 @@ void bind_numeric_effect_operator_builder(nb::module_& m, const std::string& nam
     using V = Data<NumericEffectOperator<T>>;
 
     auto cls = nb::class_<V>(m, name.c_str())  //
-                   .def(nb::init<typename V::ViewVariant<Repository>>(), "value"_a);
+                   .def(nb::init<typename V::template ViewVariant<Repository>>(), "value"_a);
     add_print(cls);
     add_hash(cls);
 }
@@ -229,7 +229,7 @@ void bind_ground_numeric_effect_operator_builder(nb::module_& m, const std::stri
     using V = Data<GroundNumericEffectOperator<T>>;
 
     auto cls = nb::class_<V>(m, name.c_str())  //
-                   .def(nb::init<typename V::ViewVariant<Repository>>(), "value"_a);
+                   .def(nb::init<typename V::template ViewVariant<Repository>>(), "value"_a);
     add_print(cls);
     add_hash(cls);
 }
@@ -239,7 +239,7 @@ void bind_function_expression_builder(nb::module_& m, const std::string& name)
     using V = Data<FunctionExpression>;
 
     auto cls = nb::class_<V>(m, name.c_str())  //
-                   .def(nb::init<typename V::ViewVariant<Repository>>(), "value"_a);
+                   .def(nb::init<typename V::template ViewVariant<Repository>>(), "value"_a);
     add_print(cls);
     add_hash(cls);
 }
@@ -318,7 +318,7 @@ void bind_ground_function_expression_builder(nb::module_& m, const std::string& 
     using V = Data<GroundFunctionExpression>;
 
     auto cls = nb::class_<V>(m, name.c_str())  //
-                   .def(nb::init<typename V::ViewVariant<Repository>>(), "value"_a);
+                   .def(nb::init<typename V::template ViewVariant<Repository>>(), "value"_a);
     add_print(cls);
     add_hash(cls);
 }
@@ -515,7 +515,7 @@ void bind_arithmethic_operator_builder(nb::module_& m, const std::string& name)
     using V = Data<ArithmeticOperator<T>>;
 
     auto cls = nb::class_<V>(m, name.c_str())  //
-                   .def(nb::init<typename V::ViewVariant<Repository>>(), "value"_a);
+                   .def(nb::init<typename V::template ViewVariant<Repository>>(), "value"_a);
     add_print(cls);
     add_hash(cls);
 }
@@ -526,7 +526,7 @@ void bind_boolean_operator_builder(nb::module_& m, const std::string& name)
     using V = Data<BooleanOperator<T>>;
 
     auto cls = nb::class_<V>(m, name.c_str())  //
-                   .def(nb::init<typename V::ViewVariant<Repository>>(), "value"_a);
+                   .def(nb::init<typename V::template ViewVariant<Repository>>(), "value"_a);
     add_print(cls);
     add_hash(cls);
 }
