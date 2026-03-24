@@ -32,9 +32,9 @@ template<>
 class AxiomEvaluator<GroundTask>
 {
 public:
-    explicit AxiomEvaluator(std::shared_ptr<GroundTask> task);
+    explicit AxiomEvaluator(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<AxiomEvaluator<GroundTask>> create(std::shared_ptr<GroundTask> task);
+    static std::shared_ptr<AxiomEvaluator<GroundTask>> create(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context);
 
     void compute_extended_state(UnpackedState<GroundTask>& unpacked_state);
 

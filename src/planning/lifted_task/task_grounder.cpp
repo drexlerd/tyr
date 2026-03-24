@@ -249,7 +249,7 @@ static auto create_fdr_task(const fp::PlanningTask& task,
                            make_view(axioms, *task.get_repository()));
 }
 
-GroundTaskPtr ground_task(LiftedTask& lifted_task)
+GroundTaskPtr ground_task(LiftedTask& lifted_task, ExecutionContext& execution_context)
 {
     auto ground_program = GroundTaskProgram(lifted_task.get_task());
 
@@ -269,7 +269,7 @@ GroundTaskPtr ground_task(LiftedTask& lifted_task)
     auto ctx = d::ProgramExecutionContext(workspace, const_workspace);
     ctx.clear();
 
-    d::solve_bottom_up(ctx);
+    execution_context.arena().execute([&] { d::solve_bottom_up(ctx); });
 
     workspace.d2p.clear();
 

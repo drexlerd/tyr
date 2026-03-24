@@ -14,6 +14,7 @@ import argparse
 
 from pathlib import Path
 
+from pytyr.common import ExecutionContext
 from pytyr.formalism.planning import ParserOptions, Parser, GroundConjunctiveCondition, GroundAction
 # Note: we can easily switch between lifted and ground planning by swapping the submodule, 
 # e.g., from pytyr.planning.ground import ..., and from pytyr.planning.ground.astar_eager import ...
@@ -129,14 +130,14 @@ def main():
     domain_filepath : Path = args.domain_filepath
     task_filepath : Path = args.task_filepath
 
+    execution_context = ExecutionContext(2)
     parser_options = ParserOptions()
     parser = Parser(domain_filepath, parser_options)
     lifted_task = Task(parser.parse_task(task_filepath, parser_options))
-    heuristic = MaxHeuristic(lifted_task)
-    successor_generator = SuccessorGenerator(lifted_task)
+    heuristic = MaxHeuristic(lifted_task, execution_context)
+    successor_generator = SuccessorGenerator(lifted_task, execution_context)
 
-    options = Options()
-    options.num_threads = 2                                # Lifted search is parallelized but only useful on large tasks.
+    options = Options()                               # Lifted search is parallelized but only useful on large tasks.
     options.event_handler = DefaultEventHandler(0)         # Collects and prints statistics. If verbosity >= 2, then also prints labeled nodes.
     options.goal_strategy = TaskGoalStrategy(lifted_task)  # Terminates the search when reaching a state that satisfies the task's goal.
     options.pruning_strategy = PruningStrategy()           # Never prunes

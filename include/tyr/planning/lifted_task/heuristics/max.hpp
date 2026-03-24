@@ -35,9 +35,9 @@ class MaxHeuristic<LiftedTask> :
                    datalog::TerminationPolicy<datalog::MaxAggregation>>
 {
 public:
-    MaxHeuristic(std::shared_ptr<LiftedTask> task);
+    MaxHeuristic(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<MaxHeuristic<LiftedTask>> create(std::shared_ptr<LiftedTask> task);
+    static std::shared_ptr<MaxHeuristic<LiftedTask>> create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
     float_t extract_cost_and_set_preferred_actions_impl(const StateView<LiftedTask>& state);
 };

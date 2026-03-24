@@ -28,7 +28,13 @@ namespace tyr::tests
 
 static p::GroundTaskPtr compute_ground_task(const fs::path& domain_filepath, const fs::path& problem_filepath)
 {
-    return p::LiftedTask(fp::Parser(domain_filepath).parse_task(problem_filepath)).instantiate_ground_task();
+    auto execution_context = ExecutionContext(1);
+    return p::LiftedTask(fp::Parser(domain_filepath).parse_task(problem_filepath)).instantiate_ground_task(execution_context);
+}
+
+static p::SuccessorGenerator<p::GroundTask> create_successor_generator(std::shared_ptr<p::GroundTask> task)
+{
+    return p::SuccessorGenerator<p::GroundTask>(task, ExecutionContext::create(1));
 }
 
 static fs::path absolute(const std::string& subdir) { return fs::path(std::string(DATA_DIR)) / subdir; }
@@ -42,7 +48,7 @@ TEST(TyrTests, TyrPlanningGroundTaskAgricola)
     EXPECT_EQ(ground_task->get_num_actions(), 12443);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 8);
 }
@@ -56,7 +62,7 @@ TEST(TyrTests, TyrPlanningGroundTaskAirport)
     EXPECT_EQ(ground_task->get_num_actions(), 43);
     EXPECT_EQ(ground_task->get_num_axioms(), 420);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 2);
 }
@@ -70,7 +76,7 @@ TEST(TyrTests, TyrPlanningGroundTaskAssembly)
     EXPECT_EQ(ground_task->get_num_actions(), 6);
     EXPECT_EQ(ground_task->get_num_axioms(), 2);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 3);
 }
@@ -84,7 +90,7 @@ TEST(TyrTests, TyrPlanningGroundTaskBarman)
     EXPECT_EQ(ground_task->get_num_actions(), 84);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 4);
 }
@@ -98,7 +104,7 @@ TEST(TyrTests, TyrPlanningGroundTaskBlocks3)
     EXPECT_EQ(ground_task->get_num_actions(), 45);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 2);
 }
@@ -112,7 +118,7 @@ TEST(TyrTests, TyrPlanningGroundTaskBlocks4)
     EXPECT_EQ(ground_task->get_num_actions(), 24);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 2);
 }
@@ -126,7 +132,7 @@ TEST(TyrTests, TyrPlanningGroundTaskChildsnack)
     EXPECT_EQ(ground_task->get_num_actions(), 7);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 3);
 }
@@ -140,7 +146,7 @@ TEST(TyrTests, TyrPlanningGroundTaskDelivery)
     EXPECT_EQ(ground_task->get_num_actions(), 16);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 2);
 }
@@ -154,7 +160,7 @@ TEST(TyrTests, TyrPlanningGroundTaskDriverlog)
     EXPECT_EQ(ground_task->get_num_actions(), 14);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 2);
 }
@@ -168,7 +174,7 @@ TEST(TyrTests, TyrPlanningGroundTaskFerry)
     EXPECT_EQ(ground_task->get_num_actions(), 10);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 3);
 }
@@ -182,7 +188,7 @@ TEST(TyrTests, TyrPlanningGroundTaskFoCounters)
     EXPECT_EQ(ground_task->get_num_actions(), 12);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 9);
 }
@@ -196,7 +202,7 @@ TEST(TyrTests, TyrPlanningGroundTaskGrid)
     EXPECT_EQ(ground_task->get_num_actions(), 35);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 1);
 }
@@ -210,7 +216,7 @@ TEST(TyrTests, TyrPlanningGroundTaskGripper)
     EXPECT_EQ(ground_task->get_num_actions(), 20);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 6);
 }
@@ -224,7 +230,7 @@ TEST(TyrTests, TyrPlanningGroundTaskHiking)
     EXPECT_EQ(ground_task->get_num_actions(), 41);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 18);
 }
@@ -238,7 +244,7 @@ TEST(TyrTests, TyrPlanningGroundTaskLogistics)
     EXPECT_EQ(ground_task->get_num_actions(), 14);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 6);
 }
@@ -252,7 +258,7 @@ TEST(TyrTests, TyrPlanningGroundTaskMiconic)
     EXPECT_EQ(ground_task->get_num_actions(), 6);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 3);
 }
@@ -266,7 +272,7 @@ TEST(TyrTests, TyrPlanningGroundTaskMiconicFulladl)
     EXPECT_EQ(ground_task->get_num_actions(), 10);
     EXPECT_EQ(ground_task->get_num_axioms(), 15);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 3);
 }
@@ -280,7 +286,7 @@ TEST(TyrTests, TyrPlanningGroundTaskMiconicSimpleadl)
     EXPECT_EQ(ground_task->get_num_actions(), 4);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 2);
 }
@@ -294,7 +300,7 @@ TEST(TyrTests, TyrPlanningGroundTaskParcprinter)
     EXPECT_EQ(ground_task->get_num_actions(), 25);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 1);
 }
@@ -308,7 +314,7 @@ TEST(TyrTests, TyrPlanningGroundTaskPathways)
     EXPECT_EQ(ground_task->get_num_actions(), 78);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 16);
 }
@@ -322,7 +328,7 @@ TEST(TyrTests, TyrPlanningGroundTaskPhilosophers)
     EXPECT_EQ(ground_task->get_num_actions(), 34);
     EXPECT_EQ(ground_task->get_num_axioms(), 34);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 2);
 }
@@ -336,7 +342,7 @@ TEST(TyrTests, TyrPlanningGroundTaskPsrMiddle)
     EXPECT_EQ(ground_task->get_num_actions(), 28);
     EXPECT_EQ(ground_task->get_num_axioms(), 467);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 1);
 }
@@ -350,7 +356,7 @@ TEST(TyrTests, TyrPlanningGroundTaskPushworld)
     EXPECT_EQ(ground_task->get_num_actions(), 1126);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 4);
 }
@@ -364,7 +370,7 @@ TEST(TyrTests, TyrPlanningGroundTaskRefuel)
     EXPECT_EQ(ground_task->get_num_actions(), 1);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 1);
 }
@@ -378,7 +384,7 @@ TEST(TyrTests, TyrPlanningGroundTaskRefuelAdl)
     EXPECT_EQ(ground_task->get_num_actions(), 15);
     EXPECT_EQ(ground_task->get_num_axioms(), 3);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 5);
 }
@@ -392,7 +398,7 @@ TEST(TyrTests, TyrPlanningGroundTaskReward)
     EXPECT_EQ(ground_task->get_num_actions(), 6);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 1);
 }
@@ -406,7 +412,7 @@ TEST(TyrTests, TyrPlanningGroundTaskRovers)
     EXPECT_EQ(ground_task->get_num_actions(), 7);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 2);
 }
@@ -420,7 +426,7 @@ TEST(TyrTests, TyrPlanningGroundTaskSatellite)
     EXPECT_EQ(ground_task->get_num_actions(), 18);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 4);
 }
@@ -434,7 +440,7 @@ TEST(TyrTests, TyrPlanningGroundTaskSchedule)
     EXPECT_EQ(ground_task->get_num_actions(), 49);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 44);
 }
@@ -448,7 +454,7 @@ TEST(TyrTests, TyrPlanningGroundTaskSokoban)
     EXPECT_EQ(ground_task->get_num_actions(), 526);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 3);
 }
@@ -462,7 +468,7 @@ TEST(TyrTests, TyrPlanningGroundTaskSpanner)
     EXPECT_EQ(ground_task->get_num_actions(), 4);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 1);
 }
@@ -476,7 +482,7 @@ TEST(TyrTests, TyrPlanningGroundTaskTpp)
     EXPECT_EQ(ground_task->get_num_actions(), 56);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 5);
 }
@@ -490,7 +496,7 @@ TEST(TyrTests, TyrPlanningGroundTaskTransport)
     EXPECT_EQ(ground_task->get_num_actions(), 104);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 5);
 }
@@ -504,7 +510,7 @@ TEST(TyrTests, TyrPlanningGroundTaskVisitall)
     EXPECT_EQ(ground_task->get_num_actions(), 12);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 2);
 }
@@ -518,7 +524,7 @@ TEST(TyrTests, TyrPlanningGroundTaskWoodworking)
     EXPECT_EQ(ground_task->get_num_actions(), 198);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 8);
 }
@@ -532,7 +538,7 @@ TEST(TyrTests, TyrPlanningGroundTaskZenotravel)
     EXPECT_EQ(ground_task->get_num_actions(), 37);
     EXPECT_EQ(ground_task->get_num_axioms(), 0);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTask>(ground_task);
+    auto successor_generator = create_successor_generator(ground_task);
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), 7);
 }

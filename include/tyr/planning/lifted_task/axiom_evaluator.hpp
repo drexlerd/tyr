@@ -20,6 +20,7 @@
 
 #include "tyr/planning/lifted_task/unpacked_state.hpp"
 //
+#include "tyr/common/onetbb.hpp"
 #include "tyr/datalog/policies/annotation.hpp"
 #include "tyr/datalog/policies/termination.hpp"
 #include "tyr/datalog/workspaces/program.hpp"
@@ -35,9 +36,9 @@ template<>
 class AxiomEvaluator<LiftedTask>
 {
 public:
-    explicit AxiomEvaluator(std::shared_ptr<LiftedTask> task);
+    explicit AxiomEvaluator(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<AxiomEvaluator<LiftedTask>> create(std::shared_ptr<LiftedTask> task);
+    static std::shared_ptr<AxiomEvaluator<LiftedTask>> create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
     void compute_extended_state(UnpackedState<LiftedTask>& unpacked_state);
 
@@ -45,6 +46,7 @@ public:
 
 private:
     std::shared_ptr<LiftedTask> m_task;
+    ExecutionContextPtr m_execution_context;
 
     datalog::ProgramWorkspace<datalog::NoOrAnnotationPolicy, datalog::NoAndAnnotationPolicy, datalog::NoTerminationPolicy> m_workspace;
 };

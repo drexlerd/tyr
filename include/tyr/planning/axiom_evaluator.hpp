@@ -19,6 +19,7 @@
 #define TYR_PLANNING_AXIOM_EVALUATOR_HPP_
 
 #include "tyr/common/declarations.hpp"
+#include "tyr/common/onetbb.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/unpacked_state.hpp"
 
@@ -32,10 +33,11 @@ class AxiomEvaluator
 };
 
 template<typename T, typename Task>
-concept AxiomEvaluatorConcept = requires(T& r, std::shared_ptr<Task> task, UnpackedState<Task>& unpacked_state) {
-    { T(task) };
-    { r.compute_extended_state(unpacked_state) } -> std::same_as<void>;
-};
+concept AxiomEvaluatorConcept =
+    requires(T& r, std::shared_ptr<Task> task, std::shared_ptr<ExecutionContext> execution_context, UnpackedState<Task>& unpacked_state) {
+        { T(task, execution_context) };
+        { r.compute_extended_state(unpacked_state) } -> std::same_as<void>;
+    };
 
 }
 

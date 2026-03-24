@@ -106,16 +106,6 @@ using Queue = PriorityQueue<QueueEntry<Task>>;
 template<typename Task>
 SearchResult<Task> find_solution(Task& task, SuccessorGenerator<Task>& successor_generator, Heuristic<Task>& heuristic, const Options<Task>& options)
 {
-    const auto available_threads = static_cast<uint_t>(oneapi::tbb::info::default_concurrency());
-
-    if (options.num_threads == 0)
-        throw std::invalid_argument("num_threads must be at least 1.");
-    if (options.num_threads > available_threads)
-        throw std::invalid_argument("Requested " + std::to_string(options.num_threads) + " threads, but only " + std::to_string(available_threads)
-                                    + " are available by default.");
-
-    auto control = oneapi::tbb::global_control(oneapi::tbb::global_control::max_allowed_parallelism, options.num_threads);
-
     const auto start_node = (options.start_node) ? options.start_node.value() : successor_generator.get_initial_node();
     const auto& start_state = start_node.get_state();
     const auto start_state_index = start_state.get_index();

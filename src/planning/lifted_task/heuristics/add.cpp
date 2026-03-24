@@ -19,12 +19,13 @@
 
 namespace tyr::planning
 {
-AddHeuristic<LiftedTask>::AddHeuristic(std::shared_ptr<LiftedTask> task) :
+AddHeuristic<LiftedTask>::AddHeuristic(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context) :
     RPGBase<AddHeuristic<LiftedTask>,
             datalog::OrAnnotationPolicy,
             datalog::AndAnnotationPolicy<datalog::SumAggregation>,
             datalog::TerminationPolicy<datalog::SumAggregation>>(
         task,
+        std::move(execution_context),
         datalog::OrAnnotationPolicy(),
         datalog::AndAnnotationPolicy<datalog::SumAggregation>(),
         datalog::TerminationPolicy<datalog::SumAggregation>(
@@ -32,9 +33,9 @@ AddHeuristic<LiftedTask>::AddHeuristic(std::shared_ptr<LiftedTask> task) :
 {
 }
 
-std::shared_ptr<AddHeuristic<LiftedTask>> AddHeuristic<LiftedTask>::create(std::shared_ptr<LiftedTask> task)
+std::shared_ptr<AddHeuristic<LiftedTask>> AddHeuristic<LiftedTask>::create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context)
 {
-    return std::make_shared<AddHeuristic<LiftedTask>>(task);
+    return std::make_shared<AddHeuristic<LiftedTask>>(std::move(task), std::move(execution_context));
 }
 
 float_t AddHeuristic<LiftedTask>::extract_cost_and_set_preferred_actions_impl(const StateView<LiftedTask>& state)

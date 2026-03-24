@@ -18,8 +18,9 @@
 #ifndef TYR_PLANNING_LIFTED_TASK_HPP_
 #define TYR_PLANNING_LIFTED_TASK_HPP_
 
-#include "tyr/common/config.hpp"                    // for float_t, uint_t
-#include "tyr/common/dynamic_bitset.hpp"            // for test
+#include "tyr/common/config.hpp"          // for float_t, uint_t
+#include "tyr/common/dynamic_bitset.hpp"  // for test
+#include "tyr/common/onetbb.hpp"
 #include "tyr/common/vector.hpp"                    // for get
 #include "tyr/formalism/planning/declarations.hpp"  // for OverlayRepos...
 #include "tyr/formalism/planning/fdr_context.hpp"
@@ -45,7 +46,7 @@ public:
 
     static std::shared_ptr<LiftedTask> create(formalism::planning::PlanningTask task);
 
-    GroundTaskPtr instantiate_ground_task();
+    GroundTaskPtr instantiate_ground_task(ExecutionContext& execution_context);
 
     /**
      * Getters

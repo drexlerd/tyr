@@ -21,6 +21,7 @@ from queue import PriorityQueue
 from dataclasses import dataclass
 from enum import Enum
 
+from pytyr.common import ExecutionContext
 from pytyr.formalism.planning import ParserOptions, Parser
 from pytyr.planning import SearchStatus
 from pytyr.planning.lifted import StateIndex, SearchResult, SuccessorGenerator, Heuristic, FFHeuristic, PruningStrategy, GoalStrategy, TaskGoalStrategy, State, Node, LabeledNode, Plan, Task
@@ -76,8 +77,8 @@ def backtrack_plan(goal_node : Node, goal_search_node : SearchNode, search_nodes
     return Plan(start_node, labeled_succ_nodes)
 
 
-def find_solution(task : Task, heuristic : Heuristic) -> SearchResult: 
-    successor_generator = SuccessorGenerator(task)
+def find_solution(task : Task, successor_generator : SuccessorGenerator, heuristic : Heuristic) -> SearchResult: 
+    
     state_repository = successor_generator.get_state_repository()
 
     goal_strategy = TaskGoalStrategy(task)
@@ -171,12 +172,14 @@ def main():
     domain_filepath : Path = args.domain_filepath
     task_filepath : Path = args.task_filepath
 
+    execution_context = ExecutionContext(2)
     parser_options = ParserOptions()
     parser = Parser(domain_filepath, parser_options)
     lifted_task = Task(parser.parse_task(task_filepath, parser_options))
-    heuristic = FFHeuristic(lifted_task)
+    heuristic = FFHeuristic(lifted_task, execution_context)
+    successor_generator = SuccessorGenerator(lifted_task, execution_context)
 
-    search_result = find_solution(lifted_task, heuristic)
+    search_result = find_solution(lifted_task, successor_generator, heuristic)
 
     print("Search status:", search_result.status)
 

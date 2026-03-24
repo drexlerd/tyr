@@ -10,6 +10,10 @@ Example usage (run from the repository root):
 Author: Dominik Drexler (dominik.drexler@liu.se)
 """
 
+from pytyr.common import (
+    ExecutionContext
+)
+
 from pytyr.formalism.planning import (
     ParameterIndex,
     RepositoryFactory,
@@ -450,7 +454,7 @@ def main():
     search_task = Task(planning_task)
 
     # Instantiate the fully grounded task representation.
-    ground_search_task = search_task.instantiate_ground_task()
+    ground_search_task = search_task.instantiate_ground_task(ExecutionContext(1))
 
     # Print the grounded formalism task.
     print(ground_search_task.get_formalism_task().get_task())

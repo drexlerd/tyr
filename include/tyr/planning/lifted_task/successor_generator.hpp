@@ -18,6 +18,7 @@
 #ifndef TYR_PLANNING_LIFTED_TASK_SUCCESSOR_GENERATOR_HPP_
 #define TYR_PLANNING_LIFTED_TASK_SUCCESSOR_GENERATOR_HPP_
 
+#include "tyr/common/onetbb.hpp"
 #include "tyr/datalog/policies/annotation.hpp"
 #include "tyr/datalog/policies/termination.hpp"
 #include "tyr/datalog/workspaces/program.hpp"
@@ -37,9 +38,9 @@ template<>
 class SuccessorGenerator<LiftedTask>
 {
 public:
-    explicit SuccessorGenerator(std::shared_ptr<LiftedTask> task);
+    explicit SuccessorGenerator(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<SuccessorGenerator<LiftedTask>> create(std::shared_ptr<LiftedTask> task);
+    static std::shared_ptr<SuccessorGenerator<LiftedTask>> create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
     Node<LiftedTask> get_initial_node();
 
@@ -59,6 +60,7 @@ public:
 
 private:
     std::shared_ptr<LiftedTask> m_task;
+    ExecutionContextPtr m_execution_context;
 
     datalog::ProgramWorkspace<datalog::NoOrAnnotationPolicy, datalog::NoAndAnnotationPolicy, datalog::NoTerminationPolicy> m_workspace;
 

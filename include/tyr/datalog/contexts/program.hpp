@@ -18,6 +18,7 @@
 #ifndef TYR_DATALOG_CONTEXTS_PROGRAM_HPP_
 #define TYR_DATALOG_CONTEXTS_PROGRAM_HPP_
 
+#include "tyr/common/onetbb.hpp"
 #include "tyr/datalog/contexts/stratum.hpp"
 #include "tyr/datalog/declarations.hpp"
 #include "tyr/datalog/fact_sets.hpp"

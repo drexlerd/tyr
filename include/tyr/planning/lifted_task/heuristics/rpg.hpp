@@ -18,6 +18,7 @@
 #ifndef TYR_PLANNING_LIFTED_TASK_HEURISTICS_RPG_HPP_
 #define TYR_PLANNING_LIFTED_TASK_HEURISTICS_RPG_HPP_
 
+#include "tyr/common/onetbb.hpp"
 #include "tyr/datalog/bottom_up.hpp"
 #include "tyr/datalog/contexts/program.hpp"
 #include "tyr/datalog/workspaces/program.hpp"
@@ -40,8 +41,9 @@ private:
     constexpr auto& self() { return static_cast<Derived&>(*this); }
 
 public:
-    explicit RPGBase(std::shared_ptr<LiftedTask> task, const OrAP& or_ap, const AndAP& and_ap, const TP& tp) :
+    explicit RPGBase(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context, const OrAP& or_ap, const AndAP& and_ap, const TP& tp) :
         m_task(std::move(task)),
+        m_execution_context(std::move(execution_context)),
         m_workspace(m_task->get_rpg_program().get_program_context(), m_task->get_rpg_program().get_const_program_workspace(), or_ap, and_ap, tp)
     {
     }
@@ -70,7 +72,7 @@ public:
         auto ctx = datalog::ProgramExecutionContext(m_workspace, m_task->get_rpg_program().get_const_program_workspace());
         ctx.clear();
 
-        datalog::solve_bottom_up(ctx);
+        m_execution_context->arena().execute([&] { datalog::solve_bottom_up(ctx); });
 
         return (m_workspace.tp.check()) ? self().extract_cost_and_set_preferred_actions_impl(state) : std::numeric_limits<float_t>::infinity();
     }
@@ -79,6 +81,7 @@ public:
 
 protected:
     std::shared_ptr<LiftedTask> m_task;
+    ExecutionContextPtr m_execution_context;
 
     datalog::ProgramWorkspace<OrAP, AndAP, TP> m_workspace;
 };

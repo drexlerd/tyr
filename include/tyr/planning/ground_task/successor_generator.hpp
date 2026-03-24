@@ -34,9 +34,9 @@ template<>
 class SuccessorGenerator<GroundTask>
 {
 public:
-    explicit SuccessorGenerator(std::shared_ptr<GroundTask> task);
+    explicit SuccessorGenerator(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<SuccessorGenerator<GroundTask>> create(std::shared_ptr<GroundTask> task);
+    static std::shared_ptr<SuccessorGenerator<GroundTask>> create(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context);
 
     Node<GroundTask> get_initial_node();
 

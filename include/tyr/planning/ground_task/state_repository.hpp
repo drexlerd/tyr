@@ -28,6 +28,7 @@
 #include "tyr/planning/ground_task/state_view.hpp"
 #include "tyr/planning/ground_task/unpacked_state.hpp"
 #include "tyr/planning/state_index.hpp"
+#include "tyr/planning/state_repository.hpp"
 
 #include <memory>  // for shared_ptr
 #include <valla/valla.hpp>
@@ -41,9 +42,9 @@ template<>
 class StateRepository<GroundTask> : public std::enable_shared_from_this<StateRepository<GroundTask>>
 {
 public:
-    explicit StateRepository(std::shared_ptr<GroundTask> task);
+    explicit StateRepository(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<StateRepository<GroundTask>> create(std::shared_ptr<GroundTask> task);
+    static std::shared_ptr<StateRepository<GroundTask>> create(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context);
 
     StateView<GroundTask> get_initial_state();
 

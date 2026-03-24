@@ -29,11 +29,11 @@
 namespace tyr::planning
 {
 
-AxiomEvaluator<GroundTask>::AxiomEvaluator(std::shared_ptr<GroundTask> task) : m_task(task), m_applicable_axioms() {}
+AxiomEvaluator<GroundTask>::AxiomEvaluator(std::shared_ptr<GroundTask> task, ExecutionContextPtr) : m_task(task), m_applicable_axioms() {}
 
-std::shared_ptr<AxiomEvaluator<GroundTask>> AxiomEvaluator<GroundTask>::create(std::shared_ptr<GroundTask> task)
+std::shared_ptr<AxiomEvaluator<GroundTask>> AxiomEvaluator<GroundTask>::create(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context)
 {
-    return std::make_shared<AxiomEvaluator<GroundTask>>(std::move(task));
+    return std::make_shared<AxiomEvaluator<GroundTask>>(std::move(task), std::move(execution_context));
 }
 
 void AxiomEvaluator<GroundTask>::compute_extended_state(UnpackedState<GroundTask>& unpacked_state)

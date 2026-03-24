@@ -133,7 +133,10 @@ void bind_axiom_evaluator(nb::module_& m, const std::string& name)
     using T = AxiomEvaluator<Task>;
 
     nb::class_<T>(m, name.c_str())  //
-        .def(nb::new_([](std::shared_ptr<Task> task) { return T::create(std::move(task)); }), "task"_a);
+        .def(nb::new_([](std::shared_ptr<Task> task, std::shared_ptr<ExecutionContext> execution_context)
+                      { return T::create(std::move(task), std::move(execution_context)); }),
+             "task"_a,
+             "execution_context"_a);
 }
 
 template<typename Task>
@@ -142,7 +145,10 @@ void bind_state_repository(nb::module_& m, const std::string& name)
     using T = StateRepository<Task>;
 
     nb::class_<T>(m, name.c_str())  //
-        .def(nb::new_([](std::shared_ptr<Task> task) { return T::create(std::move(task)); }), "task"_a)
+        .def(nb::new_([](std::shared_ptr<Task> task, std::shared_ptr<ExecutionContext> execution_context)
+                      { return T::create(std::move(task), std::move(execution_context)); }),
+             "task"_a,
+             "execution_context"_a)
         .def("get_initial_state", &T::get_initial_state, nb::rv_policy::move)
         .def("get_registered_state", &T::get_registered_state, nb::rv_policy::move, "state_index"_a)
         .def("create_state",
@@ -160,7 +166,10 @@ void bind_successor_generator(nb::module_& m, const std::string& name)
     using T = SuccessorGenerator<Task>;
 
     nb::class_<T>(m, name.c_str())
-        .def(nb::new_([](std::shared_ptr<Task> task) { return T::create(std::move(task)); }), "task"_a)
+        .def(nb::new_([](std::shared_ptr<Task> task, std::shared_ptr<ExecutionContext> execution_context)
+                      { return T::create(std::move(task), std::move(execution_context)); }),
+             "task"_a,
+             "execution_context"_a)
         .def("get_initial_node", &T::get_initial_node, nb::rv_policy::move)
         .def("get_labeled_successor_nodes", nb::overload_cast<const Node<Task>&>(&T::get_labeled_successor_nodes), nb::rv_policy::move, "node"_a)
         .def("get_successor_node", &T::get_successor_node, "node"_a, "action"_a)
@@ -283,7 +292,10 @@ void bind_max_heuristic(nb::module_& m, const std::string& name)
     using T = MaxHeuristic<Task>;
 
     nb::class_<T, Heuristic<Task>>(m, name.c_str())  //
-        .def(nb::new_([](std::shared_ptr<Task> task) { return T::create(std::move(task)); }), "task"_a);
+        .def(nb::new_([](std::shared_ptr<Task> task, std::shared_ptr<ExecutionContext> execution_context)
+                      { return T::create(std::move(task), std::move(execution_context)); }),
+             "task"_a,
+             "execution_context"_a);
 }
 
 template<typename Task>
@@ -292,7 +304,10 @@ void bind_add_heuristic(nb::module_& m, const std::string& name)
     using T = AddHeuristic<Task>;
 
     nb::class_<T, Heuristic<Task>>(m, name.c_str())  //
-        .def(nb::new_([](std::shared_ptr<Task> task) { return T::create(std::move(task)); }), "task"_a);
+        .def(nb::new_([](std::shared_ptr<Task> task, std::shared_ptr<ExecutionContext> execution_context)
+                      { return T::create(std::move(task), std::move(execution_context)); }),
+             "task"_a,
+             "execution_context"_a);
 }
 
 template<typename Task>
@@ -301,7 +316,10 @@ void bind_ff_heuristic(nb::module_& m, const std::string& name)
     using T = FFHeuristic<Task>;
 
     nb::class_<T, Heuristic<Task>>(m, name.c_str())  //
-        .def(nb::new_([](std::shared_ptr<Task> task) { return T::create(std::move(task)); }), "task"_a);
+        .def(nb::new_([](std::shared_ptr<Task> task, std::shared_ptr<ExecutionContext> execution_context)
+                      { return T::create(std::move(task), std::move(execution_context)); }),
+             "task"_a,
+             "execution_context"_a);
 }
 
 namespace astar_eager
@@ -359,7 +377,6 @@ void bind_options(nb::module_& m, const std::string& name)
         .def_rw("goal_strategy", &T::goal_strategy)
         .def_rw("max_num_states", &T::max_num_states)
         .def_rw("max_time", &T::max_time)
-        .def_rw("num_threads", &T::num_threads)
         .def_rw("random_seed", &T::random_seed)
         .def_rw("shuffle_labeled_succ_nodes", &T::shuffle_labeled_succ_nodes);
 }
@@ -455,7 +472,6 @@ void bind_options(nb::module_& m, const std::string& name)
         .def_rw("goal_strategy", &T::goal_strategy)
         .def_rw("max_num_states", &T::max_num_states)
         .def_rw("max_time", &T::max_time)
-        .def_rw("num_threads", &T::num_threads)
         .def_rw("boost_preferred_queue", &T::boost_preferred_queue)
         .def_rw("random_seed", &T::random_seed)
         .def_rw("shuffle_labeled_succ_nodes", &T::shuffle_labeled_succ_nodes);

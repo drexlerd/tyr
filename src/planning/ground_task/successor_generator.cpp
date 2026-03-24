@@ -34,17 +34,17 @@ namespace fp = tyr::formalism::planning;
 namespace tyr::planning
 {
 
-SuccessorGenerator<GroundTask>::SuccessorGenerator(std::shared_ptr<GroundTask> task) :
+SuccessorGenerator<GroundTask>::SuccessorGenerator(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context) :
     m_task(task),
     m_applicable_actions(),
-    m_state_repository(std::make_shared<StateRepository<GroundTask>>(task)),
+    m_state_repository(std::make_shared<StateRepository<GroundTask>>(task, execution_context)),
     m_executor()
 {
 }
 
-std::shared_ptr<SuccessorGenerator<GroundTask>> SuccessorGenerator<GroundTask>::create(std::shared_ptr<GroundTask> task)
+std::shared_ptr<SuccessorGenerator<GroundTask>> SuccessorGenerator<GroundTask>::create(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context)
 {
-    return std::make_shared<SuccessorGenerator<GroundTask>>(std::move(task));
+    return std::make_shared<SuccessorGenerator<GroundTask>>(std::move(task), std::move(execution_context));
 }
 
 Node<GroundTask> SuccessorGenerator<GroundTask>::get_initial_node()

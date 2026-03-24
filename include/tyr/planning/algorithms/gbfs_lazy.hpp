@@ -36,7 +36,6 @@ struct Options
     PruningStrategyPtr<Task> pruning_strategy = nullptr;
     GoalStrategyPtr<Task> goal_strategy = nullptr;
     uint_t max_num_states = std::numeric_limits<uint_t>::max();
-    uint_t num_threads = 1;
     std::optional<std::chrono::steady_clock::duration> max_time = std::nullopt;
     uint_t boost_preferred_queue = 1000;
     uint64_t random_seed = 0;
@@ -48,16 +47,6 @@ struct Options
 template<typename Task>
 SearchResult<Task>
 find_solution(Task& task, SuccessorGenerator<Task>& successor_generator, Heuristic<Task>& heuristic, const Options<Task>& options = Options<Task>());
-
-/**
- * Explicit instantiations
- */
-
-extern template SearchResult<LiftedTask>
-find_solution<LiftedTask>(LiftedTask&, SuccessorGenerator<LiftedTask>&, Heuristic<LiftedTask>&, const Options<LiftedTask>&);
-extern template SearchResult<GroundTask>
-find_solution<GroundTask>(GroundTask&, SuccessorGenerator<GroundTask>&, Heuristic<GroundTask>&, const Options<GroundTask>&);
-
 }
 
 #endif

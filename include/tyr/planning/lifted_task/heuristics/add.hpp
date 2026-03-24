@@ -35,9 +35,9 @@ class AddHeuristic<LiftedTask> :
                    datalog::TerminationPolicy<datalog::SumAggregation>>
 {
 public:
-    AddHeuristic(std::shared_ptr<LiftedTask> task);
+    AddHeuristic(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<AddHeuristic<LiftedTask>> create(std::shared_ptr<LiftedTask> task);
+    static std::shared_ptr<AddHeuristic<LiftedTask>> create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
     float_t extract_cost_and_set_preferred_actions_impl(const StateView<LiftedTask>& state);
 };

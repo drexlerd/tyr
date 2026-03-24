@@ -18,8 +18,9 @@
 #ifndef TYR_PLANNING_LIFTED_TASK_STATE_REPOSITORY_HPP_
 #define TYR_PLANNING_LIFTED_TASK_STATE_REPOSITORY_HPP_
 
-#include "tyr/common/config.hpp"              // for uint_t, float_t
-#include "tyr/common/indexed_hash_set.hpp"    // for IndexedHashSet
+#include "tyr/common/config.hpp"            // for uint_t, float_t
+#include "tyr/common/indexed_hash_set.hpp"  // for IndexedHashSet
+#include "tyr/common/onetbb.hpp"
 #include "tyr/common/shared_object_pool.hpp"  // for SharedObjectPool
 #include "tyr/planning/lifted_task/state_data.hpp"
 #include "tyr/planning/lifted_task/state_view.hpp"
@@ -38,9 +39,9 @@ template<>
 class StateRepository<LiftedTask> : public std::enable_shared_from_this<StateRepository<LiftedTask>>
 {
 public:
-    explicit StateRepository(std::shared_ptr<LiftedTask> task);
+    explicit StateRepository(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<StateRepository<LiftedTask>> create(std::shared_ptr<LiftedTask> task);
+    static std::shared_ptr<StateRepository<LiftedTask>> create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
     StateView<LiftedTask> get_initial_state();
 

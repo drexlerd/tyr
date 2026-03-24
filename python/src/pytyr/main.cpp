@@ -24,6 +24,9 @@ namespace tyr
 {
 NB_MODULE(pytyr, m)
 {
+    auto common = m.def_submodule("common");
+    bind_module_definitions(common);
+
     // Create submodules before binding to avoid missing bindings
 
     auto formalism = m.def_submodule("formalism");

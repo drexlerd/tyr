@@ -18,6 +18,7 @@
 #ifndef TYR_PLANNING_STATE_REPOSITORY_HPP_
 #define TYR_PLANNING_STATE_REPOSITORY_HPP_
 
+#include "tyr/common/onetbb.hpp"
 #include "tyr/common/shared_object_pool.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/state_index.hpp"
@@ -40,13 +41,14 @@ template<typename T, typename Task>
 concept StateRepositoryConcept =
     requires(T& r,
              std::shared_ptr<Task> task,
+             std::shared_ptr<ExecutionContext> execution_context,
              Index<State<Task>> index,
              SharedObjectPoolPtr<UnpackedState<Task>> unregistered_state,
              const std::vector<Data<formalism::planning::FDRFact<formalism::FluentTag>>>& fluent_facts,
              const std::vector<std::pair<Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>, float_t>>& fterm_values,
              const std::vector<formalism::planning::FDRFactView<formalism::FluentTag>>& fluent_fact_views,
              const std::vector<formalism::planning::GroundFunctionTermViewValuePair<formalism::FluentTag>>& fterm_value_views) {
-        { T(task) };
+        { T(task, execution_context) };
         { r.get_initial_state() } -> std::same_as<StateView<Task>>;
         { r.get_registered_state(index) } -> std::same_as<StateView<Task>>;
         { r.create_state(fluent_facts, fterm_values) } -> std::same_as<StateView<Task>>;

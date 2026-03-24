@@ -28,6 +28,7 @@ install(TARGETS pytyr DESTINATION "pytyr")
 ## Stubgen
 set(MODULES
     # pytyr  # Handled by __init__.py
+    pytyr.common
     pytyr.formalism
     pytyr.formalism.planning
     pytyr.planning

@@ -38,6 +38,15 @@ struct ExecutionContext
         {
             throw std::invalid_argument("num_threads must be at least 1.");
         }
+
+        const auto available_threads = static_cast<uint_t>(oneapi::tbb::info::default_concurrency());
+
+        if (num_threads > available_threads)
+        {
+            throw std::invalid_argument("Requested " + std::to_string(num_threads) + " threads, but only " + std::to_string(available_threads)
+                                        + " are available by default.");
+        }
+
         m_arena.initialize();
     }
 
@@ -53,6 +62,8 @@ private:
     uint_t m_num_threads;
     oneapi::tbb::task_arena m_arena;
 };
+
+using ExecutionContextPtr = std::shared_ptr<ExecutionContext>;
 
 }
 

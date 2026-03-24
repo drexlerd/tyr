@@ -18,12 +18,13 @@
 #ifndef TYR_PLANNING_LIFTED_TASK_TASK_GROUNDER_HPP_
 #define TYR_PLANNING_LIFTED_TASK_TASK_GROUNDER_HPP_
 
+#include "tyr/common/onetbb.hpp"
 #include "tyr/planning/declarations.hpp"
 
 namespace tyr::planning
 {
 
-extern GroundTaskPtr ground_task(LiftedTask& lifted_task);
+extern GroundTaskPtr ground_task(LiftedTask& lifted_task, ExecutionContext& execution_context);
 
 }
 

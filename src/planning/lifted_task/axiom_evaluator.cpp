@@ -80,8 +80,9 @@ static void read_derived_atoms_from_program_context(const AxiomEvaluatorProgram&
     }
 }
 
-AxiomEvaluator<LiftedTask>::AxiomEvaluator(std::shared_ptr<LiftedTask> task) :
+AxiomEvaluator<LiftedTask>::AxiomEvaluator(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context) :
     m_task(std::move(task)),
+    m_execution_context(std::move(execution_context)),
     m_workspace(m_task->get_axiom_program().get_program_context(),
                 m_task->get_axiom_program().get_const_program_workspace(),
                 d::NoOrAnnotationPolicy(),
@@ -90,9 +91,9 @@ AxiomEvaluator<LiftedTask>::AxiomEvaluator(std::shared_ptr<LiftedTask> task) :
 {
 }
 
-std::shared_ptr<AxiomEvaluator<LiftedTask>> AxiomEvaluator<LiftedTask>::create(std::shared_ptr<LiftedTask> task)
+std::shared_ptr<AxiomEvaluator<LiftedTask>> AxiomEvaluator<LiftedTask>::create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context)
 {
-    return std::make_shared<AxiomEvaluator<LiftedTask>>(std::move(task));
+    return std::make_shared<AxiomEvaluator<LiftedTask>>(std::move(task), std::move(execution_context));
 }
 
 void AxiomEvaluator<LiftedTask>::compute_extended_state(UnpackedState<LiftedTask>& unpacked_state)
@@ -104,7 +105,7 @@ void AxiomEvaluator<LiftedTask>::compute_extended_state(UnpackedState<LiftedTask
     auto ctx = d::ProgramExecutionContext(m_workspace, m_task->get_axiom_program().get_const_program_workspace());
     ctx.clear();
 
-    d::solve_bottom_up(ctx);
+    m_execution_context->arena().execute([&] { d::solve_bottom_up(ctx); });
 
     auto merge_planning_context = fp::MergePlanningContext { m_workspace.planning_builder, *m_task->get_repository() };
 

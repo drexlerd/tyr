@@ -58,21 +58,22 @@ void insert_extended_state(const UnpackedState<LiftedTask>& unpacked_state,
 }
 }
 
-SuccessorGenerator<LiftedTask>::SuccessorGenerator(std::shared_ptr<LiftedTask> task) :
+SuccessorGenerator<LiftedTask>::SuccessorGenerator(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context) :
     m_task(std::move(task)),
+    m_execution_context(std::move(execution_context)),
     m_workspace(m_task->get_action_program().get_program_context(),
                 m_task->get_action_program().get_const_program_workspace(),
                 d::NoOrAnnotationPolicy(),
                 d::NoAndAnnotationPolicy(),
                 d::NoTerminationPolicy()),
-    m_state_repository(std::make_shared<StateRepository<LiftedTask>>(m_task)),
+    m_state_repository(std::make_shared<StateRepository<LiftedTask>>(m_task, m_execution_context)),
     m_executor()
 {
 }
 
-std::shared_ptr<SuccessorGenerator<LiftedTask>> SuccessorGenerator<LiftedTask>::create(std::shared_ptr<LiftedTask> task)
+std::shared_ptr<SuccessorGenerator<LiftedTask>> SuccessorGenerator<LiftedTask>::create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context)
 {
-    return std::make_shared<SuccessorGenerator<LiftedTask>>(std::move(task));
+    return std::make_shared<SuccessorGenerator<LiftedTask>>(std::move(task), std::move(execution_context));
 }
 
 Node<LiftedTask> SuccessorGenerator<LiftedTask>::get_initial_node()
@@ -108,7 +109,7 @@ void SuccessorGenerator<LiftedTask>::get_labeled_successor_nodes(const Node<Lift
     auto ctx = d::ProgramExecutionContext(m_workspace, m_task->get_action_program().get_const_program_workspace());
     ctx.clear();
 
-    d::solve_bottom_up(ctx);
+    m_execution_context->arena().execute([&] { d::solve_bottom_up(ctx); });
 
     const auto state_context = StateContext<LiftedTask>(*m_task, state.get_unpacked_state(), node.get_metric());
 

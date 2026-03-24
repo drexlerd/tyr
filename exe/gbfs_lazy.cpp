@@ -79,16 +79,17 @@ int main(int argc, char** argv)
         if (verbosity > 0)
             std::cout << *lifted_task << std::endl;
 
-        auto successor_generator = planning::SuccessorGenerator<planning::LiftedTask>(lifted_task);
+        auto execution_context = ExecutionContext::create(num_worker_threads);
+
+        auto successor_generator = planning::SuccessorGenerator<planning::LiftedTask>(lifted_task, execution_context);
 
         auto options = planning::gbfs_lazy::Options<planning::LiftedTask>();
         options.start_node = successor_generator.get_initial_node();
         options.event_handler = planning::gbfs_lazy::DefaultEventHandler<planning::LiftedTask>::create(verbosity);
-        options.num_threads = num_worker_threads;
         options.random_seed = random_seed;
         options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
 
-        auto ff_heuristic = planning::FFHeuristic<planning::LiftedTask>::create(lifted_task);
+        auto ff_heuristic = planning::FFHeuristic<planning::LiftedTask>::create(lifted_task, execution_context);
         ff_heuristic->set_goal(lifted_task->get_task().get_goal());
 
         auto result = planning::gbfs_lazy::find_solution(*lifted_task, successor_generator, *ff_heuristic, options);

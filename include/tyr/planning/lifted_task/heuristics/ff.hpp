@@ -43,9 +43,9 @@ class FFHeuristic<LiftedTask> :
                    datalog::TerminationPolicy<datalog::SumAggregation>>
 {
 public:
-    FFHeuristic(std::shared_ptr<LiftedTask> task);
+    FFHeuristic(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<FFHeuristic<LiftedTask>> create(std::shared_ptr<LiftedTask> task);
+    static std::shared_ptr<FFHeuristic<LiftedTask>> create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context);
 
     float_t extract_cost_and_set_preferred_actions_impl(const StateView<LiftedTask>& state);
 

@@ -86,6 +86,6 @@ LiftedTask::LiftedTask(formalism::planning::PlanningTask task) :
 
 std::shared_ptr<LiftedTask> LiftedTask::create(formalism::planning::PlanningTask task) { return std::make_shared<LiftedTask>(std::move(task)); }
 
-GroundTaskPtr LiftedTask::instantiate_ground_task() { return ground_task(*this); }
+GroundTaskPtr LiftedTask::instantiate_ground_task(ExecutionContext& execution_context) { return ground_task(*this, execution_context); }
 
 }

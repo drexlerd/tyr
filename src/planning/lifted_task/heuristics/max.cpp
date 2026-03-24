@@ -26,12 +26,13 @@
 namespace tyr::planning
 {
 
-MaxHeuristic<LiftedTask>::MaxHeuristic(std::shared_ptr<LiftedTask> task) :
+MaxHeuristic<LiftedTask>::MaxHeuristic(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context) :
     RPGBase<MaxHeuristic<LiftedTask>,
             datalog::OrAnnotationPolicy,
             datalog::AndAnnotationPolicy<datalog::MaxAggregation>,
             datalog::TerminationPolicy<datalog::MaxAggregation>>(
         task,
+        std::move(execution_context),
         datalog::OrAnnotationPolicy(),
         datalog::AndAnnotationPolicy<datalog::MaxAggregation>(),
         datalog::TerminationPolicy<datalog::MaxAggregation>(
@@ -39,9 +40,9 @@ MaxHeuristic<LiftedTask>::MaxHeuristic(std::shared_ptr<LiftedTask> task) :
 {
 }
 
-std::shared_ptr<MaxHeuristic<LiftedTask>> MaxHeuristic<LiftedTask>::create(std::shared_ptr<LiftedTask> task)
+std::shared_ptr<MaxHeuristic<LiftedTask>> MaxHeuristic<LiftedTask>::create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context)
 {
-    return std::make_shared<MaxHeuristic<LiftedTask>>(task);
+    return std::make_shared<MaxHeuristic<LiftedTask>>(std::move(task), std::move(execution_context));
 }
 
 float_t MaxHeuristic<LiftedTask>::extract_cost_and_set_preferred_actions_impl(const StateView<LiftedTask>& state)

@@ -62,7 +62,7 @@ static auto create_derived_layout(fp::FDRTaskView fdr_task)
     return create_bitset_layout<uint_t>(fdr_task.get_atoms<f::DerivedTag>().size());
 }
 
-StateRepository<GroundTask>::StateRepository(std::shared_ptr<GroundTask> task) :
+StateRepository<GroundTask>::StateRepository(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context) :
     m_task(task),
     m_fluent_layout(create_fluent_layout(m_task->get_task())),
     m_derived_layout(create_derived_layout(m_task->get_task())),
@@ -75,13 +75,13 @@ StateRepository<GroundTask>::StateRepository(std::shared_ptr<GroundTask> task) :
     m_fluent_buffer(m_fluent_layout.total_blocks),
     m_derived_buffer(m_derived_layout.total_blocks),
     m_unpacked_state_pool(),
-    m_axiom_evaluator(std::make_shared<AxiomEvaluator<GroundTask>>(task))
+    m_axiom_evaluator(std::make_shared<AxiomEvaluator<GroundTask>>(task, execution_context))
 {
 }
 
-std::shared_ptr<StateRepository<GroundTask>> StateRepository<GroundTask>::create(std::shared_ptr<GroundTask> task)
+std::shared_ptr<StateRepository<GroundTask>> StateRepository<GroundTask>::create(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context)
 {
-    return std::make_shared<StateRepository<GroundTask>>(std::move(task));
+    return std::make_shared<StateRepository<GroundTask>>(std::move(task), std::move(execution_context));
 }
 
 StateView<GroundTask> StateRepository<GroundTask>::get_initial_state()

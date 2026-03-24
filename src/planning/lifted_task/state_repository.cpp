@@ -37,20 +37,20 @@ namespace fp = tyr::formalism::planning;
 namespace tyr::planning
 {
 
-StateRepository<LiftedTask>::StateRepository(std::shared_ptr<LiftedTask> task) :
+StateRepository<LiftedTask>::StateRepository(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context) :
     m_task(task),
     m_uint_nodes(),
     m_float_nodes(),
     m_nodes_buffer(),
     m_packed_states(),
     m_unpacked_state_pool(),
-    m_axiom_evaluator(std::make_shared<AxiomEvaluator<LiftedTask>>(task))
+    m_axiom_evaluator(std::make_shared<AxiomEvaluator<LiftedTask>>(task, execution_context))
 {
 }
 
-std::shared_ptr<StateRepository<LiftedTask>> StateRepository<LiftedTask>::create(std::shared_ptr<LiftedTask> task)
+std::shared_ptr<StateRepository<LiftedTask>> StateRepository<LiftedTask>::create(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context)
 {
-    return std::make_shared<StateRepository<LiftedTask>>(std::move(task));
+    return std::make_shared<StateRepository<LiftedTask>>(std::move(task), std::move(execution_context));
 }
 
 StateView<LiftedTask> StateRepository<LiftedTask>::get_initial_state()
