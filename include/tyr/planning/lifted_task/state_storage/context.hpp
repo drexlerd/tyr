@@ -19,7 +19,9 @@
 #define TYR_PLANNING_LIFTED_TASK_STATE_STORAGE_CONTEXT_HPP_
 
 #include "tyr/common/config.hpp"
+#include "tyr/planning/declarations.hpp"
 #include "tyr/planning/state_storage.hpp"
+#include "tyr/planning/state_storage/tags.hpp"
 
 #include <concepts>
 #include <valla/valla.hpp>

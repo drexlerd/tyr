@@ -18,22 +18,25 @@
 #ifndef TYR_PLANNING_GROUND_TASK_STATE_REPOSITORY_HPP_
 #define TYR_PLANNING_GROUND_TASK_STATE_REPOSITORY_HPP_
 
-#include "tyr/common/bit_packed_layout.hpp"   // for BitPackedArra...
-#include "tyr/common/config.hpp"              // for uint_t, float_t
-#include "tyr/common/indexed_hash_set.hpp"    // for IndexedHashSet
-#include "tyr/common/raw_array_set.hpp"       // for SegmentedArra...
-#include "tyr/common/shared_object_pool.hpp"  // for SharedObjectPool
-#include "tyr/planning/declarations.hpp"      // for GroundTask
+#include "tyr/common/config.hpp"
+#include "tyr/common/indexed_hash_set.hpp"
+#include "tyr/common/raw_array_set.hpp"
+#include "tyr/common/shared_object_pool.hpp"
+#include "tyr/planning/declarations.hpp"
 #include "tyr/planning/ground_task/state_data.hpp"
 #include "tyr/planning/ground_task/state_view.hpp"
 #include "tyr/planning/ground_task/unpacked_state.hpp"
 #include "tyr/planning/state_index.hpp"
 #include "tyr/planning/state_repository.hpp"
+//
+#include "tyr/planning/ground_task/state_storage/atom_tree_compression.hpp"
+#include "tyr/planning/ground_task/state_storage/context.hpp"
+#include "tyr/planning/ground_task/state_storage/fact_tree_compression.hpp"
+#include "tyr/planning/state_storage/numeric_tree_compression.hpp"
 
-#include <memory>  // for shared_ptr
+#include <memory>
 #include <valla/valla.hpp>
 #include <vector>
-#include <vector>  // for vector
 
 namespace tyr::planning
 {
@@ -66,17 +69,13 @@ public:
 
 private:
     std::shared_ptr<GroundTask> m_task;
-    BitPackedArrayLayout<uint_t> m_fluent_layout;
-    BitsetLayout<uint_t> m_derived_layout;
 
-    valla::IndexedHashSet<valla::Slot<uint_t>, uint_t> m_uint_nodes;
-    valla::IndexedHashSet<float_t, uint_t> m_float_nodes;
-    std::vector<uint_t> m_nodes_buffer;
+    StateStorageContext<GroundTask, TreeCompression> m_context;
+    FactStorageBackend<GroundTask, TreeCompression> m_fluent_backend;
+    AtomStorageBackend<GroundTask, TreeCompression> m_derived_backend;
+    NumericStorageBackend<GroundTask, TreeCompression> m_numeric_backend;
+
     IndexedHashSet<State<GroundTask>> m_packed_states;
-    RawArraySet<uint_t> m_fluent_repository;
-    RawArraySet<uint_t> m_derived_repository;
-    std::vector<uint_t> m_fluent_buffer;
-    std::vector<uint_t> m_derived_buffer;
     SharedObjectPool<UnpackedState<GroundTask>> m_unpacked_state_pool;
 
     std::shared_ptr<AxiomEvaluator<GroundTask>> m_axiom_evaluator;

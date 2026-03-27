@@ -93,7 +93,7 @@ public:
     template<formalism::FactKind T>
     const boost::dynamic_bitset<>& get_atoms() const noexcept;
 
-    const std::vector<formalism::planning::FDRValue>& get_fluent_values() const noexcept;
+    const std::vector<uint_t>& get_fluent_values() const noexcept;
 
     template<formalism::FactKind T>
     const std::vector<float_t>& get_numeric_variables() const noexcept;
@@ -134,7 +134,7 @@ inline const std::shared_ptr<planning::StateRepository<planning::GroundTask>>& G
 
 inline const planning::UnpackedState<planning::GroundTask>& GroundStateView::get_unpacked_state() const noexcept { return *m_unpacked; }
 
-inline const std::vector<formalism::planning::FDRValue>& GroundStateView::get_fluent_values() const noexcept { return m_unpacked->get_fluent_values(); }
+inline const std::vector<uint_t>& GroundStateView::get_fluent_values() const noexcept { return m_unpacked->get_atoms<formalism::FluentTag>().values; }
 
 inline bool GroundStateView::test(formalism::planning::GroundAtomView<formalism::StaticTag> view) const { return test(view.get_index()); }
 

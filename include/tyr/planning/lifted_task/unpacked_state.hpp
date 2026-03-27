@@ -207,10 +207,6 @@ inline auto UnpackedState<LiftedTask>::get_fluent_fterm_values_view(const formal
            | std::views::transform([repository = &repository_](auto&& pair) { return std::make_pair(make_view(pair.first, *repository), pair.second); });
 }
 
-/**
- * For lifted task
- */
-
 template<formalism::FactKind T>
 inline auto& UnpackedState<LiftedTask>::get_atoms() noexcept
 {

@@ -68,19 +68,12 @@ public:
 private:
     std::shared_ptr<LiftedTask> m_task;
 
-    // New
     StateStorageContext<LiftedTask, TreeCompression> m_context;
     FactStorageBackend<LiftedTask, TreeCompression> m_fluent_backend;
     AtomStorageBackend<LiftedTask, TreeCompression> m_derived_backend;
     NumericStorageBackend<LiftedTask, TreeCompression> m_numeric_backend;
 
-    // Old
-    valla::IndexedHashSet<valla::Slot<uint_t>, uint_t> m_uint_nodes;
-    valla::IndexedHashSet<float_t, uint_t> m_float_nodes;
-    std::vector<uint_t> m_nodes_buffer;
     IndexedHashSet<State<LiftedTask>> m_packed_states;
-
-    //
     SharedObjectPool<UnpackedState<LiftedTask>> m_unpacked_state_pool;
 
     std::shared_ptr<AxiomEvaluator<LiftedTask>> m_axiom_evaluator;

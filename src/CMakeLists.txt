@@ -67,6 +67,7 @@ add_library(core STATIC ${TYR_PRIVATE_HEADER_FILES} ${TYR_PUBLIC_HEADER_FILES}
 
     planning/ground_task/state_storage/atom_tree_compression.cpp
     planning/ground_task/state_storage/fact_tree_compression.cpp
+    planning/ground_task/state_storage/context.cpp
     planning/ground_task/axiom_evaluator.cpp
     planning/ground_task/axiom_stratification.cpp
     planning/ground_task/node.cpp

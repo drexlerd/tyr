@@ -40,6 +40,23 @@ constexpr bool is_power_of_two(T x)
     return std::has_single_bit(x);
 }
 
+template<std::unsigned_integral T>
+constexpr T ceil_div(T x, T y)
+{
+    return (x + y - 1) / y;
+}
+
+template<std::unsigned_integral T>
+constexpr T bits_needed(T domain_size)
+{
+    if (domain_size <= 1)
+        return 1;
+    return std::bit_width(static_cast<T>(domain_size - 1));
+}
+
+template<std::unsigned_integral Block>
+inline constexpr std::size_t bits_per_block_v = std::numeric_limits<Block>::digits;
+
 //! lo_set[i] is a w-bit word with the i least significant bits set and the high bits not set.
 /*! lo_set[0] = 0ULL, lo_set[1]=1ULL, lo_set[2]=3ULL...
  */

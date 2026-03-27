@@ -43,10 +43,6 @@ StateRepository<LiftedTask>::StateRepository(std::shared_ptr<LiftedTask> task, E
     m_fluent_backend(m_context),
     m_derived_backend(m_context),
     m_numeric_backend(m_context),
-    m_uint_nodes(),
-    m_float_nodes(),
-    m_nodes_buffer(),
-    m_packed_states(),
     m_unpacked_state_pool(),
     m_axiom_evaluator(std::make_shared<AxiomEvaluator<LiftedTask>>(task, execution_context))
 {

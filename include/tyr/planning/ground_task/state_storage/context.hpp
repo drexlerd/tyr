@@ -20,7 +20,9 @@
 
 #include "tyr/common/config.hpp"
 #include "tyr/common/raw_array_set.hpp"
+#include "tyr/planning/declarations.hpp"
 #include "tyr/planning/state_storage.hpp"
+#include "tyr/planning/state_storage/tags.hpp"
 
 #include <concepts>
 #include <valla/valla.hpp>
@@ -36,6 +38,8 @@ namespace tyr::planning
 template<>
 struct StateStorageContext<GroundTask, TreeCompression>
 {
+    explicit StateStorageContext(const GroundTask& task);
+
     struct VariableInfo
     {
         uint_t begin;
@@ -43,14 +47,25 @@ struct StateStorageContext<GroundTask, TreeCompression>
         uint8_t length;
     };
 
-    RawArraySet<uint_t> fluent_array_set;
-    std::vector<VariableInfo> fluent_infos;
+    struct LayoutData
+    {
+        std::vector<VariableInfo> fluent_infos;
+        uint_t fluent_array_size;
+        uint_t derived_num_bits;
+        uint_t derived_array_size;
+    };
 
-    RawArraySet<uint_t> derived_array_set;
+    std::vector<VariableInfo> fluent_infos;
+    RawArraySet<uint_t> fluent_array_set;
+
     uint_t derived_num_bits;
+    RawArraySet<uint_t> derived_array_set;
 
     valla::IndexedHashSet<valla::Slot<uint_t>, uint_t> uint_nodes;
     valla::IndexedHashSet<float_t, uint_t> float_nodes;
+
+private:
+    explicit StateStorageContext(LayoutData&& layout_data);
 };
 
 }
