@@ -21,6 +21,14 @@
 #include "tyr/formalism/declarations.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/state_data.hpp"
+//
+#include "tyr/planning/ground_task/state_storage/hash_set/atom.hpp"
+#include "tyr/planning/ground_task/state_storage/hash_set/fact.hpp"
+#include "tyr/planning/ground_task/state_storage/tree_compression/atom.hpp"
+#include "tyr/planning/ground_task/state_storage/tree_compression/fact.hpp"
+#include "tyr/planning/state_storage/config.hpp"
+#include "tyr/planning/state_storage/hash_set/numeric.hpp"
+#include "tyr/planning/state_storage/tree_compression/numeric.hpp"
 
 #include <valla/valla.hpp>
 
@@ -38,36 +46,40 @@ public:
     using TaskType = planning::GroundTask;
 
     Data() noexcept = default;
-    Data(Index<planning::State<planning::GroundTask>> index, uint_t fluent_facts, uint_t derived_facts, valla::Slot<uint_t> numeric_variables) noexcept :
+    Data(Index<planning::State<TaskType>> index,
+         planning::FactPackedStorage<TaskType, planning::StateStoragePolicyTag> fact_storage,
+         planning::AtomPackedStorage<TaskType, planning::StateStoragePolicyTag> atom_storage,
+         planning::NumericPackedStorage<TaskType, planning::StateStoragePolicyTag> numeric_storage) noexcept :
         m_index(index),
-        m_fluent_facts(fluent_facts),
-        m_derived_facts(derived_facts),
-        m_numeric_variables(numeric_variables)
+        m_fact_storage(fact_storage),
+        m_atom_storage(atom_storage),
+        m_numeric_storage(numeric_storage)
     {
     }
 
-    Index<planning::State<planning::GroundTask>> get_index() const noexcept { return m_index; }
+    Index<planning::State<TaskType>> get_index() const noexcept { return m_index; }
 
     template<formalism::FactKind T>
-    const uint_t get_facts() const noexcept
+    const auto get_atoms() const noexcept
     {
         if constexpr (std::same_as<T, formalism::FluentTag>)
-            return m_fluent_facts;
+            return m_fact_storage;
         else if constexpr (std::same_as<T, formalism::DerivedTag>)
-            return m_derived_facts;
+            return m_atom_storage;
         else
             static_assert(dependent_false<T>::value, "Missing case");
     }
 
-    valla::Slot<uint_t> get_numeric_variables() const noexcept { return m_numeric_variables; }
+    auto get_numeric_variables() const noexcept { return m_numeric_storage; }
 
-    auto identifying_members() const noexcept { return std::tie(m_fluent_facts, m_derived_facts, m_numeric_variables.i1, m_numeric_variables.i2); }
+    auto identifying_members() const noexcept { return std::tie(m_fact_storage, m_atom_storage, m_numeric_storage); }
 
 private:
-    Index<planning::State<planning::GroundTask>> m_index;
-    uint_t m_fluent_facts;
-    uint_t m_derived_facts;
-    valla::Slot<uint_t> m_numeric_variables;
+    Index<planning::State<TaskType>> m_index;
+
+    planning::FactPackedStorage<TaskType, planning::StateStoragePolicyTag> m_fact_storage;
+    planning::AtomPackedStorage<TaskType, planning::StateStoragePolicyTag> m_atom_storage;
+    planning::NumericPackedStorage<TaskType, planning::StateStoragePolicyTag> m_numeric_storage;
 };
 }
 

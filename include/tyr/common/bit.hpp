@@ -40,6 +40,23 @@ constexpr bool is_power_of_two(T x)
     return std::has_single_bit(x);
 }
 
+template<std::unsigned_integral T>
+constexpr T ceil_div(T x, T y)
+{
+    return (x + y - 1) / y;
+}
+
+template<std::unsigned_integral T>
+constexpr T bits_needed(T domain_size)
+{
+    if (domain_size <= 1)
+        return 1;
+    return std::bit_width(static_cast<T>(domain_size - 1));
+}
+
+template<std::unsigned_integral Block>
+inline constexpr std::size_t bits_per_block_v = std::numeric_limits<Block>::digits;
+
 //! lo_set[i] is a w-bit word with the i least significant bits set and the high bits not set.
 /*! lo_set[0] = 0ULL, lo_set[1]=1ULL, lo_set[2]=3ULL...
  */
@@ -192,6 +209,37 @@ public:
 
 private:
     Block* m_ptr;
+};
+
+template<std::unsigned_integral Block>
+struct bit_reference
+{
+    Block* data;
+    size_t bit;
+
+    bit_reference(Block* data, size_t bit) noexcept : data(data), bit(bit) {}
+
+    static constexpr size_t bits_per_block = std::numeric_limits<Block>::digits;
+
+    static constexpr size_t block_index(size_t bit) { return bit / bits_per_block; }
+    static constexpr size_t bit_index(size_t bit) { return bit % bits_per_block; }
+
+    bit_reference& operator=(bool value)
+    {
+        Block& block = data[block_index(bit)];
+        const Block mask = Block(1) << bit_index(bit);
+
+        if (value)
+            block |= mask;
+        else
+            block &= ~mask;
+
+        return *this;
+    }
+
+    bit_reference& operator=(const bit_reference& other) noexcept { return *this = static_cast<bool>(other); }
+
+    explicit operator bool() const noexcept { return ((data[block_index(bit)] >> bit_index(bit)) & Block(1)) != 0; }
 };
 
 }

@@ -49,12 +49,13 @@ public:
     using pointer = void;
 
     FDRFactIterator() noexcept : m_data(nullptr), m_i(0) {}
-    FDRFactIterator(const std::vector<formalism::planning::FDRValue>& data, bool begin) noexcept : m_data(&data), m_i(begin ? 0 : m_data->size()) {}
+    FDRFactIterator(const std::vector<uint_t>& data, bool begin) noexcept : m_data(&data), m_i(begin ? 0 : m_data->size()) {}
 
     value_type operator*() const noexcept
     {
         assert(m_data);
-        return Data<formalism::planning::FDRFact<Tag>> { Index<formalism::planning::FDRVariable<Tag>> { static_cast<uint_t>(m_i) }, (*m_data)[m_i] };
+        return Data<formalism::planning::FDRFact<Tag>> { Index<formalism::planning::FDRVariable<Tag>> { static_cast<uint_t>(m_i) },
+                                                         formalism::planning::FDRValue((*m_data)[m_i]) };
     }
 
     FDRFactIterator& operator++() noexcept
@@ -73,7 +74,7 @@ public:
     friend bool operator!=(const FDRFactIterator& lhs, const FDRFactIterator& rhs) noexcept { return !(lhs == rhs); }
 
 private:
-    const std::vector<formalism::planning::FDRValue>* m_data;
+    const std::vector<uint_t>* m_data;
     size_t m_i = 0;
 };
 
@@ -82,13 +83,13 @@ class FDRFactRange<GroundTask, Tag> : public std::ranges::view_interface<FDRFact
 {
 public:
     FDRFactRange() = default;
-    explicit FDRFactRange(const std::vector<formalism::planning::FDRValue>& values) : m_data(&values) {}
+    explicit FDRFactRange(const std::vector<uint_t>& values) : m_data(&values) {}
 
     auto begin() const { return FDRFactIterator<GroundTask, Tag>(*m_data, true); }
     auto end() const { return FDRFactIterator<GroundTask, Tag>(*m_data, false); }
 
 private:
-    const std::vector<formalism::planning::FDRValue>* m_data;
+    const std::vector<uint_t>* m_data;
 };
 }
 

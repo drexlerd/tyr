@@ -5,29 +5,24 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef TYR_COMMON_RAW_ARRAY_POOL_HPP_
 #define TYR_COMMON_RAW_ARRAY_POOL_HPP_
 
+#include "tyr/common/bit.hpp"
+
 #include <bit>
 #include <cassert>
 #include <cstddef>
-#include <tyr/common/bit.hpp>
+#include <type_traits>
 #include <vector>
 
 namespace tyr
 {
 
 template<typename T, size_t ArraysPerSegment = 1024>
+    requires std::is_trivially_copyable_v<T>
 class RawArrayPool
 {
     static_assert(bit::is_power_of_two(ArraysPerSegment));
@@ -38,21 +33,15 @@ class RawArrayPool
 private:
     void increase_capacity()
     {
-        // 1) If current segment has space, we’re done.
         if (m_cur_seg < m_segments.size() && m_cur_pos + m_array_size <= m_segment_size)
-        {
             return;
-        }
 
-        // 2) Next segment exists -> jump there
         if (m_cur_seg + 1 < m_segments.size())
         {
             m_cur_seg = m_cur_seg + 1;
             m_cur_pos = 0;
             return;
         }
-
-        // 3) No existing segment fits -> allocate a new one.
 
         m_segments.emplace_back(m_segment_size);
 
@@ -98,7 +87,16 @@ public:
         m_size = 0;
     }
 
+    size_t memory_usage() const noexcept
+    {
+        size_t bytes = 0;
+        for (const auto& seg : m_segments)
+            bytes += seg.capacity() * sizeof(T);
+        return bytes;
+    }
+
     size_t size() const noexcept { return m_size; }
+    size_t array_size() const noexcept { return m_array_size; }
 
 private:
     std::vector<std::vector<T>> m_segments;
@@ -111,6 +109,6 @@ private:
     size_t m_size;
 };
 
-}
+}  // namespace tyr
 
 #endif

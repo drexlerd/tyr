@@ -35,7 +35,7 @@ const boost::dynamic_bitset<>& GroundStateView::get_atoms() const noexcept
     if constexpr (std::is_same_v<T, f::StaticTag>)
         return m_state_repository->get_task()->get_static_atoms_bitset();
     else if constexpr (std::is_same_v<T, f::DerivedTag>)
-        return m_unpacked->get_derived_atoms();
+        return m_unpacked->template get_atoms<f::DerivedTag>().indices;
     else
         static_assert(dependent_false<T>::value, "Missing case");
 }
@@ -49,7 +49,7 @@ const std::vector<float_t>& GroundStateView::get_numeric_variables() const noexc
     if constexpr (std::is_same_v<T, f::StaticTag>)
         return m_state_repository->get_task()->get_static_numeric_variables();
     else if constexpr (std::is_same_v<T, f::FluentTag>)
-        return m_unpacked->get_numeric_variables();
+        return m_unpacked->get_numeric_variables().values;
     else
         static_assert(dependent_false<T>::value, "Missing case");
 }

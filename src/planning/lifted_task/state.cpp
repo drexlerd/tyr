@@ -35,7 +35,7 @@ const boost::dynamic_bitset<>& LiftedStateView::get_atoms() const noexcept
     if constexpr (std::is_same_v<T, formalism::StaticTag>)
         return m_state_repository->get_task()->get_static_atoms_bitset();
     else if constexpr (std::is_same_v<T, formalism::FluentTag> || std::is_same_v<T, formalism::DerivedTag>)
-        return m_unpacked->template get_atoms<T>();
+        return m_unpacked->template get_atoms<T>().indices;
     else
         static_assert(dependent_false<T>::value, "Missing case");
 }
@@ -50,7 +50,7 @@ const std::vector<float_t>& LiftedStateView::get_numeric_variables() const noexc
     if constexpr (std::is_same_v<T, formalism::StaticTag>)
         return m_state_repository->get_task()->get_static_numeric_variables();
     else if constexpr (std::is_same_v<T, formalism::FluentTag>)
-        return m_unpacked->get_numeric_variables();
+        return m_unpacked->get_numeric_variables().values;
     else
         static_assert(dependent_false<T>::value, "Missing case");
 }

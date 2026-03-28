@@ -27,6 +27,10 @@
 #include "tyr/formalism/planning/ground_function_term_index.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/unpacked_state.hpp"
+//
+#include "tyr/planning/ground_task/state_storage/tree_compression/atom.hpp"
+#include "tyr/planning/ground_task/state_storage/tree_compression/fact.hpp"
+#include "tyr/planning/state_storage/tree_compression/numeric.hpp"
 
 #include <boost/dynamic_bitset.hpp>
 #include <cassert>
@@ -71,20 +75,20 @@ public:
     void resize_fluent_facts(size_t num_fluent_facts);
     void resize_derived_atoms(size_t num_derived_atoms);
 
-    std::vector<formalism::planning::FDRValue>& get_fluent_values() noexcept;
-    const std::vector<formalism::planning::FDRValue>& get_fluent_values() const noexcept;
+    template<formalism::FactKind T>
+    auto& get_atoms() noexcept;
+    template<formalism::FactKind T>
+    const auto& get_atoms() const noexcept;
 
-    boost::dynamic_bitset<>& get_derived_atoms() noexcept;
-    const boost::dynamic_bitset<>& get_derived_atoms() const noexcept;
-
-    std::vector<float_t>& get_numeric_variables() noexcept;
-    const std::vector<float_t>& get_numeric_variables() const noexcept;
+    auto& get_numeric_variables() noexcept;
+    const auto& get_numeric_variables() const noexcept;
 
 private:
     Index<State<GroundTask>> m_index;
-    std::vector<formalism::planning::FDRValue> m_fluent_values;
-    boost::dynamic_bitset<> m_derived_atoms;
-    std::vector<float_t> m_numeric_variables;
+
+    planning::FactUnpackedStorage<TaskType> m_fact_storage;
+    planning::AtomUnpackedStorage<TaskType> m_atom_storage;
+    planning::NumericUnpackedStorage<TaskType> m_numeric_storage;
 };
 
 static_assert(UnpackedStateConcept<UnpackedState<GroundTask>, GroundTask>);
@@ -100,38 +104,38 @@ inline void UnpackedState<GroundTask>::set(Index<State<GroundTask>> index) { m_i
 // Fluent facts
 inline formalism::planning::FDRValue UnpackedState<GroundTask>::get(Index<formalism::planning::FDRVariable<formalism::FluentTag>> index) const
 {
-    assert(uint_t(index) < m_fluent_values.size());
-    return m_fluent_values[uint_t(index)];
+    assert(uint_t(index) < m_fact_storage.values.size());
+    return formalism::planning::FDRValue(m_fact_storage.values[uint_t(index)]);
 }
 
 inline void UnpackedState<GroundTask>::set(Data<formalism::planning::FDRFact<formalism::FluentTag>> fact)
 {
-    assert(uint_t(fact.variable) < m_fluent_values.size());
-    m_fluent_values[uint_t(fact.variable)] = fact.value;
+    assert(uint_t(fact.variable) < m_fact_storage.values.size());
+    m_fact_storage.values[uint_t(fact.variable)] = uint_t(fact.value);
 }
 
 // Fluent numeric variables
 inline float_t UnpackedState<GroundTask>::get(Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>> index) const
 {
-    return tyr::get(uint_t(index), m_numeric_variables, std::numeric_limits<float_t>::quiet_NaN());
+    return tyr::get(uint_t(index), m_numeric_storage.values, std::numeric_limits<float_t>::quiet_NaN());
 }
 
 inline void UnpackedState<GroundTask>::set(Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>> index, float_t value)
 {
-    tyr::set(uint_t(index), value, m_numeric_variables, std::numeric_limits<float_t>::quiet_NaN());
+    tyr::set(uint_t(index), value, m_numeric_storage.values, std::numeric_limits<float_t>::quiet_NaN());
 }
 
 // Derived atoms
 inline bool UnpackedState<GroundTask>::test(Index<formalism::planning::GroundAtom<formalism::DerivedTag>> index) const
 {
-    assert(uint_t(index) < m_derived_atoms.size());
-    return m_derived_atoms.test(uint_t(index));
+    assert(uint_t(index) < m_atom_storage.indices.size());
+    return m_atom_storage.indices.test(uint_t(index));
 }
 
 inline void UnpackedState<GroundTask>::set(Index<formalism::planning::GroundAtom<formalism::DerivedTag>> index)
 {
-    assert(uint_t(index) < m_derived_atoms.size());
-    m_derived_atoms.set(uint_t(index));
+    assert(uint_t(index) < m_atom_storage.indices.size());
+    m_atom_storage.indices.set(uint_t(index));
 }
 
 inline void UnpackedState<GroundTask>::clear()
@@ -142,36 +146,47 @@ inline void UnpackedState<GroundTask>::clear()
 
 inline void UnpackedState<GroundTask>::clear_unextended_part()
 {
-    m_fluent_values.clear();
-    m_numeric_variables.clear();
+    m_fact_storage.values.clear();
+    m_numeric_storage.values.clear();
 }
 
-inline void UnpackedState<GroundTask>::clear_extended_part() { m_derived_atoms.clear(); }
+inline void UnpackedState<GroundTask>::clear_extended_part() { m_atom_storage.indices.clear(); }
 
 inline void UnpackedState<GroundTask>::assign_unextended_part(const UnpackedState<GroundTask>& other)
 {
-    m_fluent_values = other.m_fluent_values;
-    m_numeric_variables = other.m_numeric_variables;
+    m_fact_storage = other.m_fact_storage;
+    m_numeric_storage = other.m_numeric_storage;
 }
 
-inline void UnpackedState<GroundTask>::resize_fluent_facts(size_t num_fluent_facts)
+inline void UnpackedState<GroundTask>::resize_fluent_facts(size_t num_fluent_facts) { m_fact_storage.values.resize(num_fluent_facts, 0); }
+
+inline void UnpackedState<GroundTask>::resize_derived_atoms(size_t num_derived_atoms) { m_atom_storage.indices.resize(num_derived_atoms, false); }
+
+template<formalism::FactKind T>
+inline auto& UnpackedState<GroundTask>::get_atoms() noexcept
 {
-    m_fluent_values.resize(num_fluent_facts, formalism::planning::FDRValue::none());
+    if constexpr (std::same_as<T, formalism::FluentTag>)
+        return m_fact_storage;
+    else if constexpr (std::same_as<T, formalism::DerivedTag>)
+        return m_atom_storage;
+    else
+        static_assert(dependent_false<T>::value, "Missing case");
 }
 
-inline void UnpackedState<GroundTask>::resize_derived_atoms(size_t num_derived_atoms) { m_derived_atoms.resize(num_derived_atoms, false); }
+template<formalism::FactKind T>
+inline const auto& UnpackedState<GroundTask>::get_atoms() const noexcept
+{
+    if constexpr (std::same_as<T, formalism::FluentTag>)
+        return m_fact_storage;
+    else if constexpr (std::same_as<T, formalism::DerivedTag>)
+        return m_atom_storage;
+    else
+        static_assert(dependent_false<T>::value, "Missing case");
+}
 
-inline std::vector<formalism::planning::FDRValue>& UnpackedState<GroundTask>::get_fluent_values() noexcept { return m_fluent_values; }
+inline auto& UnpackedState<GroundTask>::get_numeric_variables() noexcept { return m_numeric_storage; }
 
-inline const std::vector<formalism::planning::FDRValue>& UnpackedState<GroundTask>::get_fluent_values() const noexcept { return m_fluent_values; }
-
-inline boost::dynamic_bitset<>& UnpackedState<GroundTask>::get_derived_atoms() noexcept { return m_derived_atoms; }
-
-inline const boost::dynamic_bitset<>& UnpackedState<GroundTask>::get_derived_atoms() const noexcept { return m_derived_atoms; }
-
-inline std::vector<float_t>& UnpackedState<GroundTask>::get_numeric_variables() noexcept { return m_numeric_variables; }
-
-inline const std::vector<float_t>& UnpackedState<GroundTask>::get_numeric_variables() const noexcept { return m_numeric_variables; }
+inline const auto& UnpackedState<GroundTask>::get_numeric_variables() const noexcept { return m_numeric_storage; }
 
 }
 

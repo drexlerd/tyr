@@ -153,6 +153,14 @@ public:
         return (*this)[m_size - 1];
     }
 
+    size_t memory_usage() const noexcept
+    {
+        size_t bytes = 0;
+        for (const auto& seg : m_segments)
+            bytes += seg.capacity() * sizeof(T);
+        return bytes;
+    }
+
     size_t capacity() const noexcept { return m_capacity; }
     size_t size() const noexcept { return m_size; }
     bool empty() const noexcept { return m_size == 0; }

@@ -29,6 +29,10 @@
 #include "tyr/planning/state_index.hpp"
 #include "tyr/planning/state_iterators.hpp"
 #include "tyr/planning/unpacked_state.hpp"
+//
+#include "tyr/planning/lifted_task/state_storage/tree_compression/atom.hpp"
+#include "tyr/planning/lifted_task/state_storage/tree_compression/fact.hpp"
+#include "tyr/planning/state_storage/tree_compression/numeric.hpp"
 
 #include <boost/dynamic_bitset.hpp>
 #include <vector>
@@ -77,24 +81,20 @@ public:
     auto get_derived_atoms_view(const formalism::planning::Repository& repository) const noexcept;
     auto get_fluent_fterm_values_view(const formalism::planning::Repository& repository) const noexcept;
 
-    /**
-     * For LiftedTask
-     */
-
     template<formalism::FactKind T>
-    boost::dynamic_bitset<>& get_atoms() noexcept;
-
+    auto& get_atoms() noexcept;
     template<formalism::FactKind T>
-    const boost::dynamic_bitset<>& get_atoms() const noexcept;
+    const auto& get_atoms() const noexcept;
 
-    std::vector<float_t>& get_numeric_variables() noexcept;
-    const std::vector<float_t>& get_numeric_variables() const noexcept;
+    auto& get_numeric_variables() noexcept;
+    const auto& get_numeric_variables() const noexcept;
 
 private:
-    Index<State<LiftedTask>> m_index;
-    boost::dynamic_bitset<> m_fluent_atoms;
-    boost::dynamic_bitset<> m_derived_atoms;
-    std::vector<float_t> m_numeric_variables;
+    Index<State<TaskType>> m_index;
+
+    planning::FactUnpackedStorage<TaskType> m_fact_storage;
+    planning::AtomUnpackedStorage<TaskType> m_atom_storage;
+    planning::NumericUnpackedStorage<TaskType> m_numeric_storage;
 };
 
 static_assert(UnpackedStateConcept<UnpackedState<LiftedTask>, LiftedTask>);
@@ -110,35 +110,35 @@ inline void UnpackedState<LiftedTask>::set(Index<State<LiftedTask>> index) { m_i
 // Fluent facts
 inline formalism::planning::FDRValue UnpackedState<LiftedTask>::get(Index<formalism::planning::FDRVariable<formalism::FluentTag>> index) const
 {
-    return formalism::planning::FDRValue(tyr::test(uint_t(index), m_fluent_atoms));
+    return formalism::planning::FDRValue(tyr::test(uint_t(index), m_fact_storage.indices));
 }
 
 inline void UnpackedState<LiftedTask>::set(Data<formalism::planning::FDRFact<formalism::FluentTag>> fact)
 {
     assert(uint_t(fact.value) < 2);  // can only handle binary using bitsets
-    tyr::set(uint_t(fact.variable), bool(uint_t(fact.value)), m_fluent_atoms);
+    tyr::set(uint_t(fact.variable), bool(uint_t(fact.value)), m_fact_storage.indices);
 }
 
 // Fluent numeric variables
 inline float_t UnpackedState<LiftedTask>::get(Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>> index) const
 {
-    return tyr::get(uint_t(index), m_numeric_variables, std::numeric_limits<float_t>::quiet_NaN());
+    return tyr::get(uint_t(index), m_numeric_storage.values, std::numeric_limits<float_t>::quiet_NaN());
 }
 
 inline void UnpackedState<LiftedTask>::set(Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>> index, float_t value)
 {
-    tyr::set(uint_t(index), value, m_numeric_variables, std::numeric_limits<float_t>::quiet_NaN());
+    tyr::set(uint_t(index), value, m_numeric_storage.values, std::numeric_limits<float_t>::quiet_NaN());
 }
 
 // Derived atoms
 inline bool UnpackedState<LiftedTask>::test(Index<formalism::planning::GroundAtom<formalism::DerivedTag>> index) const
 {
-    return tyr::test(uint_t(index), m_derived_atoms);
+    return tyr::test(uint_t(index), m_atom_storage.indices);
 }
 
 inline void UnpackedState<LiftedTask>::set(Index<formalism::planning::GroundAtom<formalism::DerivedTag>> index)
 {
-    tyr::set(uint_t(index), true, m_derived_atoms);
+    tyr::set(uint_t(index), true, m_atom_storage.indices);
 }
 
 // Fluent facts
@@ -170,28 +170,25 @@ inline void UnpackedState<LiftedTask>::clear()
 
 inline void UnpackedState<LiftedTask>::clear_unextended_part()
 {
-    m_fluent_atoms.clear();
-    m_numeric_variables.clear();
+    m_fact_storage.indices.clear();
+    m_numeric_storage.values.clear();
 }
 
-inline void UnpackedState<LiftedTask>::clear_extended_part() { m_derived_atoms.clear(); }
+inline void UnpackedState<LiftedTask>::clear_extended_part() { m_atom_storage.indices.clear(); }
 
 inline void UnpackedState<LiftedTask>::assign_unextended_part(const UnpackedState<LiftedTask>& other)
 {
-    m_fluent_atoms = other.m_fluent_atoms;
-    m_numeric_variables = other.m_numeric_variables;
+    m_fact_storage = other.m_fact_storage;
+    m_numeric_storage = other.m_numeric_storage;
 }
 
-inline auto UnpackedState<LiftedTask>::get_fluent_facts() const noexcept
-{
-    return FDRFactRange<LiftedTask, formalism::FluentTag>(get_atoms<formalism::FluentTag>());
-}
+inline auto UnpackedState<LiftedTask>::get_fluent_facts() const noexcept { return FDRFactRange<LiftedTask, formalism::FluentTag>(m_fact_storage.indices); }
 
-inline auto UnpackedState<LiftedTask>::get_derived_atoms() const noexcept { return AtomRange<formalism::DerivedTag>(get_atoms<formalism::DerivedTag>()); }
+inline auto UnpackedState<LiftedTask>::get_derived_atoms() const noexcept { return AtomRange<formalism::DerivedTag>(m_atom_storage.indices); }
 
 inline auto UnpackedState<LiftedTask>::get_fluent_fterm_values() const noexcept
 {
-    return FunctionTermValueRange<formalism::FluentTag>(get_numeric_variables());
+    return FunctionTermValueRange<formalism::FluentTag>(m_numeric_storage.values);
 }
 
 inline auto UnpackedState<LiftedTask>::get_fluent_facts_view(const formalism::planning::Repository& repository_) const noexcept
@@ -210,35 +207,31 @@ inline auto UnpackedState<LiftedTask>::get_fluent_fterm_values_view(const formal
            | std::views::transform([repository = &repository_](auto&& pair) { return std::make_pair(make_view(pair.first, *repository), pair.second); });
 }
 
-/**
- * For lifted task
- */
-
 template<formalism::FactKind T>
-inline boost::dynamic_bitset<>& UnpackedState<LiftedTask>::get_atoms() noexcept
+inline auto& UnpackedState<LiftedTask>::get_atoms() noexcept
 {
     if constexpr (std::same_as<T, formalism::FluentTag>)
-        return m_fluent_atoms;
+        return m_fact_storage;
     else if constexpr (std::same_as<T, formalism::DerivedTag>)
-        return m_derived_atoms;
+        return m_atom_storage;
     else
         static_assert(dependent_false<T>::value, "Missing case");
 }
 
 template<formalism::FactKind T>
-inline const boost::dynamic_bitset<>& UnpackedState<LiftedTask>::get_atoms() const noexcept
+inline const auto& UnpackedState<LiftedTask>::get_atoms() const noexcept
 {
     if constexpr (std::same_as<T, formalism::FluentTag>)
-        return m_fluent_atoms;
+        return m_fact_storage;
     else if constexpr (std::same_as<T, formalism::DerivedTag>)
-        return m_derived_atoms;
+        return m_atom_storage;
     else
         static_assert(dependent_false<T>::value, "Missing case");
 }
 
-inline std::vector<float_t>& UnpackedState<LiftedTask>::get_numeric_variables() noexcept { return m_numeric_variables; }
+inline auto& UnpackedState<LiftedTask>::get_numeric_variables() noexcept { return m_numeric_storage; }
 
-inline const std::vector<float_t>& UnpackedState<LiftedTask>::get_numeric_variables() const noexcept { return m_numeric_variables; }
+inline const auto& UnpackedState<LiftedTask>::get_numeric_variables() const noexcept { return m_numeric_storage; }
 }
 
 #endif

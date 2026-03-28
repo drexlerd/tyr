@@ -149,6 +149,8 @@ int main(int argc, char** argv)
             for (const auto& worker : ws_rule->worker)
                 ff_heuristic_rule_worker_statistics.push_back(worker.solve.statistics);
         std::cout << datalog::compute_aggregated_rule_worker_statistics(ff_heuristic_rule_worker_statistics) << std::endl;
+
+        std::cout << "[Total] States memory usage: " << successor_generator.get_state_repository()->memory_usage() << " bytes" << std::endl;
     }
 
     std::cout << "[Total] Peak memory usage: " << get_peak_memory_usage_in_bytes() << " bytes" << std::endl;

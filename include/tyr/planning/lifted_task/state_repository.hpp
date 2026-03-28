@@ -18,19 +18,26 @@
 #ifndef TYR_PLANNING_LIFTED_TASK_STATE_REPOSITORY_HPP_
 #define TYR_PLANNING_LIFTED_TASK_STATE_REPOSITORY_HPP_
 
-#include "tyr/common/config.hpp"            // for uint_t, float_t
-#include "tyr/common/indexed_hash_set.hpp"  // for IndexedHashSet
+#include "tyr/common/config.hpp"
+#include "tyr/common/indexed_hash_set.hpp"
 #include "tyr/common/onetbb.hpp"
-#include "tyr/common/shared_object_pool.hpp"  // for SharedObjectPool
+#include "tyr/common/shared_object_pool.hpp"
 #include "tyr/planning/lifted_task/state_data.hpp"
 #include "tyr/planning/lifted_task/state_view.hpp"
 #include "tyr/planning/lifted_task/unpacked_state.hpp"
-#include "tyr/planning/state_index.hpp"  // for StateIndex
+#include "tyr/planning/state_index.hpp"
+//
+#include "tyr/planning/lifted_task/state_storage/hash_set/atom.hpp"
+#include "tyr/planning/lifted_task/state_storage/hash_set/fact.hpp"
+#include "tyr/planning/lifted_task/state_storage/tree_compression/atom.hpp"
+#include "tyr/planning/lifted_task/state_storage/tree_compression/fact.hpp"
+#include "tyr/planning/state_storage/config.hpp"
+#include "tyr/planning/state_storage/hash_set/numeric.hpp"
+#include "tyr/planning/state_storage/tree_compression/numeric.hpp"
 
-#include <memory>  // for shared_ptr
+#include <memory>
 #include <valla/valla.hpp>
 #include <vector>
-#include <vector>  // for vector
 
 namespace tyr::planning
 {
@@ -58,15 +65,19 @@ public:
 
     StateView<LiftedTask> register_state(SharedObjectPoolPtr<UnpackedState<LiftedTask>> state);
 
+    size_t memory_usage() const noexcept;
+
     const auto& get_task() const noexcept { return m_task; }
     const auto& get_axiom_evaluator() const noexcept { return m_axiom_evaluator; }
 
 private:
     std::shared_ptr<LiftedTask> m_task;
 
-    valla::IndexedHashSet<valla::Slot<uint_t>, uint_t> m_uint_nodes;
-    valla::IndexedHashSet<float_t, uint_t> m_float_nodes;
-    std::vector<uint_t> m_nodes_buffer;
+    StateStorageContext<LiftedTask, StateStoragePolicyTag> m_context;
+    FactStorageBackend<LiftedTask, StateStoragePolicyTag> m_fluent_backend;
+    AtomStorageBackend<LiftedTask, StateStoragePolicyTag> m_derived_backend;
+    NumericStorageBackend<LiftedTask, StateStoragePolicyTag> m_numeric_backend;
+
     IndexedHashSet<State<LiftedTask>> m_packed_states;
     SharedObjectPool<UnpackedState<LiftedTask>> m_unpacked_state_pool;
 

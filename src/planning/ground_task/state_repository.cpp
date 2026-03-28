@@ -40,40 +40,13 @@ namespace fp = tyr::formalism::planning;
 namespace tyr::planning
 {
 
-static auto create_fluent_layout(fp::FDRTaskView fdr_task)
-{
-    auto ranges = std::vector<uint_t> {};
-    for (const auto variable : fdr_task.get_fluent_variables())
-    {
-        // Ensure fluent variable indice are dense, i.e., 0,1,2,...
-        assert(uint_t(variable.get_index()) == ranges.size());
-        ranges.push_back(variable.get_domain_size());
-    }
-
-    return create_bit_packed_array_layout(ranges);
-}
-
-static auto create_derived_layout(fp::FDRTaskView fdr_task)
-{
-    // Ensure derived atom indices are dense, i.e., 0,1,2,...
-    for (uint_t i = 0; i < fdr_task.get_atoms<f::DerivedTag>().size(); ++i)
-        assert(i == uint_t(fdr_task.get_atoms<f::DerivedTag>()[i].get_index()));
-
-    return create_bitset_layout<uint_t>(fdr_task.get_atoms<f::DerivedTag>().size());
-}
-
 StateRepository<GroundTask>::StateRepository(std::shared_ptr<GroundTask> task, ExecutionContextPtr execution_context) :
     m_task(task),
-    m_fluent_layout(create_fluent_layout(m_task->get_task())),
-    m_derived_layout(create_derived_layout(m_task->get_task())),
-    m_uint_nodes(),
-    m_float_nodes(),
-    m_nodes_buffer(),
+    m_context(*m_task),
+    m_fluent_backend(m_context),
+    m_derived_backend(m_context),
+    m_numeric_backend(m_context),
     m_packed_states(),
-    m_fluent_repository(m_fluent_layout.total_blocks),
-    m_derived_repository(m_derived_layout.total_blocks),
-    m_fluent_buffer(m_fluent_layout.total_blocks),
-    m_derived_buffer(m_derived_layout.total_blocks),
     m_unpacked_state_pool(),
     m_axiom_evaluator(std::make_shared<AxiomEvaluator<GroundTask>>(task, execution_context))
 {
@@ -104,17 +77,9 @@ StateView<GroundTask> StateRepository<GroundTask>::get_registered_state(Index<St
     auto unpacked_state = get_unregistered_state();
 
     unpacked_state->set(state_index);
-    const auto fluent_ptr = m_fluent_repository[packed_state.get_facts<f::FluentTag>()];
-    auto& fluent_values = unpacked_state->get_fluent_values();
-    for (uint_t i = 0; i < m_fluent_layout.layouts.size(); ++i)
-        fluent_values[i] = fp::FDRValue { uint_t(BitPackedElementReference(m_fluent_layout.layouts[i], fluent_ptr)) };
-
-    const auto derived_ptr = m_derived_repository[packed_state.get_facts<f::DerivedTag>()];
-    auto& derived_atoms = unpacked_state->get_derived_atoms();
-    for (uint_t i = 0; i < m_derived_layout.total_bits; ++i)
-        derived_atoms[i] = bool(BitReference(i, derived_ptr));
-
-    fill_numeric_variables(packed_state.get_numeric_variables(), m_uint_nodes, m_float_nodes, m_nodes_buffer, unpacked_state->get_numeric_variables());
+    m_fluent_backend.unpack(packed_state.template get_atoms<f::FluentTag>(), unpacked_state->template get_atoms<f::FluentTag>());
+    m_derived_backend.unpack(packed_state.template get_atoms<f::DerivedTag>(), unpacked_state->template get_atoms<f::DerivedTag>());
+    m_numeric_backend.unpack(packed_state.get_numeric_variables(), unpacked_state->get_numeric_variables());
 
     return StateView<GroundTask>(shared_from_this(), std::move(unpacked_state));
 }
@@ -161,27 +126,22 @@ StateView<GroundTask> StateRepository<GroundTask>::register_state(SharedObjectPo
 {
     m_axiom_evaluator->compute_extended_state(*state);
 
-    assert(m_fluent_buffer.size() == m_fluent_layout.total_blocks);
-    assert(m_derived_buffer.size() == m_derived_layout.total_blocks);
-
-    std::fill(m_fluent_buffer.begin(), m_fluent_buffer.end(), uint_t(0));
-    for (uint_t i = 0; i < m_fluent_layout.layouts.size(); ++i)
-        BitPackedElementReference(m_fluent_layout.layouts[i], m_fluent_buffer.data()) = uint_t(state->get_fluent_values()[i]);
-    const auto fluent_facts_index = m_fluent_repository.insert(m_fluent_buffer);
-
-    std::fill(m_derived_buffer.begin(), m_derived_buffer.end(), uint_t(0));
-    for (uint_t i = 0; i < m_derived_layout.total_bits; ++i)
-        BitReference(i, m_derived_buffer.data()) = state->get_derived_atoms().test(i);
-    const auto derived_atoms_index = m_derived_repository.insert(m_derived_buffer);
-
-    auto numeric_variables_slot = create_numeric_variables_slot(state->get_numeric_variables(), m_nodes_buffer, m_uint_nodes, m_float_nodes);
-
-    state->set(
-        m_packed_states
-            .insert(Data<State<GroundTask>>(Index<State<GroundTask>>(m_packed_states.size()), fluent_facts_index, derived_atoms_index, numeric_variables_slot))
-            .first);
+    state->set(m_packed_states
+                   .insert(Data<State<GroundTask>>(Index<State<GroundTask>>(m_packed_states.size()),
+                                                   m_fluent_backend.insert(state->template get_atoms<f::FluentTag>()),
+                                                   m_derived_backend.insert(state->template get_atoms<f::DerivedTag>()),
+                                                   m_numeric_backend.insert(state->get_numeric_variables())))
+                   .first);
 
     return StateView<GroundTask>(shared_from_this(), std::move(state));
+}
+
+size_t StateRepository<GroundTask>::memory_usage() const noexcept
+{
+    size_t bytes = 0;
+    bytes += m_context.memory_usage();
+    bytes += m_packed_states.memory_usage();
+    return bytes;
 }
 
 static_assert(StateRepositoryConcept<StateRepository<GroundTask>, GroundTask>);

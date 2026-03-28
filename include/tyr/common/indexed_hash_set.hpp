@@ -108,6 +108,14 @@ public:
 
     const Data<Tag>& front() const noexcept { return m_storage->front(); }
 
+    size_t memory_usage() const noexcept
+    {
+        size_t bytes = 0;
+        bytes += m_storage ? m_storage->memory_usage() : 0;
+        bytes += m_set.capacity() * (sizeof(Index<Tag>) + sizeof(gtl::priv::ctrl_t));
+        return bytes;
+    }
+
     std::size_t size() const noexcept { return m_storage->size(); }
 
 private:

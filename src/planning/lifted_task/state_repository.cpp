@@ -39,10 +39,10 @@ namespace tyr::planning
 
 StateRepository<LiftedTask>::StateRepository(std::shared_ptr<LiftedTask> task, ExecutionContextPtr execution_context) :
     m_task(task),
-    m_uint_nodes(),
-    m_float_nodes(),
-    m_nodes_buffer(),
-    m_packed_states(),
+    m_context(),
+    m_fluent_backend(m_context),
+    m_derived_backend(m_context),
+    m_numeric_backend(m_context),
     m_unpacked_state_pool(),
     m_axiom_evaluator(std::make_shared<AxiomEvaluator<LiftedTask>>(task, execution_context))
 {
@@ -73,9 +73,9 @@ StateView<LiftedTask> StateRepository<LiftedTask>::get_registered_state(Index<St
     auto unpacked_state = get_unregistered_state();
 
     unpacked_state->set(state_index);
-    fill_atoms(packed_state.template get_atoms<f::FluentTag>(), m_uint_nodes, m_nodes_buffer, unpacked_state->template get_atoms<f::FluentTag>());
-    fill_atoms(packed_state.template get_atoms<f::DerivedTag>(), m_uint_nodes, m_nodes_buffer, unpacked_state->template get_atoms<f::DerivedTag>());
-    fill_numeric_variables(packed_state.get_numeric_variables(), m_uint_nodes, m_float_nodes, m_nodes_buffer, unpacked_state->get_numeric_variables());
+    m_fluent_backend.unpack(packed_state.template get_atoms<f::FluentTag>(), unpacked_state->template get_atoms<f::FluentTag>());
+    m_derived_backend.unpack(packed_state.template get_atoms<f::DerivedTag>(), unpacked_state->template get_atoms<f::DerivedTag>());
+    m_numeric_backend.unpack(packed_state.get_numeric_variables(), unpacked_state->get_numeric_variables());
 
     return StateView<LiftedTask>(shared_from_this(), std::move(unpacked_state));
 }
@@ -119,14 +119,22 @@ StateView<LiftedTask> StateRepository<LiftedTask>::register_state(SharedObjectPo
 {
     m_axiom_evaluator->compute_extended_state(*state);
 
-    auto fluent_atoms = create_atoms_slot(state->template get_atoms<formalism::FluentTag>(), m_nodes_buffer, m_uint_nodes);
-    auto derived_atoms = create_atoms_slot(state->template get_atoms<formalism::DerivedTag>(), m_nodes_buffer, m_uint_nodes);
-    auto numeric_variables = create_numeric_variables_slot(state->get_numeric_variables(), m_nodes_buffer, m_uint_nodes, m_float_nodes);
-
-    state->set(m_packed_states.insert(Data<State<LiftedTask>>(Index<State<LiftedTask>>(m_packed_states.size()), fluent_atoms, derived_atoms, numeric_variables))
+    state->set(m_packed_states
+                   .insert(Data<State<LiftedTask>>(Index<State<LiftedTask>>(m_packed_states.size()),
+                                                   m_fluent_backend.insert(state->template get_atoms<f::FluentTag>()),
+                                                   m_derived_backend.insert(state->template get_atoms<f::DerivedTag>()),
+                                                   m_numeric_backend.insert(state->get_numeric_variables())))
                    .first);
 
     return StateView<LiftedTask>(shared_from_this(), std::move(state));
+}
+
+size_t StateRepository<LiftedTask>::memory_usage() const noexcept
+{
+    size_t bytes = 0;
+    bytes += m_context.memory_usage();
+    bytes += m_packed_states.memory_usage();
+    return bytes;
 }
 
 static_assert(StateRepositoryConcept<StateRepository<LiftedTask>, LiftedTask>);

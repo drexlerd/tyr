@@ -18,7 +18,6 @@
 #ifndef TYR_PLANNING_PLANNING_HPP_
 #define TYR_PLANNING_PLANNING_HPP_
 
-#include "tyr/common/bit_packed_layout.hpp"
 #include "tyr/planning/algorithms/astar_eager.hpp"
 #include "tyr/planning/algorithms/astar_eager/event_handler.hpp"
 #include "tyr/planning/algorithms/gbfs_lazy.hpp"

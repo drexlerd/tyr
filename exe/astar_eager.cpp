@@ -103,6 +103,7 @@ int main(int argc, char** argv)
             plan_file << result.plan.value();
             plan_file.close();
         }
+        std::cout << "[Total] States memory usage: " << successor_generator.get_state_repository()->memory_usage() << " bytes" << std::endl;
     }
 
     std::cout << "[Total] Peak memory usage: " << get_peak_memory_usage_in_bytes() << " bytes" << std::endl;
