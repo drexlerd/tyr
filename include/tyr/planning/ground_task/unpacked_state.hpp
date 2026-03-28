@@ -104,13 +104,13 @@ inline void UnpackedState<GroundTask>::set(Index<State<GroundTask>> index) { m_i
 // Fluent facts
 inline formalism::planning::FDRValue UnpackedState<GroundTask>::get(Index<formalism::planning::FDRVariable<formalism::FluentTag>> index) const
 {
-    assert(uint_t(index) < m_fluent_values.size());
+    assert(uint_t(index) < m_fact_storage.values.size());
     return formalism::planning::FDRValue(m_fact_storage.values[uint_t(index)]);
 }
 
 inline void UnpackedState<GroundTask>::set(Data<formalism::planning::FDRFact<formalism::FluentTag>> fact)
 {
-    assert(uint_t(fact.variable) < m_fluent_values.size());
+    assert(uint_t(fact.variable) < m_fact_storage.values.size());
     m_fact_storage.values[uint_t(fact.variable)] = uint_t(fact.value);
 }
 
@@ -128,13 +128,13 @@ inline void UnpackedState<GroundTask>::set(Index<formalism::planning::GroundFunc
 // Derived atoms
 inline bool UnpackedState<GroundTask>::test(Index<formalism::planning::GroundAtom<formalism::DerivedTag>> index) const
 {
-    assert(uint_t(index) < m_derived_atoms.size());
+    assert(uint_t(index) < m_atom_storage.indices.size());
     return m_atom_storage.indices.test(uint_t(index));
 }
 
 inline void UnpackedState<GroundTask>::set(Index<formalism::planning::GroundAtom<formalism::DerivedTag>> index)
 {
-    assert(uint_t(index) < m_derived_atoms.size());
+    assert(uint_t(index) < m_atom_storage.indices.size());
     m_atom_storage.indices.set(uint_t(index));
 }
 

@@ -24,6 +24,7 @@
 //
 #include "tyr/planning/ground_task/state_storage/atom_tree_compression.hpp"
 #include "tyr/planning/ground_task/state_storage/fact_tree_compression.hpp"
+#include "tyr/planning/state_storage/config.hpp"
 #include "tyr/planning/state_storage/numeric_tree_compression.hpp"
 
 #include <valla/valla.hpp>
@@ -43,9 +44,9 @@ public:
 
     Data() noexcept = default;
     Data(Index<planning::State<TaskType>> index,
-         planning::FactPackedStorage<TaskType, planning::TreeCompression> fact_storage,
-         planning::AtomPackedStorage<TaskType, planning::TreeCompression> atom_storage,
-         planning::NumericPackedStorage<TaskType, planning::TreeCompression> numeric_storage) noexcept :
+         planning::FactPackedStorage<TaskType, planning::StateStoragePolicyTag> fact_storage,
+         planning::AtomPackedStorage<TaskType, planning::StateStoragePolicyTag> atom_storage,
+         planning::NumericPackedStorage<TaskType, planning::StateStoragePolicyTag> numeric_storage) noexcept :
         m_index(index),
         m_fact_storage(fact_storage),
         m_atom_storage(atom_storage),
@@ -73,9 +74,9 @@ public:
 private:
     Index<planning::State<TaskType>> m_index;
 
-    planning::FactPackedStorage<TaskType, planning::TreeCompression> m_fact_storage;
-    planning::AtomPackedStorage<TaskType, planning::TreeCompression> m_atom_storage;
-    planning::NumericPackedStorage<TaskType, planning::TreeCompression> m_numeric_storage;
+    planning::FactPackedStorage<TaskType, planning::StateStoragePolicyTag> m_fact_storage;
+    planning::AtomPackedStorage<TaskType, planning::StateStoragePolicyTag> m_atom_storage;
+    planning::NumericPackedStorage<TaskType, planning::StateStoragePolicyTag> m_numeric_storage;
 };
 }
 

@@ -28,6 +28,17 @@ if(TYR_HEADER_INSTANTIATION)
     add_compile_definitions(TYR_HEADER_INSTANTIATION)
 endif()
 
+set(TYR_LIFTED_STATE_STORAGE_POLICY "Tree" CACHE STRING "Policy used for storing lifted states.")
+
+if("${TYR_LIFTED_STATE_STORAGE_POLICY}" STREQUAL "Tree")
+    add_compile_definitions(TYR_LIFTED_STATE_STORAGE_TREE)
+elseif("${TYR_LIFTED_STATE_STORAGE_POLICY}" STREQUAL "Hashset")
+    add_compile_definitions(TYR_LIFTED_STATE_STORAGE_HASHSET)
+else()
+    message(FATAL_ERROR "TYR_LIFTED_STATE_STORAGE_POLICY must be Tree or Hashset")
+endif()
+
+
 ##############################################################
 # Build Targets
 ##############################################################

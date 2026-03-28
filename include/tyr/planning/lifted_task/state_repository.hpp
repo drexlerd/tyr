@@ -30,6 +30,7 @@
 #include "tyr/planning/lifted_task/state_storage/atom_tree_compression.hpp"
 #include "tyr/planning/lifted_task/state_storage/context.hpp"
 #include "tyr/planning/lifted_task/state_storage/fact_tree_compression.hpp"
+#include "tyr/planning/state_storage/config.hpp"
 #include "tyr/planning/state_storage/numeric_tree_compression.hpp"
 
 #include <memory>
@@ -68,10 +69,10 @@ public:
 private:
     std::shared_ptr<LiftedTask> m_task;
 
-    StateStorageContext<LiftedTask, TreeCompression> m_context;
-    FactStorageBackend<LiftedTask, TreeCompression> m_fluent_backend;
-    AtomStorageBackend<LiftedTask, TreeCompression> m_derived_backend;
-    NumericStorageBackend<LiftedTask, TreeCompression> m_numeric_backend;
+    StateStorageContext<LiftedTask, StateStoragePolicyTag> m_context;
+    FactStorageBackend<LiftedTask, StateStoragePolicyTag> m_fluent_backend;
+    AtomStorageBackend<LiftedTask, StateStoragePolicyTag> m_derived_backend;
+    NumericStorageBackend<LiftedTask, StateStoragePolicyTag> m_numeric_backend;
 
     IndexedHashSet<State<LiftedTask>> m_packed_states;
     SharedObjectPool<UnpackedState<LiftedTask>> m_unpacked_state_pool;

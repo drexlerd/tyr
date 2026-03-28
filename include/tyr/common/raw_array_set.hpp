@@ -34,12 +34,12 @@
 namespace tyr
 {
 
-template<typename T, size_t ArraysPerSegment = 1024>
+template<std::unsigned_integral Block, size_t ArraysPerSegment = 1024>
 class RawArraySet
 {
 public:
     explicit RawArraySet(size_t array_size) :
-        m_pool(std::make_shared<RawArrayPool<T, ArraysPerSegment>>(array_size)),
+        m_pool(std::make_shared<RawArrayPool<Block, ArraysPerSegment>>(array_size)),
         m_array_size(array_size),
         m_set(0, IndexableHash(m_pool, array_size), IndexableEqualTo(m_pool, array_size))
     {
@@ -49,7 +49,7 @@ public:
     RawArraySet(RawArraySet&& other) = default;
     RawArraySet& operator=(RawArraySet&& other) = default;
 
-    std::optional<uint_t> find(const std::vector<T>& value) const
+    std::optional<uint_t> find(const std::vector<Block>& value) const
     {
         assert(value.size() == m_array_size);
 
@@ -59,7 +59,7 @@ public:
         return std::nullopt;
     }
 
-    uint_t insert(const std::vector<T>& value)
+    uint_t insert(const std::vector<Block>& value)
     {
         assert(value.size() == m_array_size);
 
@@ -68,14 +68,14 @@ public:
 
         uint_t idx(m_pool->size());
         auto* arr = m_pool->allocate();
-        std::memcpy(arr, value.data(), m_array_size * sizeof(T));
+        std::memcpy(arr, value.data(), m_array_size * sizeof(Block));
         m_set.emplace(idx);
         return idx;
     }
 
-    T* operator[](uint_t idx) noexcept { return (*m_pool)[idx]; }
+    Block* operator[](uint_t idx) noexcept { return (*m_pool)[idx]; }
 
-    const T* operator[](uint_t idx) const noexcept { return (*m_pool)[idx]; }
+    const Block* operator[](uint_t idx) const noexcept { return (*m_pool)[idx]; }
 
     size_t size() const noexcept { return m_pool->size(); }
     size_t array_size() const noexcept { return m_pool->array_size(); }
@@ -85,13 +85,13 @@ private:
     {
         using is_transparent = void;
 
-        std::shared_ptr<RawArrayPool<T, ArraysPerSegment>> pool;
+        std::shared_ptr<RawArrayPool<Block, ArraysPerSegment>> pool;
         size_t array_size;
 
         IndexableHash() noexcept : pool(nullptr) {}
-        explicit IndexableHash(std::shared_ptr<RawArrayPool<T, ArraysPerSegment>> pool, size_t array_size) noexcept : pool(pool), array_size(array_size) {}
+        explicit IndexableHash(std::shared_ptr<RawArrayPool<Block, ArraysPerSegment>> pool, size_t array_size) noexcept : pool(pool), array_size(array_size) {}
 
-        static size_t hash(const T* arr, size_t len) noexcept
+        static size_t hash(const Block* arr, size_t len) noexcept
         {
             size_t seed = len;
             for (size_t i = 0; i < len; ++i)
@@ -100,7 +100,7 @@ private:
         }
 
         size_t operator()(uint_t el) const noexcept { return hash((*pool)[el], array_size); }
-        size_t operator()(const std::vector<T>& el) const noexcept
+        size_t operator()(const std::vector<Block>& el) const noexcept
         {
             assert(el.size() == array_size);
             return hash(el.data(), array_size);
@@ -111,27 +111,29 @@ private:
     {
         using is_transparent = void;
 
-        std::shared_ptr<RawArrayPool<T, ArraysPerSegment>> pool;
+        std::shared_ptr<RawArrayPool<Block, ArraysPerSegment>> pool;
         size_t array_size;
 
         IndexableEqualTo() noexcept : pool(nullptr) {}
-        explicit IndexableEqualTo(std::shared_ptr<RawArrayPool<T, ArraysPerSegment>> pool, size_t array_size) noexcept : pool(pool), array_size(array_size) {}
+        explicit IndexableEqualTo(std::shared_ptr<RawArrayPool<Block, ArraysPerSegment>> pool, size_t array_size) noexcept : pool(pool), array_size(array_size)
+        {
+        }
 
-        static bool equal_to(const T* lhs, const T* rhs, size_t len) { return std::equal(lhs, lhs + len, rhs); }
+        static bool equal_to(const Block* lhs, const Block* rhs, size_t len) { return std::equal(lhs, lhs + len, rhs); }
 
         bool operator()(uint_t lhs, uint_t rhs) const noexcept { return equal_to((*pool)[lhs], (*pool)[rhs], array_size); }
 
-        bool operator()(const std::vector<T>& lhs, uint_t rhs) const noexcept
+        bool operator()(const std::vector<Block>& lhs, uint_t rhs) const noexcept
         {
             assert(lhs.size() == array_size);
             return equal_to(lhs.data(), (*pool)[rhs], array_size);
         }
-        bool operator()(uint_t lhs, const std::vector<T>& rhs) const noexcept
+        bool operator()(uint_t lhs, const std::vector<Block>& rhs) const noexcept
         {
             assert(rhs.size() == array_size);
             return equal_to((*pool)[lhs], rhs.data(), array_size);
         }
-        bool operator()(const std::vector<T>& lhs, const std::vector<T>& rhs) const noexcept
+        bool operator()(const std::vector<Block>& lhs, const std::vector<Block>& rhs) const noexcept
         {
             assert(lhs.size() == array_size);
             assert(rhs.size() == array_size);
@@ -139,7 +141,7 @@ private:
         }
     };
 
-    std::shared_ptr<RawArrayPool<T, ArraysPerSegment>> m_pool;
+    std::shared_ptr<RawArrayPool<Block, ArraysPerSegment>> m_pool;
     size_t m_array_size;
     gtl::flat_hash_set<uint_t, IndexableHash, IndexableEqualTo> m_set;
 };

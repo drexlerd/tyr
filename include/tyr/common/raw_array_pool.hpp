@@ -20,6 +20,7 @@
 
 #include <bit>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <tyr/common/bit.hpp>
 #include <vector>
@@ -27,7 +28,7 @@
 namespace tyr
 {
 
-template<typename T, size_t ArraysPerSegment = 1024>
+template<std::unsigned_integral Block, size_t ArraysPerSegment = 1024>
 class RawArrayPool
 {
     static_assert(bit::is_power_of_two(ArraysPerSegment));
@@ -63,11 +64,11 @@ private:
 public:
     explicit RawArrayPool(size_t array_size) : m_array_size(array_size), m_segment_size(ArraysPerSegment * array_size), m_cur_seg(0), m_cur_pos(0), m_size(0) {}
 
-    T* allocate()
+    Block* allocate()
     {
         increase_capacity();
 
-        T* result = &m_segments[m_cur_seg][m_cur_pos];
+        Block* result = &m_segments[m_cur_seg][m_cur_pos];
 
         m_cur_pos += m_array_size;
         ++m_size;
@@ -75,7 +76,7 @@ public:
         return result;
     }
 
-    const T* operator[](size_t array_index) const noexcept
+    const Block* operator[](size_t array_index) const noexcept
     {
         assert(array_index < m_size);
         const size_t seg = array_index >> seg_shift;
@@ -83,7 +84,7 @@ public:
         return &m_segments[seg][idx * m_array_size];
     }
 
-    T* operator[](size_t array_index) noexcept
+    Block* operator[](size_t array_index) noexcept
     {
         assert(array_index < m_size);
         const size_t seg = array_index >> seg_shift;
@@ -102,7 +103,7 @@ public:
     size_t array_size() const noexcept { return m_array_size; }
 
 private:
-    std::vector<std::vector<T>> m_segments;
+    std::vector<std::vector<Block>> m_segments;
 
     size_t m_array_size;
     size_t m_segment_size;
