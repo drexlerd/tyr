@@ -66,7 +66,8 @@ using TempLiteralList = std::vector<TempLiteral>;
 
 struct TempEffect
 {
-    size_t num_variables;
+    size_t num_action_variables;
+    size_t num_effect_variables;
     TempLiteralList condition;
     TempAtomList add_effects;
     TempAtomList del_effects;
@@ -99,6 +100,17 @@ struct Invariant
 
 using InvariantList = std::vector<Invariant>;
 
+struct ActionTag
+{
+};
+struct EffectTag
+{
+};
+struct InvariantTag
+{
+};
+
+template<typename Tag>
 struct Substitution
 {
     std::vector<std::optional<Data<Term>>> data;
@@ -146,6 +158,137 @@ struct Substitution
     }
 };
 
+using ActionSubstitution = Substitution<ActionTag>;
+using EffectSubstitution = Substitution<EffectTag>;
+using InvariantSubstitution = Substitution<InvariantTag>;
+
+template<typename Tag>
+inline Data<Term> apply_substitution(const Data<Term>& term, const Substitution<Tag>& sigma)
+{
+    return std::visit(
+        [&](auto&& arg) -> Data<Term>
+        {
+            using T = std::decay_t<decltype(arg)>;
+
+            if constexpr (std::is_same_v<T, ParameterIndex>)
+            {
+                if (sigma.contains(arg))
+                    return *sigma.get(arg);
+                return term;
+            }
+            else if constexpr (std::is_same_v<T, Index<Object>>)
+            {
+                return term;
+            }
+            else
+            {
+                static_assert(dependent_false<T>::value, "Missing case");
+            }
+        },
+        term.value);
+}
+
+inline Data<Term> apply_substitution(const Data<Term>& term, const EffectSubstitution& sigma, size_t num_action_variables)
+{
+    return std::visit(
+        [&](auto&& arg) -> Data<Term>
+        {
+            using T = std::decay_t<decltype(arg)>;
+
+            if constexpr (std::is_same_v<T, ParameterIndex>)
+            {
+                const auto index = static_cast<uint_t>(arg);
+
+                if (index < num_action_variables)
+                    return term;
+
+                const auto local_index = ParameterIndex(index - num_action_variables);
+                if (sigma.contains(local_index))
+                    return *sigma.get(local_index);
+
+                return term;
+            }
+            else if constexpr (std::is_same_v<T, Index<Object>>)
+            {
+                return term;
+            }
+            else
+            {
+                static_assert(dependent_false<T>::value, "Missing case");
+            }
+        },
+        term.value);
+}
+
+template<typename Tag>
+inline TempAtom apply_substitution(const TempAtom& atom, const Substitution<Tag>& sigma)
+{
+    auto terms = std::vector<Data<Term>> {};
+    terms.reserve(atom.terms.size());
+
+    for (const auto& term : atom.terms)
+        terms.push_back(apply_substitution(term, sigma));
+
+    return TempAtom {
+        .predicate = atom.predicate,
+        .terms = std::move(terms),
+    };
+}
+
+inline TempAtom apply_substitution(const TempAtom& atom, const EffectSubstitution& sigma, size_t num_action_variables)
+{
+    auto terms = std::vector<Data<Term>> {};
+    terms.reserve(atom.terms.size());
+
+    for (const auto& term : atom.terms)
+        terms.push_back(apply_substitution(term, sigma, num_action_variables));
+
+    return TempAtom {
+        .predicate = atom.predicate,
+        .terms = std::move(terms),
+    };
+}
+
+template<typename Tag>
+inline TempLiteral apply_substitution(const TempLiteral& lit, const Substitution<Tag>& sigma)
+{
+    return TempLiteral {
+        .atom = apply_substitution(lit.atom, sigma),
+        .polarity = lit.polarity,
+    };
+}
+
+inline TempLiteral apply_substitution(const TempLiteral& lit, const EffectSubstitution& sigma, size_t num_action_variables)
+{
+    return TempLiteral {
+        .atom = apply_substitution(lit.atom, sigma, num_action_variables),
+        .polarity = lit.polarity,
+    };
+}
+
+template<typename Tag>
+inline TempLiteralList apply_substitution(const TempLiteralList& lits, const Substitution<Tag>& sigma)
+{
+    auto result = TempLiteralList {};
+    result.reserve(lits.size());
+
+    for (const auto& lit : lits)
+        result.push_back(apply_substitution(lit, sigma));
+
+    return result;
+}
+
+inline TempLiteralList apply_substitution(const TempLiteralList& lits, const EffectSubstitution& sigma, size_t num_action_variables)
+{
+    auto result = TempLiteralList {};
+    result.reserve(lits.size());
+
+    for (const auto& lit : lits)
+        result.push_back(apply_substitution(lit, sigma, num_action_variables));
+
+    return result;
+}
+
 inline Data<Term> make_temp_term(TermView element) { return element.get_data(); }
 
 inline TempAtom make_temp_atom(AtomView<FluentTag> element)
@@ -170,21 +313,46 @@ inline TempLiteral make_temp_literal(LiteralView<FluentTag> element)
     };
 }
 
-inline TempEffect make_temp_effect(ConditionalEffectView element)
+inline Data<Term> make_temp_effect_term(TermView term) { return term.get_data(); }
+
+inline TempAtom make_temp_effect_atom(AtomView<FluentTag> element)
+{
+    auto terms = std::vector<Data<Term>> {};
+    terms.reserve(element.get_terms().size());
+
+    for (const auto term : element.get_terms())
+        terms.push_back(make_temp_effect_term(term));
+
+    return TempAtom {
+        .predicate = element.get_predicate(),
+        .terms = std::move(terms),
+    };
+}
+
+inline TempLiteral make_temp_effect_literal(LiteralView<FluentTag> element)
+{
+    return TempLiteral {
+        .atom = make_temp_effect_atom(element.get_atom()),
+        .polarity = element.get_polarity(),
+    };
+}
+
+inline TempEffect make_temp_effect(ConditionalEffectView element, size_t action_arity)
 {
     TempEffect result {};
 
-    result.num_variables = element.get_arity();
+    result.num_action_variables = action_arity;
+    result.num_effect_variables = element.get_arity();
 
     for (const auto lit : element.get_condition().get_literals<FluentTag>())
-        result.condition.push_back(make_temp_literal(lit));
+        result.condition.push_back(make_temp_effect_literal(lit));
 
     for (const auto lit : element.get_effect().get_literals())
     {
         if (lit.get_polarity())
-            result.add_effects.push_back(make_temp_atom(lit.get_atom()));
+            result.add_effects.push_back(make_temp_effect_atom(lit.get_atom()));
         else
-            result.del_effects.push_back(make_temp_atom(lit.get_atom()));
+            result.del_effects.push_back(make_temp_effect_atom(lit.get_atom()));
     }
 
     return result;
@@ -201,7 +369,7 @@ inline TempAction make_temp_action(ActionView op)
 
     result.effects.reserve(op.get_effects().size());
     for (const auto cond_eff : op.get_effects())
-        result.effects.push_back(make_temp_effect(cond_eff));
+        result.effects.push_back(make_temp_effect(cond_eff, op.get_arity()));
 
     return result;
 }

@@ -44,7 +44,7 @@ namespace
  * Common
  */
 
-std::optional<Substitution> match_cover_against_atom(const Invariant& inv, const TempAtom& pattern, const TempAtom& element)
+std::optional<InvariantSubstitution> match_cover_against_atom(const Invariant& inv, const TempAtom& pattern, const TempAtom& element)
 {
     if (pattern.predicate != element.predicate)
         return std::nullopt;
@@ -52,7 +52,7 @@ std::optional<Substitution> match_cover_against_atom(const Invariant& inv, const
     if (pattern.terms.size() != element.terms.size())
         return std::nullopt;
 
-    Substitution substitution(inv.num_rigid_variables + inv.num_counted_variables);
+    InvariantSubstitution substitution(inv.num_rigid_variables + inv.num_counted_variables);
 
     for (uint_t i = 0; i < pattern.terms.size(); ++i)
     {
@@ -120,74 +120,91 @@ bool covers(const Invariant& inv, const TempAtom& element)
  * Prove invariant
  */
 
-std::vector<Substitution> enumerate_cover_substitutions(const Invariant& inv, const TempAtom& element)
+std::vector<ActionSubstitution> enumerate_action_alignments(const Invariant& inv, const TempAtom& element, size_t num_action_variables)
 {
-    auto result = std::vector<Substitution> {};
+    auto result = std::vector<ActionSubstitution> {};
 
-    for (const auto& atom : inv.atoms)
+    for (const auto& pattern : inv.atoms)
     {
-        auto sigma = match_cover_against_atom(inv, atom, element);
-        if (sigma.has_value())
-            result.push_back(std::move(*sigma));
-    }
+        if (pattern.predicate != element.predicate)
+            continue;
 
-    return result;
-}
+        if (pattern.terms.size() != element.terms.size())
+            continue;
 
-Data<Term> apply_substitution(const Data<Term>& term, const Substitution& sigma)
-{
-    return std::visit(
-        [&](auto&& arg) -> Data<Term>
+        ActionSubstitution sigma(num_action_variables);
+        bool mismatch = false;
+
+        for (uint_t i = 0; i < pattern.terms.size(); ++i)
         {
-            using T = std::decay_t<decltype(arg)>;
+            const auto& lhs = pattern.terms[i];  // invariant pattern term
+            const auto& rhs = element.terms[i];  // action/effect term
 
-            if constexpr (std::is_same_v<T, ParameterIndex>)
+            const bool ok = std::visit(
+                [&](auto&& lhs_arg) -> bool
+                {
+                    using Lhs = std::decay_t<decltype(lhs_arg)>;
+
+                    return std::visit(
+                        [&](auto&& rhs_arg) -> bool
+                        {
+                            using Rhs = std::decay_t<decltype(rhs_arg)>;
+
+                            if constexpr (std::is_same_v<Lhs, ParameterIndex>)
+                            {
+                                const bool is_counted = (static_cast<uint_t>(lhs_arg) >= inv.num_rigid_variables);
+
+                                if (is_counted)
+                                {
+                                    // Counted invariant variables do not constrain
+                                    // the action-side alignment.
+                                    return true;
+                                }
+
+                                // Rigid invariant variables must match exactly.
+                                if constexpr (std::is_same_v<Rhs, ParameterIndex>)
+                                {
+                                    return sigma.assign_or_check(rhs_arg, Data<Term>(lhs_arg));
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else if constexpr (std::is_same_v<Lhs, Index<Object>>)
+                            {
+                                if constexpr (std::is_same_v<Rhs, ParameterIndex>)
+                                {
+                                    return sigma.assign_or_check(rhs_arg, Data<Term>(lhs_arg));
+                                }
+                                else if constexpr (std::is_same_v<Rhs, Index<Object>>)
+                                {
+                                    return lhs_arg == rhs_arg;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                static_assert(dependent_false<Lhs>::value, "Missing case");
+                            }
+                        },
+                        rhs.value);
+                },
+                lhs.value);
+
+            if (!ok)
             {
-                if (sigma.contains(arg))
-                    return *sigma.get(arg);
-                return term;
+                mismatch = true;
+                break;
             }
-            else if constexpr (std::is_same_v<T, Index<Object>>)
-            {
-                return term;
-            }
-            else
-            {
-                static_assert(dependent_false<T>::value, "Missing case");
-            }
-        },
-        term.value);
-}
+        }
 
-TempAtom apply_substitution(const TempAtom& atom, const Substitution& sigma)
-{
-    auto terms = std::vector<Data<Term>> {};
-    terms.reserve(atom.terms.size());
-
-    for (const auto& term : atom.terms)
-        terms.push_back(apply_substitution(term, sigma));
-
-    return TempAtom {
-        .predicate = atom.predicate,
-        .terms = std::move(terms),
-    };
-}
-
-TempLiteral apply_substitution(const TempLiteral& lit, const Substitution& sigma)
-{
-    return TempLiteral {
-        .atom = apply_substitution(lit.atom, sigma),
-        .polarity = lit.polarity,
-    };
-}
-
-TempLiteralList apply_substitution(const TempLiteralList& lits, const Substitution& sigma)
-{
-    auto result = TempLiteralList {};
-    result.reserve(lits.size());
-
-    for (const auto& lit : lits)
-        result.push_back(apply_substitution(lit, sigma));
+        if (!mismatch)
+            result.push_back(std::move(sigma));
+    }
 
     return result;
 }
@@ -212,7 +229,8 @@ bool is_operator_too_heavy(const TempAction& op, const Invariant& inv)
 {
     // Approximation:
     // - no explicit duplication/alpha-renaming of quantified effect-local vars yet
-    // - use current cover substitutions as the operator-alignment proxy
+    // - action alignments are used for operator renaming
+    // - effect-local renamings are currently identity only
 
     for (const auto& eff_lhs : op.effects)
     {
@@ -223,7 +241,7 @@ bool is_operator_too_heavy(const TempAction& op, const Invariant& inv)
                 if (!inv.predicates.contains(atom_lhs_raw.predicate))
                     continue;
 
-                for (const auto& sigma_op : enumerate_cover_substitutions(inv, atom_lhs_raw))
+                for (const auto& sigma_op : enumerate_action_alignments(inv, atom_lhs_raw, op.num_variables))
                 {
                     const auto atom_lhs = apply_substitution(atom_lhs_raw, sigma_op);
 
@@ -275,10 +293,30 @@ bool entails(const TempLiteralList& lhs, const TempLiteralList& rhs)
     return true;
 }
 
+std::vector<EffectSubstitution>
+enumerate_effect_renamings(const TempEffect& effect, const TempAtom& element, const Invariant& inv, const ActionSubstitution& sigma_op)
+{
+    auto result = std::vector<EffectSubstitution> {};
+
+    // First approximation: identity-only renaming of effect-local variables.
+    // This is consistent once effect-local variables live in the shifted space
+    // [num_action_variables, num_action_variables + num_effect_variables).
+    EffectSubstitution sigma_eff(effect.num_effect_variables);
+
+    // Optional pruning: only keep the identity renaming if the renamed atom
+    // is at least coverable by the invariant.
+    const auto renamed = apply_substitution(apply_substitution(element, sigma_op), sigma_eff, effect.num_action_variables);
+
+    if (covers(inv, renamed))
+        result.push_back(std::move(sigma_eff));
+
+    return result;
+}
+
 bool is_add_effect_unbalanced(const TempAction& op, const TempEffect& effect, const TempAtom& add_atom, const Invariant& inv)
 {
-    // Enumerate all renamings that make the chosen add atom covered by the invariant.
-    for (const auto& sigma_op : enumerate_cover_substitutions(inv, add_atom))
+    // Enumerate action-space renamings that make the chosen add atom align with the invariant.
+    for (const auto& sigma_op : enumerate_action_alignments(inv, add_atom, op.num_variables))
     {
         const auto e_atom = apply_substitution(add_atom, sigma_op);
 
@@ -293,21 +331,23 @@ bool is_add_effect_unbalanced(const TempAction& op, const TempEffect& effect, co
         {
             for (const auto& eprime_raw : del_eff.del_effects)
             {
-                // Placeholder for now: no extra quantified-variable renaming yet.
-                // Later replace this by enumerate_delete_effect_renamings(...).
-                const auto eprime = apply_substitution(eprime_raw, sigma_op);
+                for (const auto& sigma_eff : enumerate_effect_renamings(del_eff, eprime_raw, inv, sigma_op))
+                {
+                    const auto eprime = apply_substitution(apply_substitution(eprime_raw, sigma_op), sigma_eff, del_eff.num_action_variables);
 
-                if (e_atom == eprime)
-                    continue;
+                    if (e_atom == eprime)
+                        continue;
 
-                if (!covers(inv, eprime))
-                    continue;
+                    if (!covers(inv, eprime))
+                        continue;
 
-                auto rhs = apply_substitution(del_eff.condition, sigma_op);
-                rhs.push_back(TempLiteral { .atom = eprime, .polarity = true });
+                    auto rhs = apply_substitution(del_eff.condition, sigma_op);
+                    rhs = apply_substitution(rhs, sigma_eff, del_eff.num_action_variables);
+                    rhs.push_back(TempLiteral { .atom = eprime, .polarity = true });
 
-                if (entails(lhs, rhs))
-                    return false;  // e' balances e
+                    if (entails(lhs, rhs))
+                        return false;  // e' balances e
+                }
             }
         }
     }
@@ -625,9 +665,8 @@ InvariantList make_initial_candidates(PredicateListView<FluentTag> predicates)
 
     for (const auto predicate : predicates)
     {
-        const auto arity = predicate.get_arity();
+        const auto arity = static_cast<size_t>(predicate.get_arity());
 
-        // Case 1: no counted variable
         {
             Invariant inv {};
             inv.num_rigid_variables = arity;
@@ -637,7 +676,6 @@ InvariantList make_initial_candidates(PredicateListView<FluentTag> predicates)
             result.push_back(std::move(inv));
         }
 
-        // Case 2: exactly one counted variable
         for (size_t counted_position = 0; counted_position < arity; ++counted_position)
         {
             Invariant inv {};

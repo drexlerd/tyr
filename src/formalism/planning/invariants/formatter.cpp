@@ -53,10 +53,31 @@ std::ostream& print(std::ostream& os, const formalism::planning::invariant::Temp
     return os;
 }
 
+template<typename Tag>
+std::ostream& print(std::ostream& os, const formalism::planning::invariant::Substitution<Tag>& el)
+{
+    fmt::print(os, "{{{}}}", fmt::join(to_strings(el.data), ", "));
+    return os;
+}
+
+template std::ostream& print(std::ostream& os, const formalism::planning::invariant::Substitution<formalism::planning::invariant::ActionTag>& el);
+template std::ostream& print(std::ostream& os, const formalism::planning::invariant::Substitution<formalism::planning::invariant::EffectTag>& el);
+template std::ostream& print(std::ostream& os, const formalism::planning::invariant::Substitution<formalism::planning::invariant::InvariantTag>& el);
+
 namespace formalism::planning::invariant
 {
 std::ostream& operator<<(std::ostream& os, const Invariant& el) { return tyr::print(os, el); }
 
 std::ostream& operator<<(std::ostream& os, const TempAtom& el) { return tyr::print(os, el); }
+
+template<typename Tag>
+std::ostream& operator<<(std::ostream& os, const Substitution<Tag>& el)
+{
+    return tyr::print(os, el);
+}
+
+template std::ostream& operator<<(std::ostream& os, const Substitution<ActionTag>& el);
+template std::ostream& operator<<(std::ostream& os, const Substitution<EffectTag>& el);
+template std::ostream& operator<<(std::ostream& os, const Substitution<InvariantTag>& el);
 }
 }

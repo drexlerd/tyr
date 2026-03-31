@@ -39,6 +39,9 @@ namespace formalism::planning::invariant
 std::ostream& operator<<(std::ostream& os, const Invariant& el);
 
 std::ostream& operator<<(std::ostream& os, const TempAtom& el);
+
+template<typename Tag>
+std::ostream& operator<<(std::ostream& os, const Substitution<Tag>& el);
 }
 
 /**
@@ -49,11 +52,17 @@ std::ostream& print(std::ostream& os, const formalism::planning::invariant::Inva
 
 std::ostream& print(std::ostream& os, const formalism::planning::invariant::TempAtom& el);
 
+template<typename Tag>
+std::ostream& print(std::ostream& os, const formalism::planning::invariant::Substitution<Tag>& el);
+
 namespace formalism::planning::invariant
 {
 std::ostream& operator<<(std::ostream& os, const Invariant& el);
 
 std::ostream& operator<<(std::ostream& os, const TempAtom& el);
+
+template<typename Tag>
+std::ostream& operator<<(std::ostream& os, const Substitution<Tag>& el);
 }
 }
 #endif
