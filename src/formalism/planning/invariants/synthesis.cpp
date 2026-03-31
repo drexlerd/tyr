@@ -137,8 +137,8 @@ std::vector<ActionSubstitution> enumerate_action_alignments(const Invariant& inv
 
         for (uint_t i = 0; i < pattern.terms.size(); ++i)
         {
-            const auto& lhs = pattern.terms[i];  // invariant pattern term
-            const auto& rhs = element.terms[i];  // action/effect term
+            const auto& lhs = pattern.terms[i];
+            const auto& rhs = element.terms[i];
 
             const bool ok = std::visit(
                 [&](auto&& lhs_arg) -> bool
@@ -157,13 +157,17 @@ std::vector<ActionSubstitution> enumerate_action_alignments(const Invariant& inv
                                 if (is_counted)
                                 {
                                     // Counted invariant variables do not constrain
-                                    // the action-side alignment.
+                                    // the action-parameter alignment.
                                     return true;
                                 }
 
-                                // Rigid invariant variables must match exactly.
+                                // Rigid invariant variables can only align with
+                                // action parameters, not effect-local variables.
                                 if constexpr (std::is_same_v<Rhs, ParameterIndex>)
                                 {
+                                    if (static_cast<uint_t>(rhs_arg) >= num_action_variables)
+                                        return false;
+
                                     return sigma.assign_or_check(rhs_arg, Data<Term>(lhs_arg));
                                 }
                                 else
@@ -175,6 +179,9 @@ std::vector<ActionSubstitution> enumerate_action_alignments(const Invariant& inv
                             {
                                 if constexpr (std::is_same_v<Rhs, ParameterIndex>)
                                 {
+                                    if (static_cast<uint_t>(rhs_arg) >= num_action_variables)
+                                        return false;
+
                                     return sigma.assign_or_check(rhs_arg, Data<Term>(lhs_arg));
                                 }
                                 else if constexpr (std::is_same_v<Rhs, Index<Object>>)
@@ -225,32 +232,114 @@ bool satisfiable(const TempLiteralList& lits)
     return true;
 }
 
+bool is_effect_local_parameter(ParameterIndex parameter, size_t num_action_variables) { return static_cast<uint_t>(parameter) >= num_action_variables; }
+
+ParameterIndex to_effect_local_parameter(ParameterIndex parameter, size_t num_action_variables)
+{
+    return ParameterIndex(static_cast<uint_t>(parameter) - num_action_variables);
+}
+
+uint_t get_effect_local_index(ParameterIndex parameter, size_t num_action_variables) { return static_cast<uint_t>(parameter) - num_action_variables; }
+
+Data<Term> alpha_rename_effect_term(const Data<Term>& term, size_t num_action_variables, size_t fresh_base)
+{
+    return std::visit(
+        [&](auto&& arg) -> Data<Term>
+        {
+            using T = std::decay_t<decltype(arg)>;
+
+            if constexpr (std::is_same_v<T, ParameterIndex>)
+            {
+                if (!is_effect_local_parameter(arg, num_action_variables))
+                    return term;
+
+                const auto local_index = get_effect_local_index(arg, num_action_variables);
+                return Data<Term>(ParameterIndex(fresh_base + local_index));
+            }
+            else if constexpr (std::is_same_v<T, Index<Object>>)
+            {
+                return term;
+            }
+            else
+            {
+                static_assert(dependent_false<T>::value, "Missing case");
+            }
+        },
+        term.value);
+}
+
+TempAtom alpha_rename_effect_atom(const TempAtom& atom, size_t num_action_variables, size_t fresh_base)
+{
+    auto terms = std::vector<Data<Term>> {};
+    terms.reserve(atom.terms.size());
+
+    for (const auto& term : atom.terms)
+        terms.push_back(alpha_rename_effect_term(term, num_action_variables, fresh_base));
+
+    return TempAtom {
+        .predicate = atom.predicate,
+        .terms = std::move(terms),
+    };
+}
+
+TempLiteral alpha_rename_effect_literal(const TempLiteral& lit, size_t num_action_variables, size_t fresh_base)
+{
+    return TempLiteral {
+        .atom = alpha_rename_effect_atom(lit.atom, num_action_variables, fresh_base),
+        .polarity = lit.polarity,
+    };
+}
+
+TempLiteralList alpha_rename_effect_condition(const TempLiteralList& lits, size_t num_action_variables, size_t fresh_base)
+{
+    auto result = TempLiteralList {};
+    result.reserve(lits.size());
+
+    for (const auto& lit : lits)
+        result.push_back(alpha_rename_effect_literal(lit, num_action_variables, fresh_base));
+
+    return result;
+}
+
 bool is_operator_too_heavy(const TempAction& op, const Invariant& inv)
 {
-    // Approximation:
-    // - no explicit duplication/alpha-renaming of quantified effect-local vars yet
-    // - action alignments are used for operator renaming
-    // - effect-local renamings are currently identity only
+    size_t max_num_effect_variables = 0;
+    for (const auto& eff : op.effects)
+        max_num_effect_variables = std::max(max_num_effect_variables, eff.num_effect_variables);
 
-    for (const auto& eff_lhs : op.effects)
+    const size_t fresh_base_lhs = op.num_variables;
+    const size_t fresh_base_rhs = op.num_variables + max_num_effect_variables + 1;
+
+    for (const auto& eff_lhs_raw : op.effects)
     {
-        for (const auto& eff_rhs : op.effects)
+        const auto eff_lhs_cond = alpha_rename_effect_condition(eff_lhs_raw.condition, op.num_variables, fresh_base_lhs);
+
+        for (const auto& eff_rhs_raw : op.effects)
         {
-            for (const auto& atom_lhs_raw : eff_lhs.add_effects)
+            const auto eff_rhs_cond = alpha_rename_effect_condition(eff_rhs_raw.condition, op.num_variables, fresh_base_rhs);
+
+            for (const auto& atom_lhs_raw : eff_lhs_raw.add_effects)
             {
                 if (!inv.predicates.contains(atom_lhs_raw.predicate))
                     continue;
 
-                for (const auto& sigma_op : enumerate_action_alignments(inv, atom_lhs_raw, op.num_variables))
-                {
-                    const auto atom_lhs = apply_substitution(atom_lhs_raw, sigma_op);
+                const auto atom_lhs_alpha = alpha_rename_effect_atom(atom_lhs_raw, op.num_variables, fresh_base_lhs);
 
-                    for (const auto& atom_rhs_raw : eff_rhs.add_effects)
+                for (const auto& sigma_op : enumerate_action_alignments(inv, atom_lhs_alpha, op.num_variables))
+                {
+                    const auto atom_lhs = apply_substitution(atom_lhs_alpha, sigma_op);
+
+                    if (!covers(inv, atom_lhs))
+                        continue;
+
+                    for (const auto& atom_rhs_raw : eff_rhs_raw.add_effects)
                     {
                         if (!inv.predicates.contains(atom_rhs_raw.predicate))
                             continue;
 
-                        const auto atom_rhs = apply_substitution(atom_rhs_raw, sigma_op);
+                        const auto atom_rhs_alpha = alpha_rename_effect_atom(atom_rhs_raw, op.num_variables, fresh_base_rhs);
+
+                        const auto atom_rhs = apply_substitution(atom_rhs_alpha, sigma_op);
 
                         if (atom_lhs == atom_rhs)
                             continue;
@@ -260,10 +349,10 @@ bool is_operator_too_heavy(const TempAction& op, const Invariant& inv)
 
                         auto lhs = apply_substitution(op.precondition, sigma_op);
 
-                        auto cond_lhs = apply_substitution(eff_lhs.condition, sigma_op);
+                        auto cond_lhs = apply_substitution(eff_lhs_cond, sigma_op);
                         lhs.insert(lhs.end(), cond_lhs.begin(), cond_lhs.end());
 
-                        auto cond_rhs = apply_substitution(eff_rhs.condition, sigma_op);
+                        auto cond_rhs = apply_substitution(eff_rhs_cond, sigma_op);
                         lhs.insert(lhs.end(), cond_rhs.begin(), cond_rhs.end());
 
                         lhs.push_back(TempLiteral { .atom = atom_lhs, .polarity = false });
@@ -293,47 +382,209 @@ bool entails(const TempLiteralList& lhs, const TempLiteralList& rhs)
     return true;
 }
 
+std::optional<EffectSubstitution>
+match_effect_cover_against_atom(const Invariant& inv, const TempAtom& pattern, const TempAtom& element, size_t num_action_variables)
+{
+    if (pattern.predicate != element.predicate)
+        return std::nullopt;
+
+    if (pattern.terms.size() != element.terms.size())
+        return std::nullopt;
+
+    EffectSubstitution sigma_eff;
+
+    uint_t max_local_index = 0;
+    bool has_local = false;
+
+    for (const auto& term : element.terms)
+    {
+        std::visit(
+            [&](auto&& arg)
+            {
+                using T = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<T, ParameterIndex>)
+                {
+                    if (is_effect_local_parameter(arg, num_action_variables))
+                    {
+                        has_local = true;
+                        max_local_index = std::max(max_local_index, static_cast<uint_t>(to_effect_local_parameter(arg, num_action_variables)));
+                    }
+                }
+            },
+            term.value);
+    }
+
+    if (has_local)
+        sigma_eff.resize(max_local_index + 1);
+
+    std::vector<std::optional<Data<Term>>> counted_bindings(inv.num_counted_variables, std::nullopt);
+
+    for (uint_t i = 0; i < pattern.terms.size(); ++i)
+    {
+        const auto& lhs = pattern.terms[i];
+        const auto& rhs = element.terms[i];
+
+        const bool ok = std::visit(
+            [&](auto&& lhs_arg) -> bool
+            {
+                using Lhs = std::decay_t<decltype(lhs_arg)>;
+
+                return std::visit(
+                    [&](auto&& rhs_arg) -> bool
+                    {
+                        using Rhs = std::decay_t<decltype(rhs_arg)>;
+
+                        if constexpr (std::is_same_v<Lhs, ParameterIndex>)
+                        {
+                            const auto lhs_index = static_cast<uint_t>(lhs_arg);
+                            const bool lhs_is_counted = lhs_index >= inv.num_rigid_variables;
+
+                            if (!lhs_is_counted)
+                            {
+                                // Rigid invariant variable: must match exactly.
+                                if constexpr (std::is_same_v<Rhs, ParameterIndex>)
+                                {
+                                    if (is_effect_local_parameter(rhs_arg, num_action_variables))
+                                    {
+                                        const auto local = to_effect_local_parameter(rhs_arg, num_action_variables);
+                                        return sigma_eff.assign_or_check(local, Data<Term>(lhs_arg));
+                                    }
+                                    return lhs_arg == rhs_arg;
+                                }
+                                else if constexpr (std::is_same_v<Rhs, Index<Object>>)
+                                {
+                                    return false;
+                                }
+                                else
+                                {
+                                    static_assert(dependent_false<Rhs>::value, "Missing case");
+                                }
+                            }
+                            else
+                            {
+                                // Counted invariant variable: any term is allowed, but repeated
+                                // occurrences must stay consistent whenever we can determine that.
+                                const auto counted_index = lhs_index - inv.num_rigid_variables;
+                                auto& binding = counted_bindings[counted_index];
+
+                                if constexpr (std::is_same_v<Rhs, ParameterIndex>)
+                                {
+                                    if (is_effect_local_parameter(rhs_arg, num_action_variables))
+                                    {
+                                        const auto local = to_effect_local_parameter(rhs_arg, num_action_variables);
+
+                                        if (binding.has_value())
+                                            return sigma_eff.assign_or_check(local, *binding);
+
+                                        // Leave unconstrained for now.
+                                        return true;
+                                    }
+
+                                    if (!binding.has_value())
+                                    {
+                                        binding = Data<Term>(rhs_arg);
+                                        return true;
+                                    }
+
+                                    return *binding == Data<Term>(rhs_arg);
+                                }
+                                else if constexpr (std::is_same_v<Rhs, Index<Object>>)
+                                {
+                                    if (!binding.has_value())
+                                    {
+                                        binding = Data<Term>(rhs_arg);
+                                        return true;
+                                    }
+
+                                    return *binding == Data<Term>(rhs_arg);
+                                }
+                                else
+                                {
+                                    static_assert(dependent_false<Rhs>::value, "Missing case");
+                                }
+                            }
+                        }
+                        else if constexpr (std::is_same_v<Lhs, Index<Object>>)
+                        {
+                            if constexpr (std::is_same_v<Rhs, ParameterIndex>)
+                            {
+                                if (is_effect_local_parameter(rhs_arg, num_action_variables))
+                                {
+                                    const auto local = to_effect_local_parameter(rhs_arg, num_action_variables);
+                                    return sigma_eff.assign_or_check(local, Data<Term>(lhs_arg));
+                                }
+
+                                return false;
+                            }
+                            else if constexpr (std::is_same_v<Rhs, Index<Object>>)
+                            {
+                                return lhs_arg == rhs_arg;
+                            }
+                            else
+                            {
+                                static_assert(dependent_false<Rhs>::value, "Missing case");
+                            }
+                        }
+                        else
+                        {
+                            static_assert(dependent_false<Lhs>::value, "Missing case");
+                        }
+                    },
+                    rhs.value);
+            },
+            lhs.value);
+
+        if (!ok)
+            return std::nullopt;
+    }
+
+    return sigma_eff;
+}
+
 std::vector<EffectSubstitution>
 enumerate_effect_renamings(const TempEffect& effect, const TempAtom& element, const Invariant& inv, const ActionSubstitution& sigma_op)
 {
     auto result = std::vector<EffectSubstitution> {};
 
-    // First approximation: identity-only renaming of effect-local variables.
-    // This is consistent once effect-local variables live in the shifted space
-    // [num_action_variables, num_action_variables + num_effect_variables).
-    EffectSubstitution sigma_eff(effect.num_effect_variables);
+    const auto partially_renamed = apply_substitution(element, sigma_op);
 
-    // Optional pruning: only keep the identity renaming if the renamed atom
-    // is at least coverable by the invariant.
-    const auto renamed = apply_substitution(apply_substitution(element, sigma_op), sigma_eff, effect.num_action_variables);
+    for (const auto& pattern : inv.atoms)
+    {
+        auto sigma_eff = match_effect_cover_against_atom(inv, pattern, partially_renamed, effect.num_action_variables);
 
-    if (covers(inv, renamed))
-        result.push_back(std::move(sigma_eff));
+        if (!sigma_eff.has_value())
+            continue;
+
+        const auto fully_renamed = apply_substitution(partially_renamed, *sigma_eff, effect.num_action_variables);
+
+        if (covers(inv, fully_renamed))
+            result.push_back(std::move(*sigma_eff));
+    }
 
     return result;
 }
 
 bool is_add_effect_unbalanced(const TempAction& op, const TempEffect& effect, const TempAtom& add_atom, const Invariant& inv)
 {
-    // Enumerate action-space renamings that make the chosen add atom align with the invariant.
     for (const auto& sigma_op : enumerate_action_alignments(inv, add_atom, op.num_variables))
     {
         const auto e_atom = apply_substitution(add_atom, sigma_op);
 
-        // lhs = o'.precond ∧ e.cond ∧ ¬e.atom
         auto lhs = apply_substitution(op.precondition, sigma_op);
         auto e_cond = apply_substitution(effect.condition, sigma_op);
         lhs.insert(lhs.end(), e_cond.begin(), e_cond.end());
         lhs.push_back(TempLiteral { .atom = e_atom, .polarity = false });
 
-        // Try every delete effect e' of o'
         for (const auto& del_eff : op.effects)
         {
             for (const auto& eprime_raw : del_eff.del_effects)
             {
+                const auto eprime_partial = apply_substitution(eprime_raw, sigma_op);
+
                 for (const auto& sigma_eff : enumerate_effect_renamings(del_eff, eprime_raw, inv, sigma_op))
                 {
-                    const auto eprime = apply_substitution(apply_substitution(eprime_raw, sigma_op), sigma_eff, del_eff.num_action_variables);
+                    const auto eprime = apply_substitution(eprime_partial, sigma_eff, del_eff.num_action_variables);
 
                     if (e_atom == eprime)
                         continue;
@@ -346,13 +597,13 @@ bool is_add_effect_unbalanced(const TempAction& op, const TempEffect& effect, co
                     rhs.push_back(TempLiteral { .atom = eprime, .polarity = true });
 
                     if (entails(lhs, rhs))
-                        return false;  // e' balances e
+                        return false;
                 }
             }
         }
     }
 
-    return true;  // no balancing delete effect found
+    return true;
 }
 
 struct Threat
@@ -557,6 +808,56 @@ void normalize_invariant(Invariant& inv)
     inv = Invariant(inv.num_rigid_variables, inv.num_counted_variables, std::move(inv.atoms));
 }
 
+bool has_consistent_rigid_role_pattern(const Invariant& inv)
+{
+    if (inv.atoms.empty())
+        return true;
+
+    // For each rigid variable p, remember in which predicate/argument positions
+    // it occurs. For the invariant families from the paper, inconsistent swaps
+    // like in(V1,V0) versus in(V0,V1) should be rejected.
+    for (size_t rigid = 0; rigid < inv.num_rigid_variables; ++rigid)
+    {
+        std::map<PredicateView<FluentTag>, std::vector<size_t>> positions_by_predicate;
+
+        for (const auto& atom : inv.atoms)
+        {
+            std::vector<size_t> positions;
+
+            for (size_t i = 0; i < atom.terms.size(); ++i)
+            {
+                const auto& term = atom.terms[i];
+                std::visit(
+                    [&](auto&& arg)
+                    {
+                        using T = std::decay_t<decltype(arg)>;
+                        if constexpr (std::is_same_v<T, ParameterIndex>)
+                        {
+                            if (static_cast<uint_t>(arg) == rigid)
+                                positions.push_back(i);
+                        }
+                    },
+                    term.value);
+            }
+
+            auto it = positions_by_predicate.find(atom.predicate);
+            if (it == positions_by_predicate.end())
+            {
+                positions_by_predicate.emplace(atom.predicate, std::move(positions));
+            }
+            else
+            {
+                if (it->second != positions)
+                    return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool is_well_shaped_invariant(const Invariant& inv) { return has_consistent_rigid_role_pattern(inv); }
+
 InvariantList refine_candidate(const Invariant& inv, const Threat& threat, const TempActionList& ops, PredicateListView<FluentTag> predicates)
 {
     InvariantList result;
@@ -588,6 +889,9 @@ InvariantList refine_candidate(const Invariant& inv, const Threat& threat, const
 
                 normalize_invariant(refined);
 
+                if (!is_well_shaped_invariant(refined))
+                    continue;
+
                 if (!is_add_effect_unbalanced(op, effect, add_atom, refined))
                 {
                     result.push_back(std::move(refined));
@@ -610,6 +914,9 @@ InvariantList refine_candidate(const Invariant& inv, const Threat& threat, const
                 auto refined = Invariant(inv.num_rigid_variables, std::max<size_t>(inv.num_counted_variables, 1), std::move(atoms));
 
                 normalize_invariant(refined);
+
+                if (!is_well_shaped_invariant(refined))
+                    continue;
 
                 if (!is_add_effect_unbalanced(op, effect, add_atom, refined))
                 {
@@ -678,6 +985,143 @@ InvariantList make_initial_candidates(PredicateListView<FluentTag> predicates)
     return result;
 }
 
+std::optional<InvariantSubstitution> match_invariant_against_ground_atom(const Invariant& inv, const TempAtom& pattern, const TempAtom& ground_atom)
+{
+    if (pattern.predicate != ground_atom.predicate)
+        return std::nullopt;
+
+    if (pattern.terms.size() != ground_atom.terms.size())
+        return std::nullopt;
+
+    InvariantSubstitution sigma(inv.num_rigid_variables + inv.num_counted_variables);
+
+    for (uint_t i = 0; i < pattern.terms.size(); ++i)
+    {
+        const auto& lhs = pattern.terms[i];
+        const auto& rhs = ground_atom.terms[i];
+
+        const bool ok = std::visit(
+            [&](auto&& lhs_arg) -> bool
+            {
+                using Lhs = std::decay_t<decltype(lhs_arg)>;
+
+                return std::visit(
+                    [&](auto&& rhs_arg) -> bool
+                    {
+                        using Rhs = std::decay_t<decltype(rhs_arg)>;
+
+                        if constexpr (std::is_same_v<Lhs, ParameterIndex>)
+                        {
+                            // In the initial state, both rigid and counted variables
+                            // may bind to concrete objects, but repeated occurrences
+                            // must stay consistent.
+                            return sigma.assign_or_check(lhs_arg, rhs);
+                        }
+                        else if constexpr (std::is_same_v<Lhs, Index<Object>>)
+                        {
+                            if constexpr (std::is_same_v<Rhs, Index<Object>>)
+                                return lhs_arg == rhs_arg;
+                            else
+                                return false;
+                        }
+                        else
+                        {
+                            static_assert(dependent_false<Lhs>::value, "Missing case");
+                        }
+                    },
+                    rhs.value);
+            },
+            lhs.value);
+
+        if (!ok)
+            return std::nullopt;
+    }
+
+    return sigma;
+}
+
+bool covered_atoms_conflict_in_initial_state(const Invariant& inv, const TempAtom& lhs, const TempAtom& rhs)
+{
+    for (const auto& pattern_lhs : inv.atoms)
+    {
+        auto sigma_lhs = match_invariant_against_ground_atom(inv, pattern_lhs, lhs);
+        if (!sigma_lhs.has_value())
+            continue;
+
+        for (const auto& pattern_rhs : inv.atoms)
+        {
+            auto sigma_rhs = match_invariant_against_ground_atom(inv, pattern_rhs, rhs);
+            if (!sigma_rhs.has_value())
+                continue;
+
+            bool compatible = true;
+
+            for (size_t p = 0; p < inv.num_rigid_variables; ++p)
+            {
+                const auto& lhs_binding = sigma_lhs->get(ParameterIndex(p));
+                const auto& rhs_binding = sigma_rhs->get(ParameterIndex(p));
+
+                if (lhs_binding.has_value() && rhs_binding.has_value() && *lhs_binding != *rhs_binding)
+                {
+                    compatible = false;
+                    break;
+                }
+            }
+
+            if (compatible)
+                return true;
+        }
+    }
+
+    return false;
+}
+
+inline TempAtom make_temp_ground_atom(GroundAtomView<FluentTag> element)
+{
+    auto terms = std::vector<Data<Term>> {};
+    const auto objects = element.get_row().get_objects();
+    terms.reserve(objects.size());
+
+    for (const auto object : objects)
+        terms.emplace_back(Data<Term>(object.get_index()));
+
+    return TempAtom {
+        .predicate = element.get_predicate(),
+        .terms = std::move(terms),
+    };
+}
+
+bool holds_in_initial_state(const Invariant& inv, GroundAtomListView<FluentTag> initial_atoms)
+{
+    TempAtomList covered_atoms;
+    covered_atoms.reserve(initial_atoms.size());
+
+    for (const auto atom_view : initial_atoms)
+    {
+        auto atom = make_temp_ground_atom(atom_view);
+
+        for (const auto& pattern : inv.atoms)
+        {
+            if (match_invariant_against_ground_atom(inv, pattern, atom).has_value())
+            {
+                covered_atoms.push_back(std::move(atom));
+                break;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < covered_atoms.size(); ++i)
+    {
+        for (size_t j = i + 1; j < covered_atoms.size(); ++j)
+        {
+            if (covered_atoms_conflict_in_initial_state(inv, covered_atoms[i], covered_atoms[j]))
+                return false;
+        }
+    }
+
+    return true;
+}
+
 }
 
 /**
@@ -701,7 +1145,13 @@ InvariantList synthesize_invariants(TaskView task)
 
         normalize_invariant(candidate);
 
+        if (!is_well_shaped_invariant(candidate))
+            continue;
+
         if (!seen.insert(candidate).second)
+            continue;
+
+        if (!holds_in_initial_state(candidate, task.get_atoms<FluentTag>()))
             continue;
 
         auto result = prove_invariant(candidate, ops);

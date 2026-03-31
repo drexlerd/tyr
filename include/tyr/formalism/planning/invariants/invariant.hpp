@@ -334,15 +334,15 @@ inline TempLiteral make_temp_literal(LiteralView<FluentTag> element)
     };
 }
 
-inline Data<Term> make_temp_effect_term(TermView term) { return term.get_data(); }
+inline Data<Term> make_temp_effect_term(TermView term, size_t /*num_action_variables*/) { return term.get_data(); }
 
-inline TempAtom make_temp_effect_atom(AtomView<FluentTag> element)
+inline TempAtom make_temp_effect_atom(AtomView<FluentTag> element, size_t num_action_variables)
 {
     auto terms = std::vector<Data<Term>> {};
     terms.reserve(element.get_terms().size());
 
     for (const auto term : element.get_terms())
-        terms.push_back(make_temp_effect_term(term));
+        terms.push_back(make_temp_effect_term(term, num_action_variables));
 
     return TempAtom {
         .predicate = element.get_predicate(),
@@ -350,10 +350,10 @@ inline TempAtom make_temp_effect_atom(AtomView<FluentTag> element)
     };
 }
 
-inline TempLiteral make_temp_effect_literal(LiteralView<FluentTag> element)
+inline TempLiteral make_temp_effect_literal(LiteralView<FluentTag> element, size_t num_action_variables)
 {
     return TempLiteral {
-        .atom = make_temp_effect_atom(element.get_atom()),
+        .atom = make_temp_effect_atom(element.get_atom(), num_action_variables),
         .polarity = element.get_polarity(),
     };
 }
@@ -366,14 +366,14 @@ inline TempEffect make_temp_effect(ConditionalEffectView element, size_t action_
     result.num_effect_variables = element.get_arity();
 
     for (const auto lit : element.get_condition().get_literals<FluentTag>())
-        result.condition.push_back(make_temp_effect_literal(lit));
+        result.condition.push_back(make_temp_effect_literal(lit, action_arity));
 
     for (const auto lit : element.get_effect().get_literals())
     {
         if (lit.get_polarity())
-            result.add_effects.push_back(make_temp_effect_atom(lit.get_atom()));
+            result.add_effects.push_back(make_temp_effect_atom(lit.get_atom(), action_arity));
         else
-            result.del_effects.push_back(make_temp_effect_atom(lit.get_atom()));
+            result.del_effects.push_back(make_temp_effect_atom(lit.get_atom(), action_arity));
     }
 
     return result;
