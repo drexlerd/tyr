@@ -78,7 +78,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisAgricola)
     auto lifted_task = compute_lifted_task(absolute("agricola/domain.pddl"), absolute("agricola/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -138,7 +138,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisAirport)
     auto lifted_task = compute_lifted_task(absolute("airport/domain.pddl"), absolute("airport/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -199,7 +199,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisAssembly)
 {
     auto lifted_task = compute_lifted_task(absolute("assembly/domain.pddl"), absolute("assembly/test_problem.pddl"));
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
 
@@ -219,7 +219,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisBarman)
     auto lifted_task = compute_lifted_task(absolute("barman/domain.pddl"), absolute("barman/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -254,7 +254,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisBlocks3)
     auto lifted_task = compute_lifted_task(absolute("blocks_3/domain.pddl"), absolute("blocks_3/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -285,7 +285,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisBlocks4)
     auto lifted_task = compute_lifted_task(absolute("blocks_4/domain.pddl"), absolute("blocks_4/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -337,7 +337,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisChildsnack)
     auto lifted_task = compute_lifted_task(absolute("childsnack/domain.pddl"), absolute("childsnack/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -445,7 +445,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisDelivery)
     auto lifted_task = compute_lifted_task(absolute("delivery/domain.pddl"), absolute("delivery/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -475,7 +475,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisDriverlog)
     auto lifted_task = compute_lifted_task(absolute("driverlog/domain.pddl"), absolute("driverlog/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -507,7 +507,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisFerry)
     auto lifted_task = compute_lifted_task(absolute("ferry/domain.pddl"), absolute("ferry/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -540,7 +540,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisFoCounters)
 {
     auto lifted_task = compute_lifted_task(absolute("fo-counters/domain.pddl"), absolute("fo-counters/test_problem.pddl"));
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {};
 
@@ -562,7 +562,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisGrid)
     auto lifted_task = compute_lifted_task(absolute("grid/domain.pddl"), absolute("grid/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -620,7 +620,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisGripper)
     auto lifted_task = compute_lifted_task(absolute("gripper/domain.pddl"), absolute("gripper/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -659,7 +659,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisHiking)
     auto lifted_task = compute_lifted_task(absolute("hiking/domain.pddl"), absolute("hiking/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -708,7 +708,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisLogistics)
     auto lifted_task = compute_lifted_task(absolute("logistics/domain.pddl"), absolute("logistics/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -736,7 +736,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisMiconic)
     auto lifted_task = compute_lifted_task(absolute("miconic/domain.pddl"), absolute("miconic/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(2,
@@ -786,7 +786,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisMiconicFulladl)
     auto lifted_task = compute_lifted_task(absolute("miconic-fulladl/domain.pddl"), absolute("miconic-fulladl/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -808,7 +808,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisMiconicSimpleadl)
     auto lifted_task = compute_lifted_task(absolute("miconic-simpleadl/domain.pddl"), absolute("miconic-simpleadl/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -836,7 +836,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisParcprinter)
     auto lifted_task = compute_lifted_task(absolute("parcprinter/domain.pddl"), absolute("parcprinter/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -889,7 +889,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisPathways)
     auto lifted_task = compute_lifted_task(absolute("pathways/domain.pddl"), absolute("pathways/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -917,7 +917,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisPhilosophers)
     auto lifted_task = compute_lifted_task(absolute("philosophers/domain.pddl"), absolute("philosophers/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -974,7 +974,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisPsrMiddle)
 {
     auto lifted_task = compute_lifted_task(absolute("psr-middle/domain.pddl"), absolute("psr-middle/test_problem.pddl"));
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {};
 
@@ -990,7 +990,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisPushworld)
     auto lifted_task = compute_lifted_task(absolute("pushworld/domain.pddl"), absolute("pushworld/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -1011,7 +1011,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisRefuel)
 {
     auto lifted_task = compute_lifted_task(absolute("refuel/domain.pddl"), absolute("refuel/test_problem.pddl"));
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {};
 
@@ -1025,7 +1025,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisRefuelAdl)
     auto lifted_task = compute_lifted_task(absolute("refuel-adl/domain.pddl"), absolute("refuel-adl/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -1051,7 +1051,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisReward)
     auto lifted_task = compute_lifted_task(absolute("reward/domain.pddl"), absolute("reward/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -1113,7 +1113,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisRovers)
     auto lifted_task = compute_lifted_task(absolute("rovers/domain.pddl"), absolute("rovers/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -1216,7 +1216,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisSatellite)
     auto lifted_task = compute_lifted_task(absolute("satellite/domain.pddl"), absolute("satellite/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -1243,7 +1243,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisSchedule)
 {
     auto lifted_task = compute_lifted_task(absolute("schedule/domain.pddl"), absolute("schedule/test_problem.pddl"));
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {};
 
@@ -1262,7 +1262,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisSokoban)
     auto lifted_task = compute_lifted_task(absolute("sokoban/domain.pddl"), absolute("sokoban/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -1308,7 +1308,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisSpanner)
     auto lifted_task = compute_lifted_task(absolute("spanner/domain.pddl"), absolute("spanner/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -1373,7 +1373,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisTpp)
     auto lifted_task = compute_lifted_task(absolute("tpp/numeric/domain.pddl"), absolute("tpp/numeric/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -1396,7 +1396,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisTransport)
     auto lifted_task = compute_lifted_task(absolute("transport/domain.pddl"), absolute("transport/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -1424,7 +1424,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisVisitall)
     auto lifted_task = compute_lifted_task(absolute("visitall/domain.pddl"), absolute("visitall/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(0,
@@ -1452,7 +1452,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisWoodworking)
     auto lifted_task = compute_lifted_task(absolute("woodworking/domain.pddl"), absolute("woodworking/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,
@@ -1509,7 +1509,7 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesisZenotravel)
     auto lifted_task = compute_lifted_task(absolute("zenotravel/numeric/domain.pddl"), absolute("zenotravel/numeric/test_problem.pddl"));
     auto& repository = *lifted_task.get_repository();
 
-    auto actual = fpi::synthesize_invariants(lifted_task.get_task());
+    auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());
 
     auto expected = std::vector<fpi::Invariant> {
         inv(1,

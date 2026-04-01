@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 
         auto lifted_task = planning::LiftedTask::create(parser.parse_task(problem_filepath));
 
-        auto invariants = formalism::planning::invariant::synthesize_invariants(lifted_task->get_formalism_task().get_task());
+        auto invariants = formalism::planning::invariant::synthesize_invariants(lifted_task->get_formalism_task().get_task().get_domain());
 
         std::cout << "[Total] Synthesized invariants: " << invariants.size() << std::endl;
         tyr::print(std::cout, invariants);

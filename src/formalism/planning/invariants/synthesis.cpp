@@ -39,10 +39,10 @@
 
 namespace tyr::formalism::planning::invariant
 {
-InvariantList synthesize_invariants(TaskView task)
+InvariantList synthesize_invariants(DomainView domain)
 {
-    auto ops = make_temp_actions(task.get_domain().get_actions());
-    auto queue = make_initial_candidates(task.get_domain().get_predicates<FluentTag>());
+    auto ops = make_temp_actions(domain.get_actions());
+    auto queue = make_initial_candidates(domain.get_predicates<FluentTag>());
 
     auto accepted = InvariantList {};
     auto seen = UnorderedSet<Invariant> {};
@@ -67,7 +67,7 @@ InvariantList synthesize_invariants(TaskView task)
         }
         else if (result.status == ProofStatus::UnbalancedAddEffect)
         {
-            auto refined = refine_candidate(candidate, *result.threat, ops, task.get_domain().get_predicates<FluentTag>());
+            auto refined = refine_candidate(candidate, *result.threat, ops, domain.get_predicates<FluentTag>());
 
             queue.insert(queue.end(), std::make_move_iterator(refined.begin()), std::make_move_iterator(refined.end()));
         }

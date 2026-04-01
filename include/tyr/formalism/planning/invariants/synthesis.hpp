@@ -37,7 +37,7 @@
 
 namespace tyr::formalism::planning::invariant
 {
-InvariantList synthesize_invariants(TaskView task);
+InvariantList synthesize_invariants(DomainView domain);
 }
 
 #endif
