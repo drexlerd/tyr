@@ -20,11 +20,9 @@
 #include "matching.hpp"
 #include "normalization.hpp"
 #include "proof.hpp"
-#include "tyr/formalism/planning/invariants/formatter.hpp"
 
 #include <algorithm>
 #include <optional>
-#include <unordered_map>
 #include <vector>
 
 namespace tyr::formalism::planning::invariant
@@ -129,6 +127,17 @@ std::map<ParameterIndex, Data<Term>> get_parameters_from_part(const TempAtom& pa
     return result;
 }
 
+bool optional_parameter_less(const std::optional<ParameterIndex>& a, const std::optional<ParameterIndex>& b)
+{
+    if (!a.has_value() && !b.has_value())
+        return false;
+    if (!a.has_value())
+        return false;
+    if (!b.has_value())
+        return true;
+    return *a < *b;
+}
+
 void instantiate_factored_mapping_rec(const std::vector<std::pair<std::vector<size_t>, std::vector<std::optional<ParameterIndex>>>>& groups,
                                       size_t group_index,
                                       PositionMapping& current,
@@ -143,18 +152,7 @@ void instantiate_factored_mapping_rec(const std::vector<std::pair<std::vector<si
     const auto& [positions, images] = groups[group_index];
 
     auto perm = images;
-    std::sort(perm.begin(),
-              perm.end(),
-              [](const auto& a, const auto& b)
-              {
-                  if (!a.has_value() && !b.has_value())
-                      return false;
-                  if (!a.has_value())
-                      return false;
-                  if (!b.has_value())
-                      return true;
-                  return *a < *b;
-              });
+    std::sort(perm.begin(), perm.end(), optional_parameter_less);
 
     do
     {
@@ -165,18 +163,7 @@ void instantiate_factored_mapping_rec(const std::vector<std::pair<std::vector<si
 
         for (size_t i = 0; i < positions.size(); ++i)
             current.pop_back();
-    } while (std::next_permutation(perm.begin(),
-                                   perm.end(),
-                                   [](const auto& a, const auto& b)
-                                   {
-                                       if (!a.has_value() && !b.has_value())
-                                           return false;
-                                       if (!a.has_value())
-                                           return false;
-                                       if (!b.has_value())
-                                           return true;
-                                       return *a < *b;
-                                   }));
+    } while (std::next_permutation(perm.begin(), perm.end(), optional_parameter_less));
 }
 
 std::vector<PositionMapping> instantiate_factored_mapping(const std::vector<std::pair<std::vector<size_t>, std::vector<std::optional<ParameterIndex>>>>& groups)
@@ -240,12 +227,7 @@ std::vector<TempAtom> possible_matches(const TempAtom& part, const TempAtom& own
         std::vector<Data<Term>> args(other_literal.terms.size(), Data<Term>(ParameterIndex(num_rigid_variables)));
 
         for (const auto& [other_pos, inv_var] : mapping)
-        {
-            if (inv_var.has_value())
-                args[other_pos] = Data<Term>(*inv_var);
-            else
-                args[other_pos] = Data<Term>(ParameterIndex(num_rigid_variables));
-        }
+            args[other_pos] = Data<Term>(inv_var.value_or(ParameterIndex(num_rigid_variables)));
 
         result.push_back(TempAtom {
             .predicate = other_literal.predicate,
@@ -277,6 +259,23 @@ void try_refinement(InvariantList& result,
         result.push_back(std::move(refined));
 }
 
+bool atom_uses_counted(const TempAtom& atom, size_t num_rigid_variables)
+{
+    return std::ranges::any_of(atom.terms,
+                               [&](const auto& term)
+                               {
+                                   return std::visit(
+                                       [&](auto&& arg) -> bool
+                                       {
+                                           using T = std::decay_t<decltype(arg)>;
+                                           if constexpr (std::is_same_v<T, ParameterIndex>)
+                                               return static_cast<uint_t>(arg) >= num_rigid_variables;
+                                           return false;
+                                       },
+                                       term.value);
+                               });
+}
+
 }  // namespace
 
 InvariantList refine_candidate(const Invariant& inv, const Threat& threat, const TempActionList& ops, PredicateListView<FluentTag>)
@@ -300,21 +299,8 @@ InvariantList refine_candidate(const Invariant& inv, const Threat& threat, const
 
             for (auto phi_prime : possible_matches(*part, add_atom, del_atom, inv.num_rigid_variables))
             {
-                const bool uses_counted = std::ranges::any_of(phi_prime.terms,
-                                                              [&](const auto& term)
-                                                              {
-                                                                  return std::visit(
-                                                                      [&](auto&& arg) -> bool
-                                                                      {
-                                                                          using T = std::decay_t<decltype(arg)>;
-                                                                          if constexpr (std::is_same_v<T, ParameterIndex>)
-                                                                              return static_cast<uint_t>(arg) >= inv.num_rigid_variables;
-                                                                          return false;
-                                                                      },
-                                                                      term.value);
-                                                              });
-
-                const size_t new_num_counted_variables = std::max(inv.num_counted_variables, uses_counted ? size_t(1) : size_t(0));
+                const size_t new_num_counted_variables =
+                    std::max(inv.num_counted_variables, atom_uses_counted(phi_prime, inv.num_rigid_variables) ? size_t(1) : size_t(0));
 
                 try_refinement(result, inv, op, effect, add_atom, std::move(phi_prime), new_num_counted_variables);
             }
