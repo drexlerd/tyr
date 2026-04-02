@@ -52,26 +52,95 @@ namespace fpi = tyr::formalism::planning::invariant;
 
 namespace tyr::planning
 {
-
-static auto remap_fdr_fact(fp::FDRFactView<f::FluentTag> fact, fp::FDRContext& fdr_context, fp::MergeContext& context)
+namespace
 {
-    // Ensure that remapping is unambiguous
-    assert(fact.get_variable().get_domain_size() == 2);
 
-    auto new_atom = merge_p2p(fact.get_variable().get_atoms().front(), context).first.get_index();
-    auto new_fact = fdr_context.get_fact(new_atom);
+enum class RemapStatus
+{
+    mapped,
+    tautology,
+    contradiction,
+};
 
-    // value 1 -> keep positive fact
-    if (fact.get_value() != fp::FDRValue::none())
-        return new_fact;
+template<f::FactKind T>
+RemapStatus classify_literal(fp::GroundAtomView<T> atom, bool polarity, const UnorderedSet<fp::GroundAtomView<T>>& atoms)
+{
+    const bool present = atoms.contains(atom);
 
-    // value 0 -> same variable, value 0
-    new_fact.value = fp::FDRValue::none();
+    if (polarity)
+        return present ? RemapStatus::mapped : RemapStatus::contradiction;
 
-    return new_fact;
+    return present ? RemapStatus::mapped : RemapStatus::tautology;
 }
 
-static auto create_ground_fdr_conjunctive_condition(fp::GroundConjunctiveConditionView element, fp::FDRContext& fdr_context, fp::MergeContext& context)
+template<f::FactKind T>
+RemapStatus classify_literal(fp::GroundLiteralView<T> literal, const UnorderedSet<fp::GroundAtomView<T>>& atoms)
+{
+    return classify_literal(literal.get_atom(), literal.get_polarity(), atoms);
+}
+
+struct RemappedFDRFact
+{
+    RemapStatus status;
+    std::optional<Data<fp::FDRFact<f::FluentTag>>> fact;
+};
+
+RemappedFDRFact remap_fdr_fact(fp::FDRFactView<f::FluentTag> fact,
+                               const UnorderedSet<fp::GroundAtomView<f::FluentTag>>& fluent_atoms,
+                               fp::FDRContext& fdr_context,
+                               fp::MergeContext& context)
+{
+    assert(fact.get_variable().get_domain_size() == 2);
+
+    const auto new_atom = merge_p2p(fact.get_variable().get_atoms().front(), context).first;
+    const bool polarity = (fact.get_value() != fp::FDRValue::none());
+
+    const auto status = classify_literal(new_atom, polarity, fluent_atoms);
+    if (status != RemapStatus::mapped)
+        return { status, std::nullopt };
+
+    auto new_fact = fdr_context.get_fact(new_atom);
+    if (!polarity)
+        new_fact.value = fp::FDRValue::none();
+
+    return { RemapStatus::mapped, new_fact };
+}
+
+template<f::FactKind T>
+struct RemappedLiteral
+{
+    RemapStatus status;
+    std::optional<fp::GroundLiteralView<T>> literal;
+};
+
+template<f::FactKind T>
+RemappedLiteral<T> remap_literal(fp::GroundLiteralView<T> literal, fp::MergeContext& context, const UnorderedSet<fp::GroundAtomView<T>>& atoms)
+{
+    const auto new_literal = merge_p2p(literal, context).first;
+    const auto status = classify_literal(new_literal, atoms);
+
+    if (status != RemapStatus::mapped)
+        return { status, std::nullopt };
+
+    return { RemapStatus::mapped, new_literal };
+}
+
+template<f::FactKind T>
+RemappedLiteral<T> remap_literal(fp::GroundLiteralView<T> literal, const UnorderedSet<fp::GroundAtomView<T>>& atoms)
+{
+    const auto status = classify_literal(literal, atoms);
+
+    if (status != RemapStatus::mapped)
+        return { status, std::nullopt };
+
+    return { RemapStatus::mapped, literal };
+}
+
+std::optional<fp::GroundConjunctiveConditionView> create_ground_fdr_conjunctive_condition(fp::GroundConjunctiveConditionView element,
+                                                                                          const UnorderedSet<fp::GroundAtomView<f::FluentTag>>& fluent_atoms,
+                                                                                          const UnorderedSet<fp::GroundAtomView<f::DerivedTag>>& derived_atoms,
+                                                                                          fp::FDRContext& fdr_context,
+                                                                                          fp::MergeContext& context)
 {
     auto fdr_conj_cond_ptr = context.builder.get_builder<fp::GroundConjunctiveCondition>();
     auto& fdr_conj_cond = *fdr_conj_cond_ptr;
@@ -81,16 +150,257 @@ static auto create_ground_fdr_conjunctive_condition(fp::GroundConjunctiveConditi
         fdr_conj_cond.static_literals.push_back(merge_p2p(literal, context).first.get_index());
 
     for (const auto fact : element.get_facts<f::FluentTag>())
-        fdr_conj_cond.fluent_facts.push_back(remap_fdr_fact(fact, fdr_context, context));
+    {
+        const auto remapped_fdr_fact = remap_fdr_fact(fact, fluent_atoms, fdr_context, context);
+
+        if (remapped_fdr_fact.status == RemapStatus::contradiction)
+            return std::nullopt;
+
+        if (remapped_fdr_fact.status == RemapStatus::tautology)
+            continue;
+
+        fdr_conj_cond.fluent_facts.push_back(*remapped_fdr_fact.fact);
+    }
 
     for (const auto literal : element.get_facts<f::DerivedTag>())
-        fdr_conj_cond.derived_literals.push_back(merge_p2p(literal, context).first.get_index());
+    {
+        const auto remapped = remap_literal(literal, context, derived_atoms);
+
+        if (remapped.status == RemapStatus::contradiction)
+            return std::nullopt;
+
+        if (remapped.status == RemapStatus::tautology)
+            continue;
+
+        fdr_conj_cond.derived_literals.push_back(remapped.literal->get_index());
+    }
 
     for (const auto numeric_constraint : element.get_numeric_constraints())
         fdr_conj_cond.numeric_constraints.push_back(merge_p2p(numeric_constraint, context));
 
     canonicalize(fdr_conj_cond);
-    return context.destination.get_or_create(fdr_conj_cond);
+    return context.destination.get_or_create(fdr_conj_cond).first;
+}
+
+std::optional<fp::GroundConjunctiveConditionView> ground_pruned(fp::ConjunctiveConditionView element,
+                                                                const UnorderedSet<fp::GroundAtomView<f::FluentTag>>& fluent_atoms,
+                                                                const UnorderedSet<fp::GroundAtomView<f::DerivedTag>>& derived_atoms,
+                                                                fp::GrounderContext& context,
+                                                                fp::FDRContext& fdr_context)
+{
+    auto conj_cond_ptr = context.builder.template get_builder<fp::GroundConjunctiveCondition>();
+    auto& conj_cond = *conj_cond_ptr;
+    conj_cond.clear();
+
+    for (const auto literal : element.template get_literals<f::StaticTag>())
+        conj_cond.static_literals.push_back(ground(literal, context).first.get_index());
+
+    for (const auto literal : element.template get_literals<f::FluentTag>())
+    {
+        const auto new_literal = ground(literal, context).first;
+        const auto remapped = remap_literal(new_literal, fluent_atoms);
+
+        if (remapped.status == RemapStatus::contradiction)
+            return std::nullopt;
+
+        if (remapped.status == RemapStatus::tautology)
+            continue;
+
+        conj_cond.fluent_facts.push_back(fdr_context.get_fact(*remapped.literal));
+    }
+
+    for (const auto literal : element.template get_literals<f::DerivedTag>())
+    {
+        const auto new_literal = ground(literal, context).first;
+        const auto remapped = remap_literal(new_literal, derived_atoms);
+
+        if (remapped.status == RemapStatus::contradiction)
+            return std::nullopt;
+
+        if (remapped.status == RemapStatus::tautology)
+            continue;
+
+        conj_cond.derived_literals.push_back(remapped.literal->get_index());
+    }
+
+    for (const auto numeric_constraint : element.get_numeric_constraints())
+        conj_cond.numeric_constraints.push_back(ground(numeric_constraint, context));
+
+    canonicalize(conj_cond);
+    return context.destination.get_or_create(conj_cond).first;
+}
+
+std::optional<fp::GroundConjunctiveEffectView> ground_pruned(fp::ConjunctiveEffectView element,
+                                                             const UnorderedSet<fp::GroundAtomView<f::FluentTag>>& fluent_atoms,
+                                                             UnorderedMap<Index<fp::FDRVariable<f::FluentTag>>, fp::FDRValue>& assign,
+                                                             fp::GrounderContext& context,
+                                                             fp::FDRContext& fdr)
+{
+    // Fetch and clear
+    auto conj_effect_ptr = context.builder.template get_builder<fp::GroundConjunctiveEffect>();
+    auto& conj_eff = *conj_effect_ptr;
+    conj_eff.clear();
+
+    // 1) create facts and variables
+    for (const auto literal : element.get_literals())
+    {
+        const auto new_literal = ground(literal, context).first;
+
+        if (!fluent_atoms.contains(new_literal.get_atom()))
+            continue;  // no-op
+
+        conj_eff.facts.push_back(fdr.get_fact(new_literal));
+    }
+
+    // 2) deletes first
+    assign.clear();
+    for (const auto fact : conj_eff.facts)
+        if (fact.value == fp::FDRValue::none())
+            assign[fact.variable] = fact.value;  // should be none()
+
+    // 3) adds second (overwrite delete)
+    for (const auto fact : conj_eff.facts)
+        if (fact.value != fp::FDRValue::none())
+            assign[fact.variable] = fact.value;
+
+    // 4) materialize
+    conj_eff.facts.clear();
+    for (const auto& [var, val] : assign)
+        conj_eff.facts.push_back(Data<fp::FDRFact<f::FluentTag>>(var, val));
+
+    // Fill remaining data
+    for (const auto numeric_effect : element.get_numeric_effects())
+        conj_eff.numeric_effects.push_back(ground(numeric_effect, context));
+    if (element.get_auxiliary_numeric_effect().has_value())
+        conj_eff.auxiliary_numeric_effect = ground(element.get_auxiliary_numeric_effect().value(), context);
+
+    // Prune no-op effects
+    if (conj_eff.facts.empty() && conj_eff.numeric_effects.empty() && !conj_eff.auxiliary_numeric_effect.has_value())
+        return std::nullopt;  // no-op
+
+    // Canonicalize and Serialize
+    canonicalize(conj_eff);
+    return context.destination.get_or_create(conj_eff).first;
+}
+
+std::optional<fp::GroundConditionalEffectView> ground_pruned(fp::ConditionalEffectView element,
+                                                             const UnorderedSet<fp::GroundAtomView<f::FluentTag>>& fluent_atoms,
+                                                             const UnorderedSet<fp::GroundAtomView<f::DerivedTag>>& derived_atoms,
+                                                             UnorderedMap<Index<fp::FDRVariable<f::FluentTag>>, fp::FDRValue>& assign,
+                                                             fp::GrounderContext& context,
+                                                             fp::FDRContext& fdr_context)
+{
+    // Fetch and clear
+    auto cond_effect_ptr = context.builder.template get_builder<fp::GroundConditionalEffect>();
+    auto& cond_effect = *cond_effect_ptr;
+    cond_effect.clear();
+
+    // Fill data
+    const auto new_condition_or_nullopt = ground_pruned(element.get_condition(), fluent_atoms, derived_atoms, context, fdr_context);
+    if (!new_condition_or_nullopt)
+        return std::nullopt;
+
+    cond_effect.condition = new_condition_or_nullopt->get_index();
+
+    const auto new_effect_or_nullopt = ground_pruned(element.get_effect(), fluent_atoms, assign, context, fdr_context);
+    if (!new_effect_or_nullopt)
+        return std::nullopt;
+
+    cond_effect.effect = new_effect_or_nullopt->get_index();
+
+    // Canonicalize and Serialize
+    canonicalize(cond_effect);
+    return context.destination.get_or_create(cond_effect).first;
+}
+
+std::optional<fp::GroundActionView> ground_pruned(fp::ActionView element,
+                                                  const UnorderedSet<fp::GroundAtomView<f::FluentTag>>& fluent_atoms,
+                                                  const UnorderedSet<fp::GroundAtomView<f::DerivedTag>>& derived_atoms,
+                                                  const analysis::DomainListListList& cond_effect_domains,
+                                                  UnorderedMap<Index<fp::FDRVariable<f::FluentTag>>, fp::FDRValue>& fluent_assign,
+                                                  itertools::cartesian_set::Workspace<Index<f::Object>>& iter_workspace,
+                                                  fp::GrounderContext& context,
+                                                  fp::FDRContext& fdr_context)
+{
+    // Fetch and clear
+    auto action_ptr = context.builder.template get_builder<fp::GroundAction>();
+    auto& action = *action_ptr;
+    action.clear();
+
+    // Fill data
+    action.binding = ground(element, context).first.get_index();
+
+    const auto new_condition_or_nullopt = ground_pruned(element.get_condition(), fluent_atoms, derived_atoms, context, fdr_context);
+    if (!new_condition_or_nullopt)
+        return std::nullopt;
+
+    action.condition = new_condition_or_nullopt->get_index();
+
+    auto binding_size = context.binding.size();
+
+    for (uint_t cond_effect_index = 0; cond_effect_index < element.get_effects().size(); ++cond_effect_index)
+    {
+        const auto cond_effect = element.get_effects()[cond_effect_index];
+        const auto& parameter_domains = cond_effect_domains[cond_effect_index];
+
+        // Ensure that we stripped off the action precondition parameter domains.
+        assert(std::distance(parameter_domains.begin(), parameter_domains.end()) == static_cast<int>(cond_effect.get_arity()));
+
+        itertools::cartesian_set::for_each_element(parameter_domains.begin(),
+                                                   parameter_domains.end(),
+                                                   iter_workspace,
+                                                   [&](auto&& binding_cond)
+                                                   {
+                                                       // push the additional parameters to the end
+                                                       context.binding.resize(binding_size);
+                                                       context.binding.insert(context.binding.end(), binding_cond.begin(), binding_cond.end());
+
+                                                       const auto ground_cond_effect_or_nullopt =
+                                                           ground_pruned(cond_effect, fluent_atoms, derived_atoms, fluent_assign, context, fdr_context);
+                                                       if (ground_cond_effect_or_nullopt.has_value())
+                                                           action.effects.push_back(ground_cond_effect_or_nullopt->get_index());
+                                                   });
+    }
+    context.binding.resize(binding_size);  ///< important to restore the binding in case of grounding other actions
+
+    if (action.effects.empty())
+        return std::nullopt;
+
+    // Canonicalize and Serialize
+    canonicalize(action);
+    return context.destination.get_or_create(action).first;
+}
+
+std::optional<fp::GroundAxiomView> ground_pruned(fp::AxiomView element,
+                                                 const UnorderedSet<fp::GroundAtomView<f::FluentTag>>& fluent_atoms,
+                                                 const UnorderedSet<fp::GroundAtomView<f::DerivedTag>>& derived_atoms,
+                                                 fp::GrounderContext& context,
+                                                 fp::FDRContext& fdr_context)
+{
+    // Fetch and clear
+    auto axiom_ptr = context.builder.template get_builder<fp::GroundAxiom>();
+    auto& axiom = *axiom_ptr;
+    axiom.clear();
+
+    // Fill data
+    axiom.binding = ground(element, context).first.get_index();
+
+    const auto new_body_or_nullopt = ground_pruned(element.get_body(), fluent_atoms, derived_atoms, context, fdr_context);
+    if (!new_body_or_nullopt.has_value())
+        return std::nullopt;  // body is false in all reachable states -> axiom is irrelevant
+
+    axiom.body = new_body_or_nullopt->get_index();
+
+    const auto new_head = ground(element.get_head(), context).first;
+    if (!derived_atoms.contains(new_head))
+        return std::nullopt;  // head is false in all reachable states -> axiom is irrelevant
+
+    axiom.head = new_head.get_index();
+
+    // Canonicalize and Serialize
+    canonicalize(axiom);
+    return context.destination.get_or_create(axiom).first;
+}
 }
 
 GroundTaskPtr ground_task(LiftedTask& lifted_task, ExecutionContext& execution_context, const GroundTaskOptions& options)
@@ -183,10 +493,13 @@ GroundTaskPtr ground_task(LiftedTask& lifted_task, ExecutionContext& execution_c
     std::sort(fluent_atoms.begin(), fluent_atoms.end());
     std::sort(derived_atoms.begin(), derived_atoms.end());
 
-    std::cout << "Fluent atoms:" << std::endl;
-    std::cout << fluent_atoms << std::endl;
-    std::cout << "Derived atoms:" << std::endl;
-    std::cout << derived_atoms << std::endl;
+    auto fluent_atoms_set = UnorderedSet<fp::GroundAtomView<f::FluentTag>>(fluent_atoms.begin(), fluent_atoms.end());
+    auto derived_atoms_set = UnorderedSet<fp::GroundAtomView<f::DerivedTag>>(derived_atoms.begin(), derived_atoms.end());
+
+    // std::cout << "Fluent atoms:" << std::endl;
+    // std::cout << fluent_atoms << std::endl;
+    // std::cout << "Derived atoms:" << std::endl;
+    // std::cout << derived_atoms << std::endl;
 
     auto fdr_context = std::shared_ptr<fp::FDRContext> { nullptr };
 
@@ -195,12 +508,12 @@ GroundTaskPtr ground_task(LiftedTask& lifted_task, ExecutionContext& execution_c
         auto invariants = fpi::synthesize_invariants(planning_domain.get_domain());
         auto mutex_groups = fpi::compute_mutex_groups(initial_atoms, fluent_atoms, invariants);
 
-        std::cout << "Invariants:" << std::endl;
-        print(std::cout, invariants);
-        std::cout << std::endl;
-        std::cout << "Mutex groups:" << std::endl;
-        print(std::cout, mutex_groups);
-        std::cout << std::endl;
+        // std::cout << "Invariants:" << std::endl;
+        // print(std::cout, invariants);
+        // std::cout << std::endl;
+        // std::cout << "Mutex groups:" << std::endl;
+        // print(std::cout, mutex_groups);
+        // std::cout << std::endl;
 
         fdr_context = std::make_shared<fp::FDRContext>(mutex_groups, repository);
     }
@@ -214,12 +527,8 @@ GroundTaskPtr ground_task(LiftedTask& lifted_task, ExecutionContext& execution_c
     for (const auto atom : fluent_atoms)
         fdr_task.fluent_atoms.push_back(merge_p2p(atom, merge_context).first.get_index());
 
-    // TODO: synthesize invariants, create mutex groups, instantiate fdr context
-
     for (const auto atom : derived_atoms)
         fdr_task.derived_atoms.push_back(merge_p2p(atom, merge_context).first.get_index());
-    // for (const auto fterm : fluent_fterms)
-    //     fdr_task.fluent_fterms.push_back(merge_p2p(fterm, merge_context).first.get_index());
 
     for (const auto fterm_value : task.get_fterm_values<f::StaticTag>())
         fdr_task.static_fterm_values.push_back(merge_p2p(fterm_value, merge_context).first.get_index());
@@ -241,7 +550,13 @@ GroundTaskPtr ground_task(LiftedTask& lifted_task, ExecutionContext& execution_c
         fdr_task.fluent_facts.push_back(fdr_context->get_fact(merge_p2p(atom, merge_context).first.get_index()));
 
     /// --- Create FDR goal
-    fdr_task.goal = create_ground_fdr_conjunctive_condition(task.get_goal(), *fdr_context, merge_context).first.get_index();
+    const auto goal_or_nullopt = create_ground_fdr_conjunctive_condition(task.get_goal(), fluent_atoms_set, derived_atoms_set, *fdr_context, merge_context);
+    if (goal_or_nullopt.has_value())
+        fdr_task.goal = goal_or_nullopt->get_index();
+    else
+    {
+        return nullptr;
+    }
 
     /// --- Create FDR actions and axioms
 
@@ -269,13 +584,19 @@ GroundTaskPtr ground_task(LiftedTask& lifted_task, ExecutionContext& execution_c
 
                 auto grounder_context = fp::GrounderContext { workspace.planning_builder, *repository, workspace.d2p.binding };
 
-                const auto ground_action = fp::ground(action,
-                                                      grounder_context,
-                                                      lifted_task.get_parameter_domains_per_cond_effect_per_action()[uint_t(action.get_index())],
-                                                      fluent_assign,
-                                                      iter_workspace,
-                                                      *fdr_context)
-                                               .first;
+                const auto ground_action_or_nullopt = ground_pruned(action,
+                                                                    fluent_atoms_set,
+                                                                    derived_atoms_set,
+                                                                    lifted_task.get_parameter_domains_per_cond_effect_per_action()[uint_t(action.get_index())],
+                                                                    fluent_assign,
+                                                                    iter_workspace,
+                                                                    grounder_context,
+                                                                    *fdr_context);
+
+                if (!ground_action_or_nullopt.has_value())
+                    continue;
+
+                const auto& ground_action = ground_action_or_nullopt.value();
 
                 assert(is_statically_applicable(ground_action, static_atoms_bitset));
 
@@ -307,7 +628,12 @@ GroundTaskPtr ground_task(LiftedTask& lifted_task, ExecutionContext& execution_c
 
                 auto grounder_context = fp::GrounderContext { workspace.planning_builder, *repository, workspace.d2p.binding };
 
-                const auto ground_axiom = fp::ground(axiom, grounder_context, *fdr_context).first;
+                const auto ground_axiom_or_nullopt = ground_pruned(axiom, fluent_atoms_set, derived_atoms_set, grounder_context, *fdr_context);
+
+                if (!ground_axiom_or_nullopt.has_value())
+                    continue;
+
+                const auto& ground_axiom = ground_axiom_or_nullopt.value();
 
                 assert(is_statically_applicable(ground_axiom, static_atoms_bitset));
 

@@ -245,6 +245,16 @@ precompute_groups(const GroundAtomViewList<FluentTag>& initial_atoms, const Grou
                 if (instantiated_group.empty())
                     continue;
 
+                size_t initial_count = 0;
+                for (const auto gatom : instantiated_group)
+                {
+                    if (std::find(initial_atoms.begin(), initial_atoms.end(), gatom) != initial_atoms.end())
+                        ++initial_count;
+                }
+
+                if (initial_count > 1)
+                    continue;
+
                 std::sort(instantiated_group.begin(), instantiated_group.end());
 
                 groups.push_back(PrecomputedGroup {
