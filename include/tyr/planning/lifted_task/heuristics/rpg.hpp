@@ -55,10 +55,10 @@ public:
 
         auto merge_context = formalism::planning::MergeDatalogContext { m_workspace.datalog_builder, m_workspace.workspace_repository };
 
-        for (const auto fact : goal.get_facts<formalism::FluentTag>())
+        for (const auto fact : goal.get_facts<formalism::PositiveTag>())
         {
-            if (fact.get_atom())
-                m_workspace.facts.goal_fact_sets.insert(formalism::planning::merge_p2d(fact.get_atom().value(), merge_context).first);
+            assert(fact.has_value());
+            m_workspace.facts.goal_fact_sets.insert(formalism::planning::merge_p2d(fact.get_atom().value(), merge_context).first);
         }
     }
 

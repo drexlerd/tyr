@@ -48,13 +48,19 @@ float_t GoalCountHeuristic<Kind>::evaluate(const StateView<Kind>& state)
 
     auto state_context = StateContext<Kind> { *m_task, state.get_unpacked_state(), float_t { 0 } };
 
-    for (const auto fact : m_goal.template get_facts<formalism::FluentTag>())
+    for (const auto fact : m_goal.template get_facts<formalism::PositiveTag>())
     {
-        if (!is_applicable(fact, state_context))
+        if (!is_applicable(fact, true, state_context))
             ++unsat_counter;
     }
 
-    for (const auto fact : m_goal.template get_facts<formalism::DerivedTag>())
+    for (const auto fact : m_goal.template get_facts<formalism::NegativeTag>())
+    {
+        if (!is_applicable(fact, false, state_context))
+            ++unsat_counter;
+    }
+
+    for (const auto fact : m_goal.template get_literals<formalism::DerivedTag>())
     {
         if (!is_applicable(fact, state_context))
             ++unsat_counter;

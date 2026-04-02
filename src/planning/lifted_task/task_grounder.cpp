@@ -86,24 +86,20 @@ struct RemappedFDRFact
 };
 
 RemappedFDRFact remap_fdr_fact(fp::FDRFactView<f::FluentTag> fact,
+                               bool polarity,
                                const UnorderedSet<fp::GroundAtomView<f::FluentTag>>& fluent_atoms,
                                fp::FDRContext& fdr_context,
                                fp::MergeContext& context)
 {
-    assert(fact.get_variable().get_domain_size() == 2);
+    assert(fact.has_value());
 
-    const auto new_atom = merge_p2p(fact.get_variable().get_atoms().front(), context).first;
-    const bool polarity = (fact.get_value() != fp::FDRValue::none());
-
+    const auto new_atom = merge_p2p(fact.get_atom().value(), context).first;
     const auto status = classify_literal(new_atom, polarity, fluent_atoms);
+
     if (status != RemapStatus::mapped)
         return { status, std::nullopt };
 
-    auto new_fact = fdr_context.get_fact(new_atom);
-    if (!polarity)
-        new_fact.value = fp::FDRValue::none();
-
-    return { RemapStatus::mapped, new_fact };
+    return { RemapStatus::mapped, fdr_context.get_fact(new_atom) };
 }
 
 template<f::FactKind T>
@@ -146,23 +142,10 @@ std::optional<fp::GroundConjunctiveConditionView> create_ground_fdr_conjunctive_
     auto& fdr_conj_cond = *fdr_conj_cond_ptr;
     fdr_conj_cond.clear();
 
-    for (const auto literal : element.get_facts<f::StaticTag>())
+    for (const auto literal : element.get_literals<f::StaticTag>())
         fdr_conj_cond.static_literals.push_back(merge_p2p(literal, context).first.get_index());
 
-    for (const auto fact : element.get_facts<f::FluentTag>())
-    {
-        const auto remapped_fdr_fact = remap_fdr_fact(fact, fluent_atoms, fdr_context, context);
-
-        if (remapped_fdr_fact.status == RemapStatus::contradiction)
-            return std::nullopt;
-
-        if (remapped_fdr_fact.status == RemapStatus::tautology)
-            continue;
-
-        fdr_conj_cond.fluent_facts.push_back(*remapped_fdr_fact.fact);
-    }
-
-    for (const auto literal : element.get_facts<f::DerivedTag>())
+    for (const auto literal : element.get_literals<f::DerivedTag>())
     {
         const auto remapped = remap_literal(literal, context, derived_atoms);
 
@@ -173,6 +156,32 @@ std::optional<fp::GroundConjunctiveConditionView> create_ground_fdr_conjunctive_
             continue;
 
         fdr_conj_cond.derived_literals.push_back(remapped.literal->get_index());
+    }
+
+    for (const auto fact : element.get_facts<f::PositiveTag>())
+    {
+        const auto remapped_fdr_fact = remap_fdr_fact(fact, true, fluent_atoms, fdr_context, context);
+
+        if (remapped_fdr_fact.status == RemapStatus::contradiction)
+            return std::nullopt;
+
+        if (remapped_fdr_fact.status == RemapStatus::tautology)
+            continue;
+
+        fdr_conj_cond.positive_facts.push_back(*remapped_fdr_fact.fact);
+    }
+
+    for (const auto fact : element.get_facts<f::NegativeTag>())
+    {
+        const auto remapped_fdr_fact = remap_fdr_fact(fact, false, fluent_atoms, fdr_context, context);
+
+        if (remapped_fdr_fact.status == RemapStatus::contradiction)
+            return std::nullopt;
+
+        if (remapped_fdr_fact.status == RemapStatus::tautology)
+            continue;
+
+        fdr_conj_cond.negative_facts.push_back(*remapped_fdr_fact.fact);
     }
 
     for (const auto numeric_constraint : element.get_numeric_constraints())
@@ -206,7 +215,11 @@ std::optional<fp::GroundConjunctiveConditionView> ground_pruned(fp::ConjunctiveC
         if (remapped.status == RemapStatus::tautology)
             continue;
 
-        conj_cond.fluent_facts.push_back(fdr_context.get_fact(*remapped.literal));
+        const auto new_fact = fdr_context.get_fact(remapped.literal->get_atom());
+        if (literal.get_polarity())
+            conj_cond.positive_facts.push_back(new_fact);
+        else
+            conj_cond.negative_facts.push_back(new_fact);
     }
 
     for (const auto literal : element.template get_literals<f::DerivedTag>())
@@ -256,7 +269,7 @@ std::optional<fp::GroundConjunctiveEffectView> ground_pruned(fp::ConjunctiveEffe
     assign.clear();
     for (const auto fact : conj_eff.facts)
         if (fact.value == fp::FDRValue::none())
-            assign[fact.variable] = fact.value;  // should be none()
+            assign[fact.variable] = fp::FDRValue::none();
 
     // 3) adds second (overwrite delete)
     for (const auto fact : conj_eff.facts)

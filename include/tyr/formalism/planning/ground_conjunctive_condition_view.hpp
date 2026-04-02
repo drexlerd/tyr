@@ -43,6 +43,11 @@ public:
 
     auto get_index() const noexcept { return m_handle; }
     template<formalism::FactKind T>
+    auto get_literals() const noexcept
+    {
+        return make_view(get_data().template get_literals<T>(), *m_context);
+    }
+    template<formalism::PolarityKind T>
     auto get_facts() const noexcept
     {
         return make_view(get_data().template get_facts<T>(), *m_context);

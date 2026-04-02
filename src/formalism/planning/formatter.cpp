@@ -301,6 +301,8 @@ std::ostream& print(std::ostream& os, const formalism::planning::GroundActionVie
 
         os << print_indent << "index = " << el.get_index() << "\n";
 
+        os << print_indent << "binding = " << el.get_row() << "\n";
+
         os << print_indent << "action index = " << el.get_action().get_index() << "\n";
 
         os << print_indent << "condition = " << el.get_condition() << "\n";
@@ -388,6 +390,8 @@ std::ostream& print(std::ostream& os, const formalism::planning::GroundAxiomView
         IndentScope scope(os);
 
         os << print_indent << "index = " << el.get_index() << "\n";
+
+        os << print_indent << "binding = " << el.get_row() << "\n";
 
         os << print_indent << "axiom index = " << el.get_axiom().get_index() << "\n";
 
@@ -608,9 +612,11 @@ std::ostream& print(std::ostream& os, const Data<formalism::planning::GroundConj
 
         os << print_indent << "static literals = " << el.static_literals << "\n";
 
-        os << print_indent << "fluent facts = " << el.fluent_facts << "\n";
-
         os << print_indent << "derived literals = " << el.derived_literals << "\n";
+
+        os << print_indent << "positive facts = " << el.positive_facts << "\n";
+
+        os << print_indent << "negative facts = " << el.negative_facts << "\n";
 
         os << print_indent << "numeric constraints = " << el.numeric_constraints << "\n";
     }
@@ -625,11 +631,13 @@ std::ostream& print(std::ostream& os, const formalism::planning::GroundConjuncti
     {
         IndentScope scope(os);
 
-        os << print_indent << "static literals = " << el.template get_facts<formalism::StaticTag>() << "\n";
+        os << print_indent << "static literals = " << el.template get_literals<formalism::StaticTag>() << "\n";
 
-        os << print_indent << "fluent facts = " << el.template get_facts<formalism::FluentTag>() << "\n";
+        os << print_indent << "derived literals = " << el.template get_literals<formalism::DerivedTag>() << "\n";
 
-        os << print_indent << "derived facts = " << el.template get_facts<formalism::DerivedTag>() << "\n";
+        os << print_indent << "positive facts = " << el.template get_facts<formalism::PositiveTag>() << "\n";
+
+        os << print_indent << "negative facts = " << el.template get_facts<formalism::NegativeTag>() << "\n";
 
         os << print_indent << "numeric constraints = " << el.get_numeric_constraints() << "\n";
     }

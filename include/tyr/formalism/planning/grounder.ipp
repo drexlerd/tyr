@@ -245,7 +245,12 @@ TYR_INLINE_IMPL std::pair<GroundConjunctiveConditionView, bool> ground(Conjuncti
     for (const auto literal : element.template get_literals<StaticTag>())
         conj_cond.static_literals.push_back(ground(literal, context).first.get_index());
     for (const auto literal : element.template get_literals<FluentTag>())
-        conj_cond.fluent_facts.push_back(ground(literal, context, fdr));
+    {
+        if (literal.get_polarity())
+            conj_cond.positive_facts.push_back(ground(literal.get_atom(), context, fdr));
+        else
+            conj_cond.negative_facts.push_back(ground(literal.get_atom(), context, fdr));
+    }
     for (const auto literal : element.template get_literals<DerivedTag>())
         conj_cond.derived_literals.push_back(ground(literal, context).first.get_index());
     for (const auto numeric_constraint : element.get_numeric_constraints())

@@ -1387,8 +1387,9 @@ private:
 
         const auto func_insert_literal = [](IndexGroundLiteralOrFactVariant index_literal_variant,
                                             IndexList<GroundLiteral<StaticTag>>& static_literals,
-                                            DataList<FDRFact<FluentTag>>& fluent_facts,
-                                            IndexList<GroundLiteral<DerivedTag>>& derived_literals)
+                                            IndexList<GroundLiteral<DerivedTag>>& derived_literals,
+                                            DataList<FDRFact<FluentTag>>& positive_facts,
+                                            DataList<FDRFact<FluentTag>>& negative_facts)
         {
             std::visit(
                 [&](auto&& literal_index)
@@ -1398,7 +1399,12 @@ private:
                     if constexpr (std::is_same_v<T, Index<GroundLiteral<StaticTag>>>)
                         static_literals.push_back(literal_index);
                     else if constexpr (std::is_same_v<T, Data<FDRFact<FluentTag>>>)
-                        fluent_facts.push_back(literal_index);
+                    {
+                        if (literal_index.value == FDRValue::none())
+                            negative_facts.push_back(Data<FDRFact<FluentTag>>(literal_index.variable, FDRValue::none()));
+                        else
+                            positive_facts.push_back(Data<FDRFact<FluentTag>>(literal_index.variable, FDRValue { 1 }));
+                    }
                     else if constexpr (std::is_same_v<T, Index<GroundLiteral<DerivedTag>>>)
                         derived_literals.push_back(literal_index);
                     else
@@ -1427,8 +1433,9 @@ private:
 
                                     func_insert_literal(index_literal_variant,
                                                         conj_condition.static_literals,
-                                                        conj_condition.fluent_facts,
-                                                        conj_condition.derived_literals);
+                                                        conj_condition.derived_literals,
+                                                        conj_condition.positive_facts,
+                                                        conj_condition.negative_facts);
                                 }
                                 else if constexpr (std::is_same_v<SubConditionT, loki::ConditionNumericConstraint>)
                                 {
@@ -1452,7 +1459,11 @@ private:
                 {
                     const auto index_literal_variant = translate_grounded(condition->get_literal(), builder, context, fdr_context);
 
-                    func_insert_literal(index_literal_variant, conj_condition.static_literals, conj_condition.fluent_facts, conj_condition.derived_literals);
+                    func_insert_literal(index_literal_variant,
+                                        conj_condition.static_literals,
+                                        conj_condition.derived_literals,
+                                        conj_condition.positive_facts,
+                                        conj_condition.negative_facts);
 
                     canonicalize(conj_condition);
                     return context.get_or_create(conj_condition).first.get_index();

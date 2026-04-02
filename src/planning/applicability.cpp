@@ -138,11 +138,11 @@ template bool is_applicable(formalism::planning::GroundLiteralListView<formalism
 template bool is_applicable(formalism::planning::GroundLiteralListView<formalism::StaticTag> elements, const StateContext<GroundTag>& context);
 template bool is_applicable(formalism::planning::GroundLiteralListView<formalism::DerivedTag> elements, const StateContext<GroundTag>& context);
 
-template bool is_applicable(formalism::planning::FDRFactView<formalism::FluentTag> element, const StateContext<LiftedTag>& context);
-template bool is_applicable(formalism::planning::FDRFactView<formalism::FluentTag> element, const StateContext<GroundTag>& context);
+template bool is_applicable(formalism::planning::FDRFactView<formalism::FluentTag> element, bool polarity, const StateContext<LiftedTag>& context);
+template bool is_applicable(formalism::planning::FDRFactView<formalism::FluentTag> element, bool polarity, const StateContext<GroundTag>& context);
 
-template bool is_applicable(formalism::planning::FDRFactListView<formalism::FluentTag> elements, const StateContext<LiftedTag>& context);
-template bool is_applicable(formalism::planning::FDRFactListView<formalism::FluentTag> elements, const StateContext<GroundTag>& context);
+template bool is_applicable(formalism::planning::FDRFactListView<formalism::FluentTag> elements, bool polarity, const StateContext<LiftedTag>& context);
+template bool is_applicable(formalism::planning::FDRFactListView<formalism::FluentTag> elements, bool polarity, const StateContext<GroundTag>& context);
 
 template bool is_applicable(formalism::planning::GroundBooleanOperatorListView elements, const StateContext<LiftedTag>& context);
 template bool is_applicable(formalism::planning::GroundBooleanOperatorListView elements, const StateContext<GroundTag>& context);

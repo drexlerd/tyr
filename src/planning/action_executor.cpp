@@ -73,6 +73,12 @@ void process_effects(fp::GroundActionView action,
 template<TaskKind Kind>
 bool ActionExecutor::is_applicable(fp::GroundActionView action, const StateContext<Kind>& state)
 {
+    std::cout << action << std::endl;
+    const auto a = tyr::planning::is_applicable(action, state, m_effect_families);
+    const auto b = tyr::planning::are_applicable_if_fires(action.get_effects(), state, m_effect_families);
+    std::cout << "action applicable: " << a << std::endl;
+    std::cout << "effects applicable if fires: " << b << std::endl;
+
     // Ensure that condition applicability was verified already.
     assert(tyr::planning::are_applicable_if_fires(action.get_effects(), state, m_effect_families)
            == tyr::planning::is_applicable(action, state, m_effect_families));

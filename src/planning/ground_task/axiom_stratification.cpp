@@ -37,7 +37,7 @@ static as::DepGraph build_dependency_graph(fp::FDRTaskView task, size_t num_atom
     {
         const auto h_atom = axiom.get_head().get_index();
 
-        for (const auto literal : axiom.get_body().get_facts<f::DerivedTag>())
+        for (const auto literal : axiom.get_body().get_literals<f::DerivedTag>())
         {
             const auto b_atom = literal.get_atom().get_index();
 
