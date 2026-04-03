@@ -32,6 +32,11 @@ int main(int argc, char** argv)
     program.add_argument("-N", "--num-worker-threads").default_value(size_t(1)).scan<'u', size_t>().help("The number of worker threads.");
     program.add_argument("-R", "--random-seed").default_value(uint64_t(0)).scan<'u', uint64_t>().help("The random seed.");
     program.add_argument("-S", "--shuffle-labeled-succ-nodes").default_value(false).implicit_value(true).help("Toggle shuffling the labeled successor nodes.");
+    program.add_argument("-G", "--instantiate-ground-task")
+        .default_value(false)
+        .implicit_value(true)
+        .help("Enable instantiating the ground task before search.");
+    program.add_argument("-H", "--heuristic-type").default_value("blind").choices("blind", "goal_count", "rpg_max", "rpg_add", "rpg_ff");
     program.add_argument("-V", "--verbosity")
         .default_value(size_t(0))
         .scan<'u', size_t>()
@@ -58,6 +63,8 @@ int main(int argc, char** argv)
         auto num_worker_threads = program.get<std::size_t>("--num-worker-threads");
         auto random_seed = program.get<uint64_t>("--random-seed");
         auto shuffle_labeled_succ_nodes = program.get<bool>("--shuffle-labeled-succ-nodes");
+        auto instantiate_ground_task = program.get<bool>("--instantiate-ground-task");
+        auto heuristic_type = program.get<std::string>("--heuristic-type");
         auto verbosity = program.get<size_t>("--verbosity");
 
         std::cout << "[INPUT] Num worker threads: " << num_worker_threads << std::endl;
@@ -71,8 +78,6 @@ int main(int argc, char** argv)
 
         auto lifted_task = planning::LiftedTask::create(parser.parse_task(problem_filepath));
 
-        std::cout << "Num objects: " << lifted_task->get_task().get_objects().size() << std::endl;
-
         if (verbosity > 0)
             std::cout << domain << std::endl;
 
@@ -81,82 +86,102 @@ int main(int argc, char** argv)
 
         auto execution_context = ExecutionContext::create(num_worker_threads);
 
-        auto successor_generator = planning::SuccessorGenerator<planning::LiftedTag>(lifted_task, execution_context);
-
-        auto options = planning::gbfs_lazy::Options<planning::LiftedTag>();
-        options.start_node = successor_generator.get_initial_node();
-        options.event_handler = planning::gbfs_lazy::DefaultEventHandler<planning::LiftedTag>::create(verbosity);
-        options.random_seed = random_seed;
-        options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
-
-        auto ff_heuristic = planning::FFRPGHeuristic<planning::LiftedTag>::create(lifted_task, execution_context);
-
-        auto result = planning::gbfs_lazy::find_solution(*lifted_task, successor_generator, *ff_heuristic, options);
-
-        if (result.status == planning::SearchStatus::SOLVED)
+        if (!instantiate_ground_task)
         {
-            std::ofstream plan_file;
-            plan_file.open(plan_filepath);
-            if (!plan_file.is_open())
+            auto successor_generator = planning::SuccessorGenerator<planning::LiftedTag>(lifted_task, execution_context);
+
+            auto options = planning::gbfs_lazy::Options<planning::LiftedTag>();
+            options.start_node = successor_generator.get_initial_node();
+            options.event_handler = planning::gbfs_lazy::DefaultEventHandler<planning::LiftedTag>::create(verbosity);
+            options.random_seed = random_seed;
+            options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
+
+            auto heuristic = std::shared_ptr<planning::Heuristic<planning::LiftedTag>> { nullptr };
+            if (heuristic_type == "blind")
+                heuristic = planning::BlindHeuristic<planning::LiftedTag>::create();
+            else if (heuristic_type == "goal_count")
+                heuristic = planning::GoalCountHeuristic<planning::LiftedTag>::create(lifted_task);
+            else if (heuristic_type == "rpg_add")
+                heuristic = planning::AddRPGHeuristic<planning::LiftedTag>::create(lifted_task, execution_context);
+            else if (heuristic_type == "rpg_max")
+                heuristic = planning::MaxRPGHeuristic<planning::LiftedTag>::create(lifted_task, execution_context);
+            else if (heuristic_type == "rpg_ff")
+                heuristic = planning::FFRPGHeuristic<planning::LiftedTag>::create(lifted_task, execution_context);
+            else
+                throw std::invalid_argument("The heuristic is not implemented.");
+
+            auto result = planning::gbfs_lazy::find_solution(*lifted_task, successor_generator, *heuristic, options);
+
+            if (result.status == planning::SearchStatus::SOLVED)
             {
-                std::cerr << "Error opening file!" << std::endl;
-                return 1;
+                std::ofstream plan_file;
+                plan_file.open(plan_filepath);
+                if (!plan_file.is_open())
+                {
+                    std::cerr << "Error opening file!" << std::endl;
+                    return 1;
+                }
+                plan_file << result.plan.value();
+                plan_file.close();
             }
-            plan_file << result.plan.value();
-            plan_file.close();
+
+            successor_generator.print_summary(1);
+            successor_generator.get_state_repository()->get_axiom_evaluator()->print_summary(1);
+            heuristic->print_summary(1);
+
+            std::cout << "[Total] Number of fluent atoms: " << lifted_task->get_repository()->size<formalism::planning::GroundAtom<formalism::FluentTag>>()
+                      << std::endl;
+            std::cout << "[Total] Number of derived atoms: " << lifted_task->get_repository()->size<formalism::planning::GroundAtom<formalism::DerivedTag>>()
+                      << std::endl;
+            std::cout << "[Total] Number of fluent fterms: "
+                      << lifted_task->get_repository()->size<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>() << std::endl;
+            std::cout << "[Total] States memory usage: " << successor_generator.get_state_repository()->memory_usage() << " bytes" << std::endl;
         }
-
-        std::cout << "[Successor generator] Summary" << std::endl;
-        std::cout << successor_generator.get_workspace().statistics << std::endl;
-        auto successor_generator_rule_statistics = std::vector<datalog::RuleStatistics> {};
-        for (const auto& ws_rule : successor_generator.get_workspace().rules)
-            successor_generator_rule_statistics.push_back(ws_rule->common.statistics);
-        std::cout << datalog::compute_aggregated_rule_statistics(successor_generator_rule_statistics) << std::endl;
-        auto successor_generator_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
-        for (const auto& ws_rule : successor_generator.get_workspace().rules)
-            for (const auto& worker : ws_rule->worker)
-                successor_generator_rule_worker_statistics.push_back(worker.solve.statistics);
-        std::cout << datalog::compute_aggregated_rule_worker_statistics(successor_generator_rule_worker_statistics) << std::endl;
-
-        std::cout << "[Axiom evaluator] Summary" << std::endl;
-        std::cout << successor_generator.get_state_repository()->get_axiom_evaluator()->get_workspace().statistics << std::endl;
-        auto axiom_evaluator_rule_statistics = std::vector<datalog::RuleStatistics> {};
-        for (const auto& ws_rule : successor_generator.get_state_repository()->get_axiom_evaluator()->get_workspace().rules)
-            axiom_evaluator_rule_statistics.push_back(ws_rule->common.statistics);
-        std::cout << datalog::compute_aggregated_rule_statistics(axiom_evaluator_rule_statistics) << std::endl;
-        auto axiom_evaluator_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
-        for (const auto& ws_rule : successor_generator.get_state_repository()->get_axiom_evaluator()->get_workspace().rules)
-            for (const auto& worker : ws_rule->worker)
-                axiom_evaluator_rule_worker_statistics.push_back(worker.solve.statistics);
-        std::cout << datalog::compute_aggregated_rule_worker_statistics(axiom_evaluator_rule_worker_statistics) << std::endl;
-
-        std::cout << "[FFRPGHeuristic] Summary" << std::endl;
-        std::cout << ff_heuristic->get_workspace().statistics << std::endl;
-        auto ff_heuristic_rule_statistics = std::vector<datalog::RuleStatistics> {};
-        for (size_t i = 0; i < ff_heuristic->get_workspace().rules.size(); ++i)
+        else
         {
-            const auto& ws_rule = ff_heuristic->get_workspace().rules[i];
-            const auto& cws_rule = lifted_task->get_rpg_program().get_const_program_workspace().rules[i];
-            ff_heuristic_rule_statistics.push_back(ws_rule->common.statistics);
-            // std::cout << cws_rule.get_rule() << std::endl;
-            // std::cout << ws_rule->common.statistics << std::endl;
-            // for (const auto& worker : ws_rule->worker)
-            //     std::cout << worker.solve.statistics << std::endl;
-        }
-        std::cout << datalog::compute_aggregated_rule_statistics(ff_heuristic_rule_statistics) << std::endl;
-        auto ff_heuristic_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
-        for (const auto& ws_rule : ff_heuristic->get_workspace().rules)
-            for (const auto& worker : ws_rule->worker)
-                ff_heuristic_rule_worker_statistics.push_back(worker.solve.statistics);
-        std::cout << datalog::compute_aggregated_rule_worker_statistics(ff_heuristic_rule_worker_statistics) << std::endl;
+            auto ground_task = lifted_task->instantiate_ground_task(*execution_context);
 
-        std::cout << "[Total] Number of fluent atoms: " << lifted_task->get_repository()->size<formalism::planning::GroundAtom<formalism::FluentTag>>()
-                  << std::endl;
-        std::cout << "[Total] Number of derived atoms: " << lifted_task->get_repository()->size<formalism::planning::GroundAtom<formalism::DerivedTag>>()
-                  << std::endl;
-        std::cout << "[Total] Number of fluent fterms: " << lifted_task->get_repository()->size<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>()
-                  << std::endl;
-        std::cout << "[Total] States memory usage: " << successor_generator.get_state_repository()->memory_usage() << " bytes" << std::endl;
+            std::cout << ground_task->get_formalism_task() << std::endl;
+
+            auto successor_generator = planning::SuccessorGenerator<planning::GroundTag>(ground_task, execution_context);
+
+            auto options = planning::gbfs_lazy::Options<planning::GroundTag>();
+            options.start_node = successor_generator.get_initial_node();
+            options.event_handler = planning::gbfs_lazy::DefaultEventHandler<planning::GroundTag>::create(verbosity);
+            options.random_seed = random_seed;
+            options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
+
+            auto heuristic = std::shared_ptr<planning::Heuristic<planning::GroundTag>> { nullptr };
+            if (heuristic_type == "blind")
+                heuristic = planning::BlindHeuristic<planning::GroundTag>::create();
+            else if (heuristic_type == "goal_count")
+                heuristic = planning::GoalCountHeuristic<planning::GroundTag>::create(ground_task);
+            else
+                throw std::invalid_argument("The heuristic is not implemented.");
+
+            auto result = planning::gbfs_lazy::find_solution(*ground_task, successor_generator, *heuristic, options);
+
+            if (result.status == planning::SearchStatus::SOLVED)
+            {
+                std::ofstream plan_file;
+                plan_file.open(plan_filepath);
+                if (!plan_file.is_open())
+                {
+                    std::cerr << "Error opening file!" << std::endl;
+                    return 1;
+                }
+                plan_file << result.plan.value();
+                plan_file.close();
+            }
+
+            std::cout << "[Total] Number of fluent atoms: " << ground_task->get_repository()->size<formalism::planning::GroundAtom<formalism::FluentTag>>()
+                      << std::endl;
+            std::cout << "[Total] Number of derived atoms: " << ground_task->get_repository()->size<formalism::planning::GroundAtom<formalism::DerivedTag>>()
+                      << std::endl;
+            std::cout << "[Total] Number of fluent fterms: "
+                      << ground_task->get_repository()->size<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>() << std::endl;
+            std::cout << "[Total] States memory usage: " << successor_generator.get_state_repository()->memory_usage() << " bytes" << std::endl;
+        }
     }
 
     std::cout << "[Total] Peak memory usage: " << get_peak_memory_usage_in_bytes() << " bytes" << std::endl;

@@ -51,6 +51,8 @@ public:
 
     Node<LiftedTag> get_node(Index<State<LiftedTag>> state_index);
 
+    void print_summary(size_t verbosity) const;
+
     /**
      * Expert API
      */

@@ -100,6 +100,24 @@ void AxiomEvaluator<LiftedTag>::compute_extended_state(UnpackedState<LiftedTag>&
     read_derived_atoms_from_program_context(m_task->get_axiom_program(), unpacked_state, merge_planning_context, m_workspace.facts.fact_sets);
 }
 
+void AxiomEvaluator<LiftedTag>::print_summary(size_t verbosity) const
+{
+    if (verbosity < 1)
+        return;
+
+    std::cout << "[Axiom evaluator] Summary" << std::endl;
+    std::cout << m_workspace.statistics << std::endl;
+    auto axiom_evaluator_rule_statistics = std::vector<datalog::RuleStatistics> {};
+    for (const auto& ws_rule : m_workspace.rules)
+        axiom_evaluator_rule_statistics.push_back(ws_rule->common.statistics);
+    std::cout << datalog::compute_aggregated_rule_statistics(axiom_evaluator_rule_statistics) << std::endl;
+    auto axiom_evaluator_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
+    for (const auto& ws_rule : m_workspace.rules)
+        for (const auto& worker : ws_rule->worker)
+            axiom_evaluator_rule_worker_statistics.push_back(worker.solve.statistics);
+    std::cout << datalog::compute_aggregated_rule_worker_statistics(axiom_evaluator_rule_worker_statistics) << std::endl;
+}
+
 static_assert(AxiomEvaluatorConcept<AxiomEvaluator<LiftedTag>, LiftedTag>);
 
 }

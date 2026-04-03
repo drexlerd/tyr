@@ -41,7 +41,7 @@ RE_RULE_WORKER_OA     = re.compile(r'^\[AggregatedRuleWorkerStatistics\]\s+OA\s*
 SECTION_MAP = {
     "Successor generator": "succgen",
     "Axiom evaluator": "axiom",
-    "FFRPGHeuristic": "ff",
+    "RPGHeuristic": "ff",
 }
 
 def parse_datalog_summaries(content: str, props: dict):

@@ -52,6 +52,8 @@ public:
         static const auto actions = UnorderedSet<formalism::planning::GroundActionView> {};
         return actions;
     }
+
+    virtual void print_summary(size_t verbosity) const {}
 };
 
 }

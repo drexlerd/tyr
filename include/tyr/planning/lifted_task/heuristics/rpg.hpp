@@ -25,6 +25,7 @@
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/heuristic.hpp"
 #include "tyr/planning/lifted_task.hpp"
+#include "tyr/planning/lifted_task/state_data.hpp"
 #include "tyr/planning/lifted_task/state_view.hpp"
 #include "tyr/planning/lifted_task/unpacked_state.hpp"
 #include "tyr/planning/task_utils.hpp"
@@ -79,6 +80,24 @@ public:
     }
 
     const auto& get_workspace() const noexcept { return m_workspace; }
+
+    void print_summary(size_t verbosity) const override
+    {
+        if (verbosity < 1)
+            return;
+
+        std::cout << "[RPGHeuristic] Summary" << std::endl;
+        std::cout << m_workspace.statistics << std::endl;
+        auto rule_statistics = std::vector<datalog::RuleStatistics> {};
+        for (const auto& ws_rule : m_workspace.rules)
+            rule_statistics.push_back(ws_rule->common.statistics);
+        std::cout << datalog::compute_aggregated_rule_statistics(rule_statistics) << std::endl;
+        auto rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
+        for (const auto& ws_rule : m_workspace.rules)
+            for (const auto& worker : ws_rule->worker)
+                rule_worker_statistics.push_back(worker.solve.statistics);
+        std::cout << datalog::compute_aggregated_rule_worker_statistics(rule_worker_statistics) << std::endl;
+    }
 
 protected:
     std::shared_ptr<Task<LiftedTag>> m_task;

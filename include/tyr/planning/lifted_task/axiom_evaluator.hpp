@@ -44,6 +44,8 @@ public:
 
     const auto& get_workspace() const noexcept { return m_workspace; }
 
+    void print_summary(size_t verbosity) const;
+
 private:
     std::shared_ptr<Task<LiftedTag>> m_task;
     ExecutionContextPtr m_execution_context;

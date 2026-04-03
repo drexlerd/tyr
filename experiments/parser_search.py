@@ -68,9 +68,9 @@ class SearchParser(Parser):
     """
     def __init__(self):
         super().__init__()
-        self.add_pattern("cost", r"\[GBFS\] Plan cost: (\d+)", type=int)
-        self.add_pattern("length", r"\[GBFS\] Plan length: (\d+)", type=int)
-        self.add_pattern("initial_h_value", r"\[GBFS\] Start node h_value: (\d+)", type=int)
+        self.add_pattern("cost", r"\[.*\] Plan cost: (\d+)", type=int)
+        self.add_pattern("length", r"\[.*\] Plan length: (\d+)", type=int)
+        self.add_pattern("initial_h_value", r"\[.*\] Start node h_value: (\d+)", type=int)
 
         self.add_pattern("search_time_ms", r"\[Search\] Search time: (\d+) ms", type=int)
         self.add_pattern("search_time_ns", r"\[Search\] Search time: \d+ ms \((\d+) ns\)", type=int)
@@ -102,7 +102,6 @@ class SearchParser(Parser):
     @staticmethod
     def get_attributes():
         return [
-            "num_objects",
             Attribute("coverage", min_wins=False),
             "cost",
             "length",

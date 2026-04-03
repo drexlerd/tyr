@@ -36,7 +36,7 @@ int main(int argc, char** argv)
         .default_value(false)
         .implicit_value(true)
         .help("Enable instantiating the ground task before search.");
-    program.add_argument("-H", "--heuristic-type").default_value("ff").choices("blind", "perfect", "max", "add", "setadd", "ff");
+    program.add_argument("-H", "--heuristic-type").default_value("blind").choices("blind", "goal_count", "rpg_max", "rpg_add", "rpg_ff");
     program.add_argument("-V", "--verbosity")
         .default_value(size_t(0))
         .scan<'u', size_t>()
@@ -64,6 +64,7 @@ int main(int argc, char** argv)
         auto random_seed = program.get<uint64_t>("--random-seed");
         auto shuffle_labeled_succ_nodes = program.get<bool>("--shuffle-labeled-succ-nodes");
         auto instantiate_ground_task = program.get<bool>("--instantiate-ground-task");
+        auto heuristic_type = program.get<std::string>("--heuristic-type");
         auto verbosity = program.get<size_t>("--verbosity");
 
         std::cout << "[INPUT] Num worker threads: " << num_worker_threads << std::endl;
@@ -95,11 +96,21 @@ int main(int argc, char** argv)
             options.random_seed = random_seed;
             options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
 
-            auto ff_heuristic = planning::FFRPGHeuristic<planning::LiftedTag>::create(lifted_task, execution_context);
+            auto heuristic = std::shared_ptr<planning::Heuristic<planning::LiftedTag>> { nullptr };
+            if (heuristic_type == "blind")
+                heuristic = planning::BlindHeuristic<planning::LiftedTag>::create();
+            else if (heuristic_type == "goal_count")
+                heuristic = planning::GoalCountHeuristic<planning::LiftedTag>::create(lifted_task);
+            else if (heuristic_type == "rpg_add")
+                heuristic = planning::AddRPGHeuristic<planning::LiftedTag>::create(lifted_task, execution_context);
+            else if (heuristic_type == "rpg_max")
+                heuristic = planning::MaxRPGHeuristic<planning::LiftedTag>::create(lifted_task, execution_context);
+            else if (heuristic_type == "rpg_ff")
+                heuristic = planning::FFRPGHeuristic<planning::LiftedTag>::create(lifted_task, execution_context);
+            else
+                throw std::invalid_argument("The heuristic is not implemented.");
 
-            auto blind_heuristic = planning::BlindHeuristic<planning::LiftedTag>::create();
-
-            auto result = planning::astar_eager::find_solution(*lifted_task, successor_generator, *blind_heuristic, options);
+            auto result = planning::astar_eager::find_solution(*lifted_task, successor_generator, *heuristic, options);
 
             if (result.status == planning::SearchStatus::SOLVED)
             {
@@ -126,8 +137,6 @@ int main(int argc, char** argv)
         {
             auto ground_task = lifted_task->instantiate_ground_task(*execution_context);
 
-            std::cout << ground_task->get_formalism_task() << std::endl;
-
             auto successor_generator = planning::SuccessorGenerator<planning::GroundTag>(ground_task, execution_context);
 
             auto options = planning::astar_eager::Options<planning::GroundTag>();
@@ -136,9 +145,15 @@ int main(int argc, char** argv)
             options.random_seed = random_seed;
             options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
 
-            auto blind_heuristic = planning::BlindHeuristic<planning::GroundTag>::create();
+            auto heuristic = std::shared_ptr<planning::Heuristic<planning::GroundTag>> { nullptr };
+            if (heuristic_type == "blind")
+                heuristic = planning::BlindHeuristic<planning::GroundTag>::create();
+            else if (heuristic_type == "goal_count")
+                heuristic = planning::GoalCountHeuristic<planning::GroundTag>::create(ground_task);
+            else
+                throw std::invalid_argument("The heuristic is not implemented.");
 
-            auto result = planning::astar_eager::find_solution(*ground_task, successor_generator, *blind_heuristic, options);
+            auto result = planning::astar_eager::find_solution(*ground_task, successor_generator, *heuristic, options);
 
             if (result.status == planning::SearchStatus::SOLVED)
             {

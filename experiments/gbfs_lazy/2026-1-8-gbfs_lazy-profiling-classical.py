@@ -51,6 +51,7 @@ if REMOTE:
         memory_per_cpu="2840M",
         cpus_per_task=1,  # 1*2840 >= 16000
         extra_options="#SBATCH --account=naiss2025-22-1245")
+    ENV.MAX_TASKS = 300
     
 else:
     ENV = LocalEnvironment(processes=6)
@@ -107,40 +108,43 @@ PLANNER_DIR = REPO / "build" / "exe" / "gbfs_lazy"
 exp.add_resource("planner_exe", PLANNER_DIR)
 exp.add_resource("run_planner", DIR / "gbfs_lazy.sh")
 
+base_cmd = [
+    "{run_planner}",
+    "{planner_exe}",
+    "{domain}",
+    "{problem}",
+    "plan.out",
+    "rpg_ff",
+    str(NUM_THREADS),
+    str(RANDOM_SEED),
+]
+
 for prefix, SUITE in SUITES:
     for task in suites.build_suite(BENCHMARKS_DIR / prefix, SUITE):
-            ################ Grounded ################
-            run = exp.add_run()
-            run.add_resource("domain", task.domain_file, symlink=True)
-            run.add_resource("problem", task.problem_file, symlink=True)
+        run = exp.add_run()
+        run.add_resource("domain", task.domain_file, symlink=True)
+        run.add_resource("problem", task.problem_file, symlink=True)
 
-            run.add_command(
-                f"gbfs-lazy-hff-pref-ff-{NUM_THREADS}",
-                [
-                    "{run_planner}", 
-                    "{planner_exe}", 
-                    "{domain}", 
-                    "{problem}",
-                    "plan.out",
-                    str(NUM_THREADS),
-                    str(RANDOM_SEED)
-                ],
-                wall_time_limit=WALL_TIME_LIMIT,
-                memory_limit=MEMORY_LIMIT,
-            )
-            # AbsoluteReport needs the following properties:
-            # 'domain', 'problem', 'algorithm', 'coverage'.
-            run.set_property("domain", task.domain)
-            run.set_property("problem", task.problem)
-            run.set_property("algorithm", f"gbfs-lazy-hff-pref-ff-{NUM_THREADS}")
-            # BaseReport needs the following properties:
-            # 'time_limit', 'memory_limit'.
-            run.set_property("time_limit", WALL_TIME_LIMIT)
-            run.set_property("memory_limit", MEMORY_LIMIT)
-            # Every run has to have a unique id in the form of a list.
-            # The algorithm name is only really needed when there are
-            # multiple algorithms.
-            run.set_property("id", [f"gbfs-lazy-hff-pref-ff-{NUM_THREADS}", task.domain, task.problem])
+        run.add_command(
+            f"gbfs-lazy-hff-pref-ff-{NUM_THREADS}",
+            base_cmd + ["-S"],
+            time_limit=None,
+            wall_time_limit=WALL_TIME_LIMIT,
+            memory_limit=MEMORY_LIMIT,
+        )
+        # AbsoluteReport needs the following properties:
+        # 'domain', 'problem', 'algorithm', 'coverage'.
+        run.set_property("domain", task.domain)
+        run.set_property("problem", task.problem)
+        run.set_property("algorithm", f"gbfs-lazy-hff-pref-ff-{NUM_THREADS}")
+        # BaseReport needs the following properties:
+        # 'time_limit', 'memory_limit'.
+        run.set_property("wall_time_limit", WALL_TIME_LIMIT)
+        run.set_property("memory_limit", MEMORY_LIMIT)
+        # Every run has to have a unique id in the form of a list.
+        # The algorithm name is only really needed when there are
+        # multiple algorithms.
+        run.set_property("id", [f"gbfs-lazy-hff-pref-ff-{NUM_THREADS}", task.domain, task.problem])
 
 # Add step that writes experiment files to disk.
 exp.add_step("build", exp.build)

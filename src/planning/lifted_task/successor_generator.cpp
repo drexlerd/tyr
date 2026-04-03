@@ -150,5 +150,23 @@ Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_node(Index<State<LiftedTag>> 
     return Node<LiftedTag>(std::move(state), state_metric);
 }
 
+void SuccessorGenerator<LiftedTag>::print_summary(size_t verbosity) const
+{
+    if (verbosity < 1)
+        return;
+
+    std::cout << "[Successor generator] Summary" << std::endl;
+    std::cout << m_workspace.statistics << std::endl;
+    auto successor_generator_rule_statistics = std::vector<datalog::RuleStatistics> {};
+    for (const auto& ws_rule : m_workspace.rules)
+        successor_generator_rule_statistics.push_back(ws_rule->common.statistics);
+    std::cout << datalog::compute_aggregated_rule_statistics(successor_generator_rule_statistics) << std::endl;
+    auto successor_generator_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
+    for (const auto& ws_rule : m_workspace.rules)
+        for (const auto& worker : ws_rule->worker)
+            successor_generator_rule_worker_statistics.push_back(worker.solve.statistics);
+    std::cout << datalog::compute_aggregated_rule_worker_statistics(successor_generator_rule_worker_statistics) << std::endl;
+}
+
 static_assert(SuccessorGeneratorConcept<SuccessorGenerator<LiftedTag>, LiftedTag>);
 }
