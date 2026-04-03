@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Dominik Drexler
+ * Copyright (C) 2025-2026 Dominik Drexler
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -10,7 +10,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *<
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -255,7 +255,7 @@ PlanningDomain LokiToTyrTranslator::translate(const loki::Domain& element)
     domain.constants = translate_common(element->get_constants(), builder, *context);
 
     /* Predicates section */
-    const auto func_insert_predicate = [](IndexPredicateVariant index_literal_variant,
+    const auto func_insert_predicate = [](PredicateViewVariant predicate_view_variant,
                                           IndexList<Predicate<StaticTag>>& static_predicates,
                                           IndexList<Predicate<FluentTag>>& fluent_predicates,
                                           IndexList<Predicate<DerivedTag>>& derived_predicates)
@@ -265,25 +265,25 @@ PlanningDomain LokiToTyrTranslator::translate(const loki::Domain& element)
             {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, Index<Predicate<StaticTag>>>)
-                    static_predicates.push_back(arg);
-                else if constexpr (std::is_same_v<T, Index<Predicate<FluentTag>>>)
-                    fluent_predicates.push_back(arg);
-                else if constexpr (std::is_same_v<T, Index<Predicate<DerivedTag>>>)
-                    derived_predicates.push_back(arg);
+                if constexpr (std::is_same_v<T, PredicateView<StaticTag>>)
+                    static_predicates.push_back(arg.get_index());
+                else if constexpr (std::is_same_v<T, PredicateView<FluentTag>>)
+                    fluent_predicates.push_back(arg.get_index());
+                else if constexpr (std::is_same_v<T, PredicateView<DerivedTag>>)
+                    derived_predicates.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_literal_variant);
+            predicate_view_variant);
     };
 
-    for (const auto& index_predicate_variant : translate_common(element->get_predicates(), builder, *context))
+    for (const auto& predicate_view_variant : translate_common(element->get_predicates(), builder, *context))
     {
-        func_insert_predicate(index_predicate_variant, domain.static_predicates, domain.fluent_predicates, domain.derived_predicates);
+        func_insert_predicate(predicate_view_variant, domain.static_predicates, domain.fluent_predicates, domain.derived_predicates);
     }
 
     /* Functions section */
-    const auto func_insert_function = [](IndexFunctionVariant index_literal_variant,
+    const auto func_insert_function = [](FunctionViewVariant function_view_variant,
                                          IndexList<Function<StaticTag>>& static_functions,
                                          IndexList<Function<FluentTag>>& fluent_functions,
                                          ::cista::optional<Index<Function<AuxiliaryTag>>>& auxiliary_function)
@@ -293,24 +293,24 @@ PlanningDomain LokiToTyrTranslator::translate(const loki::Domain& element)
             {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, Index<Function<StaticTag>>>)
-                    static_functions.push_back(arg);
-                else if constexpr (std::is_same_v<T, Index<Function<FluentTag>>>)
-                    fluent_functions.push_back(arg);
-                else if constexpr (std::is_same_v<T, Index<Function<AuxiliaryTag>>>)
+                if constexpr (std::is_same_v<T, FunctionView<StaticTag>>)
+                    static_functions.push_back(arg.get_index());
+                else if constexpr (std::is_same_v<T, FunctionView<FluentTag>>)
+                    fluent_functions.push_back(arg.get_index());
+                else if constexpr (std::is_same_v<T, FunctionView<AuxiliaryTag>>)
                 {
                     assert(!auxiliary_function);
-                    auxiliary_function = arg;
+                    auxiliary_function = arg.get_index();
                 }
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_literal_variant);
+            function_view_variant);
     };
 
-    for (const auto& index_function_variant : translate_common(element->get_function_skeletons(), builder, *context))
+    for (const auto& function_view_variant : translate_common(element->get_function_skeletons(), builder, *context))
     {
-        func_insert_function(index_function_variant, domain.static_functions, domain.fluent_functions, domain.auxiliary_function);
+        func_insert_function(function_view_variant, domain.static_functions, domain.fluent_functions, domain.auxiliary_function);
     }
 
     /* Structures section */
@@ -349,59 +349,60 @@ PlanningTask LokiToTyrTranslator::translate(const loki::Problem& element, Planni
     task.objects = translate_common(element->get_objects(), builder, *task_context);
 
     /* Predicates section */
-    const auto func_insert_predicate = [](IndexPredicateVariant index_predicate_variant, IndexList<Predicate<DerivedTag>>& derived_predicates)
+    const auto func_insert_predicate = [](PredicateViewVariant predicate_view_variant, IndexList<Predicate<DerivedTag>>& derived_predicates)
     {
         std::visit(
             [&](auto&& arg)
             {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, Index<Predicate<StaticTag>>>)
+                if constexpr (std::is_same_v<T, PredicateView<StaticTag>>)
                     throw std::runtime_error("Static predicate definition in task is not supported");
-                else if constexpr (std::is_same_v<T, Index<Predicate<FluentTag>>>)
+                else if constexpr (std::is_same_v<T, PredicateView<FluentTag>>)
                     throw std::runtime_error("Fluent predicate definition in task is not supported");
-                else if constexpr (std::is_same_v<T, Index<Predicate<DerivedTag>>>)
-                    derived_predicates.push_back(arg);
+                else if constexpr (std::is_same_v<T, PredicateView<DerivedTag>>)
+                    derived_predicates.push_back(arg.get_index());
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_predicate_variant);
+            predicate_view_variant);
     };
 
-    for (const auto& index_predicate_variant : translate_common(element->get_predicates(), builder, *task_context))
+    for (const auto& predicate_view_variant : translate_common(element->get_predicates(), builder, *task_context))
     {
-        func_insert_predicate(index_predicate_variant, task.derived_predicates);
+        func_insert_predicate(predicate_view_variant, task.derived_predicates);
     }
 
     /* Initial section */
-    const auto func_insert_ground_atom =
-        [&](IndexGroundLiteralOrFactVariant index_atom_variant, IndexList<GroundAtom<StaticTag>>& static_atoms, IndexList<GroundAtom<FluentTag>>& fluent_atoms)
+    const auto func_insert_ground_atom = [&](GroundLiteralOrFactViewVariant literal_or_fact_view_variant,
+                                             IndexList<GroundAtom<StaticTag>>& static_atoms,
+                                             IndexList<GroundAtom<FluentTag>>& fluent_atoms)
     {
         std::visit(
             [&](auto&& arg)
             {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, Index<GroundLiteral<StaticTag>>>)
-                    static_atoms.push_back(make_view(arg, *task_context).get_atom().get_index());
-                else if constexpr (std::is_same_v<T, Data<FDRFact<FluentTag>>>)
-                    fluent_atoms.push_back(make_view(arg, *task_context).get_atom().value().get_index());  // we know it must have a value
-                else if constexpr (std::is_same_v<T, Index<GroundLiteral<DerivedTag>>>)
+                if constexpr (std::is_same_v<T, GroundLiteralView<StaticTag>>)
+                    static_atoms.push_back(arg.get_atom().get_index());
+                else if constexpr (std::is_same_v<T, std::pair<FDRFactView<FluentTag>, bool>>)
+                    fluent_atoms.push_back(arg.first.get_atom().value().get_index());  // we know it must have a value
+                else if constexpr (std::is_same_v<T, GroundLiteralView<DerivedTag>>)
                     throw std::runtime_error("Derived ground atoms are not allowed to be defined in the initial section.");
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_atom_variant);
+            literal_or_fact_view_variant);
     };
 
     for (const auto& literal : element->get_initial_literals())
     {
-        const auto index_atom_variant = translate_grounded(literal, builder, *task_context, *fdr_context);
+        const auto literal_or_fact_view_variant = translate_grounded(literal, builder, *task_context, *fdr_context);
 
-        func_insert_ground_atom(index_atom_variant, task.static_atoms, task.fluent_atoms);
+        func_insert_ground_atom(literal_or_fact_view_variant, task.static_atoms, task.fluent_atoms);
     }
 
-    const auto func_insert_fterm_values = [](IndexGroundFunctionTermValueVariant index_fterm_value_variant,
+    const auto func_insert_fterm_values = [](GroundFunctionTermValueViewVariant fterm_value_view_variant,
                                              IndexList<GroundFunctionTermValue<StaticTag>>& static_fterm_values,
                                              IndexList<GroundFunctionTermValue<FluentTag>>& fluent_fterm_values,
                                              ::cista::optional<Index<GroundFunctionTermValue<AuxiliaryTag>>>& auxiliary_fterm_value)
@@ -411,24 +412,24 @@ PlanningTask LokiToTyrTranslator::translate(const loki::Problem& element, Planni
             {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, Index<GroundFunctionTermValue<StaticTag>>>)
-                    static_fterm_values.push_back(arg);
-                else if constexpr (std::is_same_v<T, Index<GroundFunctionTermValue<FluentTag>>>)
-                    fluent_fterm_values.push_back(arg);
-                else if constexpr (std::is_same_v<T, Index<GroundFunctionTermValue<AuxiliaryTag>>>)
+                if constexpr (std::is_same_v<T, GroundFunctionTermValueView<StaticTag>>)
+                    static_fterm_values.push_back(arg.get_index());
+                else if constexpr (std::is_same_v<T, GroundFunctionTermValueView<FluentTag>>)
+                    fluent_fterm_values.push_back(arg.get_index());
+                else if constexpr (std::is_same_v<T, GroundFunctionTermValueView<AuxiliaryTag>>)
                 {
                     assert(!auxiliary_fterm_value);
-                    auxiliary_fterm_value = arg;
+                    auxiliary_fterm_value = arg.get_index();
                 }
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_fterm_value_variant);
+            fterm_value_view_variant);
     };
 
-    for (const auto index_fterm_value_variant : translate_grounded(element->get_initial_function_values(), builder, *task_context))
+    for (const auto fterm_value_view_variant : translate_grounded(element->get_initial_function_values(), builder, *task_context))
     {
-        func_insert_fterm_values(index_fterm_value_variant, task.static_fterm_values, task.fluent_fterm_values, task.auxiliary_fterm_value);
+        func_insert_fterm_values(fterm_value_view_variant, task.static_fterm_values, task.fluent_fterm_values, task.auxiliary_fterm_value);
     }
 
     /* Goal section */

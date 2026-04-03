@@ -1,7 +1,7 @@
 
 
 /*
- * Copyright (C) 2025 Dominik Drexler
+ * Copyright (C) 2025-2026 Dominik Drexler
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

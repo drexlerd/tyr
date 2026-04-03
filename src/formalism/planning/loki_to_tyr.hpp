@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Dominik Drexler
+ * Copyright (C) 2025-2026 Dominik Drexler
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -10,7 +10,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *<
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -38,141 +38,35 @@
 namespace tyr::formalism::planning
 {
 
-using IndexPredicateVariant = std::variant<Index<Predicate<StaticTag>>, Index<Predicate<FluentTag>>, Index<Predicate<DerivedTag>>>;
+using PredicateViewVariant = std::variant<PredicateView<StaticTag>, PredicateView<FluentTag>, PredicateView<DerivedTag>>;
 
-using IndexAtomVariant = std::variant<Index<Atom<StaticTag>>, Index<Atom<FluentTag>>, Index<Atom<DerivedTag>>>;
+using AtomViewVariant = std::variant<AtomView<StaticTag>, AtomView<FluentTag>, AtomView<DerivedTag>>;
 
-using IndexLiteralVariant = std::variant<Index<Literal<StaticTag>>, Index<Literal<FluentTag>>, Index<Literal<DerivedTag>>>;
+using LiteralViewVariant = std::variant<LiteralView<StaticTag>, LiteralView<FluentTag>, LiteralView<DerivedTag>>;
 
-using IndexGroundAtomVariant = std::variant<Index<GroundAtom<StaticTag>>, Index<GroundAtom<FluentTag>>, Index<GroundAtom<DerivedTag>>>;
+using GroundAtomViewVariant = std::variant<GroundAtomView<StaticTag>, GroundAtomView<FluentTag>, GroundAtomView<DerivedTag>>;
 
-using IndexGroundLiteralVariant = std::variant<Index<GroundLiteral<StaticTag>>, Index<GroundLiteral<FluentTag>>, Index<GroundLiteral<DerivedTag>>>;
+using GroundAtomOrFactViewVariant = std::variant<GroundAtomView<StaticTag>, GroundAtomView<DerivedTag>, FDRFactView<FluentTag>>;
 
-using IndexGroundAtomOrFactVariant = std::variant<Index<GroundAtom<StaticTag>>, Data<FDRFact<FluentTag>>, Index<GroundAtom<DerivedTag>>>;
+using GroundLiteralViewVariant = std::variant<GroundLiteralView<StaticTag>, GroundLiteralView<FluentTag>, GroundLiteralView<DerivedTag>>;
 
-using IndexGroundLiteralOrFactVariant = std::variant<Index<GroundLiteral<StaticTag>>, Data<FDRFact<FluentTag>>, Index<GroundLiteral<DerivedTag>>>;
+using GroundLiteralOrFactViewVariant = std::variant<GroundLiteralView<StaticTag>, GroundLiteralView<DerivedTag>, std::pair<FDRFactView<FluentTag>, bool>>;
 
-using IndexFunctionVariant = std::variant<Index<Function<StaticTag>>, Index<Function<FluentTag>>, Index<Function<AuxiliaryTag>>>;
+using FunctionViewVariant = std::variant<FunctionView<StaticTag>, FunctionView<FluentTag>, FunctionView<AuxiliaryTag>>;
 
-using IndexFunctionTermVariant = std::variant<Index<FunctionTerm<StaticTag>>, Index<FunctionTerm<FluentTag>>, Index<FunctionTerm<AuxiliaryTag>>>;
+using FunctionTermViewVariant = std::variant<FunctionTermView<StaticTag>, FunctionTermView<FluentTag>, FunctionTermView<AuxiliaryTag>>;
 
-using IndexGroundFunctionTermVariant =
-    std::variant<Index<GroundFunctionTerm<StaticTag>>, Index<GroundFunctionTerm<FluentTag>>, Index<GroundFunctionTerm<AuxiliaryTag>>>;
+using GroundFunctionTermViewVariant = std::variant<GroundFunctionTermView<StaticTag>, GroundFunctionTermView<FluentTag>, GroundFunctionTermView<AuxiliaryTag>>;
 
-using IndexGroundFunctionTermValueVariant =
-    std::variant<Index<GroundFunctionTermValue<StaticTag>>, Index<GroundFunctionTermValue<FluentTag>>, Index<GroundFunctionTermValue<AuxiliaryTag>>>;
+using GroundFunctionTermValueViewVariant =
+    std::variant<GroundFunctionTermValueView<StaticTag>, GroundFunctionTermValueView<FluentTag>, GroundFunctionTermValueView<AuxiliaryTag>>;
 
-using IndexNumericEffectVariant = std::variant<Index<NumericEffect<OpAssign, FluentTag>>,
-                                               Index<NumericEffect<OpIncrease, FluentTag>>,
-                                               Index<NumericEffect<OpDecrease, FluentTag>>,
-                                               Index<NumericEffect<OpScaleUp, FluentTag>>,
-                                               Index<NumericEffect<OpScaleDown, FluentTag>>,
-                                               Index<NumericEffect<OpIncrease, AuxiliaryTag>>>;
-
-using IndexGroundNumericConstraintVariant = std::variant<Index<BinaryOperator<OpEq, Data<GroundFunctionExpression>>>,
-                                                         Index<BinaryOperator<OpLe, Data<GroundFunctionExpression>>>,
-                                                         Index<BinaryOperator<OpLt, Data<GroundFunctionExpression>>>,
-                                                         Index<BinaryOperator<OpGe, Data<GroundFunctionExpression>>>,
-                                                         Index<BinaryOperator<OpGt, Data<GroundFunctionExpression>>>>;
-
-struct ArityVisitor
-{
-    loki::VariableSet variables;
-
-    void collect_variables(loki::Term term)
-    {
-        std::visit(
-            [&](auto&& arg)
-            {
-                using Variant = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Variant, loki::Object>) {}
-                else if constexpr (std::is_same_v<Variant, loki::Variable>)
-                    this->variables.insert(arg);
-                else
-                    static_assert(dependent_false<Variant>::value, "Missing case for type");
-            },
-            term->get_object_or_variable());
-    }
-
-    void collect_variables(loki::Function element)
-    {
-        for (const auto& term : element->get_terms())
-            collect_variables(term);
-    }
-    void collect_variables(loki::FunctionExpressionNumber element) {}
-    void collect_variables(loki::FunctionExpressionBinaryOperator element)
-    {
-        collect_variables(element->get_left_function_expression());
-        collect_variables(element->get_right_function_expression());
-    }
-    void collect_variables(loki::FunctionExpressionMultiOperator element)
-    {
-        for (const auto& fexpr : element->get_function_expressions())
-            collect_variables(fexpr);
-    }
-    void collect_variables(loki::FunctionExpressionMinus element) { collect_variables(element->get_function_expression()); }
-    void collect_variables(loki::FunctionExpressionFunction element) { collect_variables(element->get_function()); }
-    void collect_variables(loki::FunctionExpression element)
-    {
-        std::visit([this](auto&& arg) { this->collect_variables(arg); }, element->get_function_expression());
-    }
-
-    void collect_variables(loki::ConditionLiteral element)
-    {
-        for (const auto& term : element->get_literal()->get_atom()->get_terms())
-            collect_variables(term);
-    }
-    void collect_variables(loki::ConditionAnd element)
-    {
-        for (const auto& condition : element->get_conditions())
-            collect_variables(condition);
-    }
-    void collect_variables(loki::ConditionOr element)
-    {
-        for (const auto& condition : element->get_conditions())
-            collect_variables(condition);
-    }
-    void collect_variables(loki::ConditionNot element) { collect_variables(element->get_condition()); }
-    void collect_variables(loki::ConditionImply element)
-    {
-        collect_variables(element->get_left_condition());
-        collect_variables(element->get_right_condition());
-    }
-    void collect_variables(loki::ConditionExists element)
-    {
-        for (const auto& parameter : element->get_parameters())
-            variables.insert(parameter->get_variable());
-        collect_variables(element->get_condition());
-    }
-    void collect_variables(loki::ConditionForall element)
-    {
-        for (const auto& parameter : element->get_parameters())
-            variables.insert(parameter->get_variable());
-        collect_variables(element->get_condition());
-    }
-    void collect_variables(loki::ConditionNumericConstraint element)
-    {
-        collect_variables(element->get_left_function_expression());
-        collect_variables(element->get_right_function_expression());
-    }
-    void collect_variables(loki::Condition element)
-    {
-        std::visit([this](auto&& arg) { this->collect_variables(arg); }, element->get_condition());
-    }
-
-    size_t get(loki::Condition element)
-    {
-        collect_variables(element);
-        return variables.size();
-    }
-
-    size_t get(loki::ConditionNumericConstraint element)
-    {
-        collect_variables(element);
-        return variables.size();
-    }
-};
+using NumericEffectViewVariant = std::variant<NumericEffectView<OpAssign, FluentTag>,
+                                              NumericEffectView<OpIncrease, FluentTag>,
+                                              NumericEffectView<OpDecrease, FluentTag>,
+                                              NumericEffectView<OpScaleUp, FluentTag>,
+                                              NumericEffectView<OpScaleDown, FluentTag>,
+                                              NumericEffectView<OpIncrease, AuxiliaryTag>>;
 
 class LokiToTyrTranslator
 {
@@ -266,9 +160,9 @@ private:
         return output;
     }
 
-    IndexFunctionVariant translate_common(loki::FunctionSkeleton element, Builder& builder, Repository& context)
+    FunctionViewVariant translate_common(loki::FunctionSkeleton element, Builder& builder, Repository& context)
     {
-        auto build_function = [&](auto fact_tag) -> IndexFunctionVariant
+        auto build_function = [&](auto fact_tag) -> FunctionViewVariant
         {
             using Tag = std::decay_t<decltype(fact_tag)>;
 
@@ -278,7 +172,7 @@ private:
             function.name = element->get_name();
             function.arity = element->get_parameters().size();
             canonicalize(function);
-            return context.get_or_create(function).first.get_index();
+            return context.get_or_create(function).first;
         };
 
         if (element->get_name() == "total-cost")
@@ -304,9 +198,9 @@ private:
         return translate_common(element->get_variable(), builder, context);
     }
 
-    IndexPredicateVariant translate_common(loki::Predicate element, Builder& builder, Repository& context)
+    PredicateViewVariant translate_common(loki::Predicate element, Builder& builder, Repository& context)
     {
-        auto build_predicate = [&](auto fact_tag) -> IndexPredicateVariant
+        auto build_predicate = [&](auto fact_tag) -> PredicateViewVariant
         {
             using Tag = std::decay_t<decltype(fact_tag)>;
 
@@ -316,7 +210,7 @@ private:
             predicate.name = element->get_name();
             predicate.arity = element->get_parameters().size();
             canonicalize(predicate);
-            return context.get_or_create(predicate).first.get_index();
+            return context.get_or_create(predicate).first;
         };
 
         if (m_fluent_predicates.count(element->get_name()) && !m_derived_predicates.count(element->get_name()))
@@ -370,70 +264,70 @@ private:
             element->get_object_or_variable());
     }
 
-    IndexAtomVariant translate_lifted(loki::Atom element, Builder& builder, Repository& context)
+    AtomViewVariant translate_lifted(loki::Atom element, Builder& builder, Repository& context)
     {
-        auto index_predicate_variant = translate_common(element->get_predicate(), builder, context);
+        auto predicate_view_variant = translate_common(element->get_predicate(), builder, context);
 
-        auto build_atom = [&](auto fact_tag, auto predicate_index) -> IndexAtomVariant
+        auto build_atom = [&](auto fact_tag, auto predicate) -> AtomViewVariant
         {
             using Tag = std::decay_t<decltype(fact_tag)>;
 
             auto atom_ptr = builder.template get_builder<Atom<Tag>>();
             auto& atom = *atom_ptr;
             atom.clear();
-            atom.predicate = predicate_index;
+            atom.predicate = predicate.get_index();
             atom.terms = this->translate_lifted(element->get_terms(), builder, context);
             canonicalize(atom);
-            return context.get_or_create(atom).first.get_index();
+            return context.get_or_create(atom).first;
         };
 
         return std::visit(
-            [&](auto&& arg) -> IndexAtomVariant
+            [&](auto&& arg) -> AtomViewVariant
             {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, Index<Predicate<StaticTag>>>)
+                if constexpr (std::is_same_v<T, PredicateView<StaticTag>>)
                     return build_atom(StaticTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<Predicate<FluentTag>>>)
+                else if constexpr (std::is_same_v<T, PredicateView<FluentTag>>)
                     return build_atom(FluentTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<Predicate<DerivedTag>>>)
+                else if constexpr (std::is_same_v<T, PredicateView<DerivedTag>>)
                     return build_atom(DerivedTag {}, arg);
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_predicate_variant);
+            predicate_view_variant);
     }
 
-    IndexLiteralVariant translate_lifted(loki::Literal element, Builder& builder, Repository& context)
+    LiteralViewVariant translate_lifted(loki::Literal element, Builder& builder, Repository& context)
     {
-        auto index_atom_variant = translate_lifted(element->get_atom(), builder, context);
+        auto atom_view_variant = translate_lifted(element->get_atom(), builder, context);
 
-        auto build_literal = [&](auto fact_tag, auto atom_index) -> IndexLiteralVariant
+        auto build_literal = [&](auto fact_tag, auto atom) -> LiteralViewVariant
         {
             using Tag = std::decay_t<decltype(fact_tag)>;
 
             auto literal_ptr = builder.template get_builder<Literal<Tag>>();
             auto& literal = *literal_ptr;
             literal.clear();
-            literal.atom = atom_index;
+            literal.atom = atom.get_index();
             literal.polarity = element->get_polarity();
             canonicalize(literal);
-            return context.get_or_create(literal).first.get_index();
+            return context.get_or_create(literal).first;
         };
 
         return std::visit(
-            [&](auto&& arg) -> IndexLiteralVariant
+            [&](auto&& arg) -> LiteralViewVariant
             {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, Index<Atom<StaticTag>>>)
+                if constexpr (std::is_same_v<T, AtomView<StaticTag>>)
                     return build_literal(StaticTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<Atom<FluentTag>>>)
+                else if constexpr (std::is_same_v<T, AtomView<FluentTag>>)
                     return build_literal(FluentTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<Atom<DerivedTag>>>)
+                else if constexpr (std::is_same_v<T, AtomView<DerivedTag>>)
                     return build_literal(DerivedTag {}, arg);
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_atom_variant);
+            atom_view_variant);
     }
 
     Data<FunctionExpression> translate_lifted(loki::FunctionExpressionNumber element, Builder& builder, Repository& context)
@@ -508,23 +402,23 @@ private:
 
     Data<FunctionExpression> translate_lifted(loki::FunctionExpressionFunction element, Builder& builder, Repository& context)
     {
-        const auto index_fterm_variant = translate_lifted(element->get_function(), builder, context);
+        const auto fterm_view_variant = translate_lifted(element->get_function(), builder, context);
 
         return std::visit(
             [&](auto&& arg) -> Data<FunctionExpression>
             {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, Index<FunctionTerm<StaticTag>>>)
-                    return Data<FunctionExpression>(arg);
-                else if constexpr (std::is_same_v<T, Index<FunctionTerm<FluentTag>>>)
-                    return Data<FunctionExpression>(arg);
-                else if constexpr (std::is_same_v<T, Index<FunctionTerm<AuxiliaryTag>>>)
+                if constexpr (std::is_same_v<T, FunctionTermView<StaticTag>>)
+                    return Data<FunctionExpression>(arg.get_index());
+                else if constexpr (std::is_same_v<T, FunctionTermView<FluentTag>>)
+                    return Data<FunctionExpression>(arg.get_index());
+                else if constexpr (std::is_same_v<T, FunctionTermView<AuxiliaryTag>>)
                     throw std::runtime_error("Cannot create FunctionExpression over auxiliary function term.");
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_fterm_variant);
+            fterm_view_variant);
     }
 
     Data<FunctionExpression> translate_lifted(loki::FunctionExpression element, Builder& builder, Repository& context)
@@ -532,38 +426,38 @@ private:
         return std::visit([&](auto&& arg) { return translate_lifted(arg, builder, context); }, element->get_function_expression());
     }
 
-    IndexFunctionTermVariant translate_lifted(loki::Function element, Builder& builder, Repository& context)
+    FunctionTermViewVariant translate_lifted(loki::Function element, Builder& builder, Repository& context)
     {
-        auto index_function_variant = translate_common(element->get_function_skeleton(), builder, context);
+        auto function_view_variant = translate_common(element->get_function_skeleton(), builder, context);
 
-        auto build_function_term = [&](auto fact_tag, auto function_index) -> IndexFunctionTermVariant
+        auto build_function_term = [&](auto fact_tag, auto function) -> FunctionTermViewVariant
         {
             using Tag = std::decay_t<decltype(fact_tag)>;
 
             auto fterm_ptr = builder.template get_builder<FunctionTerm<Tag>>();
             auto& fterm = *fterm_ptr;
             fterm.clear();
-            fterm.function = function_index;
+            fterm.function = function.get_index();
             fterm.terms = this->translate_lifted(element->get_terms(), builder, context);
             canonicalize(fterm);
-            return context.get_or_create(fterm).first.get_index();
+            return context.get_or_create(fterm).first;
         };
 
         return std::visit(
-            [&](auto&& arg) -> IndexFunctionTermVariant
+            [&](auto&& arg) -> FunctionTermViewVariant
             {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, Index<Function<StaticTag>>>)
+                if constexpr (std::is_same_v<T, FunctionView<StaticTag>>)
                     return build_function_term(StaticTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<Function<FluentTag>>>)
+                else if constexpr (std::is_same_v<T, FunctionView<FluentTag>>)
                     return build_function_term(FluentTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<Function<AuxiliaryTag>>>)
+                else if constexpr (std::is_same_v<T, FunctionView<AuxiliaryTag>>)
                     return build_function_term(AuxiliaryTag {}, arg);
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_function_variant);
+            function_view_variant);
     }
 
     Data<BooleanOperator<Data<FunctionExpression>>> translate_lifted(loki::ConditionNumericConstraint element, Builder& builder, Repository& context)
@@ -608,7 +502,7 @@ private:
 
         conj_condition.variables = parameters;
 
-        const auto func_insert_literal = [](IndexLiteralVariant index_literal_variant,
+        const auto func_insert_literal = [](LiteralViewVariant literal_view_variant,
                                             IndexList<Literal<StaticTag>>& static_literals,
                                             IndexList<Literal<FluentTag>>& fluent_literals,
                                             IndexList<Literal<DerivedTag>>& derived_literals)
@@ -618,16 +512,16 @@ private:
                 {
                     using T = std::decay_t<decltype(arg)>;
 
-                    if constexpr (std::is_same_v<T, Index<Literal<StaticTag>>>)
-                        static_literals.push_back(arg);
-                    else if constexpr (std::is_same_v<T, Index<Literal<FluentTag>>>)
-                        fluent_literals.push_back(arg);
-                    else if constexpr (std::is_same_v<T, Index<Literal<DerivedTag>>>)
-                        derived_literals.push_back(arg);
+                    if constexpr (std::is_same_v<T, LiteralView<StaticTag>>)
+                        static_literals.push_back(arg.get_index());
+                    else if constexpr (std::is_same_v<T, LiteralView<FluentTag>>)
+                        fluent_literals.push_back(arg.get_index());
+                    else if constexpr (std::is_same_v<T, LiteralView<DerivedTag>>)
+                        derived_literals.push_back(arg.get_index());
                     else
                         static_assert(dependent_false<T>::value, "Missing case for type");
                 },
-                index_literal_variant);
+                literal_view_variant);
         };
 
         return std::visit(
@@ -646,9 +540,9 @@ private:
 
                                 if constexpr (std::is_same_v<SubConditionT, loki::ConditionLiteral>)
                                 {
-                                    const auto index_literal_variant = translate_lifted(subcondition->get_literal(), builder, context);
+                                    const auto literal_view_variant = translate_lifted(subcondition->get_literal(), builder, context);
 
-                                    func_insert_literal(index_literal_variant,
+                                    func_insert_literal(literal_view_variant,
                                                         conj_condition.static_literals,
                                                         conj_condition.fluent_literals,
                                                         conj_condition.derived_literals);
@@ -673,9 +567,9 @@ private:
                 }
                 else if constexpr (std::is_same_v<ConditionT, loki::ConditionLiteral>)
                 {
-                    const auto index_literal_variant = translate_lifted(condition->get_literal(), builder, context);
+                    const auto literal_view_variant = translate_lifted(condition->get_literal(), builder, context);
 
-                    func_insert_literal(index_literal_variant, conj_condition.static_literals, conj_condition.fluent_literals, conj_condition.derived_literals);
+                    func_insert_literal(literal_view_variant, conj_condition.static_literals, conj_condition.fluent_literals, conj_condition.derived_literals);
 
                     canonicalize(conj_condition);
                     return context.get_or_create(conj_condition).first.get_index();
@@ -698,11 +592,11 @@ private:
             element->get_condition());
     }
 
-    IndexNumericEffectVariant translate_lifted(loki::EffectNumeric element, Builder& builder, Repository& context)
+    NumericEffectViewVariant translate_lifted(loki::EffectNumeric element, Builder& builder, Repository& context)
     {
-        auto index_fterm_variant = translate_lifted(element->get_function(), builder, context);
+        auto fterm_view_variant = translate_lifted(element->get_function(), builder, context);
 
-        auto build_numeric_effect_term_helper = [&](auto fact_tag, auto op_tag, auto fterm_index) -> IndexNumericEffectVariant
+        auto build_numeric_effect_term_helper = [&](auto fact_tag, auto op_tag, auto fterm) -> NumericEffectViewVariant
         {
             using Tag = std::decay_t<decltype(fact_tag)>;
             using Op = std::decay_t<decltype(op_tag)>;
@@ -711,13 +605,13 @@ private:
             auto& numeric_effect = *numeric_effect_ptr;
             numeric_effect.clear();
 
-            numeric_effect.fterm = fterm_index;
+            numeric_effect.fterm = fterm.get_index();
             numeric_effect.fexpr = this->translate_lifted(element->get_function_expression(), builder, context);
             canonicalize(numeric_effect);
-            return context.get_or_create(numeric_effect).first.get_index();
+            return context.get_or_create(numeric_effect).first;
         };
 
-        auto build_numeric_effect_term = [&](auto fact_tag, auto fterm_index) -> IndexNumericEffectVariant
+        auto build_numeric_effect_term = [&](auto fact_tag, auto fterm) -> NumericEffectViewVariant
         {
             using Tag = std::decay_t<decltype(fact_tag)>;
 
@@ -726,22 +620,22 @@ private:
                 if (element->get_assign_operator() != loki::AssignOperatorEnum::INCREASE)
                     throw std::runtime_error("Auxiliary numeric effect must use INCREASE operator.");
 
-                return build_numeric_effect_term_helper(Tag {}, OpIncrease {}, fterm_index);
+                return build_numeric_effect_term_helper(Tag {}, OpIncrease {}, fterm);
             }
             else
             {
                 switch (element->get_assign_operator())
                 {
                     case loki::AssignOperatorEnum::ASSIGN:
-                        return build_numeric_effect_term_helper(Tag {}, OpAssign {}, fterm_index);
+                        return build_numeric_effect_term_helper(Tag {}, OpAssign {}, fterm);
                     case loki::AssignOperatorEnum::INCREASE:
-                        return build_numeric_effect_term_helper(Tag {}, OpIncrease {}, fterm_index);
+                        return build_numeric_effect_term_helper(Tag {}, OpIncrease {}, fterm);
                     case loki::AssignOperatorEnum::DECREASE:
-                        return build_numeric_effect_term_helper(Tag {}, OpDecrease {}, fterm_index);
+                        return build_numeric_effect_term_helper(Tag {}, OpDecrease {}, fterm);
                     case loki::AssignOperatorEnum::SCALE_UP:
-                        return build_numeric_effect_term_helper(Tag {}, OpScaleUp {}, fterm_index);
+                        return build_numeric_effect_term_helper(Tag {}, OpScaleUp {}, fterm);
                     case loki::AssignOperatorEnum::SCALE_DOWN:
-                        return build_numeric_effect_term_helper(Tag {}, OpScaleDown {}, fterm_index);
+                        return build_numeric_effect_term_helper(Tag {}, OpScaleDown {}, fterm);
                     default:
                         throw std::runtime_error("Unexpected case.");
                 }
@@ -749,20 +643,20 @@ private:
         };
 
         return std::visit(
-            [&](auto&& arg) -> IndexNumericEffectVariant
+            [&](auto&& arg) -> NumericEffectViewVariant
             {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, Index<FunctionTerm<StaticTag>>>)
+                if constexpr (std::is_same_v<T, FunctionTermView<StaticTag>>)
                     throw std::runtime_error("Cannot create NumericEffect over static function term.");
-                else if constexpr (std::is_same_v<T, Index<FunctionTerm<FluentTag>>>)
+                else if constexpr (std::is_same_v<T, FunctionTermView<FluentTag>>)
                     return build_numeric_effect_term(FluentTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<FunctionTerm<AuxiliaryTag>>>)
+                else if constexpr (std::is_same_v<T, FunctionTermView<AuxiliaryTag>>)
                     return build_numeric_effect_term(AuxiliaryTag {}, arg);
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_fterm_variant);
+            fterm_view_variant);
     }
 
     IndexList<ConditionalEffect> translate_lifted(loki::Effect element, const IndexList<Variable>& parameters, Builder& builder, Repository& context)
@@ -846,52 +740,52 @@ private:
 
                         if constexpr (std::is_same_v<SubEffectT, loki::EffectLiteral>)
                         {
-                            const auto index_literal_variant = translate_lifted(subeffect->get_literal(), builder, context);
+                            const auto literal_view_variant = translate_lifted(subeffect->get_literal(), builder, context);
 
                             std::visit(
                                 [&](auto&& subsubeffect)
                                 {
                                     using SubSubEffectT = std::decay_t<decltype(subsubeffect)>;
 
-                                    if constexpr (std::is_same_v<SubSubEffectT, Index<Literal<StaticTag>>>)
-                                        throw std::logic_error("Effect lieral cannot be Static!");
-                                    else if constexpr (std::is_same_v<SubSubEffectT, Index<Literal<FluentTag>>>)
-                                        data_fluent_literals.push_back(subsubeffect);
-                                    else if constexpr (std::is_same_v<SubSubEffectT, Index<Literal<DerivedTag>>>)
+                                    if constexpr (std::is_same_v<SubSubEffectT, LiteralView<StaticTag>>)
+                                        throw std::logic_error("Effect literal cannot be Static!");
+                                    else if constexpr (std::is_same_v<SubSubEffectT, LiteralView<FluentTag>>)
+                                        data_fluent_literals.push_back(subsubeffect.get_index());
+                                    else if constexpr (std::is_same_v<SubSubEffectT, LiteralView<DerivedTag>>)
                                         throw std::runtime_error("Effect literal cannot be Derived!");
                                     else
                                         static_assert(dependent_false<SubSubEffectT>::value, "Unexpected case.");
                                 },
-                                index_literal_variant);
+                                literal_view_variant);
                         }
                         else if constexpr (std::is_same_v<SubEffectT, loki::EffectNumeric>)
                         {
-                            const auto index_numeric_effect_variant = translate_lifted(subeffect, builder, context);
+                            const auto numeric_effect_view_variant = translate_lifted(subeffect, builder, context);
 
                             std::visit(
                                 [&](auto&& subsubeffect)
                                 {
                                     using SubSubEffectT = std::decay_t<decltype(subsubeffect)>;
 
-                                    if constexpr (std::is_same_v<SubSubEffectT, Index<NumericEffect<OpAssign, FluentTag>>>)
-                                        data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect));
-                                    else if constexpr (std::is_same_v<SubSubEffectT, Index<NumericEffect<OpIncrease, FluentTag>>>)
-                                        data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect));
-                                    else if constexpr (std::is_same_v<SubSubEffectT, Index<NumericEffect<OpDecrease, FluentTag>>>)
-                                        data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect));
-                                    else if constexpr (std::is_same_v<SubSubEffectT, Index<NumericEffect<OpScaleUp, FluentTag>>>)
-                                        data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect));
-                                    else if constexpr (std::is_same_v<SubSubEffectT, Index<NumericEffect<OpScaleDown, FluentTag>>>)
-                                        data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect));
-                                    else if constexpr (std::is_same_v<SubSubEffectT, Index<NumericEffect<OpIncrease, AuxiliaryTag>>>)
+                                    if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpAssign, FluentTag>>)
+                                        data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect.get_index()));
+                                    else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpIncrease, FluentTag>>)
+                                        data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect.get_index()));
+                                    else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpDecrease, FluentTag>>)
+                                        data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect.get_index()));
+                                    else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpScaleUp, FluentTag>>)
+                                        data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect.get_index()));
+                                    else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpScaleDown, FluentTag>>)
+                                        data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect.get_index()));
+                                    else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpIncrease, AuxiliaryTag>>)
                                     {
                                         assert(!data_auxiliary_numeric_effect);
-                                        data_auxiliary_numeric_effect = Data<NumericEffectOperator<AuxiliaryTag>>(subsubeffect);
+                                        data_auxiliary_numeric_effect = Data<NumericEffectOperator<AuxiliaryTag>>(subsubeffect.get_index());
                                     }
                                     else
                                         static_assert(dependent_false<SubSubEffectT>::value, "Unexpected case.");
                                 },
-                                index_numeric_effect_variant);
+                                numeric_effect_view_variant);
                         }
                         else
                         {
@@ -1020,18 +914,18 @@ private:
         m_param_map.push_parameters(parameters);
         {
             axiom.body = translate_lifted(element->get_condition(), parameters, builder, context);
-            const auto index_literal_variant = translate_lifted(element->get_literal(), builder, context);
+            const auto literal_view_variant = translate_lifted(element->get_literal(), builder, context);
 
             std::visit(
                 [&](auto&& arg)
                 {
                     using T = std::decay_t<decltype(arg)>;
-                    if constexpr (std::is_same_v<T, Index<Literal<DerivedTag>>>)
-                        axiom.head = make_view(arg, context).get_atom().get_index();
+                    if constexpr (std::is_same_v<T, LiteralView<DerivedTag>>)
+                        axiom.head = arg.get_atom().get_index();
                     else
                         throw std::runtime_error("ToMimirStructures::translate_lifted: Expected Literal<DerivedTag> in axiom head.");
                 },
-                index_literal_variant);
+                literal_view_variant);
         }
         ///---------- Pop parameters -------------
         m_param_map.pop_parameters(parameters);
@@ -1079,52 +973,51 @@ private:
         return context.get_or_create(Data<RelationBinding<T>>(element.get_index(), element.get_arity(), objects));
     }
 
-    IndexGroundAtomVariant translate_grounded(loki::Atom element, Builder& builder, Repository& context)
+    GroundAtomViewVariant translate_grounded(loki::Atom element, Builder& builder, Repository& context)
     {
-        auto index_predicate_variant = translate_common(element->get_predicate(), builder, context);
+        auto predicate_view_variant = translate_common(element->get_predicate(), builder, context);
 
-        auto build_atom = [&](auto fact_tag, auto predicate_index)
+        auto build_atom = [&](auto fact_tag, auto predicate)
         {
             using Tag = std::decay_t<decltype(fact_tag)>;
 
             auto atom_ptr = builder.template get_builder<GroundAtom<Tag>>();
             auto& atom = *atom_ptr;
             atom.clear();
-            atom.binding =
-                to_binding(make_view(predicate_index, context), this->translate_grounded(element->get_terms(), builder, context), context).first.get_index();
+            atom.binding = to_binding(predicate, this->translate_grounded(element->get_terms(), builder, context), context).first.get_index();
             canonicalize(atom);
-            return context.get_or_create(atom).first.get_index();
+            return context.get_or_create(atom).first;
         };
 
         return std::visit(
-            [&](auto&& arg) -> IndexGroundAtomVariant
+            [&](auto&& arg) -> GroundAtomViewVariant
             {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, Index<Predicate<StaticTag>>>)
+                if constexpr (std::is_same_v<T, PredicateView<StaticTag>>)
                     return build_atom(StaticTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<Predicate<FluentTag>>>)
+                else if constexpr (std::is_same_v<T, PredicateView<FluentTag>>)
                     return build_atom(FluentTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<Predicate<DerivedTag>>>)
+                else if constexpr (std::is_same_v<T, PredicateView<DerivedTag>>)
                     return build_atom(DerivedTag {}, arg);
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_predicate_variant);
+            predicate_view_variant);
     }
 
-    IndexGroundAtomOrFactVariant translate_grounded(loki::Atom element, Builder& builder, Repository& context, FDRContext& fdr_context)
+    GroundAtomOrFactViewVariant translate_grounded(loki::Atom element, Builder& builder, Repository& context, FDRContext& fdr_context)
     {
         auto atom_variant = translate_grounded(element, builder, context);
 
         return std::visit(
-            [&](auto&& arg) -> IndexGroundAtomOrFactVariant
+            [&](auto&& arg) -> GroundAtomOrFactViewVariant
             {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, Index<GroundAtom<StaticTag>>>)
+                if constexpr (std::is_same_v<T, GroundAtomView<StaticTag>>)
                     return arg;
-                else if constexpr (std::is_same_v<T, Index<GroundAtom<FluentTag>>>)
-                    return fdr_context.get_fact(arg);
-                else if constexpr (std::is_same_v<T, Index<GroundAtom<DerivedTag>>>)
+                else if constexpr (std::is_same_v<T, GroundAtomView<FluentTag>>)
+                    return fdr_context.get_fact_view(arg);
+                else if constexpr (std::is_same_v<T, GroundAtomView<DerivedTag>>)
                     return arg;
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
@@ -1132,9 +1025,9 @@ private:
             atom_variant);
     }
 
-    IndexGroundLiteralVariant translate_grounded(loki::Literal element, Builder& builder, Repository& context)
+    GroundLiteralViewVariant translate_grounded(loki::Literal element, Builder& builder, Repository& context)
     {
-        auto atom_variant = translate_grounded(element->get_atom(), builder, context);
+        auto atom_view_variant = translate_grounded(element->get_atom(), builder, context);
 
         auto build_literal = [&](auto fact_tag, auto atom)
         {
@@ -1143,46 +1036,46 @@ private:
             auto literal_ptr = builder.template get_builder<GroundLiteral<Tag>>();
             auto& literal = *literal_ptr;
             literal.clear();
-            literal.atom = atom;
+            literal.atom = atom.get_index();
             literal.polarity = element->get_polarity();
             canonicalize(literal);
-            return context.get_or_create(literal).first.get_index();
+            return context.get_or_create(literal).first;
         };
 
         return std::visit(
-            [&](auto&& arg) -> IndexGroundLiteralVariant
+            [&](auto&& arg) -> GroundLiteralViewVariant
             {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, Index<GroundAtom<StaticTag>>>)
+                if constexpr (std::is_same_v<T, GroundAtomView<StaticTag>>)
                     return build_literal(StaticTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<GroundAtom<FluentTag>>>)
+                else if constexpr (std::is_same_v<T, GroundAtomView<FluentTag>>)
                     return build_literal(FluentTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<GroundAtom<DerivedTag>>>)
+                else if constexpr (std::is_same_v<T, GroundAtomView<DerivedTag>>)
                     return build_literal(DerivedTag {}, arg);
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            atom_variant);
+            atom_view_variant);
     }
 
-    IndexGroundLiteralOrFactVariant translate_grounded(loki::Literal element, Builder& builder, Repository& context, FDRContext& fdr_context)
+    GroundLiteralOrFactViewVariant translate_grounded(loki::Literal element, Builder& builder, Repository& context, FDRContext& fdr_context)
     {
-        auto literal_variant = translate_grounded(element, builder, context);
+        auto literal_view_variant = translate_grounded(element, builder, context);
 
         return std::visit(
-            [&](auto&& arg) -> IndexGroundLiteralOrFactVariant
+            [&](auto&& arg) -> GroundLiteralOrFactViewVariant
             {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, Index<GroundLiteral<StaticTag>>>)
+                if constexpr (std::is_same_v<T, GroundLiteralView<StaticTag>>)
                     return arg;
-                else if constexpr (std::is_same_v<T, Index<GroundLiteral<FluentTag>>>)
-                    return fdr_context.get_fact(arg);
-                else if constexpr (std::is_same_v<T, Index<GroundLiteral<DerivedTag>>>)
+                else if constexpr (std::is_same_v<T, GroundLiteralView<FluentTag>>)
+                    return std::make_pair(fdr_context.get_fact_view(arg.get_atom()), arg.get_polarity());
+                else if constexpr (std::is_same_v<T, GroundLiteralView<DerivedTag>>)
                     return arg;
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            literal_variant);
+            literal_view_variant);
     }
 
     Data<GroundFunctionExpression> translate_grounded(loki::FunctionExpressionNumber element, Builder& builder, Repository& context)
@@ -1257,23 +1150,23 @@ private:
 
     Data<GroundFunctionExpression> translate_grounded(loki::FunctionExpressionFunction element, Builder& builder, Repository& context)
     {
-        const auto index_fterm_variant = translate_grounded(element->get_function(), builder, context);
+        const auto fterm_view_variant = translate_grounded(element->get_function(), builder, context);
 
         return std::visit(
             [&](auto&& arg) -> Data<GroundFunctionExpression>
             {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, Index<GroundFunctionTerm<StaticTag>>>)
-                    return Data<GroundFunctionExpression>(arg);
-                else if constexpr (std::is_same_v<T, Index<GroundFunctionTerm<FluentTag>>>)
-                    return Data<GroundFunctionExpression>(arg);
-                else if constexpr (std::is_same_v<T, Index<GroundFunctionTerm<AuxiliaryTag>>>)
-                    return Data<GroundFunctionExpression>(arg);
+                if constexpr (std::is_same_v<T, GroundFunctionTermView<StaticTag>>)
+                    return Data<GroundFunctionExpression>(arg.get_index());
+                else if constexpr (std::is_same_v<T, GroundFunctionTermView<FluentTag>>)
+                    return Data<GroundFunctionExpression>(arg.get_index());
+                else if constexpr (std::is_same_v<T, GroundFunctionTermView<AuxiliaryTag>>)
+                    return Data<GroundFunctionExpression>(arg.get_index());
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_fterm_variant);
+            fterm_view_variant);
     }
 
     Data<GroundFunctionExpression> translate_grounded(loki::FunctionExpression element, Builder& builder, Repository& context)
@@ -1281,70 +1174,69 @@ private:
         return std::visit([&](auto&& arg) { return translate_grounded(arg, builder, context); }, element->get_function_expression());
     }
 
-    IndexGroundFunctionTermVariant translate_grounded(loki::Function element, Builder& builder, Repository& context)
+    GroundFunctionTermViewVariant translate_grounded(loki::Function element, Builder& builder, Repository& context)
     {
-        auto index_function_variant = translate_common(element->get_function_skeleton(), builder, context);
+        auto function_view_variant = translate_common(element->get_function_skeleton(), builder, context);
 
-        auto build_function_term = [&](auto fact_tag, auto function_index) -> IndexGroundFunctionTermVariant
+        auto build_function_term = [&](auto fact_tag, auto function) -> GroundFunctionTermViewVariant
         {
             using Tag = std::decay_t<decltype(fact_tag)>;
 
             auto fterm_ptr = builder.template get_builder<GroundFunctionTerm<Tag>>();
             auto& fterm = *fterm_ptr;
             fterm.clear();
-            fterm.binding =
-                to_binding(make_view(function_index, context), this->translate_grounded(element->get_terms(), builder, context), context).first.get_index();
+            fterm.binding = to_binding(function, this->translate_grounded(element->get_terms(), builder, context), context).first.get_index();
             canonicalize(fterm);
-            return context.get_or_create(fterm).first.get_index();
+            return context.get_or_create(fterm).first;
         };
 
         return std::visit(
-            [&](auto&& arg) -> IndexGroundFunctionTermVariant
+            [&](auto&& arg) -> GroundFunctionTermViewVariant
             {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, Index<Function<StaticTag>>>)
+                if constexpr (std::is_same_v<T, FunctionView<StaticTag>>)
                     return build_function_term(StaticTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<Function<FluentTag>>>)
+                else if constexpr (std::is_same_v<T, FunctionView<FluentTag>>)
                     return build_function_term(FluentTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<Function<AuxiliaryTag>>>)
+                else if constexpr (std::is_same_v<T, FunctionView<AuxiliaryTag>>)
                     return build_function_term(AuxiliaryTag {}, arg);
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_function_variant);
+            function_view_variant);
     }
 
-    IndexGroundFunctionTermValueVariant translate_grounded(loki::FunctionValue element, Builder& builder, Repository& context)
+    GroundFunctionTermValueViewVariant translate_grounded(loki::FunctionValue element, Builder& builder, Repository& context)
     {
-        auto index_fterm_variant = translate_grounded(element->get_function(), builder, context);
+        auto fterm_view_variant = translate_grounded(element->get_function(), builder, context);
 
-        auto build_fterm_value = [&](auto fact_tag, auto fterm_index) -> IndexGroundFunctionTermValueVariant
+        auto build_fterm_value = [&](auto fact_tag, auto fterm) -> GroundFunctionTermValueViewVariant
         {
             using Tag = std::decay_t<decltype(fact_tag)>;
 
             auto fterm_value_ptr = builder.template get_builder<GroundFunctionTermValue<Tag>>();
             auto& fterm_value = *fterm_value_ptr;
             fterm_value.clear();
-            fterm_value.fterm = fterm_index;
+            fterm_value.fterm = fterm.get_index();
             fterm_value.value = element->get_number();
             canonicalize(fterm_value);
-            return context.get_or_create(fterm_value).first.get_index();
+            return context.get_or_create(fterm_value).first;
         };
 
         return std::visit(
-            [&](auto&& arg) -> IndexGroundFunctionTermValueVariant
+            [&](auto&& arg) -> GroundFunctionTermValueViewVariant
             {
                 using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, Index<GroundFunctionTerm<StaticTag>>>)
+                if constexpr (std::is_same_v<T, GroundFunctionTermView<StaticTag>>)
                     return build_fterm_value(StaticTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<GroundFunctionTerm<FluentTag>>>)
+                else if constexpr (std::is_same_v<T, GroundFunctionTermView<FluentTag>>)
                     return build_fterm_value(FluentTag {}, arg);
-                else if constexpr (std::is_same_v<T, Index<GroundFunctionTerm<AuxiliaryTag>>>)
+                else if constexpr (std::is_same_v<T, GroundFunctionTermView<AuxiliaryTag>>)
                     return build_fterm_value(AuxiliaryTag {}, arg);
                 else
                     static_assert(dependent_false<T>::value, "Missing case for type");
             },
-            index_fterm_variant);
+            fterm_view_variant);
     }
 
     Data<BooleanOperator<Data<GroundFunctionExpression>>> translate_grounded(loki::ConditionNumericConstraint element, Builder& builder, Repository& context)
@@ -1385,33 +1277,32 @@ private:
         auto& conj_condition = *conj_condition_ptr;
         conj_condition.clear();
 
-        const auto func_insert_literal = [](IndexGroundLiteralOrFactVariant index_literal_variant,
+        const auto func_insert_literal = [](GroundLiteralOrFactViewVariant literal_or_fact_view_variant,
                                             IndexList<GroundLiteral<StaticTag>>& static_literals,
                                             IndexList<GroundLiteral<DerivedTag>>& derived_literals,
                                             DataList<FDRFact<FluentTag>>& positive_facts,
                                             DataList<FDRFact<FluentTag>>& negative_facts)
         {
             std::visit(
-                [&](auto&& literal_index)
+                [&](auto&& arg)
                 {
-                    using T = std::decay_t<decltype(literal_index)>;
+                    using T = std::decay_t<decltype(arg)>;
 
-                    if constexpr (std::is_same_v<T, Index<GroundLiteral<StaticTag>>>)
-                        static_literals.push_back(literal_index);
-                    else if constexpr (std::is_same_v<T, Data<FDRFact<FluentTag>>>)
+                    if constexpr (std::is_same_v<T, GroundLiteralView<StaticTag>>)
+                        static_literals.push_back(arg.get_index());
+                    else if constexpr (std::is_same_v<T, std::pair<FDRFactView<FluentTag>, bool>>)
                     {
-                        // TODO: fix this hack!!
-                        if (literal_index.value == FDRValue::none())
-                            negative_facts.push_back(Data<FDRFact<FluentTag>>(literal_index.variable, FDRValue { 1 }));
+                        if (arg.second)
+                            positive_facts.push_back(arg.first.get_data());
                         else
-                            positive_facts.push_back(Data<FDRFact<FluentTag>>(literal_index.variable, FDRValue { 1 }));
+                            negative_facts.push_back(arg.first.get_data());
                     }
-                    else if constexpr (std::is_same_v<T, Index<GroundLiteral<DerivedTag>>>)
-                        derived_literals.push_back(literal_index);
+                    else if constexpr (std::is_same_v<T, GroundLiteralView<DerivedTag>>)
+                        derived_literals.push_back(arg.get_index());
                     else
                         static_assert(dependent_false<T>::value, "Missing case for type");
                 },
-                index_literal_variant);
+                literal_or_fact_view_variant);
         };
 
         return std::visit(
@@ -1430,9 +1321,9 @@ private:
 
                                 if constexpr (std::is_same_v<SubConditionT, loki::ConditionLiteral>)
                                 {
-                                    const auto index_literal_variant = translate_grounded(subcondition->get_literal(), builder, context, fdr_context);
+                                    const auto literal_or_fact_view_variant = translate_grounded(subcondition->get_literal(), builder, context, fdr_context);
 
-                                    func_insert_literal(index_literal_variant,
+                                    func_insert_literal(literal_or_fact_view_variant,
                                                         conj_condition.static_literals,
                                                         conj_condition.derived_literals,
                                                         conj_condition.positive_facts,
