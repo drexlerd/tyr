@@ -10,7 +10,7 @@ namespace tyr::formalism::unification
 {
 
 /// Attempts to match two structures while preserving failure information.
-template<UnifiableStructure T, typename Policy = DefaultMatchPolicy>
+template<TermUnifiableStructure T, typename Policy = DefaultMatchPolicy>
 [[nodiscard]] MatchResult<TermMatchState> match_ex(const T& pattern, const T& element, TermMatchState state, const Policy& policy = {})
 {
     const bool ok =
@@ -23,7 +23,7 @@ template<UnifiableStructure T, typename Policy = DefaultMatchPolicy>
 }
 
 /// Backward-compatible wrapper that discards failure details.
-template<UnifiableStructure T, typename Policy = DefaultMatchPolicy>
+template<TermUnifiableStructure T, typename Policy = DefaultMatchPolicy>
 [[nodiscard]] std::optional<TermMatchState> match(const T& pattern, const T& element, TermMatchState state, const Policy& policy = {})
 {
     auto result = match_ex(pattern, element, std::move(state), policy);
@@ -34,7 +34,7 @@ template<UnifiableStructure T, typename Policy = DefaultMatchPolicy>
 }
 
 /// Convenience overload that returns only the resulting sigma substitution.
-template<UnifiableStructure T>
+template<TermUnifiableStructure T>
 [[nodiscard]] std::optional<SubstitutionFunction<Data<Term>>> match(const T& pattern, const T& element, SubstitutionFunction<Data<Term>> sigma)
 {
     TermMatchState state { std::move(sigma), SubstitutionFunction<Data<Term>>() };

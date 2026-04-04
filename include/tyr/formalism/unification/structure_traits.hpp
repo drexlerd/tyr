@@ -27,14 +27,7 @@ namespace tyr::formalism::unification
 {
 
 template<typename T>
-struct structure_traits
-{
-    template<typename F>
-    static bool zip_terms(const T& lhs, const T& rhs, F&& f);
-
-    template<typename F>
-    static T transform_terms(const T& value, F&& f);
-};
+struct structure_traits;
 
 template<>
 struct structure_traits<Data<Term>>
@@ -53,13 +46,13 @@ struct structure_traits<Data<Term>>
 };
 
 template<typename T>
-concept UnifiableStructure = requires(const T& lhs, const T& rhs) {
+concept TermUnifiableStructure = requires(const T& lhs, const T& rhs) {
     {
         structure_traits<T>::zip_terms(lhs, rhs, [](const Data<Term>&, const Data<Term>&) { return true; })
-        } -> std::same_as<bool>;
+    } -> std::same_as<bool>;
     {
         structure_traits<T>::transform_terms(lhs, [](const Data<Term>& term) { return term; })
-        } -> std::same_as<T>;
+    } -> std::same_as<T>;
 };
 
 }  // namespace tyr::formalism::unification

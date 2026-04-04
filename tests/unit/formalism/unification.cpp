@@ -30,7 +30,7 @@ namespace
 {
 using TermSubstitution = fu::SubstitutionFunction<Data<f::Term>>;
 
-static_assert(fu::UnifiableStructure<Data<f::Term>>);
+static_assert(fu::TermUnifiableStructure<Data<f::Term>>);
 
 Data<f::Term> parameter(size_t index) { return Data<f::Term>(f::ParameterIndex(index)); }
 

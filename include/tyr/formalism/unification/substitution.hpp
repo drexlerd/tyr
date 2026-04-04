@@ -65,11 +65,14 @@ public:
     [[nodiscard]] bool is_bound(ParameterIndex p) const noexcept
     {
         const auto it = m_positions.find(p);
-        assert(it != m_positions.end());
-        return m_data[it->second].has_value();
+        return it != m_positions.end() && m_data[it->second].has_value();
     }
 
-    [[nodiscard]] bool is_unbound(ParameterIndex p) const noexcept { return !is_bound(p); }
+    [[nodiscard]] bool is_unbound(ParameterIndex p) const noexcept
+    {
+        const auto it = m_positions.find(p);
+        return it != m_positions.end() && !m_data[it->second].has_value();
+    }
 
     [[nodiscard]] bool has_binding(ParameterIndex p) const noexcept
     {
@@ -95,9 +98,9 @@ public:
         return &m_data[it->second];
     }
 
-    const std::optional<T>& operator[](ParameterIndex p) const noexcept { return m_data[m_positions.at(p)]; }
+    const std::optional<T>& operator[](ParameterIndex p) const { return m_data[m_positions.at(p)]; }
 
-    std::optional<T>& operator[](ParameterIndex p) noexcept { return m_data[m_positions.at(p)]; }
+    std::optional<T>& operator[](ParameterIndex p) { return m_data[m_positions.at(p)]; }
 
     [[nodiscard]] bool assign(ParameterIndex p, const T& value)
     {

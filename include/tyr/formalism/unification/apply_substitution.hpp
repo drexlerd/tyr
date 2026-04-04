@@ -6,53 +6,45 @@
 #include "tyr/formalism/unification/substitution.hpp"
 #include "tyr/formalism/unification/term_operations.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <vector>
 
 namespace tyr::formalism::unification
 {
 
-template<typename S>
-concept ApplicableSubstitution = requires(const S cs, ParameterIndex p) {
-    typename S::value_type;
-    { cs.contains_parameter(p) } -> std::same_as<bool>;
-    { cs.is_unbound(p) } -> std::same_as<bool>;
-    { cs[p] } -> std::same_as<const std::optional<typename S::value_type>&>;
-    requires std::constructible_from<Data<Term>, typename S::value_type>;
-};
-
-template<ApplicableSubstitution S>
+template<TermSubstitution S>
 [[nodiscard]] Data<Term> apply_substitution_once(const Data<Term>& term, const S& rho)
 {
     if (!is_parameter(term))
         return term;
 
     const auto p = get_parameter(term);
-    if (!rho.contains_parameter(p) || rho.is_unbound(p))
+    if (!rho.is_bound(p))
         return term;
 
     return Data<Term>(*rho[p]);
 }
 
-template<typename T, ApplicableSubstitution S>
+template<TermUnifiableStructure T, TermSubstitution S>
 [[nodiscard]] T apply_substitution_once(const T& value, const S& rho)
 {
     return structure_traits<T>::transform_terms(value, [&](const Data<Term>& term) { return apply_substitution_once(term, rho); });
 }
 
-template<ApplicableSubstitution S>
+template<TermSubstitution S>
 [[nodiscard]] Data<Term> apply_substitution(const Data<Term>& term, const S& rho)
 {
     return apply_substitution_once(term, rho);
 }
 
-template<typename T, ApplicableSubstitution S>
+template<TermUnifiableStructure T, TermSubstitution S>
 [[nodiscard]] T apply_substitution(const T& value, const S& rho)
 {
     return apply_substitution_once(value, rho);
 }
 
-template<ApplicableSubstitution S>
+template<TermSubstitution S>
 [[nodiscard]] Data<Term> apply_substitution_fixpoint(const Data<Term>& term, const S& rho)
 {
     auto current = term;
@@ -68,7 +60,7 @@ template<ApplicableSubstitution S>
 
         seen.push_back(p);
 
-        if (!rho.contains_parameter(p) || rho.is_unbound(p))
+        if (!rho.is_bound(p))
             return current;
 
         current = Data<Term>(*rho[p]);
@@ -77,7 +69,7 @@ template<ApplicableSubstitution S>
     return current;
 }
 
-template<typename T, ApplicableSubstitution S>
+template<TermUnifiableStructure T, TermSubstitution S>
 [[nodiscard]] T apply_substitution_fixpoint(const T& value, const S& rho)
 {
     return structure_traits<T>::transform_terms(value, [&](const Data<Term>& term) { return apply_substitution_fixpoint(term, rho); });
