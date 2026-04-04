@@ -46,7 +46,9 @@ Renaming make_effect_alpha_renaming(const TempEffect& effect, size_t fresh_base)
 
     for (size_t i = 0; i < effect.num_effect_variables; ++i)
     {
-        sigma.assign(ParameterIndex { uint_t(effect.num_action_variables + i) }, Data<Term>(ParameterIndex { uint_t(fresh_base + i) }));
+        [[maybe_unused]] const auto inserted =
+            sigma.assign(ParameterIndex { uint_t(effect.num_action_variables + i) }, Data<Term>(ParameterIndex { uint_t(fresh_base + i) }));
+        assert(inserted);
     }
 
     return sigma;

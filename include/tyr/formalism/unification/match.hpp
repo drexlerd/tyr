@@ -8,7 +8,7 @@ namespace tyr::formalism::unification
 {
 
 template<typename T, typename Policy = DefaultMatchPolicy>
-std::optional<TermMatchState> match(const T& pattern, const T& element, TermMatchState state, const Policy& policy = {})
+[[nodiscard]] std::optional<TermMatchState> match(const T& pattern, const T& element, TermMatchState state, const Policy& policy = {})
 {
     const bool ok =
         structure_traits<T>::zip_terms(pattern, element, [&](const Data<Term>& lhs, const Data<Term>& rhs) { return match_term(lhs, rhs, state, policy); });
@@ -20,7 +20,7 @@ std::optional<TermMatchState> match(const T& pattern, const T& element, TermMatc
 }
 
 template<typename T>
-std::optional<SubstitutionFunction<Data<Term>>> match(const T& pattern, const T& element, SubstitutionFunction<Data<Term>> sigma)
+[[nodiscard]] std::optional<SubstitutionFunction<Data<Term>>> match(const T& pattern, const T& element, SubstitutionFunction<Data<Term>> sigma)
 {
     TermMatchState state { std::move(sigma), SubstitutionFunction<Data<Term>>() };
 

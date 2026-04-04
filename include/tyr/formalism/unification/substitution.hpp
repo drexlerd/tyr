@@ -19,8 +19,12 @@
 #define TYR_FORMALISM_UNIFICATION_SUBSTITUTION_HPP_
 
 #include "tyr/common/comparators.hpp"
+#include "tyr/common/equal_to.hpp"
+#include "tyr/common/hash.hpp"
+#include "tyr/formalism/parameter_index.hpp"
 #include "tyr/formalism/term_data.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <optional>
 #include <vector>
@@ -52,26 +56,44 @@ public:
         return SubstitutionFunction(std::move(parameters));
     }
 
-    size_t size() const noexcept { return m_data.size(); }
+    [[nodiscard]] size_t size() const noexcept { return m_data.size(); }
 
-    const std::vector<ParameterIndex>& parameters() const noexcept { return m_parameters; }
+    [[nodiscard]] const std::vector<ParameterIndex>& parameters() const noexcept { return m_parameters; }
 
-    bool contains_parameter(ParameterIndex p) const noexcept { return m_positions.find(p) != m_positions.end(); }
+    [[nodiscard]] bool contains_parameter(ParameterIndex p) const noexcept { return m_positions.find(p) != m_positions.end(); }
 
-    bool is_bound(ParameterIndex p) const noexcept
+    [[nodiscard]] bool is_bound(ParameterIndex p) const noexcept
     {
         const auto it = m_positions.find(p);
         assert(it != m_positions.end());
         return m_data[it->second].has_value();
     }
 
-    bool is_unbound(ParameterIndex p) const noexcept { return !is_bound(p); }
+    [[nodiscard]] bool is_unbound(ParameterIndex p) const noexcept { return !is_bound(p); }
+
+    [[nodiscard]] const std::optional<T>* try_get(ParameterIndex p) const noexcept
+    {
+        const auto it = m_positions.find(p);
+        if (it == m_positions.end())
+            return nullptr;
+
+        return &m_data[it->second];
+    }
+
+    [[nodiscard]] std::optional<T>* try_get(ParameterIndex p) noexcept
+    {
+        const auto it = m_positions.find(p);
+        if (it == m_positions.end())
+            return nullptr;
+
+        return &m_data[it->second];
+    }
 
     const std::optional<T>& operator[](ParameterIndex p) const noexcept { return m_data[m_positions.at(p)]; }
 
     std::optional<T>& operator[](ParameterIndex p) noexcept { return m_data[m_positions.at(p)]; }
 
-    bool assign(ParameterIndex p, const T& value)
+    [[nodiscard]] bool assign(ParameterIndex p, const T& value)
     {
         auto& slot = m_data[m_positions.at(p)];
         if (slot.has_value())
@@ -80,7 +102,7 @@ public:
         return true;
     }
 
-    bool assign_or_check(ParameterIndex p, const T& value)
+    [[nodiscard]] bool assign_or_check(ParameterIndex p, const T& value)
     {
         auto& slot = m_data[m_positions.at(p)];
         if (!slot.has_value())
