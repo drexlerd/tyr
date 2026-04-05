@@ -1,9 +1,5 @@
 """
-Parse and traverse planning formalism structures. 
-
-This example demonstrates how to inspect the planning formalism and highlights
-some high-level design choices. The provided type hints make it easy to
-navigate and explore all structures.
+Synthesize and inspect invariants from a planning domain.
 
 Example usage (run from the repository root):
 
