@@ -69,7 +69,6 @@ public:
     const auto& get_action_program() const noexcept { return m_action_program; }
     auto& get_rpg_program() noexcept { return m_rpg_program; }
     const auto& get_rpg_program() const noexcept { return m_rpg_program; }
-    const auto& get_parameter_domains_per_cond_effect_per_action() const noexcept { return m_parameter_domains_per_cond_effect_per_action; }
 
     const auto& get_static_atoms_bitset() const noexcept { return m_static_atoms_bitset; }
     const auto& get_static_numeric_variables() const noexcept { return m_static_numeric_variables; }
@@ -88,7 +87,6 @@ private:
     AxiomEvaluatorProgram m_axiom_program;
 
     ApplicableActionProgram m_action_program;
-    std::vector<analysis::DomainListListList> m_parameter_domains_per_cond_effect_per_action;
 
     RPGProgram m_rpg_program;
 };

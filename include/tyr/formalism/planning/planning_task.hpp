@@ -18,6 +18,7 @@
 #ifndef TYR_FORMALISM_PLANNING_PLANNING_TASK_HPP_
 #define TYR_FORMALISM_PLANNING_PLANNING_TASK_HPP_
 
+#include "tyr/analysis/domains.hpp"
 #include "tyr/formalism/planning/declarations.hpp"
 #include "tyr/formalism/planning/fdr_context.hpp"
 #include "tyr/formalism/planning/planning_domain.hpp"
@@ -34,7 +35,8 @@ public:
         m_repository(std::move(repository)),
         m_task(task),
         m_fdr_context(std::move(fdr_context)),
-        m_domain(std::move(domain))
+        m_domain(std::move(domain)),
+        m_variable_domains(analysis::compute_variable_domains(m_task))
     {
         if (&m_task.get_context() != m_repository.get())
             throw std::invalid_argument("Task context does not match the given Repository.");
@@ -50,6 +52,7 @@ private:
     TaskView m_task;
     FDRContextPtr m_fdr_context;
     PlanningDomain m_domain;
+    analysis::TaskVariableDomains m_variable_domains;
 };
 
 }
