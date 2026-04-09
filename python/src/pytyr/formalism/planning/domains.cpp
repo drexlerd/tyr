@@ -51,9 +51,10 @@ void bind_conditional_effect_domain_view(nb::module_& m, const char* name)
 {
     using T = tyr::analysis::ConditionalEffectDomainView<C>;
 
-    auto cls = nb::class_<T>(m, name)  //
-                   .def_ro("condition_domain", &T::condition_domain)
-                   .def_ro("effect_domain", &T::effect_domain);
+    auto cls = nb::class_<T>(m, name)
+                   .def_ro("element", &T::element)
+                   .def_prop_ro("condition_domain", [](const T& self) -> const auto& { return self.payload.condition_domain; })
+                   .def_prop_ro("effect_domain", [](const T& self) -> const auto& { return self.payload.effect_domain; });
     add_print(cls);
 }
 
@@ -62,9 +63,10 @@ void bind_action_domain_view(nb::module_& m, const char* name)
 {
     using T = tyr::analysis::ActionDomainView<C>;
 
-    auto cls = nb::class_<T>(m, name)  //
-                   .def_ro("precondition_domain", &T::precondition_domain)
-                   .def_ro("effect_domains", &T::effect_domains);
+    auto cls = nb::class_<T>(m, name)
+                   .def_ro("element", &T::element)
+                   .def_prop_ro("precondition_domain", [](const T& self) -> const auto& { return self.payload.precondition_domain; })
+                   .def_prop_ro("effect_domains", [](const T& self) -> const auto& { return self.payload.effect_domains; });
     add_print(cls);
 }
 

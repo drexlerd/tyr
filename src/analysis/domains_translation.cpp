@@ -1,20 +1,3 @@
-/*
- * Copyright (C) 2025-2026 Dominik Drexler
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
-
 #include "tyr/analysis/domains.hpp"
 
 namespace tyr::analysis
@@ -58,6 +41,24 @@ SimpleScopedDomainViewMap<Element, C> to_simple_scoped_domain_view_map(const Sim
     return result;
 }
 
+template<typename Element, typename C>
+ScopedDomainViewMap<Element, C> to_scoped_domain_view_map(const ScopedDomainMap<Element>& domains, const C& context)
+{
+    auto result = ScopedDomainViewMap<Element, C> {};
+    result.reserve(domains.size());
+
+    for (const auto& [element, domain] : domains)
+    {
+        result.emplace(make_view(element, context),
+                       SimpleScopedDomainView<Element, C> {
+                           make_view(domain.element, context),
+                           to_variable_domain_view_list(domain.payload, context),
+                       });
+    }
+
+    return result;
+}
+
 template<typename C>
 ConjunctiveConditionDomainView<C> to_conjunctive_condition_domain_view(const ConjunctiveConditionDomain& domain, const C& context)
 {
@@ -80,8 +81,11 @@ template<typename C>
 ConditionalEffectDomainView<C> to_conditional_effect_domain_view(const ConditionalEffectDomain& domain, const C& context)
 {
     return ConditionalEffectDomainView<C> {
-        to_conjunctive_condition_domain_view(domain.condition_domain, context),
-        to_conjunctive_effect_domain_view(domain.effect_domain, context),
+        make_view(domain.element, context),
+        ConditionalEffectDomainViewData<C> {
+            to_conjunctive_condition_domain_view(domain.payload.condition_domain, context),
+            to_conjunctive_effect_domain_view(domain.payload.effect_domain, context),
+        },
     };
 }
 
@@ -91,8 +95,8 @@ ConditionalEffectDomainViewMap<C> to_conditional_effect_domain_view_map(const Co
     auto result = ConditionalEffectDomainViewMap<C> {};
     result.reserve(domains.size());
 
-    for (const auto& [element, payload] : domains)
-        result.emplace(make_view(element, context), to_conditional_effect_domain_view(payload, context));
+    for (const auto& [element, domain] : domains)
+        result.emplace(make_view(element, context), to_conditional_effect_domain_view(domain, context));
 
     return result;
 }
@@ -103,12 +107,15 @@ ActionDomainViewMap<C> to_action_domain_view_map(const ActionDomainMap& domains,
     auto result = ActionDomainViewMap<C> {};
     result.reserve(domains.size());
 
-    for (const auto& [element, payload] : domains)
+    for (const auto& [element, domain] : domains)
     {
         result.emplace(make_view(element, context),
                        ActionDomainView<C> {
-                           to_conjunctive_condition_domain_view(payload.precondition_domain, context),
-                           to_conditional_effect_domain_view_map(payload.effect_domains, context),
+                           make_view(domain.element, context),
+                           ActionDomainViewData<C> {
+                               to_conjunctive_condition_domain_view(domain.payload.precondition_domain, context),
+                               to_conditional_effect_domain_view_map(domain.payload.effect_domains, context),
+                           },
                        });
     }
 
@@ -126,7 +133,7 @@ ProgramVariableDomainsView compute_variable_domain_views(const ProgramVariableDo
         to_simple_scoped_domain_view_map<formalism::Predicate<formalism::FluentTag>, C>(domains.fluent_predicate_domains, repository),
         to_simple_scoped_domain_view_map<formalism::Function<formalism::StaticTag>, C>(domains.static_function_domains, repository),
         to_simple_scoped_domain_view_map<formalism::Function<formalism::FluentTag>, C>(domains.fluent_function_domains, repository),
-        to_simple_scoped_domain_view_map<formalism::datalog::Rule, C>(domains.rule_domains, repository),
+        to_scoped_domain_view_map<formalism::datalog::Rule, C>(domains.rule_domains, repository),
     };
 }
 
@@ -141,7 +148,7 @@ TaskVariableDomainsView compute_variable_domain_views(const TaskVariableDomains&
         to_simple_scoped_domain_view_map<formalism::Function<formalism::StaticTag>, C>(domains.static_function_domains, repository),
         to_simple_scoped_domain_view_map<formalism::Function<formalism::FluentTag>, C>(domains.fluent_function_domains, repository),
         to_action_domain_view_map<C>(domains.action_domains, repository),
-        to_simple_scoped_domain_view_map<formalism::planning::Axiom, C>(domains.axiom_domains, repository),
+        to_scoped_domain_view_map<formalism::planning::Axiom, C>(domains.axiom_domains, repository),
     };
 }
 

@@ -68,33 +68,40 @@ using SimpleScopedDomain = Scoped<Element, VariableDomainList>;
 template<typename Element>
 using SimpleScopedDomainMap = UnorderedMap<Index<Element>, VariableDomainList>;
 
+template<typename Element>
+using ScopedDomainMap = UnorderedMap<Index<Element>, SimpleScopedDomain<Element>>;
+
 template<formalism::FactKind T>
 using PredicateDomainMap = SimpleScopedDomainMap<formalism::Predicate<T>>;
 
 template<formalism::FactKind T>
 using FunctionDomainMap = SimpleScopedDomainMap<formalism::Function<T>>;
 
-using RuleDomainMap = SimpleScopedDomainMap<formalism::datalog::Rule>;
+using RuleDomainMap = ScopedDomainMap<formalism::datalog::Rule>;
 
-using AxiomDomainMap = SimpleScopedDomainMap<formalism::planning::Axiom>;
+using AxiomDomainMap = ScopedDomainMap<formalism::planning::Axiom>;
 
 using ConjunctiveConditionDomain = SimpleScopedDomain<formalism::planning::ConjunctiveCondition>;
 
 using ConjunctiveEffectDomain = SimpleScopedDomain<formalism::planning::ConjunctiveEffect>;
 
-struct ConditionalEffectDomain
+struct ConditionalEffectDomainData
 {
     ConjunctiveConditionDomain condition_domain;
     ConjunctiveEffectDomain effect_domain;
 };
 
+using ConditionalEffectDomain = Scoped<formalism::planning::ConditionalEffect, ConditionalEffectDomainData>;
+
 using ConditionalEffectDomainMap = UnorderedMap<Index<formalism::planning::ConditionalEffect>, ConditionalEffectDomain>;
 
-struct ActionDomain
+struct ActionDomainData
 {
     ConjunctiveConditionDomain precondition_domain;
     ConditionalEffectDomainMap effect_domains;
 };
+
+using ActionDomain = Scoped<formalism::planning::Action, ActionDomainData>;
 
 using ActionDomainMap = UnorderedMap<Index<formalism::planning::Action>, ActionDomain>;
 
@@ -155,6 +162,9 @@ using SimpleScopedDomainView = ScopedView<Element, VariableDomainViewList<C>, C>
 template<typename Element, typename C>
 using SimpleScopedDomainViewMap = UnorderedMap<View<Index<Element>, C>, VariableDomainViewList<C>>;
 
+template<typename Element, typename C>
+using ScopedDomainViewMap = UnorderedMap<View<Index<Element>, C>, SimpleScopedDomainView<Element, C>>;
+
 template<formalism::FactKind T, typename C>
 using PredicateDomainViewMap = SimpleScopedDomainViewMap<formalism::Predicate<T>, C>;
 
@@ -162,16 +172,10 @@ template<formalism::FactKind T, typename C>
 using FunctionDomainViewMap = SimpleScopedDomainViewMap<formalism::Function<T>, C>;
 
 template<typename C>
-using RuleDomainView = SimpleScopedDomainView<formalism::datalog::Rule, C>;
+using RuleDomainViewMap = ScopedDomainViewMap<formalism::datalog::Rule, C>;
 
 template<typename C>
-using RuleDomainViewMap = SimpleScopedDomainViewMap<formalism::datalog::Rule, C>;
-
-template<typename C>
-using AxiomDomainView = SimpleScopedDomainView<formalism::planning::Axiom, C>;
-
-template<typename C>
-using AxiomDomainViewMap = SimpleScopedDomainViewMap<formalism::planning::Axiom, C>;
+using AxiomDomainViewMap = ScopedDomainViewMap<formalism::planning::Axiom, C>;
 
 template<typename C>
 using ConjunctiveConditionDomainView = SimpleScopedDomainView<formalism::planning::ConjunctiveCondition, C>;
@@ -180,21 +184,27 @@ template<typename C>
 using ConjunctiveEffectDomainView = SimpleScopedDomainView<formalism::planning::ConjunctiveEffect, C>;
 
 template<typename C>
-struct ConditionalEffectDomainView
+struct ConditionalEffectDomainViewData
 {
     ConjunctiveConditionDomainView<C> condition_domain;
     ConjunctiveEffectDomainView<C> effect_domain;
 };
 
 template<typename C>
+using ConditionalEffectDomainView = ScopedView<formalism::planning::ConditionalEffect, ConditionalEffectDomainViewData<C>, C>;
+
+template<typename C>
 using ConditionalEffectDomainViewMap = UnorderedMap<View<Index<formalism::planning::ConditionalEffect>, C>, ConditionalEffectDomainView<C>>;
 
 template<typename C>
-struct ActionDomainView
+struct ActionDomainViewData
 {
     ConjunctiveConditionDomainView<C> precondition_domain;
     ConditionalEffectDomainViewMap<C> effect_domains;
 };
+
+template<typename C>
+using ActionDomainView = ScopedView<formalism::planning::Action, ActionDomainViewData<C>, C>;
 
 template<typename C>
 using ActionDomainViewMap = UnorderedMap<View<Index<formalism::planning::Action>, C>, ActionDomainView<C>>;

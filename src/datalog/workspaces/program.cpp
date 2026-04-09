@@ -73,7 +73,7 @@ ConstProgramWorkspace::ConstProgramWorkspace(ProgramContext& context) :
     for (uint_t i = 0; i < context.get_program().get_rules().size(); ++i)
         rules.emplace_back(context.get_program().get_rules()[i],
                            context.get_workspace_repository(),
-                           context.get_domains().rule_domains.at(context.get_program().get_rules()[i].get_index()),
+                           context.get_domains().rule_domains.at(context.get_program().get_rules()[i].get_index()).payload,
                            context.get_program().get_objects().size(),
                            context.get_program().get_predicates<formalism::FluentTag>().size(),
                            facts.assignment_sets);

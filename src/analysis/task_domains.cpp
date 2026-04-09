@@ -147,7 +147,13 @@ AxiomDomainMap to_axiom_domain_map(const TmpAxiomDomainMap& domains)
     result.reserve(domains.size());
 
     for (const auto& [axiom, variable_domains] : domains)
-        result.emplace(axiom, to_variable_domain_list(variable_domains));
+    {
+        result.emplace(axiom,
+                       SimpleScopedDomain<formalism::planning::Axiom> {
+                           axiom,
+                           to_variable_domain_list(variable_domains),
+                       });
+    }
 
     return result;
 }
@@ -166,24 +172,30 @@ ActionDomainMap to_action_domain_map(const TmpActionDomainMap& domains)
         {
             effect_domains.emplace(c_effect,
                                    ConditionalEffectDomain {
-                                       ConjunctiveConditionDomain {
-                                           c_effect_domain.condition_domain.element,
-                                           to_variable_domain_list(c_effect_domain.condition_domain.payload),
-                                       },
-                                       ConjunctiveEffectDomain {
-                                           c_effect_domain.effect_domain.element,
-                                           to_variable_domain_list(c_effect_domain.effect_domain.payload),
+                                       c_effect,
+                                       ConditionalEffectDomainData {
+                                           ConjunctiveConditionDomain {
+                                               c_effect_domain.condition_domain.element,
+                                               to_variable_domain_list(c_effect_domain.condition_domain.payload),
+                                           },
+                                           ConjunctiveEffectDomain {
+                                               c_effect_domain.effect_domain.element,
+                                               to_variable_domain_list(c_effect_domain.effect_domain.payload),
+                                           },
                                        },
                                    });
         }
 
         result.emplace(action,
                        ActionDomain {
-                           ConjunctiveConditionDomain {
-                               action_domain.precondition_domain.element,
-                               to_variable_domain_list(action_domain.precondition_domain.payload),
+                           action,
+                           ActionDomainData {
+                               ConjunctiveConditionDomain {
+                                   action_domain.precondition_domain.element,
+                                   to_variable_domain_list(action_domain.precondition_domain.payload),
+                               },
+                               std::move(effect_domains),
                            },
-                           std::move(effect_domains),
                        });
     }
 

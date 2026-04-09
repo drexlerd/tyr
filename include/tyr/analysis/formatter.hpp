@@ -74,15 +74,47 @@ inline std::ostream& print(std::ostream& os, const analysis::Scoped<Element, Pay
     return os;
 }
 
+template<typename Element, typename Payload>
+inline std::ostream& print(std::ostream& os, const analysis::Scoped<formalism::planning::Axiom, Payload>& el)
+{
+    os << "AxiomDomain(\n";
+    {
+        IndentScope scope(os);
+
+        os << print_indent << "element = " << el.element << "\n";
+
+        os << print_indent << "payload = " << el.payload << "\n";
+    }
+    os << print_indent << ")";
+    return os;
+}
+
+template<typename Element, typename Payload>
+inline std::ostream& print(std::ostream& os, const analysis::Scoped<formalism::datalog::Rule, Payload>& el)
+{
+    os << "RuleDomain(\n";
+    {
+        IndentScope scope(os);
+
+        os << print_indent << "element = " << el.element << "\n";
+
+        os << print_indent << "payload = " << el.payload << "\n";
+    }
+    os << print_indent << ")";
+    return os;
+}
+
 inline std::ostream& print(std::ostream& os, const analysis::ConditionalEffectDomain& el)
 {
     os << "ConditionalEffectDomain(\n";
     {
         IndentScope scope(os);
 
-        os << print_indent << "condition domain = " << el.condition_domain << "\n";
+        os << print_indent << "element = " << el.element << "\n";
 
-        os << print_indent << "effect domain = " << el.effect_domain << "\n";
+        os << print_indent << "condition domain = " << el.payload.condition_domain << "\n";
+
+        os << print_indent << "effect domain = " << el.payload.effect_domain << "\n";
     }
     os << print_indent << ")";
     return os;
@@ -93,9 +125,12 @@ inline std::ostream& print(std::ostream& os, const analysis::ActionDomain& el)
     os << "ActionDomain(\n";
     {
         IndentScope scope(os);
-        os << print_indent << "precondition domain = " << el.precondition_domain << "\n";
 
-        os << print_indent << "effect domains = " << el.effect_domains << "\n";
+        os << print_indent << "element = " << el.element << "\n";
+
+        os << print_indent << "precondition domain = " << el.payload.precondition_domain << "\n";
+
+        os << print_indent << "effect domains = " << el.payload.effect_domains << "\n";
     }
     os << print_indent << ")";
     return os;
@@ -200,6 +235,36 @@ inline std::ostream& print(std::ostream& os, const analysis::ScopedView<formalis
     return os;
 }
 
+template<typename Payload, typename C>
+inline std::ostream& print(std::ostream& os, const analysis::ScopedView<formalism::planning::Axiom, Payload, C>& el)
+{
+    os << "AxiomDomain(\n";
+    {
+        IndentScope scope(os);
+
+        os << print_indent << "element = " << el.element.get_index() << "\n";
+
+        os << print_indent << "payload = " << el.payload << "\n";
+    }
+    os << print_indent << ")";
+    return os;
+}
+
+template<typename Payload, typename C>
+inline std::ostream& print(std::ostream& os, const analysis::ScopedView<formalism::datalog::Rule, Payload, C>& el)
+{
+    os << "RuleDomain(\n";
+    {
+        IndentScope scope(os);
+
+        os << print_indent << "element = " << el.element.get_index() << "\n";
+
+        os << print_indent << "payload = " << el.payload << "\n";
+    }
+    os << print_indent << ")";
+    return os;
+}
+
 template<typename C>
 inline std::ostream& print(std::ostream& os, const analysis::ConditionalEffectDomainView<C>& el)
 {
@@ -207,9 +272,11 @@ inline std::ostream& print(std::ostream& os, const analysis::ConditionalEffectDo
     {
         IndentScope scope(os);
 
-        os << print_indent << el.condition_domain << "\n";
+        os << print_indent << "element = " << el.element.get_index() << "\n";
 
-        os << print_indent << el.effect_domain << "\n";
+        os << print_indent << el.payload.condition_domain << "\n";
+
+        os << print_indent << el.payload.effect_domain << "\n";
     }
     os << print_indent << ")";
     return os;
@@ -222,9 +289,11 @@ inline std::ostream& print(std::ostream& os, const analysis::ActionDomainView<C>
     {
         IndentScope scope(os);
 
-        os << print_indent << el.precondition_domain << "\n";
+        os << print_indent << "element = " << el.element.get_index() << "\n";
 
-        for (const auto& [conditional_effect, domain] : el.effect_domains)
+        os << print_indent << el.payload.precondition_domain << "\n";
+
+        for (const auto& [conditional_effect, domain] : el.payload.effect_domains)
             os << print_indent << domain << "\n";
     }
     os << print_indent << ")";

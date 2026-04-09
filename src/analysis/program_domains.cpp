@@ -126,7 +126,13 @@ RuleDomainMap to_rule_domain_map(const TmpRuleDomainMap& domains)
     result.reserve(domains.size());
 
     for (const auto& [rule, variable_domains] : domains)
-        result.emplace(rule, to_variable_domain_list(variable_domains));
+    {
+        result.emplace(rule,
+                       SimpleScopedDomain<formalism::datalog::Rule> {
+                           rule,
+                           to_variable_domain_list(variable_domains),
+                       });
+    }
 
     return result;
 }
