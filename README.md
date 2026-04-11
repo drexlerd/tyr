@@ -16,13 +16,13 @@ The library consists of a **formalism** and a **planning** component. The formal
 
 ## Python Interface
 
-Pytyr is available at [Pypi.org](https://pypi.org/project/pytyr/) and can be installed with `pip install pytyr`. 
+Pytyr is available at [PyPI](https://pypi.org/project/pytyr/) and can be installed with `pip install pytyr`. 
 
 Detailed examples are available in the `python/examples` directory:
 
 - [`structures.py`](python/examples/formalism/planning/structures.py) – Parse and traverse all planning formalism structures.
 - [`builder.py`](python/examples/formalism/planning/builder.py) – Create new planning formalism structures.
-- [`invariants.py](python/examples/formalism/planning/invariants.py) – Synthesize invariants, access candidate variables bindings, and match atoms through unification.
+- [`invariants.py`](python/examples/formalism/planning/invariants.py) – Synthesize invariants, access candidate variable bindings, and match atoms through unification.
 - [`astar_eager.py`](python/examples/planning/astar_eager.py) – Use and customize off-the-shelf search algorithms.
 - [`gbfs_lazy.py`](python/examples/planning/gbfs_lazy.py) – Implement a custom search algorithm from scratch.
 
@@ -38,7 +38,7 @@ parser = tfp.Parser("domain.pddl")
 # Instantiate a lifted task.
 task = tpl.Task(parser.parse_task("problem.pddl"))
 
-# Instantiate an single-threaded execution environment.
+# Instantiate a single-threaded execution environment.
 execution_context = tpl.ExecutionContext(1)
 
 # Instantiate a lifted successor generator.
@@ -69,7 +69,7 @@ auto parser = tfp::Parser("domain.pddl");
 // Instantiate a lifted task.
 auto task = tp::LiftedTask::create(parser.parse_task("problem.pddl"));
 
-// Instantiate an single-threaded execution environment
+// Instantiate a single-threaded execution environment
 auto execution_context = tp::ExecutionContext::create(1);
 
 // Instantiate a lifted successor generator.
