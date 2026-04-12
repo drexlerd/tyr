@@ -242,7 +242,7 @@ public:
                 {
                     auto& cell = m_adj_span(v, pj);
 
-                    if (dependency_graph.has_dependency(pi, pj))
+                    if (dependency_graph.binary().has_dependency(pi, pj))
                     {
                         cell.offset = m_bitset_data.size();
 
@@ -260,7 +260,8 @@ public:
 
     auto get_bitset(uint_t v, uint_t p) noexcept
     {
-        assert(m_dependency_graph.has_dependency(m_layout.vertex_to_partition[v], p) && "Should only modify adjacency when there is a binary dependency");
+        assert(m_dependency_graph.binary().has_dependency(m_layout.vertex_to_partition[v], p)
+               && "Should only modify adjacency when there is a binary dependency");
 
         const auto& cell = m_adj_span(v, p);
         const auto& info = m_layout.info.infos[p];
@@ -274,7 +275,7 @@ public:
         const auto& info = m_layout.info.infos[p];
         const auto pv = m_layout.vertex_to_partition[v];
 
-        if (m_dependency_graph.has_dependency(pv, p))
+        if (m_dependency_graph.binary().has_dependency(pv, p))
         {
             return BitsetSpan<const uint64_t>(m_bitset_data.data() + cell.offset, info.num_bits);
         }

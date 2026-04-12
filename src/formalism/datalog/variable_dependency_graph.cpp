@@ -17,51 +17,67 @@
 
 #include "tyr/formalism/datalog/variable_dependency_graph.hpp"
 
-#include "tyr/common/comparators.hpp"
 #include "tyr/formalism/datalog/expression_arity.hpp"
-#include "tyr/formalism/datalog/repository.hpp"
 #include "tyr/formalism/views.hpp"
+
+#include <algorithm>
 
 namespace tyr::formalism::datalog
 {
+template<FactKind T, PolarityKind P>
+static void insert_literal_dependencies(const std::vector<ParameterIndex>& parameters, details::UnaryDependencies& unary, details::BinaryDependencies& binary)
+{
+    auto& unary_dep = details::select_literal_dependency<T, P>(unary);
+    auto& binary_dep = details::select_literal_dependency<T, P>(binary);
+
+    for (const auto parameter : parameters)
+    {
+        const auto pi = uint_t(parameter);
+        unary_dep.set(pi);
+    }
+
+    for (uint_t i = 0; i < parameters.size(); ++i)
+    {
+        const auto pi = uint_t(parameters[i]);
+
+        for (uint_t j = i + 1; j < parameters.size(); ++j)
+        {
+            const auto pj = uint_t(parameters[j]);
+
+            binary_dep.set(binary.get_index(pi, pj));
+            binary_dep.set(binary.get_index(pj, pi));
+        }
+    }
+}
+
 template<FactKind T>
-static void insert_literal(LiteralView<T> literal, uint_t k, boost::dynamic_bitset<>& positive_dependencies, boost::dynamic_bitset<>& negative_dependencies)
+static void insert_literal(LiteralView<T> literal, details::UnaryDependencies& unary, details::BinaryDependencies& binary)
 {
     const auto parameters_set = collect_parameters(literal);
     auto parameters = std::vector<ParameterIndex>(parameters_set.begin(), parameters_set.end());
     std::sort(parameters.begin(), parameters.end());
 
-    for (uint_t i = 0; i < parameters.size(); ++i)
-    {
-        const auto pi = uint_t(parameters[i]);
-
-        for (uint_t j = i + 1; j < parameters.size(); ++j)
-        {
-            const auto pj = uint_t(parameters[j]);
-
-            const auto i1 = VariableDependencyGraph::get_index(pi, pj, k);
-            const auto i2 = VariableDependencyGraph::get_index(pj, pi, k);
-
-            if (literal.get_polarity())
-            {
-                positive_dependencies.set(i1);
-                positive_dependencies.set(i2);
-            }
-            else
-            {
-                negative_dependencies.set(i1);
-                negative_dependencies.set(i2);
-            }
-        }
-    }
+    if (literal.get_polarity())
+        insert_literal_dependencies<T, PositiveTag>(parameters, unary, binary);
+    else
+        insert_literal_dependencies<T, NegativeTag>(parameters, unary, binary);
 }
 
-static void insert_numeric_constraint(LiftedBooleanOperatorView numeric_constraint, uint_t k, boost::dynamic_bitset<>& positive_dependencies)
+static void insert_numeric_constraint(LiftedBooleanOperatorView numeric_constraint, details::UnaryDependencies& unary, details::BinaryDependencies& binary)
 {
     const auto parameters_set = collect_parameters(numeric_constraint);
     auto parameters = std::vector<ParameterIndex>(parameters_set.begin(), parameters_set.end());
     std::sort(parameters.begin(), parameters.end());
 
+    auto& unary_dep = details::select_numeric_dependency(unary);
+    auto& binary_dep = details::select_numeric_dependency(binary);
+
+    for (const auto parameter : parameters)
+    {
+        const auto pi = uint_t(parameter);
+        unary_dep.set(pi);
+    }
+
     for (uint_t i = 0; i < parameters.size(); ++i)
     {
         const auto pi = uint_t(parameters[i]);
@@ -70,30 +86,24 @@ static void insert_numeric_constraint(LiftedBooleanOperatorView numeric_constrai
         {
             const auto pj = uint_t(parameters[j]);
 
-            const auto i1 = VariableDependencyGraph::get_index(pi, pj, k);
-            const auto i2 = VariableDependencyGraph::get_index(pj, pi, k);
-
-            positive_dependencies.set(i1);
-            positive_dependencies.set(i2);
+            binary_dep.set(binary.get_index(pi, pj));
+            binary_dep.set(binary.get_index(pj, pi));
         }
     }
 }
 
 VariableDependencyGraph::VariableDependencyGraph(ConjunctiveConditionView condition) :
     m_k(condition.get_arity()),
-    m_static_positive_dependencies(m_k * m_k),
-    m_static_negative_dependencies(m_k * m_k),
-    m_fluent_positive_dependencies(m_k * m_k),
-    m_fluent_negative_dependencies(m_k * m_k)
+    m_unary_dependencies(m_k),
+    m_binary_dependencies(m_k)
 {
     for (const auto literal : condition.get_literals<StaticTag>())
-        insert_literal(literal, m_k, m_static_positive_dependencies, m_static_negative_dependencies);
+        insert_literal(literal, m_unary_dependencies, m_binary_dependencies);
 
     for (const auto literal : condition.get_literals<FluentTag>())
-        insert_literal(literal, m_k, m_fluent_positive_dependencies, m_fluent_negative_dependencies);
+        insert_literal(literal, m_unary_dependencies, m_binary_dependencies);
 
     for (const auto numeric_constraint : condition.get_numeric_constraints())
-        insert_numeric_constraint(numeric_constraint, m_k, m_fluent_positive_dependencies);
+        insert_numeric_constraint(numeric_constraint, m_unary_dependencies, m_binary_dependencies);
 }
-
 }

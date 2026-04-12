@@ -23,6 +23,7 @@
 #include "tyr/common/vector.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 #include "tyr/formalism/datalog/repository.hpp"
+#include "tyr/formalism/datalog/variable_dependency_graph_details.hpp"
 #include "tyr/formalism/datalog/views.hpp"
 
 namespace tyr::formalism::datalog
@@ -30,65 +31,23 @@ namespace tyr::formalism::datalog
 
 class VariableDependencyGraph
 {
-private:
-    template<FactKind T, PolarityKind P>
-    const auto& get_dependency() const noexcept
-    {
-        if constexpr (std::is_same_v<T, StaticTag>)
-            if constexpr (std::is_same_v<P, PositiveTag>)
-                return m_static_positive_dependencies;
-            else if constexpr (std::is_same_v<P, NegativeTag>)
-                return m_static_negative_dependencies;
-            else
-                static_assert(dependent_false<P>::value, "Missing case");
-        else if constexpr (std::is_same_v<T, FluentTag>)
-            if constexpr (std::is_same_v<P, PositiveTag>)
-                return m_fluent_positive_dependencies;
-            else if constexpr (std::is_same_v<P, NegativeTag>)
-                return m_fluent_negative_dependencies;
-            else
-                static_assert(dependent_false<P>::value, "Missing case");
-        else
-            static_assert(dependent_false<T>::value, "Missing case");
-    }
-
 public:
     explicit VariableDependencyGraph(ConjunctiveConditionView condition);
 
-    static constexpr uint_t get_index(uint_t pi, uint_t pj, uint_t k) noexcept
-    {
-        assert(pi < k && pj < k);
-        return pi * k + pj;
-    }
+    const auto& unary() const noexcept { return m_unary_dependencies; }
+    const auto& binary() const noexcept { return m_binary_dependencies; }
 
-    template<FactKind T, PolarityKind P>
-    bool has_dependency(uint_t pi, uint_t pj) const noexcept
-    {
-        return get_dependency<T, P>().test(get_index(pi, pj, m_k));
-    }
-
-    template<FactKind T>
-    bool has_dependency(uint_t pi, uint_t pj) const noexcept
-    {
-        return has_dependency<T, PositiveTag>(pi, pj) || has_dependency<T, NegativeTag>(pi, pj);
-    }
-
-    template<PolarityKind P>
-    bool has_dependency(uint_t pi, uint_t pj) const noexcept
-    {
-        return has_dependency<StaticTag, P>(pi, pj) || has_dependency<FluentTag, P>(pi, pj);
-    }
-
-    bool has_dependency(uint_t pi, uint_t pj) const noexcept { return has_dependency<StaticTag>(pi, pj) || has_dependency<FluentTag>(pi, pj); }
+    /**
+     * Getters
+     */
 
     auto k() const noexcept { return m_k; }
 
 private:
     uint_t m_k;
-    boost::dynamic_bitset<> m_static_positive_dependencies;
-    boost::dynamic_bitset<> m_static_negative_dependencies;
-    boost::dynamic_bitset<> m_fluent_positive_dependencies;
-    boost::dynamic_bitset<> m_fluent_negative_dependencies;
+
+    details::UnaryDependencies m_unary_dependencies;
+    details::BinaryDependencies m_binary_dependencies;
 };
 }
 

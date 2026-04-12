@@ -1223,7 +1223,7 @@ void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const Assignm
                 {
                     const auto& info_j = layout.info.infos[pj];
 
-                    if (!m_binary_overapproximation_vdg.has_dependency(pi, pj))
+                    if (!m_binary_overapproximation_vdg.binary().has_dependency(pi, pj))
                     {
                         offset_j += info_j.num_bits;
                         continue;  // Already checked via vertex consistency
@@ -1303,7 +1303,7 @@ void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const Assignm
 
         for (uint_t pj = pi + 1; pj < layout.k; ++pj)
         {
-            if (!m_binary_overapproximation_vdg.has_dependency(pi, pj))
+            if (!m_binary_overapproximation_vdg.binary().has_dependency(pi, pj))
             {
                 const auto& info_j = layout.info.infos[pj];
                 auto delta_affected_partition_j = delta_graph.affected_partitions.get_bitset(info_j);
