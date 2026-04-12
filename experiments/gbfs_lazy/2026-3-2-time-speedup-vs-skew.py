@@ -38,11 +38,12 @@ def main():
                         continue
 
                     total_time_ms = run["total_time_ns"] / 1_000_000
-                    axiom_prog_t_tot_ms = run["axiom_prog_t_tot_ms"]
+                    # axiom_prog_t_tot_ms = run["axiom_prog_t_tot_ms"]
                     succgen_prog_t_tot_ms = run["succgen_prog_t_tot_ms"]
                     ff_prog_t_tot_ms = run["ff_prog_t_tot_ms"]
 
-                    df = (axiom_prog_t_tot_ms + succgen_prog_t_tot_ms + ff_prog_t_tot_ms) / total_time_ms
+                    # df = (axiom_prog_t_tot_ms + succgen_prog_t_tot_ms + ff_prog_t_tot_ms) / total_time_ms
+                    df = (succgen_prog_t_tot_ms + ff_prog_t_tot_ms) / total_time_ms
                     if df < 0.5:
                         continue
                     run_1 = run
