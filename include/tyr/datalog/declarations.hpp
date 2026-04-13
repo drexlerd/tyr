@@ -91,6 +91,7 @@ namespace kpkc
 {
 struct Workspace;
 struct Vertex;
+struct Edge;
 class VertexPartitions;
 class DeduplicatedAdjacencyMatrix;
 class PartitionedAdjacencyMatrix;

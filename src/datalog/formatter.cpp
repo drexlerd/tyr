@@ -226,6 +226,12 @@ std::ostream& print(std::ostream& os, const datalog::kpkc::Vertex& el)
     return os;
 }
 
+std::ostream& print(std::ostream& os, const datalog::kpkc::Edge& el)
+{
+    os << "<" << el.src << " -- " << el.dst << ">";
+    return os;
+}
+
 std::ostream& print(std::ostream& os, const datalog::kpkc::VertexPartitions& el)
 {
     os << "VertexPartitions(\n";
@@ -489,6 +495,8 @@ std::ostream& operator<<(std::ostream& os, const StaticConsistencyGraph& el) { r
 namespace kpkc
 {
 std::ostream& operator<<(std::ostream& os, const Vertex& el) { return print(os, el); }
+
+std::ostream& operator<<(std::ostream& os, const Edge& el) { return print(os, el); }
 
 std::ostream& operator<<(std::ostream& os, const VertexPartitions& el) { return print(os, el); }
 

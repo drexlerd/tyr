@@ -36,6 +36,13 @@ void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_gr
                                          const TaggedFactSets<formalism::FluentTag>& delta_fact_sets,
                                          const AssignmentSets& assignment_sets)
 {
+    auto delta_graph = m_delta_graph;  // copy old delta to compute new delta
+    auto full_graph = m_full_graph;    // copy old full to compute new full
+
+    static_graph.initialize_dynamic_consistency_graphs2(assignment_sets, delta_fact_sets, m_layout, delta_graph, full_graph, m_delta_edges, m_iteration == 0);
+
+    auto delta_edges = m_delta_edges;  // copy old delta edges to compute new delta edges
+
     static_graph.initialize_dynamic_consistency_graphs(assignment_sets,
                                                        delta_fact_sets,
                                                        m_layout,
@@ -43,6 +50,16 @@ void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_gr
                                                        m_full_graph,
                                                        m_delta_edges,
                                                        m_fact_induced_candidates);
+
+    std::cout << "Delta edges: ";
+    print(std::cout, delta_edges);
+    std::cout << std::endl;
+    std::cout << "Delta edges: ";
+    print(std::cout, m_delta_edges);
+    std::cout << std::endl;
+
+    assert(delta_graph == m_delta_graph);
+    assert(full_graph == m_full_graph);
 
     ++m_iteration;
 }

@@ -97,6 +97,11 @@ class VertexPartitions
 public:
     explicit VertexPartitions(const GraphLayout& layout) : m_layout(layout), m_data(layout.info.num_blocks, 0) {}
 
+    friend bool operator==(const VertexPartitions& lhs, const VertexPartitions& rhs) noexcept
+    {
+        return lhs.m_layout.nv == rhs.m_layout.nv && lhs.m_layout.k == rhs.m_layout.k && lhs.m_data == rhs.m_data;
+    }
+
     void reset() noexcept { std::memset(m_data.data(), 0, m_data.size() * sizeof(uint64_t)); }
 
     auto get_bitset(const GraphLayout::BitsetInfo& info) noexcept { return BitsetSpan<uint64_t>(m_data.data() + info.block_offset, info.num_bits); }
@@ -258,6 +263,12 @@ public:
         }
     }
 
+    friend bool operator==(const PartitionedAdjacencyMatrix& lhs, const PartitionedAdjacencyMatrix& rhs) noexcept
+    {
+        return lhs.m_layout.nv == rhs.m_layout.nv && lhs.m_layout.k == rhs.m_layout.k && lhs.m_adj_data == rhs.m_adj_data
+               && lhs.m_bitset_data == rhs.m_bitset_data;
+    }
+
     auto get_bitset(uint_t v, uint_t p) noexcept
     {
         assert(m_dependency_graph.binary().has_dependency(m_layout.vertex_to_partition[v], p)
@@ -293,6 +304,8 @@ public:
     struct Cell
     {
         uint_t offset;
+
+        friend bool operator==(const Cell& lhs, const Cell& rhs) noexcept { return lhs.offset == rhs.offset; }
     };
 
     template<typename Callback>
@@ -408,6 +421,11 @@ struct Graph
         delta_partitions(layout),
         matrix(layout, affected_partitions, delta_partitions, dependency_graph)
     {
+    }
+
+    friend bool operator==(const Graph& lhs, const Graph& rhs) noexcept
+    {
+        return lhs.affected_partitions == rhs.affected_partitions && lhs.delta_partitions == rhs.delta_partitions && lhs.matrix == rhs.matrix;
     }
 
     void reset() noexcept
