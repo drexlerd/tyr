@@ -1217,6 +1217,8 @@ void StaticConsistencyGraph::bootstrap_edges_from_filter_only_regions(const Assi
     for (uint_t pi = 0; pi < k; ++pi)
     {
         const auto& info_i = layout.info.infos[pi];
+        const auto offset_i = info_i.bit_offset;
+
         auto full_affected_partition_i = full_graph.affected_partitions.get_bitset(info_i);
         auto delta_affected_partition_i = delta_graph.affected_partitions.get_bitset(info_i);
 
@@ -1241,9 +1243,9 @@ void StaticConsistencyGraph::bootstrap_edges_from_filter_only_regions(const Assi
             auto delta_affected_partition_j = delta_graph.affected_partitions.get_bitset(info_j);
             const auto offset_j = info_j.bit_offset;
 
-            for (const auto vi : layout.vertex_partitions[pi])
+            for (auto bi = full_affected_partition_i.find_first(); bi != BitsetSpan<const uint64_t>::npos; bi = full_affected_partition_i.find_next(bi))
             {
-                const auto bi = layout.vertex_to_bit[vi];
+                const auto vi = offset_i + bi;
 
                 const auto static_edges = m_matrix.get_bitset(vi, pj);
                 auto full_edges_i = full_graph.matrix.get_bitset(vi, pj);
@@ -1470,7 +1472,7 @@ void StaticConsistencyGraph::expand_edges_from_positive_deltas(const AssignmentS
     }
 }
 
-void StaticConsistencyGraph::propagate_implicit_binary_blocks(const kpkc::GraphLayout& layout, kpkc::Graph& delta_graph, const kpkc::Graph& full_graph) const
+void StaticConsistencyGraph::expand_edges_implicit(const kpkc::GraphLayout& layout, kpkc::Graph& delta_graph, const kpkc::Graph& full_graph) const
 {
     const auto k = layout.k;
 
@@ -1498,11 +1500,11 @@ void StaticConsistencyGraph::propagate_implicit_binary_blocks(const kpkc::GraphL
     }
 }
 
-void StaticConsistencyGraph::expand_nonpositive_binary_blocks_from_new_vertices(const AssignmentSets& assignment_sets,
-                                                                                const kpkc::GraphLayout& layout,
-                                                                                kpkc::Graph& delta_graph,
-                                                                                kpkc::Graph& full_graph,
-                                                                                std::vector<kpkc::Edge>& delta_edges) const
+void StaticConsistencyGraph::expand_edges_from_new_vertices(const AssignmentSets& assignment_sets,
+                                                            const kpkc::GraphLayout& layout,
+                                                            kpkc::Graph& delta_graph,
+                                                            kpkc::Graph& full_graph,
+                                                            std::vector<kpkc::Edge>& delta_edges) const
 {
     const auto k = layout.k;
     const auto binary_overapproximation_constraints = m_binary_overapproximation_condition.get_numeric_constraints();
@@ -1517,22 +1519,19 @@ void StaticConsistencyGraph::expand_nonpositive_binary_blocks_from_new_vertices(
         for (uint_t pj = pi + 1; pj < k; ++pj)
         {
             if (!m_binary_overapproximation_vdg.binary().has_dependency(pi, pj))
-                continue;
-
-            const bool has_fluent_positive = m_binary_overapproximation_vdg.binary().has_literal_dependency<f::FluentTag, f::PositiveTag>(pi, pj);
-
-            if (has_fluent_positive)
-                continue;
-
-            const bool has_runtime_filter = m_binary_overapproximation_vdg.binary().has_literal_dependency<f::FluentTag, f::NegativeTag>(pi, pj)
-                                            || m_binary_overapproximation_vdg.binary().has_numeric_dependency(pi, pj);
-
-            const auto mode = has_runtime_filter ? BootstrapMode::filter_only : BootstrapMode::static_only;
+                continue;  // implicit case handled separately
 
             const auto& info_j = layout.info.infos[pj];
             auto full_affected_partition_j = full_graph.affected_partitions.get_bitset(info_j);
             auto delta_affected_partition_j = delta_graph.affected_partitions.get_bitset(info_j);
             const auto delta_delta_partition_j = delta_graph.delta_partitions.get_bitset(info_j);
+
+            const bool has_fluent_positive = m_binary_overapproximation_vdg.binary().has_literal_dependency<f::FluentTag, f::PositiveTag>(pi, pj);
+
+            const bool has_runtime_filter = m_binary_overapproximation_vdg.binary().has_literal_dependency<f::FluentTag, f::NegativeTag>(pi, pj)
+                                            || m_binary_overapproximation_vdg.binary().has_numeric_dependency(pi, pj);
+
+            const bool need_full_check = has_fluent_positive || has_runtime_filter;
 
             auto expand_from_new_vertices = [&](uint_t src_p,
                                                 uint_t dst_p,
@@ -1550,6 +1549,7 @@ void StaticConsistencyGraph::expand_nonpositive_binary_blocks_from_new_vertices(
                 for (auto b_src = delta_src_partition.find_first(); b_src != BitsetSpan<const uint64_t>::npos; b_src = delta_src_partition.find_next(b_src))
                 {
                     const auto v_src = src_offset + b_src;
+
                     const auto static_edges = m_matrix.get_bitset(v_src, dst_p);
                     auto full_edges = full_graph.matrix.get_bitset(v_src, dst_p);
                     auto delta_edges_local = delta_graph.matrix.get_bitset(v_src, dst_p);
@@ -1561,9 +1561,9 @@ void StaticConsistencyGraph::expand_nonpositive_binary_blocks_from_new_vertices(
                         {
                             const auto v_dst = dst_offset + b_dst;
 
-                            bool accept = (mode == BootstrapMode::static_only);
+                            bool accept = !need_full_check;
 
-                            if (mode == BootstrapMode::filter_only)
+                            if (need_full_check)
                             {
                                 const auto& vertex_src = get_vertex(v_src);
                                 const auto& vertex_dst = get_vertex(v_dst);
@@ -1637,49 +1637,37 @@ void StaticConsistencyGraph::initialize_dynamic_consistency_graphs2(const Assign
                                                                     std::vector<kpkc::Edge>& delta_edges,
                                                                     bool bootstrap_filter_only_regions) const
 {
+    static struct Statistics
+    {
+        std::chrono::nanoseconds total_time = std::chrono::nanoseconds::zero();
+        size_t num_executions = 0;
+    } statistics;
+
+    ++statistics.num_executions;
+    const auto start = std::chrono::steady_clock::now();
+
     delta_graph.reset();
     delta_edges.clear();
 
     if (bootstrap_filter_only_regions)
-    {
-        /**
-         * Phase A (first semi-naive iteration only): Bootstrap filter-only regions.
-         *
-         * Initialize vertices and edges for partitions and partition pairs that
-         * have no positive anchor and therefore cannot be discovered from delta
-         * facts alone. This mainly covers dependencies induced only by negative
-         * literals and, for now, numeric constraints.
-         *
-         * Validation and graph updates happen immediately during this phase.
-         */
-
         bootstrap_vertices_from_filter_only_regions(assignment_sets, layout, delta_graph, full_graph);
-        bootstrap_edges_from_filter_only_regions(assignment_sets, layout, delta_graph, full_graph, delta_edges);
-    }
-
-    /**
-     * Phase B (every iteration): Delta-driven expansion from positive literals.
-     *
-     * Use newly added positive facts to induce candidate vertices and edges
-     * for positively anchored partitions and partition pairs.
-     *
-     * Validation and graph updates happen immediately during this phase.
-     */
 
     expand_vertices_from_positive_deltas(assignment_sets, delta_fact_sets, layout, delta_graph, full_graph);
+
+    if (bootstrap_filter_only_regions)
+        bootstrap_edges_from_filter_only_regions(assignment_sets, layout, delta_graph, full_graph, delta_edges);
+
     expand_edges_from_positive_deltas(assignment_sets, delta_fact_sets, layout, delta_graph, full_graph, delta_edges);
+    expand_edges_from_new_vertices(assignment_sets, layout, delta_graph, full_graph, delta_edges);
+    expand_edges_implicit(layout, delta_graph, full_graph);
 
-    /**
-     * Propagate delta through implicit binary blocks.
-     *
-     * If (pi, pj) has no binary dependency, then every consistent vertex in pi
-     * is implicitly adjacent to every consistent vertex in pj. Hence, if one side
-     * gains new vertices in the current iteration, the other side becomes newly
-     * affected as well.
-     */
+    const auto end = std::chrono::steady_clock::now();
+    statistics.total_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
-    expand_nonpositive_binary_blocks_from_new_vertices(assignment_sets, layout, delta_graph, full_graph, delta_edges);
-    propagate_implicit_binary_blocks(layout, delta_graph, full_graph);
+    if (statistics.num_executions % 100 == 0)
+    {
+        std::cout << "Total time init 1 after " << statistics.num_executions << " executions: " << statistics.total_time.count() << " ns\n";
+    }
 }
 
 void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const AssignmentSets& assignment_sets,
@@ -1690,6 +1678,15 @@ void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const Assignm
                                                                    std::vector<kpkc::Edge>& delta_edges,
                                                                    kpkc::VertexPartitions& fact_induced_candidates) const
 {
+    static struct Statistics
+    {
+        std::chrono::nanoseconds total_time = std::chrono::nanoseconds::zero();
+        size_t num_executions = 0;
+    } statistics;
+
+    ++statistics.num_executions;
+    const auto start = std::chrono::steady_clock::now();
+
     /// 1. Copy old full into delta, then add new vertices and edges into delta, before finally subtracting full from delta.
 
     fact_induced_candidates.reset();
@@ -1901,6 +1898,14 @@ void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const Assignm
                     delta_affected_partition_i |= full_graph.affected_partitions.get_bitset(info_i);
             }
         }
+    }
+
+    const auto end = std::chrono::steady_clock::now();
+    statistics.total_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+
+    if (statistics.num_executions % 100 == 0)
+    {
+        std::cout << "Total time init 2 after " << statistics.num_executions << " executions: " << statistics.total_time.count() << " ns\n";
     }
 }
 

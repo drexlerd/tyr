@@ -275,13 +275,13 @@ private:
                                            kpkc::Graph& full_graph,
                                            std::vector<kpkc::Edge>& delta_edges) const;
 
-    void propagate_implicit_binary_blocks(const kpkc::GraphLayout& layout, kpkc::Graph& delta_graph, const kpkc::Graph& full_graph) const;
+    void expand_edges_implicit(const kpkc::GraphLayout& layout, kpkc::Graph& delta_graph, const kpkc::Graph& full_graph) const;
 
-    void expand_nonpositive_binary_blocks_from_new_vertices(const AssignmentSets& assignment_sets,
-                                                            const kpkc::GraphLayout& layout,
-                                                            kpkc::Graph& delta_graph,
-                                                            kpkc::Graph& full_graph,
-                                                            std::vector<kpkc::Edge>& delta_edges) const;
+    void expand_edges_from_new_vertices(const AssignmentSets& assignment_sets,
+                                        const kpkc::GraphLayout& layout,
+                                        kpkc::Graph& delta_graph,
+                                        kpkc::Graph& full_graph,
+                                        std::vector<kpkc::Edge>& delta_edges) const;
 
 public:
     StaticConsistencyGraph(formalism::datalog::RuleView rule,

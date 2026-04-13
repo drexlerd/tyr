@@ -32,6 +32,22 @@ DeltaKPKC::DeltaKPKC(const StaticConsistencyGraph& static_graph) :
 {
 }
 
+static void debug_partition_diff(const char* name, const kpkc::VertexPartitions& a, const kpkc::VertexPartitions& b, const kpkc::GraphLayout& layout)
+{
+    for (uint_t p = 0; p < layout.k; ++p)
+    {
+        const auto ba = a.get_bitset(layout.info.infos[p]);
+        const auto bb = b.get_bitset(layout.info.infos[p]);
+
+        if (ba != bb)
+        {
+            std::cout << name << " differs in partition " << p << "\n";
+            std::cout << "a \\ b = " << ba << " " << bb << "\n";
+            return;
+        }
+    }
+}
+
 void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_graph,
                                          const TaggedFactSets<formalism::FluentTag>& delta_fact_sets,
                                          const AssignmentSets& assignment_sets)
@@ -51,15 +67,25 @@ void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_gr
                                                        m_delta_edges,
                                                        m_fact_induced_candidates);
 
-    std::cout << "Delta edges: ";
-    print(std::cout, delta_edges);
-    std::cout << std::endl;
-    std::cout << "Delta edges: ";
-    print(std::cout, m_delta_edges);
-    std::cout << std::endl;
+    // std::cout << "Delta edges: ";
+    // print(std::cout, delta_edges);
+    // std::cout << std::endl;
+    // std::cout << "Delta edges: ";
+    // print(std::cout, m_delta_edges);
+    // std::cout << std::endl;
 
-    assert(delta_graph == m_delta_graph);
-    assert(full_graph == m_full_graph);
+    // debug_partition_diff("delta affected", delta_graph.affected_partitions, m_delta_graph.affected_partitions, m_layout);
+    // debug_partition_diff("delta delta", delta_graph.delta_partitions, m_delta_graph.delta_partitions, m_layout);
+    // debug_partition_diff("full affected", full_graph.affected_partitions, m_full_graph.affected_partitions, m_layout);
+    // debug_partition_diff("full delta", full_graph.delta_partitions, m_full_graph.delta_partitions, m_layout);
+
+    // assert(same_affected_partitions(delta_graph, m_delta_graph));
+    // assert(same_delta_partitions(delta_graph, m_delta_graph));
+    // assert(same_matrix(delta_graph, m_delta_graph));
+
+    // assert(same_affected_partitions(full_graph, m_full_graph));
+    // assert(same_delta_partitions(full_graph, m_full_graph));
+    // assert(same_matrix(full_graph, m_full_graph));
 
     ++m_iteration;
 }

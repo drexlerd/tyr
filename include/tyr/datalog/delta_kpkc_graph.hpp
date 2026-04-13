@@ -423,9 +423,15 @@ struct Graph
     {
     }
 
+    friend bool same_affected_partitions(const Graph& lhs, const Graph& rhs) noexcept { return lhs.affected_partitions == rhs.affected_partitions; }
+
+    friend bool same_delta_partitions(const Graph& lhs, const Graph& rhs) noexcept { return lhs.delta_partitions == rhs.delta_partitions; }
+
+    friend bool same_matrix(const Graph& lhs, const Graph& rhs) noexcept { return lhs.matrix == rhs.matrix; }
+
     friend bool operator==(const Graph& lhs, const Graph& rhs) noexcept
     {
-        return lhs.affected_partitions == rhs.affected_partitions && lhs.delta_partitions == rhs.delta_partitions && lhs.matrix == rhs.matrix;
+        return same_affected_partitions(lhs, rhs) && same_delta_partitions(lhs, rhs) && same_matrix(lhs, rhs);
     }
 
     void reset() noexcept
