@@ -257,14 +257,6 @@ public:
                            uint_t end_parameter_index,
                            const TaggedAssignmentSets<formalism::StaticTag>& static_assignment_sets);
 
-    void initialize_dynamic_consistency_graphs2(const AssignmentSets& assignment_sets,
-                                                const TaggedFactSets<formalism::FluentTag>& delta_fact_sets,
-                                                const kpkc::GraphLayout& layout,
-                                                kpkc::Graph& delta_graph,
-                                                kpkc::Graph& full_graph,
-                                                std::vector<kpkc::Edge>& delta_edges,
-                                                bool bootstrap_filter_only_regions) const;
-
     void initialize_dynamic_consistency_graphs(const AssignmentSets& assignment_sets,
                                                const TaggedFactSets<formalism::FluentTag>& delta_fact_sets,
                                                const kpkc::GraphLayout& layout,
