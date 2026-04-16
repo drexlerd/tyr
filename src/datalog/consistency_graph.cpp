@@ -1044,14 +1044,13 @@ void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const Assignm
                                                                    kpkc::Graph& full_graph,
                                                                    std::vector<kpkc::Edge>& delta_edges) const
 {
-    static struct Statistics
-    {
-        std::chrono::nanoseconds total_time = std::chrono::nanoseconds::zero();
-        size_t num_executions = 0;
-    } statistics;
-
-    ++statistics.num_executions;
-    const auto start = std::chrono::steady_clock::now();
+    // static struct Statistics
+    // {
+    //     std::chrono::nanoseconds total_time = std::chrono::nanoseconds::zero();
+    //     size_t num_executions = 0;
+    // } statistics;
+    // ++statistics.num_executions;
+    // const auto start = std::chrono::steady_clock::now();
 
     /// 1. Copy old full into delta, then add new vertices and edges into delta, before finally subtracting full from delta.
 
@@ -1215,14 +1214,13 @@ void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const Assignm
         }
     }
 
-    const auto end = std::chrono::steady_clock::now();
-    statistics.total_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-
-    if (statistics.num_executions % 100 == 0)
-    {
-        std::cout << "Total time init 2 after " << statistics.num_executions
-                  << " executions: " << std::chrono::duration_cast<std::chrono::milliseconds>(statistics.total_time).count() << " ms\n";
-    }
+    // const auto end = std::chrono::steady_clock::now();
+    // statistics.total_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    // if (statistics.num_executions % 100 == 0)
+    // {
+    //     std::cout << "Total time init 2 after " << statistics.num_executions
+    //               << " executions: " << std::chrono::duration_cast<std::chrono::milliseconds>(statistics.total_time).count() << " ms\n";
+    // }
 }
 
 const details::Vertex& StaticConsistencyGraph::get_vertex(uint_t index) const { return m_vertices[index]; }
