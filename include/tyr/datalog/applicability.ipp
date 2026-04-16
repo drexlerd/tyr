@@ -136,16 +136,122 @@ TYR_INLINE_IMPL bool is_applicable(formalism::datalog::GroundRuleView element, c
  * is_valid_binding
  */
 
+TYR_INLINE_IMPL float_t is_valid_binding(float_t element, const FactSets&, formalism::datalog::GrounderContext&) { return element; }
+
+template<formalism::ArithmeticOpKind O>
+float_t is_valid_binding(formalism::datalog::LiftedUnaryOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return formalism::apply(O {}, is_valid_binding(element.get_arg(), fact_sets, context));
+}
+
+template<formalism::ArithmeticOpKind O>
+float_t is_valid_binding(formalism::datalog::LiftedBinaryOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return formalism::apply(O {}, is_valid_binding(element.get_lhs(), fact_sets, context), is_valid_binding(element.get_rhs(), fact_sets, context));
+}
+
+template<formalism::BooleanOpKind O>
+bool is_valid_binding(formalism::datalog::LiftedBinaryOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return formalism::apply(O {}, is_valid_binding(element.get_lhs(), fact_sets, context), is_valid_binding(element.get_rhs(), fact_sets, context));
+}
+
+template<formalism::ArithmeticOpKind O>
+float_t is_valid_binding(formalism::datalog::LiftedMultiOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    const auto child_fexprs = element.get_args();
+
+    return std::accumulate(std::next(child_fexprs.begin()),  // Start from the second expression
+                           child_fexprs.end(),
+                           is_valid_binding(child_fexprs.front(), fact_sets, context),
+                           [&](const auto& value, const auto& child_expr)
+                           { return formalism::apply(O {}, value, is_valid_binding(child_expr, fact_sets, context)); });
+}
+
+template<formalism::FactKind T>
+float_t is_valid_binding(formalism::datalog::FunctionTermView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    auto binding_ptr = context.builder.get_builder<formalism::RelationBinding<formalism::Function<T>>>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    binding.relation = element.get_function().get_index();
+    for (const auto term : element.get_terms())
+    {
+        visit(
+            [&](auto&& arg)
+            {
+                using Alternative = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<Alternative, formalism::ParameterIndex>)
+                    binding.objects.push_back(context.binding[uint_t(arg)]);
+                else if constexpr (std::is_same_v<Alternative, formalism::datalog::ObjectView>)
+                    binding.objects.push_back(arg.get_index());
+                else
+                    static_assert(dependent_false<Alternative>::value, "Missing case");
+            },
+            term.get_variant());
+    }
+
+    canonicalize(binding);
+    auto binding_or_nullopt = context.destination.find(binding);
+    if (!binding_or_nullopt)
+        return std::numeric_limits<float_t>::quiet_NaN();  // Indicate invalid binding with NaN
+
+    return fact_sets.template get<T>().function[*binding_or_nullopt];
+}
+
+TYR_INLINE_IMPL float_t is_valid_binding(formalism::datalog::FunctionExpressionView element,
+                                         const FactSets& fact_sets,
+                                         formalism::datalog::GrounderContext& context)
+{
+    return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
+}
+
+TYR_INLINE_IMPL float_t is_valid_binding(formalism::datalog::LiftedArithmeticOperatorView element,
+                                         const FactSets& fact_sets,
+                                         formalism::datalog::GrounderContext& context)
+{
+    return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
+}
+
 TYR_INLINE_IMPL bool
 is_valid_binding(formalism::datalog::LiftedBooleanOperatorView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
 {
-    return evaluate(make_view(formalism::datalog::ground(element, context), context.destination), fact_sets);
+    return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
 }
 
 template<formalism::FactKind T>
 bool is_valid_binding(formalism::datalog::LiteralView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
 {
-    return fact_sets.template get<T>().predicate.contains(formalism::datalog::ground_binding(element.get_atom(), context).first) == element.get_polarity();
+    auto binding_ptr = context.builder.get_builder<formalism::RelationBinding<formalism::Predicate<T>>>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    binding.relation = element.get_atom().get_predicate().get_index();
+    for (const auto term : element.get_atom().get_terms())
+    {
+        visit(
+            [&](auto&& arg)
+            {
+                using Alternative = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<Alternative, formalism::ParameterIndex>)
+                    binding.objects.push_back(context.binding[uint_t(arg)]);
+                else if constexpr (std::is_same_v<Alternative, formalism::datalog::ObjectView>)
+                    binding.objects.push_back(arg.get_index());
+                else
+                    static_assert(dependent_false<Alternative>::value, "Missing case");
+            },
+            term.get_variant());
+    }
+
+    canonicalize(binding);
+    auto binding_or_nullopt = context.destination.find(binding);
+    if (!binding_or_nullopt)
+        return element.get_polarity() == false;
+
+    return fact_sets.template get<T>().predicate.contains(*binding_or_nullopt) == element.get_polarity();
 }
 
 template<formalism::FactKind T>
