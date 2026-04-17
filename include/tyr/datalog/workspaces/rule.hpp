@@ -35,9 +35,11 @@
 #include "tyr/formalism/object_index.hpp"
 
 #include <atomic>
+#include <boost/dynamic_bitset.hpp>
 #include <chrono>
 #include <oneapi/tbb/enumerable_thread_specific.h>
 #include <oneapi/tbb/spin_mutex.h>
+#include <optional>
 #include <vector>
 
 namespace tyr::datalog

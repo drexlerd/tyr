@@ -62,18 +62,58 @@ template bool is_applicable(formalism::datalog::GroundLiteralListView<formalism:
 // GroundRule
 
 /**
+ * FactSetPolicy
+ */
+
+template bool NoCareFactSetPolicy::check_literal(formalism::datalog::LiteralView<formalism::StaticTag> element,
+                                                 const formalism::datalog::GrounderContext& context) const;
+template bool NoCareFactSetPolicy::check_literal(formalism::datalog::LiteralView<formalism::FluentTag> element,
+                                                 const formalism::datalog::GrounderContext& context) const;
+
+template float_t NoCareFactSetPolicy::check_function_term(formalism::datalog::FunctionTermView<formalism::StaticTag> element,
+                                                          const formalism::datalog::GrounderContext& context) const;
+template float_t NoCareFactSetPolicy::check_function_term(formalism::datalog::FunctionTermView<formalism::FluentTag> element,
+                                                          const formalism::datalog::GrounderContext& context) const;
+
+template bool CareFactSetPolicy::check_literal(formalism::datalog::LiteralView<formalism::StaticTag> element,
+                                               const formalism::datalog::GrounderContext& context) const;
+template bool CareFactSetPolicy::check_literal(formalism::datalog::LiteralView<formalism::FluentTag> element,
+                                               const formalism::datalog::GrounderContext& context) const;
+
+template float_t CareFactSetPolicy::check_function_term(formalism::datalog::FunctionTermView<formalism::StaticTag> element,
+                                                        const formalism::datalog::GrounderContext& context) const;
+template float_t CareFactSetPolicy::check_function_term(formalism::datalog::FunctionTermView<formalism::FluentTag> element,
+                                                        const formalism::datalog::GrounderContext& context) const;
+
+/**
  * is_valid_binding
  */
 
-template bool
-is_valid_binding(formalism::datalog::LiteralView<formalism::StaticTag> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
-template bool
-is_valid_binding(formalism::datalog::LiteralView<formalism::FluentTag> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template bool is_valid_binding(formalism::datalog::LiteralView<formalism::StaticTag> element,
+                               const NoCareFactSetPolicy& policy,
+                               const formalism::datalog::GrounderContext& context);
+template bool is_valid_binding(formalism::datalog::LiteralView<formalism::FluentTag> element,
+                               const NoCareFactSetPolicy& policy,
+                               const formalism::datalog::GrounderContext& context);
+template bool is_valid_binding(formalism::datalog::LiteralView<formalism::StaticTag> element,
+                               const CareFactSetPolicy& policy,
+                               const formalism::datalog::GrounderContext& context);
+template bool is_valid_binding(formalism::datalog::LiteralView<formalism::FluentTag> element,
+                               const CareFactSetPolicy& policy,
+                               const formalism::datalog::GrounderContext& context);
 
-template bool
-is_valid_binding(formalism::datalog::LiteralListView<formalism::StaticTag> elements, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
-template bool
-is_valid_binding(formalism::datalog::LiteralListView<formalism::FluentTag> elements, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template bool is_valid_binding(formalism::datalog::LiteralListView<formalism::StaticTag> elements,
+                               const NoCareFactSetPolicy& policy,
+                               const formalism::datalog::GrounderContext& context);
+template bool is_valid_binding(formalism::datalog::LiteralListView<formalism::FluentTag> elements,
+                               const NoCareFactSetPolicy& policy,
+                               const formalism::datalog::GrounderContext& context);
+template bool is_valid_binding(formalism::datalog::LiteralListView<formalism::StaticTag> elements,
+                               const CareFactSetPolicy& policy,
+                               const formalism::datalog::GrounderContext& context);
+template bool is_valid_binding(formalism::datalog::LiteralListView<formalism::FluentTag> elements,
+                               const CareFactSetPolicy& policy,
+                               const formalism::datalog::GrounderContext& context);
 
 }
 

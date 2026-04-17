@@ -20,6 +20,7 @@
 
 #include "tyr/common/vector.hpp"
 #include "tyr/datalog/fact_sets.hpp"
+#include "tyr/datalog/policies/care.hpp"
 #include "tyr/formalism/arithmetic_operator_utils.hpp"
 #include "tyr/formalism/boolean_operator_utils.hpp"
 #include "tyr/formalism/datalog/builder.hpp"
@@ -92,38 +93,44 @@ bool is_applicable(formalism::datalog::GroundRuleView element, const FactSets& f
  * is_valid_binding
  */
 
-float_t is_valid_binding(float_t element, const FactSets&, formalism::datalog::GrounderContext&);
+template<FactSetPolicyConcept P>
+float_t is_valid_binding(float_t element, const P&, const formalism::datalog::GrounderContext&);
 
-template<formalism::ArithmeticOpKind O>
-float_t is_valid_binding(formalism::datalog::LiftedUnaryOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<formalism::ArithmeticOpKind O, FactSetPolicyConcept P>
+float_t is_valid_binding(formalism::datalog::LiftedUnaryOperatorView<O> element, const P& policy, const formalism::datalog::GrounderContext& context);
 
-template<formalism::ArithmeticOpKind O>
-float_t is_valid_binding(formalism::datalog::LiftedBinaryOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<formalism::ArithmeticOpKind O, FactSetPolicyConcept P = NoCareFactSetPolicy>
+float_t is_valid_binding(formalism::datalog::LiftedBinaryOperatorView<O> element, const P& policy, const formalism::datalog::GrounderContext& context);
 
-template<formalism::BooleanOpKind O>
-bool is_valid_binding(formalism::datalog::LiftedBinaryOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<formalism::BooleanOpKind O, FactSetPolicyConcept P>
+bool is_valid_binding(formalism::datalog::LiftedBinaryOperatorView<O> element, const P& policy, const formalism::datalog::GrounderContext& context);
 
-template<formalism::ArithmeticOpKind O>
-float_t is_valid_binding(formalism::datalog::LiftedMultiOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<formalism::ArithmeticOpKind O, FactSetPolicyConcept P>
+float_t is_valid_binding(formalism::datalog::LiftedMultiOperatorView<O> element, const P& policy, const formalism::datalog::GrounderContext& context);
 
-template<formalism::FactKind T>
-float_t is_valid_binding(formalism::datalog::FunctionTermView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<formalism::FactKind T, FactSetPolicyConcept P>
+float_t is_valid_binding(formalism::datalog::FunctionTermView<T> element, const P& policy, const formalism::datalog::GrounderContext& context);
 
-float_t is_valid_binding(formalism::datalog::FunctionExpressionView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<FactSetPolicyConcept P>
+float_t is_valid_binding(formalism::datalog::FunctionExpressionView element, const P& policy, const formalism::datalog::GrounderContext& context);
 
-float_t is_valid_binding(formalism::datalog::LiftedArithmeticOperatorView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<FactSetPolicyConcept P>
+float_t is_valid_binding(formalism::datalog::LiftedArithmeticOperatorView element, const P& policy, const formalism::datalog::GrounderContext& context);
 
-bool is_valid_binding(formalism::datalog::LiftedBooleanOperatorView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<FactSetPolicyConcept P>
+bool is_valid_binding(formalism::datalog::LiftedBooleanOperatorView element, const P& policy, const formalism::datalog::GrounderContext& context);
 
-template<formalism::FactKind T>
-bool is_valid_binding(formalism::datalog::LiteralView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<formalism::FactKind T, FactSetPolicyConcept P>
+bool is_valid_binding(formalism::datalog::LiteralView<T> element, const P& policy, const formalism::datalog::GrounderContext& context);
 
-template<formalism::FactKind T>
-bool is_valid_binding(formalism::datalog::LiteralListView<T> elements, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<formalism::FactKind T, FactSetPolicyConcept P>
+bool is_valid_binding(formalism::datalog::LiteralListView<T> elements, const P& policy, const formalism::datalog::GrounderContext& context);
 
-bool is_valid_binding(formalism::datalog::LiftedBooleanOperatorListView elements, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<FactSetPolicyConcept P>
+bool is_valid_binding(formalism::datalog::LiftedBooleanOperatorListView elements, const P& policy, const formalism::datalog::GrounderContext& context);
 
-bool is_valid_binding(formalism::datalog::ConjunctiveConditionView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+template<FactSetPolicyConcept P>
+bool is_valid_binding(formalism::datalog::ConjunctiveConditionView element, const P& policy, const formalism::datalog::GrounderContext& context);
 
 }
 
