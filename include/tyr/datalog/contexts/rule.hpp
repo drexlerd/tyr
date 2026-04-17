@@ -77,7 +77,6 @@ public:
         const RuleWorkspace<AndAP>& m_ws_rule;
         const ConstRuleWorkspace& m_cws_rule;
 
-        const FactSets m_fact_set;
         const CP::FactSetPolicy m_fact_set_cp;
     };
 
