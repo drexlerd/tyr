@@ -19,11 +19,11 @@
 #define TYR_DATALOG_CONTEXTS_PROGRAM_HPP_
 
 #include "tyr/common/onetbb.hpp"
+#include "tyr/datalog/care_accessor_concept.hpp"
 #include "tyr/datalog/contexts/stratum.hpp"
 #include "tyr/datalog/declarations.hpp"
 #include "tyr/datalog/fact_sets.hpp"
 #include "tyr/datalog/policies/annotation_concept.hpp"
-#include "tyr/datalog/policies/care_concept.hpp"
 #include "tyr/datalog/policies/termination_concept.hpp"
 #include "tyr/datalog/workspaces/program.hpp"
 #include "tyr/datalog/workspaces/rule.hpp"
@@ -33,7 +33,7 @@
 namespace tyr::datalog
 {
 
-template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CarePolicyConcept CP>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CareAccessorConcept CP>
 struct ProgramExecutionContext
 {
     ProgramExecutionContext(ProgramWorkspace<OrAP, AndAP, TP>& ws, const ConstProgramWorkspace& cws) :
@@ -93,8 +93,8 @@ struct ProgramExecutionContext
     ProgramWorkspace<OrAP, AndAP, TP>& ws;
     const ConstProgramWorkspace& cws;
 
-    const CP::FactSetPolicy fact_set_cp;
-    const CP::AssignmentSetPolicy assignment_set_cp;
+    const CP::FactSetAccessor fact_set_cp;
+    const CP::AssignmentSetAccessor assignment_set_cp;
 };
 }
 

@@ -58,7 +58,7 @@ private:
 public:
     NullaryApplicabilityCheck() : m_condition(std::nullopt), m_unsat_fluent_literals(), m_unsat_numeric_constraints(), m_statically_applicable(false) {}
 
-    template<FactSetCarePolicyConcept CP>
+    template<FactSetCareAccessorConcept CP>
     void initialize(formalism::datalog::GroundConjunctiveConditionView condition, const CP& policy)
     {
         m_condition = condition;
@@ -75,7 +75,7 @@ public:
 
     bool is_statically_applicable() const noexcept { return m_statically_applicable; }
 
-    template<FactSetCarePolicyConcept CP>
+    template<FactSetCareAccessorConcept CP>
     bool is_dynamically_applicable(const CP& policy)
     {
         for (auto i = m_unsat_fluent_literals.find_first(); i != boost::dynamic_bitset<>::npos; i = m_unsat_fluent_literals.find_next(i))
@@ -103,7 +103,7 @@ private:
 public:
     ConflictingApplicabilityCheck() : m_condition(std::nullopt), m_unsat_fluent_literals(), m_unsat_numeric_constraints(), m_statically_applicable(false) {}
 
-    template<FactSetCarePolicyConcept CP>
+    template<FactSetCareAccessorConcept CP>
     void initialize(formalism::datalog::ConjunctiveConditionView condition, const CP& policy, formalism::datalog::GrounderContext& context)
     {
         m_condition = condition;
@@ -120,7 +120,7 @@ public:
 
     bool is_statically_applicable() const noexcept { return m_statically_applicable; }
 
-    template<FactSetCarePolicyConcept CP>
+    template<FactSetCareAccessorConcept CP>
     bool is_dynamically_applicable(const CP& policy, formalism::datalog::GrounderContext& context)
     {
         for (auto i = m_unsat_fluent_literals.find_first(); i != boost::dynamic_bitset<>::npos; i = m_unsat_fluent_literals.find_next(i))
@@ -144,7 +144,7 @@ private:
 public:
     ApplicabilityCheck() : m_nullary(), m_conflicting() {}
 
-    template<FactSetCarePolicyConcept CP>
+    template<FactSetCareAccessorConcept CP>
     void initialize(formalism::datalog::GroundConjunctiveConditionView nullary,
                     formalism::datalog::ConjunctiveConditionView conflicting,
                     const CP& policy,
@@ -156,7 +156,7 @@ public:
 
     bool is_statically_applicable() const noexcept { return m_nullary.is_statically_applicable() && m_conflicting.is_statically_applicable(); }
 
-    template<FactSetCarePolicyConcept CP>
+    template<FactSetCareAccessorConcept CP>
     bool is_dynamically_applicable(const CP& policy, formalism::datalog::GrounderContext& context) noexcept
     {
         return m_nullary.is_dynamically_applicable(policy) && m_conflicting.is_dynamically_applicable(policy, context);
@@ -172,7 +172,7 @@ struct RuleWorkspace
                         const formalism::datalog::Repository& workspace_repository,
                         const StaticConsistencyGraph& static_consistency_graph);
 
-        template<AssignmentSetCarePolicyConcept CP>
+        template<AssignmentSetCareAccessorConcept CP>
         void initialize_iteration(const StaticConsistencyGraph& static_consistency_graph, const CP& policy);
 
         void clear() noexcept;
@@ -325,7 +325,7 @@ void RuleWorkspace<AndAP>::Common::clear() noexcept
 }
 
 template<typename AndAP>
-template<AssignmentSetCarePolicyConcept CP>
+template<AssignmentSetCareAccessorConcept CP>
 void RuleWorkspace<AndAP>::Common::initialize_iteration(const StaticConsistencyGraph& static_consistency_graph, const CP& policy)
 {
     kpkc.set_next_assignment_sets(static_consistency_graph, policy);

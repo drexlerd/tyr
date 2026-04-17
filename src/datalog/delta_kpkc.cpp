@@ -17,8 +17,9 @@
 
 #include "tyr/datalog/delta_kpkc.hpp"
 
+#include "tyr/datalog/assignment_sets_accessor_concept.hpp"
+#include "tyr/datalog/care_accessor.hpp"
 #include "tyr/datalog/consistency_graph.hpp"
-#include "tyr/datalog/policies/care.hpp"
 
 namespace tyr::datalog::kpkc
 {
@@ -32,7 +33,7 @@ DeltaKPKC::DeltaKPKC(const StaticConsistencyGraph& static_graph) :
 {
 }
 
-template<AssignmentSetCarePolicyConcept CP>
+template<AssignmentSetCareAccessorConcept CP>
 void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_graph, const CP& policy)
 {
     static_graph.initialize_dynamic_consistency_graphs(policy, m_layout, m_delta_graph, m_full_graph, m_delta_edges);
@@ -40,8 +41,8 @@ void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_gr
     ++m_iteration;
 }
 
-template void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_graph, const NoCareAssignmentSetPolicy& policy);
-template void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_graph, const CareAssignmentSetPolicy& policy);
+template void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_graph, const NoCareAssignmentSetAccessor& policy);
+template void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_graph, const CareAssignmentSetAccessor& policy);
 
 void DeltaKPKC::reset()
 {

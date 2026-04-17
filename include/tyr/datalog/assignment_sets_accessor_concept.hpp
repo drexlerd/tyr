@@ -48,40 +48,11 @@ concept FunctionAssignmentCheckerConcept =
     };
 
 /**
- * Tagged fact-set policies
- */
-
-template<typename P, typename T>
-concept TaggedFactSetCarePolicyForKind = formalism::FactKind<T>
-                                         && requires(const P& policy,
-                                                     formalism::datalog::LiteralView<T> lit,
-                                                     formalism::datalog::FunctionTermView<T> fterm,
-                                                     formalism::datalog::GroundLiteralView<T> glit,
-                                                     formalism::datalog::GroundFunctionTermView<T> gfterm,
-                                                     const formalism::datalog::GrounderContext& context) {
-                                                { policy.predicate.check(lit, context) } -> std::same_as<bool>;
-                                                { policy.function.check(fterm, context) } -> std::same_as<float_t>;
-                                                { policy.predicate.check(glit) } -> std::same_as<bool>;
-                                                { policy.function.check(gfterm) } -> std::same_as<float_t>;
-                                            };
-
-/**
- * Combined fact-set policies
- */
-
-template<typename P, typename T>
-concept FactSetCarePolicyForKind =
-    formalism::FactKind<T> && requires(const P& policy) { requires TaggedFactSetCarePolicyForKind<decltype(policy.template get<T>()), T>; };
-
-template<typename P>
-concept FactSetCarePolicyConcept = FactSetCarePolicyForKind<P, formalism::StaticTag> && FactSetCarePolicyForKind<P, formalism::FluentTag>;
-
-/**
  * Tagged assignment-set policies
  */
 
 template<typename P, typename T>
-concept TaggedAssignmentSetCarePolicyForKind =
+concept TaggedAssignmentSetCareAccessorForKind =
     formalism::FactKind<T> && requires(const P& policy, Index<formalism::Predicate<T>> predicate, Index<formalism::Function<T>> function) {
         requires PredicateAssignmentCheckerConcept<decltype(policy.predicate.make_checker(predicate))>;
         requires FunctionAssignmentCheckerConcept<decltype(policy.function.make_checker(function))>;
@@ -92,24 +63,12 @@ concept TaggedAssignmentSetCarePolicyForKind =
  */
 
 template<typename P, typename T>
-concept AssignmentSetCarePolicyForKind =
-    formalism::FactKind<T> && requires(const P& policy) { requires TaggedAssignmentSetCarePolicyForKind<decltype(policy.template get<T>()), T>; };
+concept AssignmentSetCareAccessorForKind =
+    formalism::FactKind<T> && requires(const P& policy) { requires TaggedAssignmentSetCareAccessorForKind<decltype(policy.template get<T>()), T>; };
 
 template<typename P>
-concept AssignmentSetCarePolicyConcept = AssignmentSetCarePolicyForKind<P, formalism::StaticTag> && AssignmentSetCarePolicyForKind<P, formalism::FluentTag>;
-
-/**
- * Combined top-level care policy
- */
-
-template<typename P>
-concept CarePolicyConcept = requires(const ConstFactsWorkspace& cws, const FactsWorkspace& ws) {
-    typename P::FactSetPolicy;
-    typename P::AssignmentSetPolicy;
-
-    { P::make_fact_set_policy(cws, ws) } -> std::same_as<typename P::FactSetPolicy>;
-    { P::make_assignment_set_policy(cws, ws) } -> std::same_as<typename P::AssignmentSetPolicy>;
-};
+concept AssignmentSetCareAccessorConcept =
+    AssignmentSetCareAccessorForKind<P, formalism::StaticTag> && AssignmentSetCareAccessorForKind<P, formalism::FluentTag>;
 
 }  // namespace tyr::datalog
 

@@ -18,18 +18,18 @@
 #ifndef TYR_DATALOG_CONTEXTS_STRATUM_HPP_
 #define TYR_DATALOG_CONTEXTS_STRATUM_HPP_
 
+#include "tyr/datalog/care_accessor_concept.hpp"
 #include "tyr/datalog/contexts/rule.hpp"
 #include "tyr/datalog/declarations.hpp"
 #include "tyr/datalog/policies/annotation_concept.hpp"
-#include "tyr/datalog/policies/care_concept.hpp"
 #include "tyr/datalog/policies/termination_concept.hpp"
 
 namespace tyr::datalog
 {
-template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CarePolicyConcept CP>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CareAccessorConcept CP>
 struct ProgramExecutionContext;
 
-template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CarePolicyConcept CP>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CareAccessorConcept CP>
 struct StratumExecutionContext
 {
     StratumExecutionContext(RuleSchedulerStratum& scheduler, const ProgramExecutionContext<OrAP, AndAP, TP, CP>& ctx) : scheduler(scheduler), ctx(ctx) {}

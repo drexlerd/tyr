@@ -19,8 +19,8 @@
 
 #include "../metric.hpp"
 #include "tyr/datalog/bottom_up.hpp"
+#include "tyr/datalog/care_accessor.hpp"
 #include "tyr/datalog/contexts/program.hpp"
-#include "tyr/datalog/policies/care.hpp"
 #include "tyr/formalism/planning/grounder.hpp"
 #include "tyr/formalism/planning/merge_datalog.hpp"
 #include "tyr/planning/declarations.hpp"
@@ -98,7 +98,7 @@ void SuccessorGenerator<LiftedTag>::get_labeled_successor_nodes(const Node<Lifte
                           m_workspace.facts.fact_sets,
                           m_workspace.facts.assignment_sets);
 
-    auto ctx = d::ProgramExecutionContext<d::NoOrAnnotationPolicy, d::NoAndAnnotationPolicy, d::NoTerminationPolicy, d::NoCarePolicy>(
+    auto ctx = d::ProgramExecutionContext<d::NoOrAnnotationPolicy, d::NoAndAnnotationPolicy, d::NoTerminationPolicy, d::NoCareAccessor>(
         m_workspace,
         program.get_const_program_workspace());
     ctx.clear();

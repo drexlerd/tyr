@@ -19,10 +19,10 @@
 #define TYR_DATALOG_CONTEXTS_RULE_HPP_
 
 #include "tyr/datalog/assignment_sets.hpp"
+#include "tyr/datalog/care_accessor_concept.hpp"
 #include "tyr/datalog/declarations.hpp"
 #include "tyr/datalog/fact_sets.hpp"
 #include "tyr/datalog/policies/annotation_concept.hpp"
-#include "tyr/datalog/policies/care_concept.hpp"
 #include "tyr/datalog/policies/termination_concept.hpp"
 #include "tyr/datalog/workspaces/rule.hpp"
 #include "tyr/formalism/datalog/rule_index.hpp"
@@ -32,13 +32,13 @@
 
 namespace tyr::datalog
 {
-template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CarePolicyConcept CP>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CareAccessorConcept CP>
 struct StratumExecutionContext;
 
-template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CarePolicyConcept CP>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CareAccessorConcept CP>
 struct RuleExecutionContext;
 
-template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CarePolicyConcept CP>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CareAccessorConcept CP>
 class RuleWorkerExecutionContext
 {
 public:
@@ -77,7 +77,7 @@ public:
         const RuleWorkspace<AndAP>& m_ws_rule;
         const ConstRuleWorkspace& m_cws_rule;
 
-        const CP::FactSetPolicy& m_fact_set_cp;
+        const CP::FactSetAccessor& m_fact_set_cp;
     };
 
     class Out
@@ -147,7 +147,7 @@ private:
     Out m_out;
 };
 
-template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CarePolicyConcept CP>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CareAccessorConcept CP>
 struct RuleExecutionContext
 {
     RuleExecutionContext(Index<formalism::datalog::Rule> rule, StratumExecutionContext<OrAP, AndAP, TP, CP>& ctx) :

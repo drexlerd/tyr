@@ -15,26 +15,29 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_SOLVER_BOTTOM_UP_HPP_
-#define TYR_SOLVER_BOTTOM_UP_HPP_
+#ifndef TYR_DATALOG_CARE_ACCESSOR_CONCEPT_HPP_
+#define TYR_DATALOG_CARE_ACCESSOR_CONCEPT_HPP_
 
-#include "tyr/common/config.hpp"
-#include "tyr/common/types.hpp"
-#include "tyr/datalog/care_accessor_concept.hpp"
-#include "tyr/datalog/contexts/program.hpp"
-#include "tyr/datalog/declarations.hpp"
-#include "tyr/datalog/policies/annotation_concept.hpp"
-#include "tyr/datalog/policies/termination_concept.hpp"
+#include "tyr/common/closed_interval.hpp"
+#include "tyr/datalog/assignment.hpp"
+#include "tyr/datalog/workspaces/facts.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
-#include "tyr/formalism/datalog/ground_atom_index.hpp"
+#include "tyr/formalism/datalog/grounder_decl.hpp"
 
 #include <concepts>
-#include <vector>
 
 namespace tyr::datalog
 {
-template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP, CareAccessorConcept CP>
-void solve_bottom_up(ProgramExecutionContext<OrAP, AndAP, TP, CP>& ctx);
-}
+
+template<typename P>
+concept CareAccessorConcept = requires(const ConstFactsWorkspace& cws, const FactsWorkspace& ws) {
+    typename P::FactSetAccessor;
+    typename P::AssignmentSetAccessor;
+
+    { P::make_fact_set_policy(cws, ws) } -> std::same_as<typename P::FactSetAccessor>;
+    { P::make_assignment_set_policy(cws, ws) } -> std::same_as<typename P::AssignmentSetAccessor>;
+};
+
+}  // namespace tyr::datalog
 
 #endif
