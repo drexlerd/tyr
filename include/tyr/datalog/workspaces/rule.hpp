@@ -25,7 +25,7 @@
 #include "tyr/datalog/applicability.hpp"
 #include "tyr/datalog/consistency_graph.hpp"
 #include "tyr/datalog/delta_kpkc.hpp"
-#include "tyr/datalog/policies/annotation.hpp"
+#include "tyr/datalog/policies/annotation_concept.hpp"
 #include "tyr/datalog/statistics/rule.hpp"
 #include "tyr/formalism/binding_index.hpp"
 #include "tyr/formalism/datalog/builder.hpp"

@@ -21,8 +21,8 @@
 #include "tyr/datalog/assignment_sets.hpp"
 #include "tyr/datalog/declarations.hpp"
 #include "tyr/datalog/fact_sets.hpp"
-#include "tyr/datalog/policies/annotation.hpp"
-#include "tyr/datalog/policies/termination.hpp"
+#include "tyr/datalog/policies/annotation_concept.hpp"
+#include "tyr/datalog/policies/termination_concept.hpp"
 #include "tyr/datalog/workspaces/rule.hpp"
 #include "tyr/formalism/datalog/rule_index.hpp"
 
@@ -37,9 +37,7 @@ struct StratumExecutionContext;
 template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
 struct RuleExecutionContext;
 
-template<OrAnnotationPolicyConcept OrAP = NoOrAnnotationPolicy,
-         AndAnnotationPolicyConcept AndAP = NoAndAnnotationPolicy,
-         TerminationPolicyConcept TP = NoTerminationPolicy>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
 class RuleWorkerExecutionContext
 {
 public:
@@ -148,9 +146,7 @@ private:
     Out m_out;
 };
 
-template<OrAnnotationPolicyConcept OrAP = NoOrAnnotationPolicy,
-         AndAnnotationPolicyConcept AndAP = NoAndAnnotationPolicy,
-         TerminationPolicyConcept TP = NoTerminationPolicy>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
 struct RuleExecutionContext
 {
     RuleExecutionContext(Index<formalism::datalog::Rule> rule, StratumExecutionContext<OrAP, AndAP, TP>& ctx) :

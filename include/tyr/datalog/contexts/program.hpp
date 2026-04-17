@@ -22,8 +22,8 @@
 #include "tyr/datalog/contexts/stratum.hpp"
 #include "tyr/datalog/declarations.hpp"
 #include "tyr/datalog/fact_sets.hpp"
-#include "tyr/datalog/policies/annotation.hpp"
-#include "tyr/datalog/policies/termination.hpp"
+#include "tyr/datalog/policies/annotation_concept.hpp"
+#include "tyr/datalog/policies/termination_concept.hpp"
 #include "tyr/datalog/workspaces/program.hpp"
 #include "tyr/datalog/workspaces/rule.hpp"
 
@@ -32,9 +32,7 @@
 namespace tyr::datalog
 {
 
-template<OrAnnotationPolicyConcept OrAP = NoOrAnnotationPolicy,
-         AndAnnotationPolicyConcept AndAP = NoAndAnnotationPolicy,
-         TerminationPolicyConcept TP = NoTerminationPolicy>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
 struct ProgramExecutionContext
 {
     ProgramExecutionContext(ProgramWorkspace<OrAP, AndAP, TP>& ws, const ConstProgramWorkspace& cws) : ws(ws), cws(cws) {}

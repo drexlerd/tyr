@@ -17,13 +17,17 @@
 
 #include "tyr/datalog/workspaces/program.hpp"
 
+#include "tyr/datalog/policies/aggregation.hpp"
+#include "tyr/datalog/policies/annotation.hpp"
+#include "tyr/datalog/policies/termination.hpp"
+
 namespace a = tyr::analysis;
 namespace f = tyr::formalism;
 namespace fd = tyr::formalism::datalog;
 
 namespace tyr::datalog
 {
-template<typename OrAP, typename AndAP, typename TP>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
 ProgramWorkspace<OrAP, AndAP, TP>::ProgramWorkspace(ProgramContext& context, const ConstProgramWorkspace& cws, OrAP or_ap, AndAP and_ap, TP tp) :
     program_repository(context.get_program_repository()),
     workspace_repository(context.get_workspace_repository()),

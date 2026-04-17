@@ -32,6 +32,9 @@
 #include "tyr/datalog/delta_kpkc.hpp"  // for Works...
 #include "tyr/datalog/fact_sets.hpp"
 #include "tyr/datalog/formatter.hpp"
+#include "tyr/datalog/policies/aggregation.hpp"
+#include "tyr/datalog/policies/annotation.hpp"
+#include "tyr/datalog/policies/termination.hpp"
 #include "tyr/datalog/rule_scheduler.hpp"  // for RuleSchedulerStratum
 #include "tyr/datalog/workspaces/facts.hpp"
 #include "tyr/datalog/workspaces/program.hpp"
