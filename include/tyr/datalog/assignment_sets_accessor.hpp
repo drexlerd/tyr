@@ -193,8 +193,20 @@ bool PredicateAssignmentSetAccessor<S, T>::Checker::is_consistent(const Assignme
  * PredicateAssignmentSetAccessor<CareSemanticTag, FluentTag>
  */
 
-template<typename Assignment>
-bool PredicateAssignmentSetAccessor<CareSemanticTag, formalism::FluentTag>::Checker::is_consistent(const Assignment& assignment) const
+template<>
+inline bool PredicateAssignmentSetAccessor<CareSemanticTag, formalism::FluentTag>::Checker::is_consistent(const VertexAssignment& assignment) const
+{
+    if (arity > 1)
+        return true;
+
+    if (!care_set.at(assignment))
+        return true;
+
+    return set.at(assignment) == polarity;
+}
+
+template<>
+inline bool PredicateAssignmentSetAccessor<CareSemanticTag, formalism::FluentTag>::Checker::is_consistent(const EdgeAssignment& assignment) const
 {
     if (arity > 2)
         return true;

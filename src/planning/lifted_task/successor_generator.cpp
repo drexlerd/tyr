@@ -167,8 +167,6 @@ void insert_care_set(const formalism::planning::CareSet& care,
 {
     for (const auto& binding : care.predicate_bindings)
         care_fact_sets.insert(fp::merge_p2d<f::FluentTag, f::FluentTag>(binding, fluent_to_fluent_predicate, merge_context).first);
-
-    care_assignment_sets.insert(care_fact_sets);
 }
 }
 

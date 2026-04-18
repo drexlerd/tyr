@@ -76,6 +76,7 @@ struct ProgramExecutionContext
 
         // Initialize assignment sets
         ws.facts.assignment_sets.insert(ws.facts.fact_sets);
+        ws.facts.care_assignment_sets.insert(ws.facts.care_fact_sets);
 
         // Reset cost buckets.
         ws.cost_buckets.clear();
