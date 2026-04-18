@@ -34,7 +34,6 @@
 
 namespace tyr::planning
 {
-
 template<>
 class SuccessorGenerator<LiftedTag>
 {
@@ -45,33 +44,57 @@ public:
 
     Node<LiftedTag> get_initial_node();
 
-    /**
-     * Standard semantics
-     */
+    // Ground action API (interning)
+    Node<LiftedTag> get_successor_node(const Node<LiftedTag>& node, formalism::planning::GroundActionView action);
 
     std::vector<LabeledNode<LiftedTag>> get_labeled_successor_nodes(const Node<LiftedTag>& node);
     void get_labeled_successor_nodes(const Node<LiftedTag>& node, std::vector<LabeledNode<LiftedTag>>& out_nodes);
 
-    /**
-     * Care semantics
-     */
-
     std::vector<LabeledNode<LiftedTag>> get_labeled_successor_nodes(const Node<LiftedTag>& node, const formalism::planning::CareSet& care);
     void get_labeled_successor_nodes(const Node<LiftedTag>& node, const formalism::planning::CareSet& care, std::vector<LabeledNode<LiftedTag>>& out_nodes);
 
-    /**
-     * Lookup
-     */
+    // Action binding API (interning)
+    Node<LiftedTag> get_successor_node(const Node<LiftedTag>& node, formalism::planning::ActionBindingView binding);
 
-    Node<LiftedTag> get_successor_node(const Node<LiftedTag>& node, formalism::planning::GroundActionView action);
+    std::vector<formalism::planning::ActionBindingView> get_applicable_action_bindings(const Node<LiftedTag>& node);
+    void get_applicable_action_bindings(const Node<LiftedTag>& node, std::vector<formalism::planning::ActionBindingView>& out_bindings);
 
+    Node<LiftedTag> get_successor_node(const Node<LiftedTag>& node, const formalism::planning::CareSet& care, formalism::planning::ActionBindingView binding);
+
+    std::vector<formalism::planning::ActionBindingView> get_applicable_action_bindings(const Node<LiftedTag>& node, const formalism::planning::CareSet& care);
+    void get_applicable_action_bindings(const Node<LiftedTag>& node,
+                                        const formalism::planning::CareSet& care,
+                                        std::vector<formalism::planning::ActionBindingView>& out_bindings);
+
+    // Action binding API (no interning)
+    Node<LiftedTag> get_successor_node(const Node<LiftedTag>& node, const Data<formalism::RelationBinding<formalism::planning::Action>>& binding);
+
+    template<typename Callback>
+    void for_each_applicable_action_binding(const Node<LiftedTag>& node, Callback&& callback);
+
+    template<typename Callback>
+    void for_each_applicable_action_binding(const Node<LiftedTag>& node,
+                                            Data<formalism::RelationBinding<formalism::planning::Action>>& scratch_binding,
+                                            Callback&& callback);
+
+    Node<LiftedTag> get_successor_node(const Node<LiftedTag>& node,
+                                       const formalism::planning::CareSet& care,
+                                       const Data<formalism::RelationBinding<formalism::planning::Action>>& binding);
+
+    template<typename Callback>
+    void for_each_applicable_action_binding(const Node<LiftedTag>& node, const formalism::planning::CareSet& care, Callback&& callback);
+
+    template<typename Callback>
+    void for_each_applicable_action_binding(const Node<LiftedTag>& node,
+                                            const formalism::planning::CareSet& care,
+                                            Data<formalism::RelationBinding<formalism::planning::Action>>& scratch_binding,
+                                            Callback&& callback);
+
+    // Lookup
     Node<LiftedTag> get_node(Index<State<LiftedTag>> state_index);
 
+    // Diagnostics
     void print_summary(size_t verbosity) const;
-
-    /**
-     * Expert API
-     */
 
     const auto& get_state_repository() const noexcept { return m_state_repository; }
     const auto& get_workspace() const noexcept { return m_workspace; }
@@ -87,6 +110,27 @@ private:
     ActionExecutor m_executor;
 };
 
+/**
+ * Implementations
+ */
+
+// Action binding API (no interning)
+
+template<typename Callback>
+void SuccessorGenerator<LiftedTag>::for_each_applicable_action_binding(const Node<LiftedTag>& node, Callback&& callback)
+{
+    auto scratch_binding = Data<formalism::RelationBinding<formalism::planning::Action>>();
+    for_each_applicable_action_binding(node, scratch_binding, std::forward<Callback>(callback));
+}
+
+template<typename Callback>
+void SuccessorGenerator<LiftedTag>::for_each_applicable_action_binding(const Node<LiftedTag>& node,
+                                                                       const formalism::planning::CareSet& care,
+                                                                       Callback&& callback)
+{
+    auto scratch_binding = Data<formalism::RelationBinding<formalism::planning::Action>>();
+    for_each_applicable_action_binding(node, care, scratch_binding, std::forward<Callback>(callback));
+}
 }
 
 #endif

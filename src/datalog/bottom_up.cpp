@@ -171,7 +171,7 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP, S>& wrctx, std::
     // Therefore we must store it as pending (keyed by binding) and recheck in the next fact envelope.
     if (applicability_check->is_dynamically_applicable(in.fact_sets_cp(), out.ground_context_iteration()))
     {
-        assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets_cp().fact_sets));
+        assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets_cp()));
 
         // std::cout << rctx.cws_rule.rule << " " << rctx.out.ground_context_solve().binding << std::endl;
 
@@ -302,7 +302,7 @@ void process_pending(RuleExecutionContext<OrAP, AndAP, TP, S>& rctx)
             }
             else if (it->second->is_dynamically_applicable(in.fact_sets_cp(), out.ground_context_iteration()))
             {
-                assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets_cp().fact_sets));
+                assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets_cp()));
 
                 const auto worker_head = fd::ground_binding(in.cws_rule().get_rule().get_head(), out.ground_context_solve()).first;
 

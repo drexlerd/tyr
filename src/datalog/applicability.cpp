@@ -24,6 +24,40 @@ namespace tyr::datalog
 {
 
 /**
+ * evaluate
+ */
+
+template float_t evaluate(formalism::datalog::GroundFunctionExpressionView element, const FactSetAccessor<StandardSemanticTag>& accessor);
+template float_t evaluate(formalism::datalog::GroundFunctionExpressionView element, const FactSetAccessor<CareSemanticTag>& accessor);
+
+template float_t evaluate(formalism::datalog::GroundArithmeticOperatorView element, const FactSetAccessor<StandardSemanticTag>& accessor);
+template float_t evaluate(formalism::datalog::GroundArithmeticOperatorView element, const FactSetAccessor<CareSemanticTag>& accessor);
+
+template float_t evaluate(formalism::datalog::FunctionExpressionView element,
+                          const FactSetAccessor<StandardSemanticTag>& accessor,
+                          const formalism::datalog::GrounderContext& context);
+template float_t evaluate(formalism::datalog::FunctionExpressionView element,
+                          const FactSetAccessor<CareSemanticTag>& accessor,
+                          const formalism::datalog::GrounderContext& context);
+
+template float_t evaluate(formalism::datalog::LiftedArithmeticOperatorView element,
+                          const FactSetAccessor<StandardSemanticTag>& accessor,
+                          const formalism::datalog::GrounderContext& context);
+template float_t evaluate(formalism::datalog::LiftedArithmeticOperatorView element,
+                          const FactSetAccessor<CareSemanticTag>& accessor,
+                          const formalism::datalog::GrounderContext& context);
+
+template bool evaluate(formalism::datalog::GroundBooleanOperatorView element, const FactSetAccessor<StandardSemanticTag>& accessor);
+template bool evaluate(formalism::datalog::GroundBooleanOperatorView element, const FactSetAccessor<CareSemanticTag>& accessor);
+
+template bool evaluate(formalism::datalog::LiftedBooleanOperatorView element,
+                       const FactSetAccessor<StandardSemanticTag>& accessor,
+                       const formalism::datalog::GrounderContext& context);
+template bool evaluate(formalism::datalog::LiftedBooleanOperatorView element,
+                       const FactSetAccessor<CareSemanticTag>& accessor,
+                       const formalism::datalog::GrounderContext& context);
+
+/**
  * is_applicable
  */
 
