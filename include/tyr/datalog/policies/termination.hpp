@@ -23,6 +23,7 @@
 #include "tyr/datalog/fact_sets.hpp"
 #include "tyr/datalog/policies/aggregation.hpp"
 #include "tyr/datalog/policies/annotation_types.hpp"
+#include "tyr/datalog/policies/termination_concept.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 #include "tyr/formalism/datalog/ground_atom_index.hpp"
 #include "tyr/formalism/datalog/repository.hpp"
@@ -33,20 +34,6 @@
 
 namespace tyr::datalog
 {
-
-template<typename T>
-concept TerminationPolicyConcept = requires(T& p,
-                                            const T& cp,
-                                            formalism::datalog::PredicateBindingView<formalism::FluentTag> binding,
-                                            const PredicateFactSets<formalism::FluentTag>& goals,
-                                            const OrAnnotationsList& or_annot) {
-    { p.set_goals(goals) } -> std::same_as<void>;
-    { p.achieve(binding) } -> std::same_as<void>;
-    { cp.check() } -> std::same_as<bool>;
-    { cp.get_total_cost(or_annot) } -> std::same_as<Cost>;
-    { p.reset() } -> std::same_as<void>;
-    { p.clear() } -> std::same_as<void>;
-};
 
 class NoTerminationPolicy
 {

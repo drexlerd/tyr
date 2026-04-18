@@ -104,6 +104,7 @@ public:
     void insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value);
     void insert(formalism::datalog::GroundFunctionTermValueListView<T> fterm_values);
 
+    float_t operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept;
     float_t operator[](formalism::datalog::GroundFunctionTermView<T> fterm) const noexcept;
 
     const std::vector<uint_t>& get_remap() const noexcept;
@@ -128,6 +129,7 @@ public:
     void insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value);
     void insert(formalism::datalog::GroundFunctionTermValueListView<T> fterm_values);
 
+    float_t operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept;
     float_t operator[](formalism::datalog::GroundFunctionTermView<T> fterm) const noexcept;
 
     const std::vector<FunctionFactSet<T>>& get_sets() const noexcept;

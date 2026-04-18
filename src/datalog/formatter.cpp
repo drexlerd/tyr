@@ -102,55 +102,6 @@ std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralPosit
     return os;
 }
 
-std::ostream& print(std::ostream& os, const datalog::details::LiteralToRuleParameterMapping& el)
-{
-    os << "LiteralToRuleParameterMapping(\n";
-
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "position to parameter = " << el.position_to_parameter << "\n";
-
-        os << print_indent << "position parameter pairs = " << el.position_parameter_pairs << "\n";
-    }
-
-    os << ")";
-
-    return os;
-}
-
-std::ostream& print(std::ostream& os, const datalog::details::LiteralToRuleInfo& el)
-{
-    os << "LiteralToRuleInfo(\n";
-
-    {
-        IndentScope scope(os);
-
-        os << print_indent << " parameter_mappings = " << el.parameter_mappings << "\n";
-    }
-
-    os << ")";
-
-    return os;
-}
-
-std::ostream& print(std::ostream& os, const datalog::details::LiteralToRuleInfos& el)
-{
-    os << "LiteralToRuleInfos(\n";
-
-    {
-        IndentScope scope(os);
-
-        os << print_indent << " infos = " << el.infos << "\n";
-
-        os << print_indent << " bound_parameters = " << el.bound_parameters << "\n";
-    }
-
-    os << ")";
-
-    return os;
-}
-
 template<formalism::FactKind T>
 std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralInfo<T>& el)
 {
@@ -223,6 +174,12 @@ std::ostream& print(std::ostream& os, const datalog::StaticConsistencyGraph& el)
 std::ostream& print(std::ostream& os, const datalog::kpkc::Vertex& el)
 {
     os << el.index;
+    return os;
+}
+
+std::ostream& print(std::ostream& os, const datalog::kpkc::Edge& el)
+{
+    os << "<" << el.src << " -- " << el.dst << ">";
     return os;
 }
 
@@ -454,12 +411,6 @@ std::ostream& operator<<(std::ostream& os, const RuleToLiteralInfoMappings& el) 
 
 std::ostream& operator<<(std::ostream& os, const RuleToLiteralPositionMappings& el) { return print(os, el); }
 
-std::ostream& operator<<(std::ostream& os, const LiteralToRuleParameterMapping& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const LiteralToRuleInfo& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const LiteralToRuleInfos& el) { return print(os, el); }
-
 std::ostream& operator<<(std::ostream& os, const Vertex& el) { return print(os, el); }
 
 std::ostream& operator<<(std::ostream& os, const Edge& el) { return print(os, el); }
@@ -489,6 +440,8 @@ std::ostream& operator<<(std::ostream& os, const StaticConsistencyGraph& el) { r
 namespace kpkc
 {
 std::ostream& operator<<(std::ostream& os, const Vertex& el) { return print(os, el); }
+
+std::ostream& operator<<(std::ostream& os, const Edge& el) { return print(os, el); }
 
 std::ostream& operator<<(std::ostream& os, const VertexPartitions& el) { return print(os, el); }
 

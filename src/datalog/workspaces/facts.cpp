@@ -34,7 +34,6 @@ FactsWorkspace::FactsWorkspace(fd::PredicateListView<f::FluentTag> predicates,
                                const formalism::datalog::Repository& workspace_repository) :
     fact_sets(predicates, functions, atoms, fterm_values, workspace_repository),
     assignment_sets(predicates, functions, predicate_domains, function_domains, num_objects, fact_sets),
-    delta_fact_sets(predicates, functions, workspace_repository),
     goal_fact_sets(predicates, workspace_repository)
 {
 }
@@ -43,7 +42,6 @@ void FactsWorkspace::reset()
 {
     fact_sets.reset();
     assignment_sets.reset();
-    delta_fact_sets.reset();
 }
 
 ConstFactsWorkspace::ConstFactsWorkspace(fd::PredicateListView<f::StaticTag> predicates,

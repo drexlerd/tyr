@@ -22,8 +22,6 @@
 #include "tyr/datalog/fact_sets.hpp"
 #include "tyr/formalism/datalog/repository.hpp"
 #include "tyr/formalism/declarations.hpp"
-#include "tyr/formalism/function_view.hpp"
-#include "tyr/formalism/predicate_view.hpp"
 
 namespace tyr::datalog
 {
@@ -31,8 +29,6 @@ struct FactsWorkspace
 {
     TaggedFactSets<formalism::FluentTag> fact_sets;
     TaggedAssignmentSets<formalism::FluentTag> assignment_sets;
-
-    TaggedFactSets<formalism::FluentTag> delta_fact_sets;
 
     PredicateFactSets<formalism::FluentTag> goal_fact_sets;
 

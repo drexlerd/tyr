@@ -27,22 +27,13 @@ DeltaKPKC::DeltaKPKC(const StaticConsistencyGraph& static_graph) :
     m_iteration(0),
     m_delta_graph(m_layout, static_graph.get_variable_dependeny_graph()),
     m_full_graph(m_layout, static_graph.get_variable_dependeny_graph()),
-    m_delta_edges(),
-    m_fact_induced_candidates(m_layout)
+    m_delta_edges()
 {
 }
 
-void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_graph,
-                                         const TaggedFactSets<formalism::FluentTag>& delta_fact_sets,
-                                         const AssignmentSets& assignment_sets)
+void DeltaKPKC::set_next_assignment_sets(const StaticConsistencyGraph& static_graph, const AssignmentSets& assignment_sets)
 {
-    static_graph.initialize_dynamic_consistency_graphs(assignment_sets,
-                                                       delta_fact_sets,
-                                                       m_layout,
-                                                       m_delta_graph,
-                                                       m_full_graph,
-                                                       m_delta_edges,
-                                                       m_fact_induced_candidates);
+    static_graph.initialize_dynamic_consistency_graphs(assignment_sets, m_layout, m_delta_graph, m_full_graph, m_delta_edges);
 
     ++m_iteration;
 }

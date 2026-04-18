@@ -20,24 +20,18 @@
 
 #include "tyr/datalog/contexts/rule.hpp"
 #include "tyr/datalog/declarations.hpp"
-#include "tyr/datalog/policies/annotation.hpp"
-#include "tyr/datalog/policies/termination.hpp"
+#include "tyr/datalog/policies/annotation_concept.hpp"
+#include "tyr/datalog/policies/termination_concept.hpp"
 
 namespace tyr::datalog
 {
 template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
 struct ProgramExecutionContext;
 
-template<OrAnnotationPolicyConcept OrAP = NoOrAnnotationPolicy,
-         AndAnnotationPolicyConcept AndAP = NoAndAnnotationPolicy,
-         TerminationPolicyConcept TP = NoTerminationPolicy>
+template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
 struct StratumExecutionContext
 {
-    StratumExecutionContext(RuleSchedulerStratum& scheduler, const ProgramExecutionContext<OrAP, AndAP, TP>& ctx) : scheduler(scheduler), ctx(ctx)
-    {
-        // Initialize delta facts
-        ctx.ws.facts.delta_fact_sets.insert(ctx.ws.facts.fact_sets);
-    }
+    StratumExecutionContext(RuleSchedulerStratum& scheduler, const ProgramExecutionContext<OrAP, AndAP, TP>& ctx) : scheduler(scheduler), ctx(ctx) {}
 
     /**
      * Initialization

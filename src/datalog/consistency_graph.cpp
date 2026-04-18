@@ -966,67 +966,10 @@ static auto compute_indexed_constraints(fd::ConjunctiveConditionView element)
     return result;
 }
 
-auto compute_indexed_literals(fd::ConjunctiveConditionView element)
+static auto compute_indexed_literals(fd::ConjunctiveConditionView element)
 {
     return details::RuleToLiteralInfos { compute_tagged_indexed_literals(element.get_literals<f::StaticTag>(), element.get_arity()),
                                          compute_tagged_indexed_literals(element.get_literals<f::FluentTag>(), element.get_arity()) };
-}
-
-static auto compute_indexed_anchors(fd::ConjunctiveConditionView element, size_t num_fluent_predicates)
-{
-    auto result = details::LiteralToRuleInfos {};
-    result.groups = std::vector<details::LiteralToRuleInfos::GroupInfo> {};
-    result.infos = std::vector<details::LiteralToRuleInfo> {};
-    result.bound_parameters = boost::dynamic_bitset<>(element.get_arity(), false);
-    result.negated_bound_parameters = boost::dynamic_bitset<>(element.get_arity(), false);
-
-    auto bound_parameters = UnorderedSet<uint_t> {};
-
-    auto map = UnorderedMap<Index<f::Predicate<f::FluentTag>>, std::vector<details::LiteralToRuleInfo>> {};
-
-    for (const auto literal : element.get_literals<f::FluentTag>())
-    {
-        auto info = details::LiteralToRuleInfo {};
-        info.parameter_mappings.position_to_parameter =
-            std::vector<uint_t>(literal.get_atom().get_predicate().get_arity(), details::LiteralToRuleParameterMapping::NoParam);
-        info.parameter_mappings.position_parameter_pairs = std::vector<std::pair<uint_t, uint_t>> {};
-
-        const auto terms = literal.get_atom().get_terms();
-
-        for (uint_t position = 0; position < terms.size(); ++position)
-        {
-            const auto term = terms[position];
-
-            visit(
-                [&](auto&& arg)
-                {
-                    using Alternative = std::decay_t<decltype(arg)>;
-
-                    if constexpr (std::is_same_v<Alternative, f::ParameterIndex>)
-                    {
-                        info.parameter_mappings.position_to_parameter[position] = uint_t(arg);
-                        info.parameter_mappings.position_parameter_pairs.emplace_back(position, uint_t(arg));
-                        result.bound_parameters.set(uint_t(arg));
-                        if (!literal.get_polarity())
-                            result.negated_bound_parameters.set(uint_t(arg));
-                    }
-                    else if constexpr (std::is_same_v<Alternative, fd::ObjectView>) {}
-                    else
-                        static_assert(dependent_false<Alternative>::value, "Missing case");
-                },
-                term.get_variant());
-        }
-
-        map[literal.get_atom().get_predicate().get_index()].push_back(std::move(info));
-    }
-
-    for (auto& [predicate, infos] : map)
-    {
-        result.groups.emplace_back(predicate, result.infos.size(), result.infos.size() + infos.size());
-        result.infos.insert(result.infos.end(), infos.begin(), infos.end());
-    }
-
-    return result;
 }
 
 StaticConsistencyGraph::StaticConsistencyGraph(fd::RuleView rule,
@@ -1051,10 +994,7 @@ StaticConsistencyGraph::StaticConsistencyGraph(fd::RuleView rule,
     m_unary_overapproximation_indexed_literals(compute_indexed_literals(m_unary_overapproximation_condition)),
     m_binary_overapproximation_indexed_literals(compute_indexed_literals(m_binary_overapproximation_condition)),
     m_unary_overapproximation_indexed_constraints(compute_indexed_constraints(m_unary_overapproximation_condition)),
-    m_binary_overapproximation_indexed_constraints(compute_indexed_constraints(m_binary_overapproximation_condition)),
-    m_predicate_to_anchors(compute_indexed_anchors(condition, num_fluent_predicates)),
-    m_unary_overapproximation_predicate_to_anchors(compute_indexed_anchors(m_unary_overapproximation_condition, num_fluent_predicates)),
-    m_binary_overapproximation_predicate_to_anchors(compute_indexed_anchors(m_binary_overapproximation_condition, num_fluent_predicates))
+    m_binary_overapproximation_indexed_constraints(compute_indexed_constraints(m_binary_overapproximation_condition))
 {
     auto [vertices_, vertex_partitions_, object_to_vertex_per_partition_] = compute_vertices(m_unary_overapproximation_indexed_literals.static_indexed,
                                                                                              parameter_domains,
@@ -1099,80 +1039,58 @@ StaticConsistencyGraph::StaticConsistencyGraph(fd::RuleView rule,
 }
 
 void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const AssignmentSets& assignment_sets,
-                                                                   const TaggedFactSets<f::FluentTag>& delta_fact_sets,
                                                                    const kpkc::GraphLayout& layout,
                                                                    kpkc::Graph& delta_graph,
                                                                    kpkc::Graph& full_graph,
-                                                                   std::vector<kpkc::Edge>& delta_edges,
-                                                                   kpkc::VertexPartitions& fact_induced_candidates) const
+                                                                   std::vector<kpkc::Edge>& delta_edges) const
 {
+    // static struct Statistics
+    // {
+    //     std::chrono::nanoseconds total_time = std::chrono::nanoseconds::zero();
+    //     size_t num_executions = 0;
+    // } statistics;
+    // ++statistics.num_executions;
+    // const auto start = std::chrono::steady_clock::now();
+
     /// 1. Copy old full into delta, then add new vertices and edges into delta, before finally subtracting full from delta.
 
-    fact_induced_candidates.reset();
     delta_graph.reset();
-
-    /**
-     * Compute delta fact induced vertices.
-     */
-
-    const auto& predicate_sets = delta_fact_sets.predicate.get_sets();
-
-    const auto& predicate_to_anchors = m_unary_overapproximation_predicate_to_anchors;
-
-    for (const auto& group : predicate_to_anchors.groups)
-    {
-        const auto predicate_index = group.predicate;
-
-        for (const auto binding : predicate_sets[uint_t(predicate_index)].get_bindings())  ///< Outter loop because |facts| > |infos|
-        {
-            const auto objects = binding.get_objects();
-
-            for (const auto& info : predicate_to_anchors[group])
-            {
-                const auto& pairs = info.parameter_mappings.position_parameter_pairs;
-                const auto pairs_size = pairs.size();
-
-                for (uint_t i = 0; i < pairs_size; ++i)
-                {
-                    const auto& [pos_i, pi] = pairs[i];
-
-                    const auto vi = m_object_to_vertex_per_partition[pi][uint_t(objects[pos_i].get_index())];
-
-                    if (vi == std::numeric_limits<uint_t>::max())
-                        continue;
-
-                    fact_induced_candidates.get_bitset(pi).set(layout.vertex_to_bit[vi]);
-                }
-            }
-        }
-    }
-
-    // Overapproximate negated part or those where we dont have anchors
-    for (uint_t p = 0; p < layout.k; ++p)
-        if (!m_unary_overapproximation_predicate_to_anchors.bound_parameters.test(p)
-            || m_unary_overapproximation_predicate_to_anchors.negated_bound_parameters.test(p))
-            fact_induced_candidates.get_bitset(p).set();
 
     /// 2. Monotonically update full consistent vertices partition
 
     {
         const auto unary_overapproximation_constraints = m_unary_overapproximation_condition.get_numeric_constraints();
 
-        auto vertex_index_offset = uint_t(0);
-
         for (uint_t p = 0; p < layout.k; ++p)
         {
             const auto& info = layout.info.infos[p];
-            auto induced_partition = fact_induced_candidates.get_bitset(p);
             auto full_affected_partition = full_graph.affected_partitions.get_bitset(info);
-            auto delta_affected_partition = delta_graph.affected_partitions.get_bitset(info);
             auto full_delta_partition = full_graph.delta_partitions.get_bitset(info);
+            auto delta_affected_partition = delta_graph.affected_partitions.get_bitset(info);
             auto delta_delta_partition = delta_graph.delta_partitions.get_bitset(info);
 
+            // Implicit case doesnt exist for vertices, so we dont need to check for that here.
+
+            // Static-only case.
+            if (!m_unary_overapproximation_vdg.unary().has_literal_dependency<f::FluentTag, f::PositiveTag>(p)
+                && !m_unary_overapproximation_vdg.unary().has_literal_dependency<f::FluentTag, f::NegativeTag>(p)
+                && !m_unary_overapproximation_vdg.unary().has_numeric_dependency(p))
+            {
+                delta_affected_partition.set();
+                delta_delta_partition.set();
+                delta_affected_partition -= full_affected_partition;
+                delta_delta_partition -= full_delta_partition;
+                full_affected_partition.set();
+                full_delta_partition.set();
+
+                continue;
+            }
+
+            // Runtime-filtered case.
             for_each_bit(
                 [&](auto&& bit)
                 {
-                    const auto v = vertex_index_offset + bit;
+                    const auto v = info.bit_offset + bit;
                     const auto& vertex = get_vertex(v);
 
                     if (consistent_literals(vertex, m_unary_overapproximation_indexed_literals.fluent_indexed, assignment_sets.fluent_sets.predicate)
@@ -1189,11 +1107,8 @@ void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const Assignm
                         delta_delta_partition.set(bit);
                     }
                 },
-                [](auto&& a, auto&& b) noexcept { return a & ~b; },
-                induced_partition,
+                [](auto&& a) noexcept { return ~a; },
                 full_affected_partition);
-
-            vertex_index_offset += info.num_bits;
         }
     }
 
@@ -1204,34 +1119,42 @@ void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const Assignm
 
         const auto binary_overapproximation_constraints = m_binary_overapproximation_condition.get_numeric_constraints();
 
-        auto offset_i = 0;
-
         for (uint_t pi = 0; pi < layout.k; ++pi)
         {
             const auto& info_i = layout.info.infos[pi];
+            auto offset_i = info_i.bit_offset;
 
             const auto full_affected_partition_i = full_graph.affected_partitions.get_bitset(info_i);
             auto delta_affected_partition_i = delta_graph.affected_partitions.get_bitset(info_i);
+            const auto delta_delta_partition_i = delta_graph.delta_partitions.get_bitset(info_i);
 
-            for (auto bi = full_affected_partition_i.find_first(); bi != BitsetSpan<const uint64_t>::npos; bi = full_affected_partition_i.find_next(bi))
+            for (uint_t pj = pi + 1; pj < layout.k; ++pj)
             {
-                const auto vi = offset_i + bi;  ///< vi is consistent + delta
-                const auto& vertex_i = get_vertex(vi);
+                const auto& info_j = layout.info.infos[pj];
+                auto offset_j = info_j.bit_offset;
 
-                auto offset_j = offset_i + info_i.num_bits;
+                const auto full_affected_partition_j = full_graph.affected_partitions.get_bitset(info_j);
+                auto delta_affected_partition_j = delta_graph.affected_partitions.get_bitset(info_j);
+                const auto delta_delta_partition_j = delta_graph.delta_partitions.get_bitset(info_j);
 
-                for (uint_t pj = pi + 1; pj < layout.k; ++pj)
+                // Implicit
+                if (!m_binary_overapproximation_vdg.binary().has_dependency(pi, pj))
                 {
-                    const auto& info_j = layout.info.infos[pj];
+                    if (delta_delta_partition_i.any())
+                        delta_affected_partition_j |= full_affected_partition_j;
 
-                    if (!m_binary_overapproximation_vdg.binary().has_dependency(pi, pj))
-                    {
-                        offset_j += info_j.num_bits;
-                        continue;  // Already checked via vertex consistency
-                    }
+                    if (delta_delta_partition_j.any())
+                        delta_affected_partition_i |= full_affected_partition_i;
 
-                    const auto full_affected_partition_j = full_graph.affected_partitions.get_bitset(info_j);
-                    auto delta_affected_partition_j = delta_graph.affected_partitions.get_bitset(info_j);
+                    continue;
+                }
+
+                // Static-only/runtime-filtered.
+                // TODO: separate both
+                for (auto bi = full_affected_partition_i.find_first(); bi != BitsetSpan<const uint64_t>::npos; bi = full_affected_partition_i.find_next(bi))
+                {
+                    const auto vi = offset_i + bi;  ///< vi is consistent + delta
+                    const auto& vertex_i = get_vertex(vi);
 
                     const auto static_edges = m_matrix.get_bitset(vi, pj);
                     auto full_edges_i = full_graph.matrix.get_bitset(vi, pj);
@@ -1286,38 +1209,18 @@ void StaticConsistencyGraph::initialize_dynamic_consistency_graphs(const Assignm
                         static_edges,
                         full_affected_partition_j,
                         full_edges_i);
-
-                    offset_j += info_j.num_bits;
                 }
             }
-
-            offset_i += info_i.num_bits;
         }
     }
 
-    /// If vi is new, then mark all implicit vj's in pj as affected, and vice versa.
-    for (uint_t pi = 0; pi < layout.k; ++pi)
-    {
-        const auto& info_i = layout.info.infos[pi];
-        auto delta_affected_partition_i = delta_graph.affected_partitions.get_bitset(info_i);
-        const auto delta_delta_partition_i = delta_graph.delta_partitions.get_bitset(info_i);
-
-        for (uint_t pj = pi + 1; pj < layout.k; ++pj)
-        {
-            if (!m_binary_overapproximation_vdg.binary().has_dependency(pi, pj))
-            {
-                const auto& info_j = layout.info.infos[pj];
-                auto delta_affected_partition_j = delta_graph.affected_partitions.get_bitset(info_j);
-                const auto delta_delta_partition_j = delta_graph.delta_partitions.get_bitset(info_j);
-
-                if (delta_delta_partition_i.any())
-                    delta_affected_partition_j |= full_graph.affected_partitions.get_bitset(info_j);
-
-                if (delta_delta_partition_j.any())
-                    delta_affected_partition_i |= full_graph.affected_partitions.get_bitset(info_i);
-            }
-        }
-    }
+    // const auto end = std::chrono::steady_clock::now();
+    // statistics.total_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    // if (statistics.num_executions % 100 == 0)
+    // {
+    //     std::cout << "Total time init 2 after " << statistics.num_executions
+    //               << " executions: " << std::chrono::duration_cast<std::chrono::milliseconds>(statistics.total_time).count() << " ms\n";
+    // }
 }
 
 const details::Vertex& StaticConsistencyGraph::get_vertex(uint_t index) const { return m_vertices[index]; }
@@ -1333,8 +1236,6 @@ const fd::VariableDependencyGraph& StaticConsistencyGraph::get_variable_dependen
 const std::vector<std::vector<uint_t>>& StaticConsistencyGraph::get_vertex_partitions() const noexcept { return m_vertex_partitions; }
 
 const std::vector<std::vector<uint_t>>& StaticConsistencyGraph::get_object_to_vertex_per_partition() const noexcept { return m_object_to_vertex_per_partition; }
-
-const details::LiteralToRuleInfos& StaticConsistencyGraph::get_predicate_to_anchors() const noexcept { return m_predicate_to_anchors; }
 
 const kpkc::DeduplicatedAdjacencyMatrix& StaticConsistencyGraph::get_adjacency_matrix() const noexcept { return m_matrix; }
 
@@ -1487,5 +1388,4 @@ std::pair<fd::RuleView, bool> create_overapproximation_conflicting_rule(size_t k
     canonicalize(rule);
     return context.get_or_create(rule);
 }
-
 }

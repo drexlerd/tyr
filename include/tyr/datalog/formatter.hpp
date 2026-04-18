@@ -38,12 +38,6 @@ extern std::ostream& print(std::ostream& os, const datalog::details::RuleToLiter
 
 extern std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralPositionMappings& el);
 
-extern std::ostream& print(std::ostream& os, const datalog::details::LiteralToRuleParameterMapping& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::details::LiteralToRuleInfo& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::details::LiteralToRuleInfos& el);
-
 template<formalism::FactKind T>
 std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralInfo<T>& el);
 
@@ -55,6 +49,8 @@ extern std::ostream& print(std::ostream& os, const datalog::details::RuleToLiter
 extern std::ostream& print(std::ostream& os, const datalog::StaticConsistencyGraph& el);
 
 extern std::ostream& print(std::ostream& os, const datalog::kpkc::Vertex& el);
+
+extern std::ostream& print(std::ostream& os, const datalog::kpkc::Edge& el);
 
 extern std::ostream& print(std::ostream& os, const datalog::kpkc::VertexPartitions& el);
 
@@ -84,12 +80,6 @@ extern std::ostream& operator<<(std::ostream& os, const RuleToLiteralInfoMapping
 
 extern std::ostream& operator<<(std::ostream& os, const RuleToLiteralPositionMappings& el);
 
-extern std::ostream& operator<<(std::ostream& os, const LiteralToRuleParameterMapping& el);
-
-extern std::ostream& operator<<(std::ostream& os, const LiteralToRuleInfo& el);
-
-extern std::ostream& operator<<(std::ostream& os, const LiteralToRuleInfos& el);
-
 template<formalism::FactKind T>
 std::ostream& operator<<(std::ostream& os, const RuleToLiteralInfo<T>& el);
 
@@ -108,6 +98,8 @@ extern std::ostream& operator<<(std::ostream& os, const StaticConsistencyGraph& 
 namespace kpkc
 {
 extern std::ostream& operator<<(std::ostream& os, const Vertex& el);
+
+extern std::ostream& operator<<(std::ostream& os, const Edge& el);
 
 extern std::ostream& operator<<(std::ostream& os, const VertexPartitions& el);
 

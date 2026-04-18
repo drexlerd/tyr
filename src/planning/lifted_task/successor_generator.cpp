@@ -119,11 +119,11 @@ void SuccessorGenerator<LiftedTag>::get_labeled_successor_nodes(const Node<Lifte
             {
                 const auto action = it->second;
 
-                auto grounder_context = fp::GrounderContext { m_workspace.planning_builder, *m_task->get_repository(), m_workspace.d2p.binding };
+                auto grounder_context = fp::GrounderContext { m_workspace.planning_builder, *m_task->get_repository(), m_workspace.binding };
 
-                m_workspace.d2p.binding.clear();
+                m_workspace.binding.clear();
                 for (const auto object : binding.get_objects())
-                    m_workspace.d2p.binding.push_back(object.get_index());
+                    m_workspace.binding.push_back(object.get_index());
 
                 const auto ground_action = fp::ground(action,
                                                       grounder_context,

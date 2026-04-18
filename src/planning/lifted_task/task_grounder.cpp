@@ -411,7 +411,6 @@ GroundTaskInstantiationResult instantiate_ground_task(LiftedTask& lifted_task,  
     ctx.clear();
 
     execution_context.arena().execute([&] { d::solve_bottom_up(ctx); });
-    workspace.d2p.clear();
 
     /**
      * Create basic structures of task
@@ -571,11 +570,11 @@ GroundTaskInstantiationResult instantiate_ground_task(LiftedTask& lifted_task,  
             {
                 const auto action = it->second;
 
-                workspace.d2p.binding.clear();
+                workspace.binding.clear();
                 for (const auto object : binding.get_objects())
-                    workspace.d2p.binding.push_back(object.get_index());
+                    workspace.binding.push_back(object.get_index());
 
-                auto grounder_context = fp::GrounderContext { workspace.planning_builder, *repository, workspace.d2p.binding };
+                auto grounder_context = fp::GrounderContext { workspace.planning_builder, *repository, workspace.binding };
 
                 const auto ground_action_or_nullopt =
                     ground_pruned(action,
@@ -615,11 +614,11 @@ GroundTaskInstantiationResult instantiate_ground_task(LiftedTask& lifted_task,  
             {
                 const auto axiom = it->second;
 
-                workspace.d2p.binding.clear();
+                workspace.binding.clear();
                 for (const auto object : binding.get_objects())
-                    workspace.d2p.binding.push_back(object.get_index());
+                    workspace.binding.push_back(object.get_index());
 
-                auto grounder_context = fp::GrounderContext { workspace.planning_builder, *repository, workspace.d2p.binding };
+                auto grounder_context = fp::GrounderContext { workspace.planning_builder, *repository, workspace.binding };
 
                 const auto ground_axiom_or_nullopt = ground_pruned(axiom, fluent_atoms_set, derived_atoms_set, grounder_context, *fdr_context);
 

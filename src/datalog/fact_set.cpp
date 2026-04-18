@@ -249,15 +249,21 @@ void FunctionFactSet<T>::insert(fd::GroundFunctionTermValueListView<T> fterm_val
 }
 
 template<f::FactKind T>
-float_t FunctionFactSet<T>::operator[](fd::GroundFunctionTermView<T> fterm) const noexcept
+float_t FunctionFactSet<T>::operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept
 {
-    const auto row = fterm.get_row().get_index();
-    const auto i = uint_t(row.row);
+    const auto row = binding.get_index().row;
+    const auto i = uint_t(row);
 
     if (i >= m_remap.size())
         return std::numeric_limits<float_t>::quiet_NaN();
 
     return tyr::get(m_remap[i], m_values, std::numeric_limits<float_t>::quiet_NaN());
+}
+
+template<f::FactKind T>
+float_t FunctionFactSet<T>::operator[](fd::GroundFunctionTermView<T> fterm) const noexcept
+{
+    return (*this)[fterm.get_row()];
 }
 
 template<f::FactKind T>
@@ -342,9 +348,15 @@ void FunctionFactSets<T>::insert(fd::GroundFunctionTermValueListView<T> fterm_va
 }
 
 template<f::FactKind T>
+float_t FunctionFactSets<T>::operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept
+{
+    return m_sets[uint_t(binding.get_relation().get_index())][binding];
+}
+
+template<f::FactKind T>
 float_t FunctionFactSets<T>::operator[](fd::GroundFunctionTermView<T> fterm) const noexcept
 {
-    return m_sets[uint_t(fterm.get_function().get_index())][fterm];
+    return (*this)[fterm.get_row()];
 }
 
 template<f::FactKind T>

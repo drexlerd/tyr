@@ -60,7 +60,6 @@ add_library(core STATIC ${TYR_PRIVATE_HEADER_FILES} ${TYR_PUBLIC_HEADER_FILES}
 
     datalog/policies/annotation.cpp
     datalog/policies/termination.cpp
-    datalog/workspaces/d2p.cpp
     datalog/workspaces/facts.cpp
     datalog/workspaces/program.cpp
     datalog/workspaces/rule.cpp

@@ -60,9 +60,7 @@ public:
 
     /// @brief Set new fact set to compute deltas.
     /// @param assignment_sets
-    void set_next_assignment_sets(const StaticConsistencyGraph& static_graph,
-                                  const TaggedFactSets<formalism::FluentTag>& delta_fact_sets,
-                                  const AssignmentSets& assignment_sets);
+    void set_next_assignment_sets(const StaticConsistencyGraph& static_graph, const AssignmentSets& assignment_sets);
 
     /// @brief Reset should be called before first iteration.
     void reset();
@@ -145,8 +143,6 @@ private:
     Graph m_full_graph;
 
     std::vector<Edge> m_delta_edges;
-
-    VertexPartitions m_fact_induced_candidates;
 };
 
 /**

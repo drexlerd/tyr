@@ -52,8 +52,6 @@ struct D2PWorkspace;
 struct FactsWorkspace;
 struct ConstFactsWorkspace;
 struct P2DWorkspace;
-template<typename OrAP, typename AndAP, typename TP>
-struct ProgramWorkspace;
 struct ConstProgramWorkspace;
 template<typename AndAP>
 struct RuleWorkspace;
@@ -67,6 +65,8 @@ struct AggregatedRuleStatistics;
 struct RuleWorkerStatistics;
 struct AggregatedRuleWorkerStatistics;
 
+class ProgramContext;
+
 namespace details
 {
 class Vertex;
@@ -74,14 +74,11 @@ class Edge;
 
 struct RuleToLiteralInfoMappings;
 struct RuleToLiteralPositionMappings;
-struct LiteralToRuleParameterMapping;
 template<formalism::FactKind T>
 struct RuleToLiteralInfo;
 template<formalism::FactKind T>
 struct TaggedRuleToLiteralInfos;
 struct RuleToLiteralInfos;
-struct LiteralToRuleInfo;
-struct LiteralToRuleInfos;
 }
 
 struct VertexAssignment;
@@ -91,6 +88,7 @@ namespace kpkc
 {
 struct Workspace;
 struct Vertex;
+struct Edge;
 class VertexPartitions;
 class DeduplicatedAdjacencyMatrix;
 class PartitionedAdjacencyMatrix;
