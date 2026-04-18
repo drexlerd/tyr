@@ -107,6 +107,7 @@ public:
     void insert(formalism::datalog::GroundAtomView<T> ground_atom);
     void insert(formalism::datalog::PredicateBindingView<T> binding);
     void insert(formalism::datalog::PredicateBindingForwardRangeView<T> bindings);
+    void insert(const PredicateFactSets<T>& fact_sets);
 
     size_t size() const noexcept;
 

@@ -23,6 +23,7 @@
 #include "tyr/datalog/policies/termination.hpp"
 #include "tyr/datalog/workspaces/program.hpp"
 #include "tyr/formalism/planning/ground_action_view.hpp"
+#include "tyr/formalism/planning/grounder_decl.hpp"
 #include "tyr/planning/action_executor.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/ground_task/match_tree/declarations.hpp"  // for Matc...
@@ -44,8 +45,23 @@ public:
 
     Node<LiftedTag> get_initial_node();
 
+    /**
+     * Standard semantics
+     */
+
     std::vector<LabeledNode<LiftedTag>> get_labeled_successor_nodes(const Node<LiftedTag>& node);
     void get_labeled_successor_nodes(const Node<LiftedTag>& node, std::vector<LabeledNode<LiftedTag>>& out_nodes);
+
+    /**
+     * Care semantics
+     */
+
+    std::vector<LabeledNode<LiftedTag>> get_labeled_successor_nodes(const Node<LiftedTag>& node, const formalism::planning::CareSet& care);
+    void get_labeled_successor_nodes(const Node<LiftedTag>& node, const formalism::planning::CareSet& care, std::vector<LabeledNode<LiftedTag>>& out_nodes);
+
+    /**
+     * Lookup
+     */
 
     Node<LiftedTag> get_successor_node(const Node<LiftedTag>& node, formalism::planning::GroundActionView action);
 

@@ -32,6 +32,10 @@
 namespace tyr::formalism::planning
 {
 
+/**
+ * StandardSemantic
+ */
+
 template<FactKind T>
 std::pair<FunctionBindingView<T>, bool> ground(TermListView terms, FunctionView<T> function, GrounderContext& context)
 {
@@ -428,6 +432,205 @@ TYR_INLINE_IMPL std::pair<GroundAxiomView, bool> ground(AxiomView element, Groun
     axiom_cache.emplace(binding, result.first.get_index());
 
     return result;
+}
+
+/**
+ * CareSemantic
+ */
+
+TYR_INLINE_IMPL std::optional<PredicateBindingView<FluentTag>>
+ground_care(TermListView terms, PredicateView<FluentTag> predicate, GrounderContext& context, const CareSet& care)
+{
+    auto binding_ptr = context.builder.template get_builder<RelationBinding<Predicate<FluentTag>>>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    binding.relation = predicate.get_index();
+    for (const auto term : terms)
+    {
+        visit(
+            [&](auto&& arg)
+            {
+                using Alternative = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
+                    binding.objects.push_back(context.binding[uint_t(arg)]);
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
+                    binding.objects.push_back(arg.get_index());
+                else
+                    static_assert(dependent_false<Alternative>::value, "Missing case");
+            },
+            term.get_variant());
+    }
+
+    // Canonicalize and lookup
+    canonicalize(binding);
+    const auto binding_or_nullopt = context.destination.find(binding);
+
+    if (!binding_or_nullopt)
+        return std::nullopt;
+
+    return care.predicate_bindings.contains(*binding_or_nullopt) ? binding_or_nullopt : std::nullopt;
+}
+
+TYR_INLINE_IMPL std::optional<GroundAtomView<FluentTag>> ground_care(AtomView<FluentTag> element, GrounderContext& context, const CareSet& care)
+{
+    // Fetch and clear
+    auto atom_ptr = context.builder.template get_builder<GroundAtom<FluentTag>>();
+    auto& atom = *atom_ptr;
+    atom.clear();
+
+    // Fill data
+    const auto binding_or_nullopt = ground_care(element.get_terms(), element.get_predicate(), context, care);
+    if (!binding_or_nullopt)
+        return std::nullopt;
+
+    atom.binding = binding_or_nullopt->get_index();
+
+    // Canonicalize and Serialize
+    canonicalize(atom);
+    return context.destination.find(atom);
+}
+
+TYR_INLINE_IMPL std::optional<Data<FDRFact<FluentTag>>> ground_care(AtomView<FluentTag> element, GrounderContext& context, const CareSet& care, FDRContext& fdr)
+{
+    const auto atom_view_or_nullopt = ground_care(element, context, care);
+    if (!atom_view_or_nullopt)
+        return std::nullopt;
+
+    return fdr.get_fact(atom_view_or_nullopt->get_index());
+}
+
+TYR_INLINE_IMPL std::optional<Data<FDRFact<FluentTag>>>
+ground_care(LiteralView<FluentTag> element, GrounderContext& context, const CareSet& care, FDRContext& fdr)
+{
+    auto fact_or_nullopt = ground_care(element.get_atom(), context, care, fdr);
+    if (!fact_or_nullopt)
+        return std::nullopt;
+
+    if (!element.get_polarity())
+        fact_or_nullopt->value = FDRValue::none();
+
+    return fact_or_nullopt;
+}
+
+TYR_INLINE_IMPL std::pair<GroundConjunctiveConditionView, bool>
+ground_care(ConjunctiveConditionView element, GrounderContext& context, const CareSet& care, FDRContext& fdr)
+{
+    // Fetch and clear
+    auto conj_cond_ptr = context.builder.template get_builder<GroundConjunctiveCondition>();
+    auto& conj_cond = *conj_cond_ptr;
+    conj_cond.clear();
+
+    // Fill data
+    for (const auto literal : element.template get_literals<StaticTag>())
+        conj_cond.static_literals.push_back(ground(literal, context).first.get_index());
+    for (const auto literal : element.template get_literals<FluentTag>())
+    {
+        const auto fact_or_nullopt = ground_care(literal.get_atom(), context, care, fdr);
+        if (!fact_or_nullopt)
+            continue;
+
+        if (literal.get_polarity())
+            conj_cond.positive_facts.push_back(*fact_or_nullopt);
+        else
+            conj_cond.negative_facts.push_back(*fact_or_nullopt);
+    }
+    for (const auto literal : element.template get_literals<DerivedTag>())
+        conj_cond.derived_literals.push_back(ground(literal, context).first.get_index());
+    for (const auto numeric_constraint : element.get_numeric_constraints())
+        conj_cond.numeric_constraints.push_back(ground(numeric_constraint, context));
+
+    // Canonicalize and Serialize
+    canonicalize(conj_cond);
+    return context.destination.get_or_create(conj_cond);
+}
+
+TYR_INLINE_IMPL std::pair<GroundConjunctiveEffectView, bool>
+ground_care(ConjunctiveEffectView element, GrounderContext& context, const CareSet& care, FDRContext& fdr)
+{
+    // Fetch and clear
+    auto conj_effect_ptr = context.builder.template get_builder<GroundConjunctiveEffect>();
+    auto& conj_eff = *conj_effect_ptr;
+    conj_eff.clear();
+
+    for (const auto literal : element.get_literals())
+    {
+        const auto fact_or_nullopt = ground_care(literal.get_atom(), context, care, fdr);
+        if (!fact_or_nullopt)
+            continue;
+
+        if (literal.get_polarity())
+            conj_eff.add_facts.push_back(*fact_or_nullopt);
+        else
+            conj_eff.del_facts.push_back(*fact_or_nullopt);
+    }
+    for (const auto numeric_effect : element.get_numeric_effects())
+        conj_eff.numeric_effects.push_back(ground(numeric_effect, context));
+    if (element.get_auxiliary_numeric_effect().has_value())
+        conj_eff.auxiliary_numeric_effect = ground(element.get_auxiliary_numeric_effect().value(), context);
+
+    // Canonicalize and Serialize
+    canonicalize(conj_eff);
+    return context.destination.get_or_create(conj_eff);
+}
+
+TYR_INLINE_IMPL std::pair<GroundConditionalEffectView, bool>
+ground_care(ConditionalEffectView element, GrounderContext& context, const CareSet& care, FDRContext& fdr)
+{
+    // Fetch and clear
+    auto cond_effect_ptr = context.builder.template get_builder<GroundConditionalEffect>();
+    auto& cond_effect = *cond_effect_ptr;
+    cond_effect.clear();
+
+    // Fill data
+    cond_effect.condition = ground_care(element.get_condition(), context, care, fdr).first.get_index();
+    cond_effect.effect = ground_care(element.get_effect(), context, care, fdr).first.get_index();
+
+    // Canonicalize and Serialize
+    canonicalize(cond_effect);
+    return context.destination.get_or_create(cond_effect);
+}
+
+TYR_INLINE_IMPL std::pair<GroundActionView, bool> ground_care(ActionView element,
+                                                              GrounderContext& context,
+                                                              const CareSet& care,
+                                                              const analysis::ActionDomain& action_domains,
+                                                              itertools::cartesian_set::Workspace<Index<formalism::Object>>& iter_workspace,
+                                                              FDRContext& fdr)
+{
+    auto action_ptr = context.builder.template get_builder<GroundAction>();
+    auto& action = *action_ptr;
+    action.clear();
+
+    action.binding = ground(element, context).first.get_index();
+    action.condition = ground_care(element.get_condition(), context, care, fdr).first.get_index();
+
+    const auto binding_size = context.binding.size();
+
+    for (uint_t cond_effect_index = 0; cond_effect_index < element.get_effects().size(); ++cond_effect_index)
+    {
+        const auto cond_effect = element.get_effects()[cond_effect_index];
+        const auto& parameter_domains = action_domains.payload.effect_domains.at(cond_effect.get_index()).payload.effect_domain.payload;
+
+        assert(std::distance(parameter_domains.begin(), parameter_domains.end()) == static_cast<int>(element.get_arity() + cond_effect.get_arity()));
+
+        itertools::cartesian_set::for_each_element(parameter_domains.begin() + element.get_arity(),
+                                                   parameter_domains.end(),
+                                                   iter_workspace,
+                                                   [&](auto&& binding_cond)
+                                                   {
+                                                       context.binding.resize(binding_size);
+                                                       context.binding.insert(context.binding.end(), binding_cond.begin(), binding_cond.end());
+
+                                                       action.effects.push_back(ground_care(cond_effect, context, care, fdr).first.get_index());
+                                                   });
+    }
+
+    context.binding.resize(binding_size);
+
+    canonicalize(action);
+    return context.destination.get_or_create(action);
 }
 
 }

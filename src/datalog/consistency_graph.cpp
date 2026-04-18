@@ -66,12 +66,10 @@ consistent_literals(const Vertex& vertex, const TaggedRuleToLiteralInfos<T>& ind
     for (const auto lit_id : indexed_literals.info_mappings.parameter_to_infos[uint_t(parameter_index)])
     {
         const auto& info = indexed_literals.infos[lit_id];
-        const auto predicate = info.predicate;
-        const auto polarity = info.polarity;
 
-        assert(polarity || info.kpkc_arity == 1);  ///< Can only handly unary negated literals due to overapproximation
+        assert(info.polarity || info.kpkc_arity == 1);  ///< Can only handly unary negated literals due to overapproximation
 
-        auto predicate_checker = accessor.predicate.make_checker(predicate);
+        auto predicate_checker = accessor.predicate.make_checker(info.predicate, info.polarity, info.kpkc_arity);
 
         for (const auto position : info.position_mappings.parameter_to_positions[uint_t(parameter_index)])
         {
@@ -81,7 +79,7 @@ consistent_literals(const Vertex& vertex, const TaggedRuleToLiteralInfos<T>& ind
 
                 // std::cout << assignment << std::endl;
 
-                if (predicate_checker.is_consistent(assignment, polarity) == false)
+                if (predicate_checker.is_consistent(assignment) == false)
                     return false;
             }
 
@@ -108,7 +106,7 @@ consistent_literals(const Vertex& vertex, const TaggedRuleToLiteralInfos<T>& ind
 
                     // std::cout << assignment << std::endl;
 
-                    if (predicate_checker.is_consistent(assignment, polarity) == false)
+                    if (predicate_checker.is_consistent(assignment) == false)
                         return false;
                 }
             }
@@ -124,7 +122,7 @@ consistent_literals(const Vertex& vertex, const TaggedRuleToLiteralInfos<T>& ind
 
                 // std::cout << assignment << std::endl;
 
-                if (predicate_checker.is_consistent(assignment, polarity) == false)
+                if (predicate_checker.is_consistent(assignment) == false)
                     return false;
             }
         }
@@ -512,10 +510,9 @@ consistent_literals(const Edge& edge, const TaggedRuleToLiteralInfos<T>& indexed
     for (const auto lit_id : indexed_literals.info_mappings.parameter_pairs_to_infos[p][q])
     {
         const auto& info = indexed_literals.infos[lit_id];
-        auto predicate_checker = accessor.predicate.make_checker(info.predicate);
-        const auto polarity = info.polarity;
+        auto predicate_checker = accessor.predicate.make_checker(info.predicate, info.polarity, info.kpkc_arity);
 
-        assert(polarity || info.kpkc_arity == 2);  ///< Can only handly binary negated literals due to overapproximation
+        assert(info.polarity || info.kpkc_arity == 2);  ///< Can only handly binary negated literals due to overapproximation
 
         for (auto pos_p : info.position_mappings.parameter_to_positions[p])
         {
@@ -539,7 +536,7 @@ consistent_literals(const Edge& edge, const TaggedRuleToLiteralInfos<T>& indexed
 
                 // std::cout << assignment << std::endl;
 
-                if (predicate_checker.is_consistent(assignment, polarity) == false)
+                if (predicate_checker.is_consistent(assignment) == false)
                     return false;
             }
         }
@@ -549,10 +546,9 @@ consistent_literals(const Edge& edge, const TaggedRuleToLiteralInfos<T>& indexed
     for (const auto lit_id : indexed_literals.info_mappings.parameter_to_infos_with_constants[p])
     {
         const auto& info = indexed_literals.infos[lit_id];
-        auto predicate_checker = accessor.predicate.make_checker(info.predicate);
-        const auto polarity = info.polarity;
+        auto predicate_checker = accessor.predicate.make_checker(info.predicate, info.polarity, info.kpkc_arity);
 
-        assert(polarity || info.kpkc_arity == 2);  ///< Can only handly binary negated literals due to overapproximation
+        assert(info.polarity || info.kpkc_arity == 2);  ///< Can only handly binary negated literals due to overapproximation
 
         for (auto pos_p : info.position_mappings.parameter_to_positions[p])
         {
@@ -576,7 +572,7 @@ consistent_literals(const Edge& edge, const TaggedRuleToLiteralInfos<T>& indexed
 
                 // std::cout << assignment << std::endl;
 
-                if (predicate_checker.is_consistent(assignment, polarity) == false)
+                if (predicate_checker.is_consistent(assignment) == false)
                     return false;
             }
         }
@@ -586,10 +582,9 @@ consistent_literals(const Edge& edge, const TaggedRuleToLiteralInfos<T>& indexed
     for (const auto lit_id : indexed_literals.info_mappings.parameter_to_infos_with_constants[q])
     {
         const auto& info = indexed_literals.infos[lit_id];
-        auto predicate_checker = accessor.predicate.make_checker(info.predicate);
-        const auto polarity = info.polarity;
+        auto predicate_checker = accessor.predicate.make_checker(info.predicate, info.polarity, info.kpkc_arity);
 
-        assert(polarity || info.kpkc_arity == 2);  ///< Can only handly binary negated literals due to overapproximation
+        assert(info.polarity || info.kpkc_arity == 2);  ///< Can only handly binary negated literals due to overapproximation
 
         for (auto pos_q : info.position_mappings.parameter_to_positions[q])
         {
@@ -613,7 +608,7 @@ consistent_literals(const Edge& edge, const TaggedRuleToLiteralInfos<T>& indexed
 
                 // std::cout << assignment << std::endl;
 
-                if (predicate_checker.is_consistent(assignment, polarity) == false)
+                if (predicate_checker.is_consistent(assignment) == false)
                     return false;
             }
         }

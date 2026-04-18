@@ -42,12 +42,17 @@ struct PredicateAssignmentSetAccessor
     struct Checker
     {
         const PredicateAssignmentSet<T>& set;
+        bool polarity;
+        size_t arity;
 
         template<typename Assignment>
-        bool is_consistent(const Assignment& assignment, bool polarity) const;
+        bool is_consistent(const Assignment& assignment) const;
     };
 
-    Checker make_checker(Index<formalism::Predicate<T>> predicate) const { return Checker { assignment_sets.at(predicate) }; }
+    Checker make_checker(Index<formalism::Predicate<T>> predicate, bool polarity, size_t arity) const
+    {
+        return Checker { assignment_sets.at(predicate), polarity, arity };
+    }
 };
 
 template<>
@@ -60,14 +65,16 @@ struct PredicateAssignmentSetAccessor<CareSemanticTag, formalism::FluentTag>
     {
         const PredicateAssignmentSet<formalism::FluentTag>& set;
         const PredicateAssignmentSet<formalism::FluentTag>& care_set;
+        bool polarity;
+        size_t arity;
 
         template<typename Assignment>
-        bool is_consistent(const Assignment& assignment, bool polarity) const;
+        bool is_consistent(const Assignment& assignment) const;
     };
 
-    Checker make_checker(Index<formalism::Predicate<formalism::FluentTag>> predicate) const
+    Checker make_checker(Index<formalism::Predicate<formalism::FluentTag>> predicate, bool polarity, size_t arity) const
     {
-        return Checker { assignment_sets.at(predicate), care_assignment_sets.at(predicate) };
+        return Checker { assignment_sets.at(predicate), care_assignment_sets.at(predicate), polarity, arity };
     }
 };
 
@@ -177,7 +184,7 @@ struct AssignmentSetAccessor<CareSemanticTag>
 
 template<SemanticTag S, formalism::FactKind T>
 template<typename Assignment>
-bool PredicateAssignmentSetAccessor<S, T>::Checker::is_consistent(const Assignment& assignment, bool polarity) const
+bool PredicateAssignmentSetAccessor<S, T>::Checker::is_consistent(const Assignment& assignment) const
 {
     return set.at(assignment) == polarity;
 }
@@ -187,8 +194,11 @@ bool PredicateAssignmentSetAccessor<S, T>::Checker::is_consistent(const Assignme
  */
 
 template<typename Assignment>
-bool PredicateAssignmentSetAccessor<CareSemanticTag, formalism::FluentTag>::Checker::is_consistent(const Assignment& assignment, bool polarity) const
+bool PredicateAssignmentSetAccessor<CareSemanticTag, formalism::FluentTag>::Checker::is_consistent(const Assignment& assignment) const
 {
+    if (arity > 2)
+        return true;
+
     if (!care_set.at(assignment))
         return true;
 

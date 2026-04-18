@@ -34,6 +34,10 @@
 namespace tyr::formalism::planning
 {
 
+/**
+ * StandardSemantic
+ */
+
 template<FactKind T>
 std::pair<FunctionBindingView<T>, bool> ground(TermListView terms, FunctionView<T> function, GrounderContext& context);
 
@@ -92,6 +96,33 @@ std::pair<GroundActionView, bool> ground(ActionView element,
 std::pair<AxiomBindingView, bool> ground(AxiomView axiom, GrounderContext& context);
 
 std::pair<GroundAxiomView, bool> ground(AxiomView element, GrounderContext& context, GrounderCache& cache, FDRContext& fdr);
+
+/**
+ * CareSemantic
+ */
+
+std::optional<PredicateBindingView<FluentTag>>
+ground_care(TermListView terms, PredicateView<FluentTag> predicate, GrounderContext& context, const CareSet& care);
+
+std::optional<GroundAtomView<FluentTag>> ground_care(AtomView<FluentTag> element, GrounderContext& context, const CareSet& care);
+
+std::optional<Data<FDRFact<FluentTag>>> ground_care(AtomView<FluentTag> element, GrounderContext& context, const CareSet& care, FDRContext& fdr);
+
+std::optional<Data<FDRFact<FluentTag>>> ground_care(LiteralView<FluentTag> element, GrounderContext& context, const CareSet& care, FDRContext& fdr);
+
+std::pair<GroundConjunctiveConditionView, bool> ground_care(ConjunctiveConditionView element, GrounderContext& context, const CareSet& care, FDRContext& fdr);
+
+std::pair<GroundConjunctiveEffectView, bool> ground_care(ConjunctiveEffectView element, GrounderContext& context, const CareSet& care, FDRContext& fdr);
+
+std::pair<GroundConditionalEffectView, bool> ground_care(ConditionalEffectView element, GrounderContext& context, const CareSet& care, FDRContext& fdr);
+
+// No action cache here: projected grounding depends on the current care set.
+std::pair<GroundActionView, bool> ground_care(ActionView element,
+                                              GrounderContext& context,
+                                              const CareSet& care,
+                                              const analysis::ActionDomain& action_domains,
+                                              itertools::cartesian_set::Workspace<Index<formalism::Object>>& iter_workspace,
+                                              FDRContext& fdr);
 
 }
 

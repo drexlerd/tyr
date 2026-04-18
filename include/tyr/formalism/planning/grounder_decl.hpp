@@ -68,6 +68,11 @@ struct GrounderCache
     }
 };
 
+struct CareSet
+{
+    UnorderedSet<PredicateBindingView<FluentTag>> predicate_bindings;
+};
+
 }
 
 #endif

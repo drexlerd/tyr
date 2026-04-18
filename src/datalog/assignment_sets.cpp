@@ -278,6 +278,13 @@ void PredicateAssignmentSets<T>::insert(formalism::datalog::PredicateBindingForw
 }
 
 template<formalism::FactKind T>
+void PredicateAssignmentSets<T>::insert(const PredicateFactSets<T>& fact_sets)
+{
+    for (const auto& set : fact_sets.get_sets())
+        insert(set.get_bindings());
+}
+
+template<formalism::FactKind T>
 size_t PredicateAssignmentSets<T>::size() const noexcept
 {
     return std::accumulate(m_sets.begin(), m_sets.end(), size_t { 0 }, [](auto&& lhs, auto&& rhs) { return lhs + rhs.size(); });

@@ -143,6 +143,108 @@ void SuccessorGenerator<LiftedTag>::get_labeled_successor_nodes(const Node<Lifte
     }
 }
 
+/**
+ * Care semantics
+ */
+
+std::vector<LabeledNode<LiftedTag>> SuccessorGenerator<LiftedTag>::get_labeled_successor_nodes(const Node<LiftedTag>& node,
+                                                                                               const formalism::planning::CareSet& care)
+{
+    auto result = std::vector<LabeledNode<LiftedTag>> {};
+
+    get_labeled_successor_nodes(node, care, result);
+
+    return result;
+}
+
+namespace
+{
+void insert_care_set(const formalism::planning::CareSet& care,
+                     const P2DTranslationContext::FluentToFluentPredicateMapping& fluent_to_fluent_predicate,
+                     fp::MergeDatalogContext& merge_context,
+                     d::PredicateFactSets<f::FluentTag>& care_fact_sets,
+                     d::PredicateAssignmentSets<f::FluentTag>& care_assignment_sets)
+{
+    for (const auto& binding : care.predicate_bindings)
+        care_fact_sets.insert(fp::merge_p2d<f::FluentTag, f::FluentTag>(binding, fluent_to_fluent_predicate, merge_context).first);
+
+    care_assignment_sets.insert(care_fact_sets);
+}
+}
+
+void SuccessorGenerator<LiftedTag>::get_labeled_successor_nodes(const Node<LiftedTag>& node,
+                                                                const formalism::planning::CareSet& care,
+                                                                std::vector<LabeledNode<LiftedTag>>& out_nodes)
+{
+    out_nodes.clear();
+
+    const auto state = node.get_state();
+
+    auto merge_context = fp::MergeDatalogContext { m_workspace.datalog_builder, m_workspace.workspace_repository };
+    const auto& program = m_task->get_action_program();
+
+    insert_extended_state(state.get_unpacked_state(),
+                          *m_task->get_repository(),
+                          program.get_translation_context().p2d,
+                          merge_context,
+                          m_workspace.facts.fact_sets,
+                          m_workspace.facts.assignment_sets);
+
+    insert_care_set(care,
+                    program.get_translation_context().p2d.fluent_to_fluent_predicate,
+                    merge_context,
+                    m_workspace.facts.care_fact_sets,
+                    m_workspace.facts.care_assignment_sets);
+
+    auto ctx = d::ProgramExecutionContext<d::NoOrAnnotationPolicy, d::NoAndAnnotationPolicy, d::NoTerminationPolicy, CareSemanticTag>(
+        m_workspace,
+        program.get_const_program_workspace());
+    ctx.clear();
+
+    m_execution_context->arena().execute([&] { d::solve_bottom_up(ctx); });
+
+    const auto state_context = StateContext<LiftedTag>(*m_task, state.get_unpacked_state(), node.get_metric());
+
+    out_nodes.clear();
+
+    auto fluent_assign = UnorderedMap<Index<fp::FDRVariable<f::FluentTag>>, fp::FDRValue> {};
+    auto iter_workspace = itertools::cartesian_set::Workspace<Index<f::Object>> {};
+
+    for (const auto& set : m_workspace.facts.fact_sets.predicate.get_sets())
+    {
+        for (const auto& binding : set.get_bindings())
+        {
+            const auto& mapping = program.get_predicate_to_action_mapping();
+
+            if (const auto it = mapping.find(binding.get_relation()); it != mapping.end())
+            {
+                const auto action = it->second;
+
+                auto grounder_context = fp::GrounderContext { m_workspace.planning_builder, *m_task->get_repository(), m_workspace.binding };
+
+                m_workspace.binding.clear();
+                for (const auto object : binding.get_objects())
+                    m_workspace.binding.push_back(object.get_index());
+
+                const auto ground_action = fp::ground_care(action,
+                                                           grounder_context,
+                                                           care,
+                                                           m_task->get_formalism_task().get_variable_domains().action_domains.at(action.get_index()),
+                                                           iter_workspace,
+                                                           *m_task->get_fdr_context())
+                                               .first;
+
+                if (m_executor.is_applicable(ground_action, state_context))
+                    out_nodes.emplace_back(ground_action, m_executor.apply_action(state_context, ground_action, *m_state_repository));
+            }
+        }
+    }
+}
+
+/**
+ * Lookup
+ */
+
 Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_successor_node(const Node<LiftedTag>& node, fp::GroundActionView action)
 {
     const auto& state = node.get_state();
