@@ -16,6 +16,7 @@
  */
 
 #include "tyr/common/macros.hpp"
+#include "tyr/common/semantics.hpp"
 #include "tyr/common/vector.hpp"
 #include "tyr/datalog/fact_sets.hpp"
 #include "tyr/datalog/fact_sets_accessor.hpp"

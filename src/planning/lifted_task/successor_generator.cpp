@@ -42,10 +42,48 @@ namespace df = tyr::formalism::datalog;
 
 namespace tyr::planning
 {
+namespace
+{
+void insert_care_set(const formalism::planning::CareSet& care,
+                     const P2DTranslationContext::FluentToFluentPredicateMapping& fluent_to_fluent_predicate,
+                     fp::MergeDatalogContext& merge_context,
+                     d::PredicateFactSets<f::FluentTag>& care_fact_sets,
+                     d::PredicateAssignmentSets<f::FluentTag>& care_assignment_sets)
+{
+    for (const auto& binding : care.predicate_bindings)
+        care_fact_sets.insert(fp::merge_p2d<f::FluentTag, f::FluentTag>(binding, fluent_to_fluent_predicate, merge_context).first);
+}
+
+template<typename Callback>
+void for_each_action_binding(const d::ProgramWorkspace<d::NoOrAnnotationPolicy, d::NoAndAnnotationPolicy, d::NoTerminationPolicy>& workspace,
+                             const ApplicableActionProgram& program,
+                             IndexList<f::Object>& binding_scratch,
+                             Callback&& callback)
+{
+    const auto& mapping = program.get_predicate_to_action_mapping();
+
+    for (const auto& set : workspace.facts.fact_sets.predicate.get_sets())
+    {
+        for (const auto& binding : set.get_bindings())
+        {
+            if (const auto it = mapping.find(binding.get_relation()); it != mapping.end())
+            {
+                binding_scratch.clear();
+
+                for (const auto object : binding.get_objects())
+                    binding_scratch.push_back(object.get_index());
+
+                callback(it->second, binding_scratch);
+            }
+        }
+    }
+}
+}
 
 SuccessorGenerator<LiftedTag>::SuccessorGenerator(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context) :
     m_task(std::move(task)),
     m_execution_context(std::move(execution_context)),
+    m_cartesian_workspace(),
     m_workspace(m_task->get_action_program().get_program_context(),
                 m_task->get_action_program().get_const_program_workspace(),
                 d::NoOrAnnotationPolicy(),
@@ -65,20 +103,26 @@ std::shared_ptr<SuccessorGenerator<LiftedTag>> SuccessorGenerator<LiftedTag>::cr
 Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_initial_node()
 {
     auto initial_state = m_state_repository->get_initial_state();
-
     const auto state_context = StateContext<LiftedTag>(*m_task, initial_state.get_unpacked_state(), 0);
-
     const auto state_metric = evaluate_metric(m_task->get_task().get_metric(), m_task->get_task().get_auxiliary_fterm_value(), state_context);
 
     return Node<LiftedTag>(std::move(initial_state), state_metric);
 }
 
+Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_successor_node(const Node<LiftedTag>& node, fp::GroundActionView action)
+{
+    const auto& state = node.get_state();
+    const auto state_context = StateContext<LiftedTag>(*m_task, state.get_unpacked_state(), node.get_metric());
+
+    return m_executor.apply_action(state_context, action, *m_state_repository);
+}
+
+// Ground action API (interning)
+
 std::vector<LabeledNode<LiftedTag>> SuccessorGenerator<LiftedTag>::get_labeled_successor_nodes(const Node<LiftedTag>& node)
 {
     auto result = std::vector<LabeledNode<LiftedTag>> {};
-
     get_labeled_successor_nodes(node, result);
-
     return result;
 }
 
@@ -86,61 +130,27 @@ void SuccessorGenerator<LiftedTag>::get_labeled_successor_nodes(const Node<Lifte
 {
     out_nodes.clear();
 
-    const auto state = node.get_state();
+    compute_action_facts(node);
 
-    auto merge_context = fp::MergeDatalogContext { m_workspace.datalog_builder, m_workspace.workspace_repository };
-    const auto& program = m_task->get_action_program();
+    auto grounder_context = fp::GrounderContext { m_workspace.planning_builder, *m_task->get_repository(), m_workspace.binding };
+    const auto state_context = StateContext<LiftedTag>(*m_task, node.get_state().get_unpacked_state(), node.get_metric());
 
-    insert_extended_state(state.get_unpacked_state(),
-                          *m_task->get_repository(),
-                          program.get_translation_context().p2d,
-                          merge_context,
-                          m_workspace.facts.fact_sets,
-                          m_workspace.facts.assignment_sets);
+    for_each_action_binding(m_workspace,
+                            m_task->get_action_program(),
+                            m_workspace.binding,
+                            [&](const auto& action, const auto&)
+                            {
+                                const auto ground_action = fp::ground(action,
+                                                                      grounder_context,
+                                                                      m_task->get_grounder_cache(),
+                                                                      m_task->get_formalism_task().get_variable_domains().action_domains.at(action.get_index()),
+                                                                      m_cartesian_workspace,
+                                                                      *m_task->get_fdr_context())
+                                                               .first;
 
-    auto ctx = d::ProgramExecutionContext<d::NoOrAnnotationPolicy, d::NoAndAnnotationPolicy, d::NoTerminationPolicy, StandardSemanticTag>(
-        m_workspace,
-        program.get_const_program_workspace());
-    ctx.clear();
-
-    m_execution_context->arena().execute([&] { d::solve_bottom_up(ctx); });
-
-    const auto state_context = StateContext<LiftedTag>(*m_task, state.get_unpacked_state(), node.get_metric());
-
-    out_nodes.clear();
-
-    auto fluent_assign = UnorderedMap<Index<fp::FDRVariable<f::FluentTag>>, fp::FDRValue> {};
-    auto iter_workspace = itertools::cartesian_set::Workspace<Index<f::Object>> {};
-
-    for (const auto& set : m_workspace.facts.fact_sets.predicate.get_sets())
-    {
-        for (const auto& binding : set.get_bindings())
-        {
-            const auto& mapping = program.get_predicate_to_action_mapping();
-
-            if (const auto it = mapping.find(binding.get_relation()); it != mapping.end())
-            {
-                const auto action = it->second;
-
-                auto grounder_context = fp::GrounderContext { m_workspace.planning_builder, *m_task->get_repository(), m_workspace.binding };
-
-                m_workspace.binding.clear();
-                for (const auto object : binding.get_objects())
-                    m_workspace.binding.push_back(object.get_index());
-
-                const auto ground_action = fp::ground(action,
-                                                      grounder_context,
-                                                      m_task->get_grounder_cache(),
-                                                      m_task->get_formalism_task().get_variable_domains().action_domains.at(action.get_index()),
-                                                      iter_workspace,
-                                                      *m_task->get_fdr_context())
-                                               .first;
-
-                if (m_executor.is_applicable(ground_action, state_context))
-                    out_nodes.emplace_back(ground_action, m_executor.apply_action(state_context, ground_action, *m_state_repository));
-            }
-        }
-    }
+                                if (m_executor.is_applicable(ground_action, state_context))
+                                    out_nodes.emplace_back(ground_action, m_executor.apply_action(state_context, ground_action, *m_state_repository));
+                            });
 }
 
 /**
@@ -157,27 +167,132 @@ std::vector<LabeledNode<LiftedTag>> SuccessorGenerator<LiftedTag>::get_labeled_s
     return result;
 }
 
-namespace
-{
-void insert_care_set(const formalism::planning::CareSet& care,
-                     const P2DTranslationContext::FluentToFluentPredicateMapping& fluent_to_fluent_predicate,
-                     fp::MergeDatalogContext& merge_context,
-                     d::PredicateFactSets<f::FluentTag>& care_fact_sets,
-                     d::PredicateAssignmentSets<f::FluentTag>& care_assignment_sets)
-{
-    for (const auto& binding : care.predicate_bindings)
-        care_fact_sets.insert(fp::merge_p2d<f::FluentTag, f::FluentTag>(binding, fluent_to_fluent_predicate, merge_context).first);
-}
-}
-
 void SuccessorGenerator<LiftedTag>::get_labeled_successor_nodes(const Node<LiftedTag>& node,
                                                                 const formalism::planning::CareSet& care,
                                                                 std::vector<LabeledNode<LiftedTag>>& out_nodes)
 {
     out_nodes.clear();
 
-    const auto state = node.get_state();
+    compute_action_facts(node, care);
 
+    auto grounder_context = fp::GrounderContext { m_workspace.planning_builder, *m_task->get_repository(), m_workspace.binding };
+    const auto state_context = StateContext<LiftedTag>(*m_task, node.get_state().get_unpacked_state(), node.get_metric());
+
+    for_each_action_binding(m_workspace,
+                            m_task->get_action_program(),
+                            m_workspace.binding,
+                            [&](const auto& action, const auto&)
+                            {
+                                const auto ground_action =
+                                    fp::ground_care(action,
+                                                    grounder_context,
+                                                    care,
+                                                    m_task->get_formalism_task().get_variable_domains().action_domains.at(action.get_index()),
+                                                    m_cartesian_workspace,
+                                                    *m_task->get_fdr_context())
+                                        .first;
+
+                                if (m_executor.is_applicable(ground_action, state_context))
+                                    out_nodes.emplace_back(ground_action, m_executor.apply_action(state_context, ground_action, *m_state_repository));
+                            });
+}
+
+// Action binding API (interning)
+
+Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_successor_node(const Node<LiftedTag>& node, formalism::planning::ActionBindingView binding) {}
+
+std::vector<formalism::planning::ActionBindingView> SuccessorGenerator<LiftedTag>::get_applicable_action_bindings(const Node<LiftedTag>& node) {}
+
+void SuccessorGenerator<LiftedTag>::get_applicable_action_bindings(const Node<LiftedTag>& node,
+                                                                   std::vector<formalism::planning::ActionBindingView>& out_bindings)
+{
+}
+
+Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_successor_node(const Node<LiftedTag>& node,
+                                                                  const formalism::planning::CareSet& care,
+                                                                  formalism::planning::ActionBindingView binding)
+{
+}
+
+std::vector<formalism::planning::ActionBindingView> SuccessorGenerator<LiftedTag>::get_applicable_action_bindings(const Node<LiftedTag>& node,
+                                                                                                                  const formalism::planning::CareSet& care)
+{
+}
+
+void SuccessorGenerator<LiftedTag>::get_applicable_action_bindings(const Node<LiftedTag>& node,
+                                                                   const formalism::planning::CareSet& care,
+                                                                   std::vector<formalism::planning::ActionBindingView>& out_bindings)
+{
+}
+
+// Action binding API (no interning)
+
+Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_successor_node(const Node<LiftedTag>& node,
+                                                                  const Data<formalism::RelationBinding<formalism::planning::Action>>& binding)
+{
+}
+
+Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_successor_node(const Node<LiftedTag>& node,
+                                                                  const formalism::planning::CareSet& care,
+                                                                  const Data<formalism::RelationBinding<formalism::planning::Action>>& binding)
+{
+}
+
+// Lookup
+
+Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_node(Index<State<LiftedTag>> state_index)
+{
+    auto state = m_state_repository->get_registered_state(state_index);
+    const auto state_context = StateContext<LiftedTag>(*m_task, state.get_unpacked_state(), 0);
+    const auto state_metric = evaluate_metric(m_task->get_task().get_metric(), m_task->get_task().get_auxiliary_fterm_value(), state_context);
+
+    return Node<LiftedTag>(std::move(state), state_metric);
+}
+
+// Diagnostics
+
+void SuccessorGenerator<LiftedTag>::print_summary(size_t verbosity) const
+{
+    if (verbosity < 1)
+        return;
+
+    std::cout << "[Successor generator] Summary" << std::endl;
+    std::cout << m_workspace.statistics << std::endl;
+    auto successor_generator_rule_statistics = std::vector<datalog::RuleStatistics> {};
+    for (const auto& ws_rule : m_workspace.rules)
+        successor_generator_rule_statistics.push_back(ws_rule->common.statistics);
+    std::cout << datalog::compute_aggregated_rule_statistics(successor_generator_rule_statistics) << std::endl;
+    auto successor_generator_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
+    for (const auto& ws_rule : m_workspace.rules)
+        for (const auto& worker : ws_rule->worker)
+            successor_generator_rule_worker_statistics.push_back(worker.solve.statistics);
+    std::cout << datalog::compute_aggregated_rule_worker_statistics(successor_generator_rule_worker_statistics) << std::endl;
+}
+
+void SuccessorGenerator<LiftedTag>::compute_action_facts(const Node<LiftedTag>& node)
+{
+    const auto state = node.get_state();
+    auto merge_context = fp::MergeDatalogContext { m_workspace.datalog_builder, m_workspace.workspace_repository };
+    const auto& program = m_task->get_action_program();
+
+    insert_extended_state(state.get_unpacked_state(),
+                          *m_task->get_repository(),
+                          program.get_translation_context().p2d,
+                          merge_context,
+                          m_workspace.facts.fact_sets,
+                          m_workspace.facts.assignment_sets);
+
+    auto ctx = d::ProgramExecutionContext<d::NoOrAnnotationPolicy, d::NoAndAnnotationPolicy, d::NoTerminationPolicy, StandardSemanticTag>(
+        m_workspace,
+        program.get_const_program_workspace());
+    ctx.clear();
+
+    m_execution_context->arena().execute([&] { d::solve_bottom_up(ctx); });
+}
+
+void SuccessorGenerator<LiftedTag>::compute_action_facts(const Node<LiftedTag>& node, const formalism::planning::CareSet& care)
+{
+    const auto state = node.get_state();
     auto merge_context = fp::MergeDatalogContext { m_workspace.datalog_builder, m_workspace.workspace_repository };
     const auto& program = m_task->get_action_program();
 
@@ -200,82 +315,6 @@ void SuccessorGenerator<LiftedTag>::get_labeled_successor_nodes(const Node<Lifte
     ctx.clear();
 
     m_execution_context->arena().execute([&] { d::solve_bottom_up(ctx); });
-
-    const auto state_context = StateContext<LiftedTag>(*m_task, state.get_unpacked_state(), node.get_metric());
-
-    out_nodes.clear();
-
-    auto fluent_assign = UnorderedMap<Index<fp::FDRVariable<f::FluentTag>>, fp::FDRValue> {};
-    auto iter_workspace = itertools::cartesian_set::Workspace<Index<f::Object>> {};
-
-    for (const auto& set : m_workspace.facts.fact_sets.predicate.get_sets())
-    {
-        for (const auto& binding : set.get_bindings())
-        {
-            const auto& mapping = program.get_predicate_to_action_mapping();
-
-            if (const auto it = mapping.find(binding.get_relation()); it != mapping.end())
-            {
-                const auto action = it->second;
-
-                auto grounder_context = fp::GrounderContext { m_workspace.planning_builder, *m_task->get_repository(), m_workspace.binding };
-
-                m_workspace.binding.clear();
-                for (const auto object : binding.get_objects())
-                    m_workspace.binding.push_back(object.get_index());
-
-                const auto ground_action = fp::ground_care(action,
-                                                           grounder_context,
-                                                           care,
-                                                           m_task->get_formalism_task().get_variable_domains().action_domains.at(action.get_index()),
-                                                           iter_workspace,
-                                                           *m_task->get_fdr_context())
-                                               .first;
-
-                if (m_executor.is_applicable(ground_action, state_context))
-                    out_nodes.emplace_back(ground_action, m_executor.apply_action(state_context, ground_action, *m_state_repository));
-            }
-        }
-    }
-}
-
-/**
- * Lookup
- */
-
-Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_successor_node(const Node<LiftedTag>& node, fp::GroundActionView action)
-{
-    const auto& state = node.get_state();
-    const auto state_context = StateContext<LiftedTag>(*m_task, state.get_unpacked_state(), node.get_metric());
-
-    return m_executor.apply_action(state_context, action, *m_state_repository);
-}
-
-Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_node(Index<State<LiftedTag>> state_index)
-{
-    auto state = m_state_repository->get_registered_state(state_index);
-    const auto state_context = StateContext<LiftedTag>(*m_task, state.get_unpacked_state(), 0);
-    const auto state_metric = evaluate_metric(m_task->get_task().get_metric(), m_task->get_task().get_auxiliary_fterm_value(), state_context);
-
-    return Node<LiftedTag>(std::move(state), state_metric);
-}
-
-void SuccessorGenerator<LiftedTag>::print_summary(size_t verbosity) const
-{
-    if (verbosity < 1)
-        return;
-
-    std::cout << "[Successor generator] Summary" << std::endl;
-    std::cout << m_workspace.statistics << std::endl;
-    auto successor_generator_rule_statistics = std::vector<datalog::RuleStatistics> {};
-    for (const auto& ws_rule : m_workspace.rules)
-        successor_generator_rule_statistics.push_back(ws_rule->common.statistics);
-    std::cout << datalog::compute_aggregated_rule_statistics(successor_generator_rule_statistics) << std::endl;
-    auto successor_generator_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
-    for (const auto& ws_rule : m_workspace.rules)
-        for (const auto& worker : ws_rule->worker)
-            successor_generator_rule_worker_statistics.push_back(worker.solve.statistics);
-    std::cout << datalog::compute_aggregated_rule_worker_statistics(successor_generator_rule_worker_statistics) << std::endl;
 }
 
 static_assert(SuccessorGeneratorConcept<SuccessorGenerator<LiftedTag>, LiftedTag>);

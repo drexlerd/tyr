@@ -18,6 +18,7 @@
 #ifndef TYR_PLANNING_LIFTED_TASK_SUCCESSOR_GENERATOR_HPP_
 #define TYR_PLANNING_LIFTED_TASK_SUCCESSOR_GENERATOR_HPP_
 
+#include "tyr/common/itertools.hpp"
 #include "tyr/common/onetbb.hpp"
 #include "tyr/datalog/policies/annotation.hpp"
 #include "tyr/datalog/policies/termination.hpp"
@@ -100,8 +101,14 @@ public:
     const auto& get_workspace() const noexcept { return m_workspace; }
 
 private:
+    void compute_action_facts(const Node<LiftedTag>& node);
+
+    void compute_action_facts(const Node<LiftedTag>& node, const formalism::planning::CareSet& care);
+
+private:
     std::shared_ptr<Task<LiftedTag>> m_task;
     ExecutionContextPtr m_execution_context;
+    itertools::cartesian_set::Workspace<Index<formalism::Object>> m_cartesian_workspace;
 
     datalog::ProgramWorkspace<datalog::NoOrAnnotationPolicy, datalog::NoAndAnnotationPolicy, datalog::NoTerminationPolicy> m_workspace;
 
@@ -125,11 +132,26 @@ void SuccessorGenerator<LiftedTag>::for_each_applicable_action_binding(const Nod
 
 template<typename Callback>
 void SuccessorGenerator<LiftedTag>::for_each_applicable_action_binding(const Node<LiftedTag>& node,
+                                                                       Data<formalism::RelationBinding<formalism::planning::Action>>& scratch_binding,
+                                                                       Callback&& callback)
+{
+}
+
+template<typename Callback>
+void SuccessorGenerator<LiftedTag>::for_each_applicable_action_binding(const Node<LiftedTag>& node,
                                                                        const formalism::planning::CareSet& care,
                                                                        Callback&& callback)
 {
     auto scratch_binding = Data<formalism::RelationBinding<formalism::planning::Action>>();
     for_each_applicable_action_binding(node, care, scratch_binding, std::forward<Callback>(callback));
+}
+
+template<typename Callback>
+void SuccessorGenerator<LiftedTag>::for_each_applicable_action_binding(const Node<LiftedTag>& node,
+                                                                       const formalism::planning::CareSet& care,
+                                                                       Data<formalism::RelationBinding<formalism::planning::Action>>& scratch_binding,
+                                                                       Callback&& callback)
+{
 }
 }
 

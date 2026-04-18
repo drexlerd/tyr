@@ -18,6 +18,7 @@
 #ifndef TYR_DATALOG_APPLICABILITY_HPP_
 #define TYR_DATALOG_APPLICABILITY_HPP_
 
+#include "tyr/common/semantics.hpp"
 #include "tyr/common/vector.hpp"
 #include "tyr/datalog/declarations.hpp"
 #include "tyr/datalog/fact_sets.hpp"
