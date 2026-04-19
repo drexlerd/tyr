@@ -178,7 +178,7 @@ void bind_successor_generator(nb::module_& m, const std::string& name)
              nb::rv_policy::move,
              "node"_a,
              nb::call_guard<nb::gil_scoped_release>())
-        .def("get_successor_node", &T::get_successor_node, "node"_a, "action"_a)
+        .def("get_successor_node", nb::overload_cast<const Node<Kind>&, formalism::planning::GroundActionView>(&T::get_successor_node), "node"_a, "action"_a)
         .def("get_node", &T::get_node, nb::rv_policy::move, "state_index"_a)
         .def("get_state_repository", &T::get_state_repository, nb::rv_policy::copy);
 }
