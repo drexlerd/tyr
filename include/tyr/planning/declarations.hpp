@@ -18,6 +18,7 @@
 #ifndef TYR_PLANNING_DECLARATIONS_HPP_
 #define TYR_PLANNING_DECLARATIONS_HPP_
 
+#include "tyr/common/semantics.hpp"
 #include "tyr/planning/task.hpp"
 
 #include <concepts>
@@ -38,6 +39,9 @@ class State;
 
 template<TaskKind Kind>
 struct StateContext;
+
+template<TaskKind Kind, SemanticTag S>
+struct StateAccessor;
 
 template<TaskKind Kind>
 class SuccessorGenerator;

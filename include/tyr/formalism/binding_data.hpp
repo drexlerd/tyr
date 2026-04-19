@@ -33,7 +33,7 @@ struct Data<formalism::RelationBinding<T>>
     IndexList<formalism::Object> objects;
 
     Data() = default;
-    Data(Index<T> relation_, size_t arity_, IndexList<formalism::Object> objects_) : relation(relation_), objects(std::move(objects_)) {}
+    Data(Index<T> relation_, IndexList<formalism::Object> objects_) : relation(relation_), objects(std::move(objects_)) {}
     // Python constructor
     template<typename C>
     Data(View<Index<T>, C> relation_, const std::vector<View<Index<formalism::Object>, C>>& objects_) : relation(), objects()

@@ -970,7 +970,7 @@ private:
     template<typename T>
     auto to_binding(View<Index<T>, Repository> element, const IndexList<Object>& objects, Repository& context)
     {
-        return context.get_or_create(Data<RelationBinding<T>>(element.get_index(), element.get_arity(), objects));
+        return context.get_or_create(Data<RelationBinding<T>>(element.get_index(), objects));
     }
 
     GroundAtomViewVariant translate_grounded(loki::Atom element, Builder& builder, Repository& context)

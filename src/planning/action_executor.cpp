@@ -22,6 +22,7 @@
 #include "tyr/common/types.hpp"
 #include "tyr/datalog/declarations.hpp"
 #include "tyr/formalism/planning/declarations.hpp"
+#include "tyr/formalism/planning/grounder_decl.hpp"
 #include "tyr/planning/action_executor.hpp"
 #include "tyr/planning/applicability.hpp"
 #include "tyr/planning/declarations.hpp"
@@ -41,6 +42,8 @@ namespace fp = tyr::formalism::planning;
 
 namespace tyr::planning
 {
+
+// Ground action API (interning)
 
 template<TaskKind Kind>
 void process_effects(fp::GroundActionView action,
@@ -75,11 +78,10 @@ void process_effects(fp::GroundActionView action,
 template<TaskKind Kind>
 bool ActionExecutor::is_applicable(fp::GroundActionView action, const StateContext<Kind>& state)
 {
-    // Ensure that condition applicability was verified already.
-    assert(tyr::planning::are_applicable_if_fires(action.get_effects(), state, m_effect_families)
-           == tyr::planning::is_applicable(action, state, m_effect_families));
+    // Ensure precondition applicability
+    assert(tyr::planning::is_applicable(action.get_condition(), state));
 
-    return are_applicable_if_fires(action.get_effects(), state, m_effect_families);
+    return tyr::planning::are_applicable_if_fires(action.get_effects(), state, m_effect_families);
 }
 
 template bool ActionExecutor::is_applicable(fp::GroundActionView action, const StateContext<LiftedTag>& state);
@@ -122,4 +124,41 @@ template Node<LiftedTag>
 ActionExecutor::apply_action(const StateContext<LiftedTag>& state_context, fp::GroundActionView action, StateRepository<LiftedTag>& state_repository);
 template Node<GroundTag>
 ActionExecutor::apply_action(const StateContext<GroundTag>& state_context, fp::GroundActionView action, StateRepository<GroundTag>& state_repository);
+
+// Action binding API (interning)
+
+bool ActionExecutor::is_applicable(formalism::planning::ActionBindingView binding, const StateContext<LiftedTag>& state)
+{
+    auto data = Data<formalism::RelationBinding<formalism::planning::Action>> {};
+    for (const auto object : binding.get_objects())
+        data.objects.push_back(object.get_index());
+    data.relation = binding.get_relation().get_index();
+
+    return is_applicable(data, state);
+}
+
+Node<LiftedTag> ActionExecutor::apply_action(const StateContext<LiftedTag>& state_context,
+                                             formalism::planning::ActionBindingView binding,
+                                             StateRepository<LiftedTag>& state_repository)
+{
+}
+
+// Action binding API (no interning)
+
+bool ActionExecutor::is_applicable(const Data<formalism::RelationBinding<formalism::planning::Action>>& binding, const StateContext<LiftedTag>& state)
+{
+    // m_binding = binding.objects;
+    // auto grounder_context = formalism::planning::GrounderContext { m_builder, *state.task.get_repository(), m_binding };
+    // Ensure that condition applicability was verified already.
+    //    assert(tyr::planning::are_applicable_if_fires(binding.get_relation(), grounder_context, state, m_effect_families, m_cartesian_workspace)
+    //           == tyr::planning::is_applicable(binding.get_relation(), grounder_context, state, m_effect_families));
+    //
+    //    return are_applicable_if_fires(binding.get_relation(), grounder_context, state, m_effect_families, m_cartesian_workspace);
+}
+
+Node<LiftedTag> ActionExecutor::apply_action(const StateContext<LiftedTag>& state_context,
+                                             const Data<formalism::RelationBinding<formalism::planning::Action>>& binding,
+                                             StateRepository<LiftedTag>& state_repository)
+{
+}
 }
