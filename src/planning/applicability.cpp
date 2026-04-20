@@ -123,6 +123,13 @@ template bool is_applicable_if_fires(formalism::planning::GroundConditionalEffec
                                      const StateContext<GroundTag>& context,
                                      formalism::planning::EffectFamilyList& ref_fluent_effect_families);
 
+template bool is_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
+                                     const StateContext<LiftedTag>& context,
+                                     formalism::planning::EffectFamilyList& out_fluent_effect_families);
+template bool is_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
+                                     const StateContext<GroundTag>& context,
+                                     formalism::planning::EffectFamilyList& out_fluent_effect_families);
+
 /**
  * is_applicable
  */
@@ -221,15 +228,6 @@ template bool is_applicable(formalism::planning::GroundConjunctiveEffectView ele
 template bool is_applicable(formalism::planning::GroundConjunctiveEffectView element,
                             const StateContext<GroundTag>& context,
                             formalism::planning::EffectFamilyList& ref_fluent_effect_families);
-
-// GroundConditionalEffectList
-
-template bool are_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
-                                      const StateContext<LiftedTag>& context,
-                                      formalism::planning::EffectFamilyList& out_fluent_effect_families);
-template bool are_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
-                                      const StateContext<GroundTag>& context,
-                                      formalism::planning::EffectFamilyList& out_fluent_effect_families);
 
 // GroundAction
 

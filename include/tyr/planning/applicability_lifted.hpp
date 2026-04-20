@@ -99,6 +99,12 @@ bool is_applicable_if_fires(formalism::planning::ConditionalEffectView element,
                             formalism::planning::EffectFamilyList& ref_fluent_effect_families,
                             itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace);
 
+template<TaskKind Kind, SemanticTag S>
+bool is_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
+                            const LiftedApplicabilityContext<Kind, S>& context,
+                            formalism::planning::EffectFamilyList& out_fluent_effect_families,
+                            itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace);
+
 /**
  * is_applicable
  */

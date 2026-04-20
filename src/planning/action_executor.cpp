@@ -81,7 +81,7 @@ bool ActionExecutor::is_applicable(fp::GroundActionView action, const StateConte
     // Ensure precondition applicability
     assert(tyr::planning::is_applicable(action.get_condition(), state));
 
-    return tyr::planning::are_applicable_if_fires(action.get_effects(), state, m_effect_families);
+    return tyr::planning::is_applicable_if_fires(action.get_effects(), state, m_effect_families);
 }
 
 template bool ActionExecutor::is_applicable(fp::GroundActionView action, const StateContext<LiftedTag>& state);

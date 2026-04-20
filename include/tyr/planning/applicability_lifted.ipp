@@ -117,6 +117,19 @@ bool is_applicable_if_fires(formalism::planning::ConditionalEffectView element,
                             formalism::planning::EffectFamilyList& ref_fluent_effect_families,
                             itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace);
 
+template<TaskKind Kind, SemanticTag S>
+bool is_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
+                            const LiftedApplicabilityContext<Kind, S>& context,
+                            formalism::planning::EffectFamilyList& out_fluent_effect_families,
+                            itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace)
+{
+    out_fluent_effect_families.clear();
+
+    return std::all_of(elements.begin(),
+                       elements.end(),
+                       [&](auto&& cond_effect) { return is_applicable_if_fires(cond_effect, context, out_fluent_effect_families, cartesian_workspace); });
+}
+
 /**
  * is_applicable
  */
@@ -137,37 +150,82 @@ template<formalism::PolarityKind P, TaskKind Kind, SemanticTag S>
 bool is_applicable(formalism::planning::FDRFactListView<formalism::FluentTag> elements, const LiftedApplicabilityContext<Kind, S>& context);
 
 template<TaskKind Kind, SemanticTag S>
-bool is_applicable(formalism::planning::LiftedBooleanOperatorView element, const LiftedApplicabilityContext<Kind, S>& context);
+bool is_applicable(formalism::planning::LiftedBooleanOperatorView element, const LiftedApplicabilityContext<Kind, S>& context)
+{
+    return evaluate(element, context);
+}
 
 template<TaskKind Kind, SemanticTag S>
-bool is_applicable(formalism::planning::LiftedBooleanOperatorListView elements, const LiftedApplicabilityContext<Kind, S>& context);
+bool is_applicable(formalism::planning::LiftedBooleanOperatorListView elements, const LiftedApplicabilityContext<Kind, S>& context)
+{
+    return std::all_of(elements.begin(), elements.end(), [&](auto&& arg) { return is_applicable(arg, context); });
+}
 
 template<TaskKind Kind, formalism::planning::NumericEffectOpKind Op, SemanticTag S>
 bool is_applicable(formalism::planning::NumericEffectView<Op, formalism::FluentTag> element,
                    const LiftedApplicabilityContext<Kind, S>& context,
-                   formalism::planning::EffectFamilyList& ref_fluent_effect_families);
+                   formalism::planning::EffectFamilyList& ref_fluent_effect_families)
+{
+    const auto fterm_index = element.get_fterm().get_index();
+    ref_fluent_effect_families.resize(fterm_index.get_value() + 1, formalism::planning::EffectFamily::NONE);
+
+    // Check non-conflicting effects
+    if (!is_compatible_effect_family(Op::family, ref_fluent_effect_families[fterm_index.get_value()]))
+        return false;  /// incompatible effects
+
+    ref_fluent_effect_families[fterm_index.get_value()] = Op::family;
+
+    // Check fterm is well-defined in context
+    if constexpr (!std::is_same_v<Op, formalism::planning::OpAssign>)
+    {
+        if (std::isnan(evaluate(element.get_fterm(), context)))
+            return false;  /// target function is undefined and operator is not assign
+    }
+
+    // Check fexpr is well-defined in context
+    return !std::isnan(evaluate(element.get_fexpr(), context));
+}
 
 template<TaskKind Kind, SemanticTag S>
 bool is_applicable(formalism::planning::NumericEffectOperatorView<formalism::FluentTag> element,
                    const LiftedApplicabilityContext<Kind, S>& context,
-                   formalism::planning::EffectFamilyList& ref_fluent_effect_families);
+                   formalism::planning::EffectFamilyList& ref_fluent_effect_families)
+{
+    return visit([&](auto&& arg) { return is_applicable(arg, context, ref_fluent_effect_families); }, element.get_variant());
+}
 
 template<TaskKind Kind, SemanticTag S>
 bool is_applicable(formalism::planning::NumericEffectOperatorListView<formalism::FluentTag> elements,
                    const LiftedApplicabilityContext<Kind, S>& context,
-                   formalism::planning::EffectFamilyList& ref_fluent_effect_families);
+                   formalism::planning::EffectFamilyList& ref_fluent_effect_families)
+{
+    return std::all_of(elements.begin(), elements.end(), [&](auto&& arg) { return is_applicable(arg, context, ref_fluent_effect_families); });
+}
 
 template<TaskKind Kind, SemanticTag S>
 bool is_applicable(formalism::planning::NumericEffectView<formalism::planning::OpIncrease, formalism::AuxiliaryTag> element,
-                   const LiftedApplicabilityContext<Kind, S>& context);
+                   const LiftedApplicabilityContext<Kind, S>& context)
+{
+    // Check fexpr is well-defined in context
+    return !std::isnan(evaluate(element.get_fexpr(), context));
+}
 
 template<TaskKind Kind, SemanticTag S>
-bool is_applicable(formalism::planning::NumericEffectOperatorView<formalism::AuxiliaryTag> element, const LiftedApplicabilityContext<Kind, S>& context);
+bool is_applicable(formalism::planning::NumericEffectOperatorView<formalism::AuxiliaryTag> element, const LiftedApplicabilityContext<Kind, S>& context)
+{
+    return visit([&](auto&& arg) { return is_applicable(arg, context); }, element.get_variant());
+}
 
 // ConjunctiveCondition
 
 template<TaskKind Kind, SemanticTag S>
-bool is_applicable(formalism::planning::ConjunctiveConditionView element, const LiftedApplicabilityContext<Kind, S>& context);
+bool is_applicable(formalism::planning::ConjunctiveConditionView element, const LiftedApplicabilityContext<Kind, S>& context)
+{
+    return is_applicable(element.template get_literals<formalism::StaticTag>(), context)  //
+           && is_applicable(element.template get_literals<formalism::FluentTag>(), context)
+           && is_applicable(element.template get_literals<formalism::DerivedTag>(), context)  //
+           && is_applicable(element.get_numeric_constraints(), context);
+}
 
 // ConjunctiveEffect
 
@@ -188,12 +246,8 @@ bool is_applicable(formalism::planning::ActionView element,
                    formalism::planning::EffectFamilyList& out_fluent_effect_families,
                    itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace)
 {
-    out_fluent_effect_families.clear();
-
     return is_applicable(element.get_condition(), context)
-           && std::all_of(element.get_effects().begin(),
-                          element.get_effects().end(),
-                          [&](const auto& effect) { return is_applicable_if_fires(effect, context, out_fluent_effect_families, cartesian_workspace); });
+           && is_applicable_if_fires(element.get_effects(), context, out_fluent_effect_families, cartesian_workspace);
 }
 
 // Axiom

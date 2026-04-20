@@ -95,6 +95,11 @@ bool is_applicable_if_fires(formalism::planning::GroundConditionalEffectView ele
                             const StateContext<Kind>& context,
                             formalism::planning::EffectFamilyList& ref_fluent_effect_families);
 
+template<TaskKind Kind>
+bool is_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
+                            const StateContext<Kind>& context,
+                            formalism::planning::EffectFamilyList& out_fluent_effect_families);
+
 /**
  * is_applicable
  */
@@ -153,13 +158,6 @@ template<TaskKind Kind>
 bool is_applicable(formalism::planning::GroundConjunctiveEffectView element,
                    const StateContext<Kind>& context,
                    formalism::planning::EffectFamilyList& ref_fluent_effect_families);
-
-// GroundConditionalEffectList
-
-template<TaskKind Kind>
-bool are_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
-                             const StateContext<Kind>& context,
-                             formalism::planning::EffectFamilyList& out_fluent_effect_families);
 
 // GroundAction
 
