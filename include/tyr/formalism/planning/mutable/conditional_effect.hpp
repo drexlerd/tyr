@@ -93,10 +93,10 @@ struct structure_traits<tyr::formalism::planning::MutableConditionalEffect>
     template<typename F>
     static Type transform_terms(const Type& value, F&& f)
     {
-        return Type { .num_parent_variables = value.num_parent_variables,
-                      .num_variables = value.num_variables,
-                      .condition = tyr::formalism::unification::transform_terms(value.condition, f),
-                      .effect = tyr::formalism::unification::transform_terms(value.effect, f) };
+        return Type(value.num_parent_variables,
+                    value.num_variables,
+                    tyr::formalism::unification::transform_terms(value.condition, f),
+                    tyr::formalism::unification::transform_terms(value.effect, f));
     }
 };
 }
