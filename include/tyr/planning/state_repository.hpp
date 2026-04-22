@@ -33,10 +33,7 @@ namespace tyr::planning
 {
 
 template<TaskKind Kind>
-class StateRepository
-{
-    static_assert(dependent_false<Kind>::value, "State is not defined for type T.");
-};
+class StateRepository;
 
 template<typename T, typename Kind>
 concept StateRepositoryConcept =

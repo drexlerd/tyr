@@ -28,10 +28,7 @@ namespace tyr::planning
 {
 
 template<TaskKind Kind>
-class SuccessorGenerator
-{
-    static_assert(dependent_false<Kind>::value, "SuccessorGenerator is not defined for type T.");
-};
+class SuccessorGenerator;
 
 template<typename T, typename Kind>
 concept SuccessorGeneratorConcept = requires(T& r,

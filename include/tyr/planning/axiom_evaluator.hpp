@@ -27,10 +27,7 @@ namespace tyr::planning
 {
 
 template<TaskKind Kind>
-class AxiomEvaluator
-{
-    static_assert(dependent_false<Kind>::value, "AxiomEvaluator is not defined for type T.");
-};
+class AxiomEvaluator;
 
 template<typename T, typename Kind>
 concept AxiomEvaluatorConcept =
