@@ -58,7 +58,7 @@ private:
         while (current != nullptr)
         {
             if (auto index_or_nullopt = current->m_symbol_repository.find_local_with_hash(builder, h))
-                return { View<Index<T>, Repository>(*index_or_nullopt, *current), false };
+                return View<Index<T>, Repository>(*index_or_nullopt, *current);
 
             current = current->m_parent;
         }
