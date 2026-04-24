@@ -13,7 +13,7 @@ include dependencies/argparse/CMakeLists.txt
 include dependencies/CMakeLists.txt
 
 include CMakeLists.txt
-include LICENSE.md
+include LICENSE
 include MANIFEST.in
 include pyproject.toml
 include README.md

@@ -1,0 +1,128 @@
+Bootstrap: docker
+From: ubuntu:22.04
+Stage: build
+
+%files
+    CMakeLists.txt /opt/tyr/CMakeLists.txt
+    LICENSE /opt/tyr/LICENSE
+    MANIFEST.in /opt/tyr/MANIFEST.in
+    pyproject.toml /opt/tyr/pyproject.toml
+    README.md /opt/tyr/README.md
+    setup.py /opt/tyr/setup.py
+    Config.cmake.in /opt/tyr/Config.cmake.in
+
+    cmake /opt/tyr/cmake
+    exe /opt/tyr/exe
+    include /opt/tyr/include
+    python /opt/tyr/python
+    src /opt/tyr/src
+    tests /opt/tyr/tests
+
+    dependencies/CMakeLists.txt /opt/tyr/dependencies/CMakeLists.txt
+    dependencies/cista /opt/tyr/dependencies/cista
+    dependencies/abseil /opt/tyr/dependencies/abseil
+    dependencies/nanobind /opt/tyr/dependencies/nanobind
+    dependencies/boost /opt/tyr/dependencies/boost
+    dependencies/fmt /opt/tyr/dependencies/fmt
+    dependencies/gtl /opt/tyr/dependencies/gtl
+    dependencies/loki /opt/tyr/dependencies/loki
+    dependencies/oneTBB /opt/tyr/dependencies/oneTBB
+    dependencies/googletest /opt/tyr/dependencies/googletest
+    dependencies/benchmark /opt/tyr/dependencies/benchmark
+    dependencies/valla /opt/tyr/dependencies/valla
+    dependencies/argparse /opt/tyr/dependencies/argparse
+
+%post
+    # Set noninteractive mode for apt
+    export DEBIAN_FRONTEND=noninteractive
+
+    # Update and install dependencies
+    # At least Python 3.9 for nanobind.
+    apt-get update
+    apt-get install -y \
+        build-essential \
+        cmake \
+        git \
+        wget \
+        ca-certificates \
+        python3.10 \
+        python3.10-dev \
+        python3-pip \
+        ccache \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Python typing extensions for stubgen, which is used by pytyr
+    python3.10 -m pip install --no-cache-dir --upgrade typing_extensions
+
+    # Set working directory
+    cd /opt/tyr
+
+    # Build and install dependencies
+    cmake -S dependencies -B dependencies/build \
+        -DCMAKE_INSTALL_PREFIX=dependencies/installs \
+        -DPython_EXECUTABLE=/usr/bin/python3.10
+    cmake --build dependencies/build -j$(nproc)
+
+    # Build Tyr
+    cmake -S . -B build \
+        -DCMAKE_PREFIX_PATH=/opt/tyr/dependencies/installs \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DPython_EXECUTABLE=/usr/bin/python3.10 \
+        -DBUILD_TESTS=OFF \
+        -DBUILD_PROFILING=OFF \
+        -DBUILD_PYTYR=OFF \
+        -DBUILD_EXECUTABLES=ON \
+        -DTYR_HEADER_INSTANTIATION=OFF \
+        -DTYR_STATE_STORAGE_POLICY=Tree
+    cmake --build build -j$(nproc)
+
+    # Install Tyr to a staging directory
+    cmake --install build --prefix=/opt/tyr/install
+
+
+# Runtime stage
+Bootstrap: docker
+From: ubuntu:22.04
+Stage: runtime
+
+%files from build
+    /opt/tyr/install /usr/local
+    /opt/tyr/build/exe/gbfs_lazy /usr/local/bin/gbfs_lazy
+    /opt/tyr/dependencies/installs/lib /usr/local/lib
+
+%post
+    # Install only runtime dependencies
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y \
+        libstdc++6 \
+        libgomp1 \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Update library cache
+    ldconfig
+
+%environment
+    export LC_ALL=C
+    export PATH=/usr/local/bin:$PATH
+    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+%runscript
+    exec /usr/local/bin/gbfs_lazy -D "$1" -P "$2" -O "$3" -N 1 -H rpg_ff -S 
+
+%labels
+    Author Dominik Drexler
+    Description Tyr Lifted FF Planner
+
+%help
+    This is an example Apptainer definition file for building and running the Tyr planner.
+
+    Usage:
+        apptainer run tyr.sif <domain.pddl> <problem.pddl> <plan.out>
+
+    Or start an interactive shell:
+        apptainer shell tyr.sif
+
+    The gbfs_lazy executable is available at /usr/local/bin/gbfs_lazy

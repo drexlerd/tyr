@@ -15,6 +15,7 @@ find_package(nanobind QUIET PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH)
 if (NOT nanobind_FOUND)
     list(APPEND CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+            -DNB_TEST=OFF
     )
 
     message(STATUS "Preparing external project \"nanobind\" with args:")
