@@ -35,7 +35,7 @@ namespace tyr::formalism::datalog
 {
 
 /**
- * Declarations
+ * ground
  */
 
 template<FactKind T>
@@ -63,9 +63,6 @@ template<FactKind T>
 std::pair<PredicateBindingView<T>, bool> ground(TermListView terms, PredicateView<T> predicate, GrounderContext& context);
 
 template<FactKind T>
-std::pair<PredicateBindingView<T>, bool> ground_binding(AtomView<T> element, GrounderContext& context);
-
-template<FactKind T>
 std::pair<GroundAtomView<T>, bool> ground(AtomView<T> element, GrounderContext& context);
 
 template<FactKind T>
@@ -73,9 +70,26 @@ std::pair<GroundLiteralView<T>, bool> ground(LiteralView<T> element, GrounderCon
 
 std::pair<GroundConjunctiveConditionView, bool> ground(ConjunctiveConditionView element, GrounderContext& context);
 
+std::pair<GroundRuleView, bool> ground(RuleView element, GrounderContext& context);
+
+/**
+ * ground_binding
+ */
+
+template<FactKind T>
+std::pair<PredicateBindingView<T>, bool> ground_binding(AtomView<T> element, GrounderContext& context);
+
 std::pair<RuleBindingView, bool> ground_binding(RuleView element, GrounderContext& context);
 
-std::pair<GroundRuleView, bool> ground(RuleView element, GrounderContext& context);
+/**
+ * try_ground
+ */
+
+template<FactKind T>
+std::optional<FunctionBindingView<T>> try_ground_binding(FunctionTermView<T> element, GrounderContext& context);
+
+template<FactKind T>
+std::optional<PredicateBindingView<T>> try_ground_binding(AtomView<T> element, GrounderContext& context);
 
 }
 

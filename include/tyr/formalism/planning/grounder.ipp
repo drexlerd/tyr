@@ -32,6 +32,10 @@
 namespace tyr::formalism::planning
 {
 
+/**
+ * ground
+ */
+
 template<FactKind T>
 std::pair<FunctionBindingView<T>, bool> ground(TermListView terms, FunctionView<T> function, GrounderContext& context)
 {
@@ -428,6 +432,68 @@ TYR_INLINE_IMPL std::pair<GroundAxiomView, bool> ground(AxiomView element, Groun
     axiom_cache.emplace(binding, result.first.get_index());
 
     return result;
+}
+
+/**
+ * try_ground
+ */
+
+template<FactKind T>
+std::optional<FunctionBindingView<T>> try_ground_binding(FunctionTermView<T> element, GrounderContext& context)
+{
+    auto binding_ptr = context.builder.get_builder<RelationBinding<Function<T>>>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    binding.relation = element.get_function().get_index();
+    for (const auto term : element.get_terms())
+    {
+        visit(
+            [&](auto&& arg)
+            {
+                using Alternative = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
+                    binding.objects.push_back(context.binding[uint_t(arg)]);
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
+                    binding.objects.push_back(arg.get_index());
+                else
+                    static_assert(dependent_false<Alternative>::value, "Missing case");
+            },
+            term.get_variant());
+    }
+
+    canonicalize(binding);
+    return context.destination.find(binding);
+}
+
+template<FactKind T>
+std::optional<PredicateBindingView<T>> try_ground_binding(AtomView<T> element, GrounderContext& context)
+{
+    auto binding_ptr = context.builder.get_builder<RelationBinding<Predicate<T>>>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    binding.relation = element.get_predicate().get_index();
+    for (const auto term : element.get_terms())
+    {
+        visit(
+            [&](auto&& arg)
+            {
+                using Alternative = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
+                    binding.objects.push_back(context.binding[uint_t(arg)]);
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
+                    binding.objects.push_back(arg.get_index());
+                else
+                    static_assert(dependent_false<Alternative>::value, "Missing case");
+            },
+            term.get_variant());
+    }
+
+    canonicalize(binding);
+    return context.destination.find(binding);
 }
 
 }

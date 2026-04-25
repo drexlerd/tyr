@@ -34,6 +34,10 @@
 namespace tyr::formalism::planning
 {
 
+/**
+ * ground
+ */
+
 template<FactKind T>
 std::pair<FunctionBindingView<T>, bool> ground(TermListView terms, FunctionView<T> function, GrounderContext& context);
 
@@ -92,6 +96,16 @@ std::pair<GroundActionView, bool> ground(ActionView element,
 std::pair<AxiomBindingView, bool> ground(AxiomView axiom, GrounderContext& context);
 
 std::pair<GroundAxiomView, bool> ground(AxiomView element, GrounderContext& context, GrounderCache& cache, FDRContext& fdr);
+
+/**
+ * try_ground
+ */
+
+template<FactKind T>
+std::optional<FunctionBindingView<T>> try_ground_binding(FunctionTermView<T> element, GrounderContext& context);
+
+template<FactKind T>
+std::optional<PredicateBindingView<T>> try_ground_binding(AtomView<T> element, GrounderContext& context);
 
 }
 

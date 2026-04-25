@@ -32,6 +32,10 @@
 namespace tyr::formalism::datalog
 {
 
+/**
+ * ground
+ */
+
 template<FactKind T>
 std::pair<FunctionBindingView<T>, bool> ground(TermListView terms, FunctionView<T> function, GrounderContext& context)
 {
@@ -188,36 +192,6 @@ std::pair<PredicateBindingView<T>, bool> ground(TermListView terms, PredicateVie
 }
 
 template<FactKind T>
-std::pair<PredicateBindingView<T>, bool> ground_binding(AtomView<T> element, GrounderContext& context)
-{
-    auto binding_ptr = context.builder.template get_builder<RelationBinding<Predicate<T>>>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    binding.relation = element.get_predicate().get_index();
-    for (const auto term : element.get_terms())
-    {
-        visit(
-            [&](auto&& arg)
-            {
-                using Alternative = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
-                    binding.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, ObjectView>)
-                    binding.objects.push_back(arg.get_index());
-                else
-                    static_assert(dependent_false<Alternative>::value, "Missing case");
-            },
-            term.get_variant());
-    }
-
-    // Canonicalize and Serialize
-    canonicalize(binding);
-    return context.destination.get_or_create(binding);
-}
-
-template<FactKind T>
 std::pair<GroundAtomView<T>, bool> ground(AtomView<T> element, GrounderContext& context)
 {
     // Fetch and clear
@@ -270,19 +244,6 @@ TYR_INLINE_IMPL std::pair<GroundConjunctiveConditionView, bool> ground(Conjuncti
     return context.destination.get_or_create(conj_cond);
 }
 
-TYR_INLINE_IMPL std::pair<RuleBindingView, bool> ground_binding(RuleView element, GrounderContext& context)
-{
-    auto binding_ptr = context.builder.template get_builder<RelationBinding<Rule>>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    binding.relation = element.get_index();
-    for (const auto object : context.binding)
-        binding.objects.push_back(object);
-
-    return context.destination.get_or_create(binding);
-}
-
 TYR_INLINE_IMPL std::pair<GroundRuleView, bool> ground(RuleView element, GrounderContext& context)
 {
     // Fetch and clear
@@ -298,5 +259,114 @@ TYR_INLINE_IMPL std::pair<GroundRuleView, bool> ground(RuleView element, Grounde
     // Canonicalize and Serialize
     canonicalize(rule);
     return context.destination.get_or_create(rule);
+}
+
+/**
+ * ground_binding
+ */
+
+template<FactKind T>
+std::pair<PredicateBindingView<T>, bool> ground_binding(AtomView<T> element, GrounderContext& context)
+{
+    auto binding_ptr = context.builder.template get_builder<RelationBinding<Predicate<T>>>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    binding.relation = element.get_predicate().get_index();
+    for (const auto term : element.get_terms())
+    {
+        visit(
+            [&](auto&& arg)
+            {
+                using Alternative = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
+                    binding.objects.push_back(context.binding[uint_t(arg)]);
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
+                    binding.objects.push_back(arg.get_index());
+                else
+                    static_assert(dependent_false<Alternative>::value, "Missing case");
+            },
+            term.get_variant());
+    }
+
+    // Canonicalize and Serialize
+    canonicalize(binding);
+    return context.destination.get_or_create(binding);
+}
+
+TYR_INLINE_IMPL std::pair<RuleBindingView, bool> ground_binding(RuleView element, GrounderContext& context)
+{
+    auto binding_ptr = context.builder.template get_builder<RelationBinding<Rule>>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    binding.relation = element.get_index();
+    for (const auto object : context.binding)
+        binding.objects.push_back(object);
+
+    return context.destination.get_or_create(binding);
+}
+
+/**
+ * try_ground
+ */
+
+template<FactKind T>
+std::optional<FunctionBindingView<T>> try_ground_binding(FunctionTermView<T> element, GrounderContext& context)
+{
+    auto binding_ptr = context.builder.get_builder<RelationBinding<Function<T>>>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    binding.relation = element.get_function().get_index();
+    for (const auto term : element.get_terms())
+    {
+        visit(
+            [&](auto&& arg)
+            {
+                using Alternative = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
+                    binding.objects.push_back(context.binding[uint_t(arg)]);
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
+                    binding.objects.push_back(arg.get_index());
+                else
+                    static_assert(dependent_false<Alternative>::value, "Missing case");
+            },
+            term.get_variant());
+    }
+
+    canonicalize(binding);
+    return context.destination.find(binding);
+}
+
+template<FactKind T>
+std::optional<PredicateBindingView<T>> try_ground_binding(AtomView<T> element, GrounderContext& context)
+{
+    auto binding_ptr = context.builder.get_builder<RelationBinding<Predicate<T>>>();
+    auto& binding = *binding_ptr;
+    binding.clear();
+
+    binding.relation = element.get_predicate().get_index();
+    for (const auto term : element.get_terms())
+    {
+        visit(
+            [&](auto&& arg)
+            {
+                using Alternative = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<Alternative, ParameterIndex>)
+                    binding.objects.push_back(context.binding[uint_t(arg)]);
+                else if constexpr (std::is_same_v<Alternative, ObjectView>)
+                    binding.objects.push_back(arg.get_index());
+                else
+                    static_assert(dependent_false<Alternative>::value, "Missing case");
+            },
+            term.get_variant());
+    }
+
+    canonicalize(binding);
+    return context.destination.find(binding);
 }
 }

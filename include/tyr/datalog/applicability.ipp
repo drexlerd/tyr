@@ -171,30 +171,7 @@ float_t is_valid_binding(formalism::datalog::LiftedMultiOperatorView<O> element,
 template<formalism::FactKind T>
 float_t is_valid_binding(formalism::datalog::FunctionTermView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
 {
-    auto binding_ptr = context.builder.get_builder<formalism::RelationBinding<formalism::Function<T>>>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    binding.relation = element.get_function().get_index();
-    for (const auto term : element.get_terms())
-    {
-        visit(
-            [&](auto&& arg)
-            {
-                using Alternative = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Alternative, formalism::ParameterIndex>)
-                    binding.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, formalism::datalog::ObjectView>)
-                    binding.objects.push_back(arg.get_index());
-                else
-                    static_assert(dependent_false<Alternative>::value, "Missing case");
-            },
-            term.get_variant());
-    }
-
-    canonicalize(binding);
-    auto binding_or_nullopt = context.destination.find(binding);
+    auto binding_or_nullopt = try_ground_binding(element, context);
     if (!binding_or_nullopt)
         return std::numeric_limits<float_t>::quiet_NaN();  // Indicate invalid binding with NaN
 
@@ -224,30 +201,7 @@ is_valid_binding(formalism::datalog::LiftedBooleanOperatorView element, const Fa
 template<formalism::FactKind T>
 bool is_valid_binding(formalism::datalog::LiteralView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
 {
-    auto binding_ptr = context.builder.get_builder<formalism::RelationBinding<formalism::Predicate<T>>>();
-    auto& binding = *binding_ptr;
-    binding.clear();
-
-    binding.relation = element.get_atom().get_predicate().get_index();
-    for (const auto term : element.get_atom().get_terms())
-    {
-        visit(
-            [&](auto&& arg)
-            {
-                using Alternative = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<Alternative, formalism::ParameterIndex>)
-                    binding.objects.push_back(context.binding[uint_t(arg)]);
-                else if constexpr (std::is_same_v<Alternative, formalism::datalog::ObjectView>)
-                    binding.objects.push_back(arg.get_index());
-                else
-                    static_assert(dependent_false<Alternative>::value, "Missing case");
-            },
-            term.get_variant());
-    }
-
-    canonicalize(binding);
-    auto binding_or_nullopt = context.destination.find(binding);
+    auto binding_or_nullopt = try_ground_binding(element.get_atom(), context);
     if (!binding_or_nullopt)
         return element.get_polarity() == false;
 

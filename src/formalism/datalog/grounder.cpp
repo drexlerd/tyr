@@ -47,14 +47,24 @@ template std::pair<GroundMultiOperatorView<OpMul>, bool> ground(LiftedMultiOpera
 template std::pair<PredicateBindingView<StaticTag>, bool> ground(TermListView terms, PredicateView<StaticTag> predicate, GrounderContext& context);
 template std::pair<PredicateBindingView<FluentTag>, bool> ground(TermListView terms, PredicateView<FluentTag> predicate, GrounderContext& context);
 
-template std::pair<PredicateBindingView<StaticTag>, bool> ground_binding(AtomView<StaticTag> element, GrounderContext& context);
-template std::pair<PredicateBindingView<FluentTag>, bool> ground_binding(AtomView<FluentTag> element, GrounderContext& context);
-
 template std::pair<GroundAtomView<StaticTag>, bool> ground(AtomView<StaticTag> element, GrounderContext& context);
 template std::pair<GroundAtomView<FluentTag>, bool> ground(AtomView<FluentTag> element, GrounderContext& context);
 
 template std::pair<GroundLiteralView<StaticTag>, bool> ground(LiteralView<StaticTag> element, GrounderContext& context);
 template std::pair<GroundLiteralView<FluentTag>, bool> ground(LiteralView<FluentTag> element, GrounderContext& context);
+
+template std::pair<PredicateBindingView<StaticTag>, bool> ground_binding(AtomView<StaticTag> element, GrounderContext& context);
+template std::pair<PredicateBindingView<FluentTag>, bool> ground_binding(AtomView<FluentTag> element, GrounderContext& context);
+
+template std::optional<FunctionBindingView<StaticTag>> try_ground_binding(formalism::datalog::FunctionTermView<StaticTag> element,
+                                                                          formalism::datalog::GrounderContext& context);
+template std::optional<FunctionBindingView<FluentTag>> try_ground_binding(formalism::datalog::FunctionTermView<FluentTag> element,
+                                                                          formalism::datalog::GrounderContext& context);
+
+template std::optional<PredicateBindingView<StaticTag>> try_ground_binding(formalism::datalog::AtomView<StaticTag> element,
+                                                                           formalism::datalog::GrounderContext& context);
+template std::optional<PredicateBindingView<FluentTag>> try_ground_binding(formalism::datalog::AtomView<FluentTag> element,
+                                                                           formalism::datalog::GrounderContext& context);
 }
 
 #endif
