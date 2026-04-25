@@ -27,6 +27,7 @@
 #include "tyr/formalism/planning/repository.hpp"
 #include "tyr/formalism/planning/views.hpp"
 #include "tyr/planning/applicability_decl.hpp"
+#include "tyr/planning/declarations.hpp"
 #include "tyr/planning/node.hpp"
 
 #include <algorithm>
@@ -143,6 +144,18 @@ bool is_applicable_if_fires(formalism::planning::GroundConditionalEffectView ele
 
     // Important: only modify effect families if condition is satisfied
     return is_applicable(element.get_effect(), context, ref_fluent_effect_families);
+}
+
+template<TaskKind Kind>
+bool is_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
+                            const StateContext<Kind>& context,
+                            formalism::planning::EffectFamilyList& out_fluent_effect_families)
+{
+    out_fluent_effect_families.clear();
+
+    return std::all_of(elements.begin(),
+                       elements.end(),
+                       [&](auto&& cond_effect) { return is_applicable_if_fires(cond_effect, context, out_fluent_effect_families); });
 }
 
 /**
@@ -278,20 +291,6 @@ bool is_applicable(formalism::planning::GroundConjunctiveEffectView element,
            && (!element.get_auxiliary_numeric_effect().has_value() || is_applicable(element.get_auxiliary_numeric_effect().value(), context));
 }
 
-// GroundConditionalEffectList
-
-template<TaskKind Kind>
-bool are_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
-                             const StateContext<Kind>& context,
-                             formalism::planning::EffectFamilyList& out_fluent_effect_families)
-{
-    out_fluent_effect_families.clear();
-
-    return std::all_of(elements.begin(),
-                       elements.end(),
-                       [&](auto&& cond_effect) { return is_applicable_if_fires(cond_effect, context, out_fluent_effect_families); });
-}
-
 // GroundAction
 
 template<TaskKind Kind>
@@ -299,7 +298,7 @@ bool is_applicable(formalism::planning::GroundActionView element,
                    const StateContext<Kind>& context,
                    formalism::planning::EffectFamilyList& out_fluent_effect_families)
 {
-    return is_applicable(element.get_condition(), context) && are_applicable_if_fires(element.get_effects(), context, out_fluent_effect_families);
+    return is_applicable(element.get_condition(), context) && is_applicable_if_fires(element.get_effects(), context, out_fluent_effect_families);
 }
 
 // GroundAxiom

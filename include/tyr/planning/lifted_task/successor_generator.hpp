@@ -44,25 +44,48 @@ public:
 
     Node<LiftedTag> get_initial_node();
 
+    // Ground action API (interning)
     std::vector<LabeledNode<LiftedTag>> get_labeled_successor_nodes(const Node<LiftedTag>& node);
+
     void get_labeled_successor_nodes(const Node<LiftedTag>& node, std::vector<LabeledNode<LiftedTag>>& out_nodes);
 
     Node<LiftedTag> get_successor_node(const Node<LiftedTag>& node, formalism::planning::GroundActionView action);
 
+    // Action binding API (interning)
+    Node<LiftedTag> get_successor_node(const Node<LiftedTag>& node, formalism::planning::ActionBindingView binding);
+
+    std::vector<formalism::planning::ActionBindingView> get_applicable_action_bindings(const Node<LiftedTag>& node);
+
+    void get_applicable_action_bindings(const Node<LiftedTag>& node, std::vector<formalism::planning::ActionBindingView>& out_bindings);
+
+    // Action binding API (no interning)
+    Node<LiftedTag> get_successor_node(const Node<LiftedTag>& node, const Data<formalism::RelationBinding<formalism::planning::Action>>& binding);
+
+    template<typename Callback>
+    void for_each_applicable_action_binding(const Node<LiftedTag>& node, Callback&& callback);
+
+    template<typename Callback>
+    void for_each_applicable_action_binding(const Node<LiftedTag>& node,
+                                            Data<formalism::RelationBinding<formalism::planning::Action>>& scratch_binding,
+                                            Callback&& callback);
+
+    // Lookup
     Node<LiftedTag> get_node(Index<State<LiftedTag>> state_index);
 
+    // Diagnostics
     void print_summary(size_t verbosity) const;
-
-    /**
-     * Expert API
-     */
 
     const auto& get_state_repository() const noexcept { return m_state_repository; }
     const auto& get_workspace() const noexcept { return m_workspace; }
 
 private:
+    void compute_action_facts(const Node<LiftedTag>& node);
+
+private:
     std::shared_ptr<Task<LiftedTag>> m_task;
     ExecutionContextPtr m_execution_context;
+    itertools::cartesian_set::Workspace<Index<formalism::Object>> m_cartesian_workspace;
+    Data<formalism::RelationBinding<formalism::planning::Action>> m_scratch_action_binding;
 
     datalog::ProgramWorkspace<datalog::NoOrAnnotationPolicy, datalog::NoAndAnnotationPolicy, datalog::NoTerminationPolicy> m_workspace;
 
@@ -71,6 +94,25 @@ private:
     ActionExecutor m_executor;
 };
 
+/**
+ * Implementations
+ */
+
+// Action binding API (no interning)
+
+template<typename Callback>
+void SuccessorGenerator<LiftedTag>::for_each_applicable_action_binding(const Node<LiftedTag>& node, Callback&& callback)
+{
+    auto scratch_binding = Data<formalism::RelationBinding<formalism::planning::Action>>();
+    for_each_applicable_action_binding(node, scratch_binding, std::forward<Callback>(callback));
+}
+
+template<typename Callback>
+void SuccessorGenerator<LiftedTag>::for_each_applicable_action_binding(const Node<LiftedTag>& node,
+                                                                       Data<formalism::RelationBinding<formalism::planning::Action>>& scratch_binding,
+                                                                       Callback&& callback)
+{
+}
 }
 
 #endif

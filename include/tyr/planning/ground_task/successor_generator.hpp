@@ -47,10 +47,6 @@ public:
 
     Node<GroundTag> get_node(Index<State<GroundTag>> state_index);
 
-    /**
-     * Expert API
-     */
-
     const auto& get_state_repository() const noexcept { return m_state_repository; }
 
 private:
