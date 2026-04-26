@@ -15,6 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "tyr/analysis/declarations.hpp"
 #include "tyr/common/dynamic_bitset.hpp"
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
@@ -24,11 +25,15 @@
 #include "tyr/formalism/arithmetic_operator_utils.hpp"
 #include "tyr/formalism/boolean_operator_utils.hpp"
 #include "tyr/formalism/planning/declarations.hpp"
+#include "tyr/formalism/planning/fdr_context.hpp"
 #include "tyr/formalism/planning/ground_numeric_effect_operator_utils.hpp"
+#include "tyr/formalism/planning/grounder.hpp"
 #include "tyr/formalism/planning/repository.hpp"
 #include "tyr/formalism/planning/views.hpp"
 #include "tyr/planning/applicability_lifted_decl.hpp"
 #include "tyr/planning/declarations.hpp"
+#include "tyr/planning/lifted_task.hpp"
+#include "tyr/planning/lifted_task/unpacked_state.hpp"
 #include "tyr/planning/node.hpp"
 
 #include <algorithm>
@@ -79,23 +84,55 @@ float_t evaluate(formalism::planning::LiftedMultiOperatorView<O> element, const 
                            { return formalism::apply(formalism::OpMul {}, value, evaluate(child_expr, context)); });
 }
 
-TYR_INLINE_IMPL float_t evaluate(formalism::planning::FunctionTermView<formalism::StaticTag> element, const ApplicabilityContext& context);
+TYR_INLINE_IMPL float_t evaluate(formalism::planning::FunctionTermView<formalism::StaticTag> element, const ApplicabilityContext& context)
+{
+    const auto fterm_or_nullopt = formalism::planning::try_ground(element, context.grounder);
+    if (!fterm_or_nullopt.has_value())
+        return std::numeric_limits<float_t>::quiet_NaN();
 
-TYR_INLINE_IMPL float_t evaluate(formalism::planning::FunctionTermView<formalism::FluentTag> element, const ApplicabilityContext& context);
+    return context.state.task.get(fterm_or_nullopt->get_index());
+}
 
-TYR_INLINE_IMPL float_t evaluate(formalism::planning::FunctionTermView<formalism::AuxiliaryTag> element, const ApplicabilityContext& context);
+TYR_INLINE_IMPL float_t evaluate(formalism::planning::FunctionTermView<formalism::FluentTag> element, const ApplicabilityContext& context)
+{
+    const auto fterm_or_nullopt = formalism::planning::try_ground(element, context.grounder);
+    if (!fterm_or_nullopt.has_value())
+        return std::numeric_limits<float_t>::quiet_NaN();
 
-TYR_INLINE_IMPL float_t evaluate(formalism::planning::FunctionExpressionView element, const ApplicabilityContext& context);
+    return context.state.unpacked_state.get(fterm_or_nullopt->get_index());
+}
 
-TYR_INLINE_IMPL float_t evaluate(formalism::planning::LiftedArithmeticOperatorView element, const ApplicabilityContext& context);
+TYR_INLINE_IMPL float_t evaluate(formalism::planning::FunctionTermView<formalism::AuxiliaryTag> element, const ApplicabilityContext& context)
+{
+    return context.state.auxiliary_value;
+}
 
-TYR_INLINE_IMPL bool evaluate(formalism::planning::LiftedBooleanOperatorView element, const ApplicabilityContext& context);
+TYR_INLINE_IMPL float_t evaluate(formalism::planning::FunctionExpressionView element, const ApplicabilityContext& context)
+{
+    return visit([&](auto&& arg) { return evaluate(arg, context); }, element.get_variant());
+}
+
+TYR_INLINE_IMPL float_t evaluate(formalism::planning::LiftedArithmeticOperatorView element, const ApplicabilityContext& context)
+{
+    return visit([&](auto&& arg) { return evaluate(arg, context); }, element.get_variant());
+}
+
+TYR_INLINE_IMPL bool evaluate(formalism::planning::LiftedBooleanOperatorView element, const ApplicabilityContext& context)
+{
+    return visit([&](auto&& arg) { return evaluate(arg, context); }, element.get_variant());
+}
 
 template<formalism::planning::NumericEffectOpKind Op, formalism::FactKind T>
-float_t evaluate(formalism::planning::NumericEffectView<Op, T> element, const ApplicabilityContext& context);
+float_t evaluate(formalism::planning::NumericEffectView<Op, T> element, const ApplicabilityContext& context)
+{
+    return formalism::planning::apply(Op {}, evaluate(element.get_fterm(), context), evaluate(element.get_fexpr(), context));
+}
 
 template<formalism::FactKind T>
-float_t evaluate(formalism::planning::NumericEffectOperatorView<T> element, const ApplicabilityContext& context);
+float_t evaluate(formalism::planning::NumericEffectOperatorView<T> element, const ApplicabilityContext& context)
+{
+    return visit([&](auto&& arg) { return evaluate(arg, context); }, element.get_variant());
+}
 
 /**
  * is_applicable_if_fires
@@ -104,36 +141,95 @@ float_t evaluate(formalism::planning::NumericEffectOperatorView<T> element, cons
 TYR_INLINE_IMPL bool is_applicable_if_fires(formalism::planning::ConditionalEffectView element,
                                             const ApplicabilityContext& context,
                                             formalism::planning::EffectFamilyList& ref_fluent_effect_families,
-                                            itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace);
+                                            itertools::cartesian_set::Workspace<Index<formalism::Object>>& cartesian_workspace,
+                                            const analysis::ConditionalEffectDomain& effect_domains)
+{
+    const auto& parameter_domains = effect_domains.payload.effect_domain.payload;
+    const auto binding_size = context.grounder.binding.size();
 
-TYR_INLINE_IMPL bool is_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
+    bool applicable = true;
+
+    itertools::cartesian_set::for_each_element(parameter_domains.begin() + element.get_arity(),
+                                               parameter_domains.end(),
+                                               cartesian_workspace,
+                                               [&](auto&& binding_cond)
+                                               {
+                                                   context.binding.resize(binding_size);
+                                                   context.binding.insert(context.binding.end(), binding_cond.begin(), binding_cond.end());
+
+                                                   if (is_applicable(element.get_condition(), context)
+                                                       && !is_applicable(element.get_effect(), context, ref_fluent_effect_families))
+                                                   {
+                                                       applicable = false;
+                                                       return;
+                                                   }
+                                               });
+
+    return applicable;
+}
+
+TYR_INLINE_IMPL bool is_applicable_if_fires(formalism::planning::ConditionalEffectListView elements,
                                             const ApplicabilityContext& context,
                                             formalism::planning::EffectFamilyList& out_fluent_effect_families,
-                                            itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace)
+                                            itertools::cartesian_set::Workspace<Index<formalism::Object>>& cartesian_workspace,
+                                            const analysis::ActionDomain& action_domains)
 {
     out_fluent_effect_families.clear();
 
-    return std::all_of(elements.begin(),
-                       elements.end(),
-                       [&](auto&& cond_effect) { return is_applicable_if_fires(cond_effect, context, out_fluent_effect_families, cartesian_workspace); });
+    for (auto cond_effect_index = 0; elements.size(); ++cond_effect_index)
+    {
+        const auto cond_effect = elements[cond_effect_index];
+        const auto& cond_effect_domain = action_domains.payload.effect_domains.at(cond_effect_index);
+
+        if (!is_applicable_if_fires(cond_effect, context, out_fluent_effect_families, cartesian_workspace, cond_effect_domain))
+            return false;
+    }
+
+    return true;
 }
 
 /**
  * is_applicable
  */
 
-TYR_INLINE_IMPL bool is_applicable(formalism::planning::LiteralView<formalism::StaticTag> element, const ApplicabilityContext& context);
+TYR_INLINE_IMPL bool is_applicable(formalism::planning::LiteralView<formalism::StaticTag> element, const ApplicabilityContext& context)
+{
+    const auto atom_or_nullopt = formalism::planning::try_ground(element.get_atom(), context.grounder);
+    if (!atom_or_nullopt.has_value())
+        return !element.get_polarity();
 
-TYR_INLINE_IMPL bool is_applicable(formalism::planning::LiteralView<formalism::DerivedTag> element, const ApplicabilityContext& context);
+    return context.state.task.test(atom_or_nullopt->get_index()) == element.get_polarity();
+}
+
+TYR_INLINE_IMPL bool is_applicable(formalism::planning::LiteralView<formalism::FluentTag> element, const ApplicabilityContext& context)
+{
+    const auto atom_or_nullopt = formalism::planning::try_ground(element.get_atom(), context.grounder);
+    if (!atom_or_nullopt.has_value())
+        return !element.get_polarity();
+
+    const auto fact_or_nullopt = context.fdr.get_fact(*atom_or_nullopt);
+
+    if (!fact_or_nullopt.has_value())
+        return !element.get_polarity();
+
+    const auto& fact = *fact_or_nullopt;
+    return (context.state.unpacked_state.get(fact.variable) == fact.value) == element.get_polarity();
+}
+
+TYR_INLINE_IMPL bool is_applicable(formalism::planning::LiteralView<formalism::DerivedTag> element, const ApplicabilityContext& context)
+{
+    const auto atom_or_nullopt = formalism::planning::try_ground(element.get_atom(), context.grounder);
+    if (!atom_or_nullopt.has_value())
+        return !element.get_polarity();
+
+    return context.state.unpacked_state.test(atom_or_nullopt->get_index()) == element.get_polarity();
+}
 
 template<formalism::FactKind T>
-bool is_applicable(formalism::planning::LiteralListView<T> elements, const ApplicabilityContext& context);
-
-template<formalism::PolarityKind P, TaskKind Kind>
-bool is_applicable(formalism::planning::FDRFactView<formalism::FluentTag> element, const ApplicabilityContext& context);
-
-template<formalism::PolarityKind P, TaskKind Kind>
-bool is_applicable(formalism::planning::FDRFactListView<formalism::FluentTag> elements, const ApplicabilityContext& context);
+bool is_applicable(formalism::planning::LiteralListView<T> elements, const ApplicabilityContext& context)
+{
+    return std::all_of(elements.begin(), elements.end(), [&](auto&& arg) { return is_applicable(arg, context); });
+}
 
 TYR_INLINE_IMPL bool is_applicable(formalism::planning::LiftedBooleanOperatorView element, const ApplicabilityContext& context)
 {
@@ -221,10 +317,11 @@ TYR_INLINE_IMPL bool is_applicable(formalism::planning::ConjunctiveEffectView el
 TYR_INLINE_IMPL bool is_applicable(formalism::planning::ActionView element,
                                    const ApplicabilityContext& context,
                                    formalism::planning::EffectFamilyList& out_fluent_effect_families,
-                                   itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace)
+                                   itertools::cartesian_set::Workspace<Index<formalism::Object>>& cartesian_workspace,
+                                   const analysis::ActionDomain& action_domains)
 {
     return is_applicable(element.get_condition(), context)
-           && is_applicable_if_fires(element.get_effects(), context, out_fluent_effect_families, cartesian_workspace);
+           && is_applicable_if_fires(element.get_effects(), context, out_fluent_effect_families, cartesian_workspace, action_domains);
 }
 
 // Axiom

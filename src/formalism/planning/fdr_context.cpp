@@ -144,20 +144,23 @@ Data<FDRFact<FluentTag>> FDRContext::get_fact(GroundAtomView<FluentTag> atom) { 
 
 FDRFactView<FluentTag> FDRContext::get_fact_view(GroundAtomView<FluentTag> atom) { return make_view(get_fact(atom), *m_context); }
 
-Data<FDRFact<FluentTag>> FDRContext::get_fact(Index<GroundLiteral<FluentTag>> literal) { return get_fact(make_view(literal, *m_context)); }
-
-Data<FDRFact<FluentTag>> FDRContext::get_fact(GroundLiteralView<FluentTag> literal)
+std::optional<Data<FDRFact<FluentTag>>> FDRContext::get_fact(Index<GroundAtom<FluentTag>> atom) const
 {
-    auto pos_fact = this->get_fact(literal.get_atom().get_index());
+    if (auto it = m_mapping.find(atom); it != m_mapping.end())
+        return it->second;
 
-    if (literal.get_polarity())
-        return pos_fact;
-
-    return Data<FDRFact<FluentTag>>(make_view(pos_fact, *m_context).get_variable().get_index(), FDRValue { 0 });
+    return std::nullopt;
 }
 
-FDRFactView<FluentTag> FDRContext::get_fact_view(GroundLiteralView<FluentTag> literal) { return make_view(get_fact(literal), *m_context); }
+std::optional<Data<FDRFact<FluentTag>>> FDRContext::get_fact(GroundAtomView<FluentTag> atom) const { return get_fact(atom.get_index()); }
+
+std::optional<FDRFactView<FluentTag>> FDRContext::get_fact_view(GroundAtomView<FluentTag> atom) const
+{
+    if (auto fact = get_fact(atom); fact)
+        return make_view(*fact, *m_context);
+
+    return std::nullopt;
+}
 
 FDRVariableListView<FluentTag> FDRContext::get_variables() const { return make_view(m_variables, *m_context); }
-
 }

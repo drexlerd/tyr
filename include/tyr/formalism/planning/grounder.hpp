@@ -102,10 +102,10 @@ std::pair<GroundAxiomView, bool> ground(AxiomView element, GrounderContext& cont
  */
 
 template<FactKind T>
-std::optional<FunctionBindingView<T>> try_ground_binding(FunctionTermView<T> element, GrounderContext& context);
+std::optional<GroundFunctionTermView<T>> try_ground(FunctionTermView<T> element, GrounderContext& context);
 
 template<FactKind T>
-std::optional<PredicateBindingView<T>> try_ground_binding(AtomView<T> element, GrounderContext& context);
+std::optional<GroundAtomView<T>> try_ground(AtomView<T> element, GrounderContext& context);
 
 }
 

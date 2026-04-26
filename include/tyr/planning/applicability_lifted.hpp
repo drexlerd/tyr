@@ -18,6 +18,7 @@
 #ifndef TYR_PLANNING_APPLICABILITY_LIFTED_HPP_
 #define TYR_PLANNING_APPLICABILITY_LIFTED_HPP_
 
+#include "tyr/analysis/declarations.hpp"
 #include "tyr/common/dynamic_bitset.hpp"
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
@@ -87,29 +88,24 @@ float_t evaluate(formalism::planning::NumericEffectOperatorView<T> element, cons
 bool is_applicable_if_fires(formalism::planning::ConditionalEffectView element,
                             const ApplicabilityContext& context,
                             formalism::planning::EffectFamilyList& ref_fluent_effect_families,
-                            itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace);
+                            itertools::cartesian_set::Workspace<Index<formalism::Object>>& cartesian_workspace,
+                            const analysis::ConditionalEffectDomain& effect_domains);
 
-bool is_applicable_if_fires(formalism::planning::GroundConditionalEffectListView elements,
+bool is_applicable_if_fires(formalism::planning::ConditionalEffectListView elements,
                             const ApplicabilityContext& context,
                             formalism::planning::EffectFamilyList& out_fluent_effect_families,
-                            itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace);
+                            itertools::cartesian_set::Workspace<Index<formalism::Object>>& cartesian_workspace,
+                            const analysis::ActionDomain& action_domains);
 
 /**
  * is_applicable
  */
 
-bool is_applicable(formalism::planning::LiteralView<formalism::StaticTag> element, const ApplicabilityContext& context);
-
-bool is_applicable(formalism::planning::LiteralView<formalism::DerivedTag> element, const ApplicabilityContext& context);
+template<formalism::FactKind T>
+bool is_applicable(formalism::planning::LiteralView<T> element, const ApplicabilityContext& context);
 
 template<formalism::FactKind T>
 bool is_applicable(formalism::planning::LiteralListView<T> elements, const ApplicabilityContext& context);
-
-template<formalism::PolarityKind P, TaskKind Kind>
-bool is_applicable(formalism::planning::FDRFactView<formalism::FluentTag> element, const ApplicabilityContext& context);
-
-template<formalism::PolarityKind P, TaskKind Kind>
-bool is_applicable(formalism::planning::FDRFactListView<formalism::FluentTag> elements, const ApplicabilityContext& context);
 
 bool is_applicable(formalism::planning::LiftedBooleanOperatorView element, const ApplicabilityContext& context);
 
@@ -148,7 +144,8 @@ bool is_applicable(formalism::planning::ConjunctiveEffectView element,
 bool is_applicable(formalism::planning::ActionView element,
                    const ApplicabilityContext& context,
                    formalism::planning::EffectFamilyList& out_fluent_effect_families,
-                   itertools::cartesian_set::Workspace<Index<formalism::Object>> cartesian_workspace);
+                   itertools::cartesian_set::Workspace<Index<formalism::Object>>& cartesian_workspace,
+                   const analysis::ActionDomain& action_domains);
 
 // Axiom
 

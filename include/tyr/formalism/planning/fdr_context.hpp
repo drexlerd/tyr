@@ -50,9 +50,9 @@ public:
     Data<FDRFact<FluentTag>> get_fact(GroundAtomView<FluentTag> atom);
     FDRFactView<FluentTag> get_fact_view(GroundAtomView<FluentTag> atom);
 
-    Data<FDRFact<FluentTag>> get_fact(Index<GroundLiteral<FluentTag>> literal);
-    Data<FDRFact<FluentTag>> get_fact(GroundLiteralView<FluentTag> literal);
-    FDRFactView<FluentTag> get_fact_view(GroundLiteralView<FluentTag> literal);
+    std::optional<Data<FDRFact<FluentTag>>> get_fact(Index<GroundAtom<FluentTag>> atom) const;
+    std::optional<Data<FDRFact<FluentTag>>> get_fact(GroundAtomView<FluentTag> atom) const;
+    std::optional<FDRFactView<FluentTag>> get_fact_view(GroundAtomView<FluentTag> atom) const;
 
     FDRVariableListView<FluentTag> get_variables() const;
 

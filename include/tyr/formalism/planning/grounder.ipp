@@ -439,7 +439,7 @@ TYR_INLINE_IMPL std::pair<GroundAxiomView, bool> ground(AxiomView element, Groun
  */
 
 template<FactKind T>
-std::optional<FunctionBindingView<T>> try_ground_binding(FunctionTermView<T> element, GrounderContext& context)
+std::optional<GroundFunctionTermView<T>> try_ground(FunctionTermView<T> element, GrounderContext& context)
 {
     auto binding_ptr = context.builder.get_builder<RelationBinding<Function<T>>>();
     auto& binding = *binding_ptr;
@@ -464,11 +464,21 @@ std::optional<FunctionBindingView<T>> try_ground_binding(FunctionTermView<T> ele
     }
 
     canonicalize(binding);
-    return context.destination.find(binding);
+    const auto binding_or_nullopt = context.destination.find(binding);
+    if (!binding_or_nullopt.has_value())
+        return std::nullopt;
+
+    auto fterm_ptr = context.builder.get_builder<GroundFunctionTerm<T>>();
+    auto& fterm = *fterm_ptr;
+    fterm.clear();
+
+    fterm.binding = binding_or_nullopt->get_index();
+
+    return context.destination.find(fterm);
 }
 
 template<FactKind T>
-std::optional<PredicateBindingView<T>> try_ground_binding(AtomView<T> element, GrounderContext& context)
+std::optional<GroundAtomView<T>> try_ground(AtomView<T> element, GrounderContext& context)
 {
     auto binding_ptr = context.builder.get_builder<RelationBinding<Predicate<T>>>();
     auto& binding = *binding_ptr;
@@ -493,7 +503,17 @@ std::optional<PredicateBindingView<T>> try_ground_binding(AtomView<T> element, G
     }
 
     canonicalize(binding);
-    return context.destination.find(binding);
+    const auto binding_or_nullopt = context.destination.find(binding);
+    if (!binding_or_nullopt.has_value())
+        return std::nullopt;
+
+    auto atom_ptr = context.builder.get_builder<GroundAtom<T>>();
+    auto& atom = *atom_ptr;
+    atom.clear();
+
+    atom.binding = binding_or_nullopt->get_index();
+
+    return context.destination.find(atom);
 }
 
 }

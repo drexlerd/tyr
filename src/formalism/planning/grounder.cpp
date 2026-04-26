@@ -70,11 +70,11 @@ template std::pair<GroundNumericEffectView<OpIncrease, AuxiliaryTag>, bool> grou
 template Data<GroundNumericEffectOperator<FluentTag>> ground(NumericEffectOperatorView<FluentTag> element, GrounderContext& context);
 template Data<GroundNumericEffectOperator<AuxiliaryTag>> ground(NumericEffectOperatorView<AuxiliaryTag> element, GrounderContext& context);
 
-template std::optional<FunctionBindingView<StaticTag>> try_ground_binding(FunctionTermView<StaticTag> element, GrounderContext& context);
-template std::optional<FunctionBindingView<FluentTag>> try_ground_binding(FunctionTermView<FluentTag> element, GrounderContext& context);
+template std::optional<GroundFunctionTermView<StaticTag>> try_ground(FunctionTermView<StaticTag> element, GrounderContext& context);
+template std::optional<GroundFunctionTermView<FluentTag>> try_ground(FunctionTermView<FluentTag> element, GrounderContext& context);
 
-template std::optional<PredicateBindingView<StaticTag>> try_ground_binding(AtomView<StaticTag> element, GrounderContext& context);
-template std::optional<PredicateBindingView<FluentTag>> try_ground_binding(AtomView<FluentTag> element, GrounderContext& context);
+template std::optional<GroundAtomView<StaticTag>> try_ground(AtomView<StaticTag> element, GrounderContext& context);
+template std::optional<GroundAtomView<FluentTag>> try_ground(AtomView<FluentTag> element, GrounderContext& context);
 
 }
 
