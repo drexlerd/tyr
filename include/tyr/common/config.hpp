@@ -35,6 +35,19 @@ using int_t = std::int32_t;
 using uint_t = std::uint32_t;
 using float_t = double;
 
+template<typename T>
+struct FloatTolerance
+{
+    static_assert(!std::is_same_v<T, T>, "FloatTolerance<T> is not defined for this type.");
+};
+
+template<>
+struct FloatTolerance<float_t>
+{
+    static constexpr float_t abs_epsilon = static_cast<float_t>(1e-12);
+    static constexpr float_t rel_epsilon = static_cast<float_t>(1e-12);
+};
+
 #ifdef NDEBUG
 static constexpr ::cista::mode CISTA_MODE = ::cista::mode::UNCHECKED;
 #else

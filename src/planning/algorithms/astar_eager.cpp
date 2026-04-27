@@ -274,6 +274,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
             if (pruning_strategy->should_prune_successor_state(state, succ_state, is_new_successor_state))
             {
+                successor_search_node.status = SearchNodeStatus::CLOSED;
                 event_handler->on_prune_node(succ_node);
                 continue;
             }

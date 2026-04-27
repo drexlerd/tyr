@@ -34,10 +34,10 @@ namespace tyr::formalism
 template<std::floating_point T>
 struct FloatCmp
 {
-    static constexpr T abs_eps = static_cast<T>(1e-12);
-    static constexpr T rel_eps = static_cast<T>(1e-12);
-
-    static T tol(T a, T b) noexcept { return std::max(abs_eps, rel_eps * std::max(std::abs(a), std::abs(b))); }
+    static T tol(T a, T b) noexcept
+    {
+        return std::max(FloatTolerance<T>::abs_epsilon, FloatTolerance<T>::rel_epsilon * std::max(std::abs(a), std::abs(b)));
+    }
 
     static bool eq(T a, T b) noexcept { return std::abs(a - b) <= tol(a, b); }
 
