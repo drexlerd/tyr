@@ -129,6 +129,43 @@ inline void process_effects(fp::ActionView action,
     }
 }
 
+template<TaskKind Kind, typename ProcessEffects>
+Node<Kind> apply_action_impl(const StateContext<Kind>& state_context,
+                             StateRepository<Kind>& state_repository,
+                             DataList<fp::FDRFact<f::FluentTag>>& del_effects,
+                             DataList<fp::FDRFact<f::FluentTag>>& add_effects,
+                             ProcessEffects&& process_effects)
+{
+    del_effects.clear();
+    add_effects.clear();
+
+    auto tmp_state_context = state_context;
+    auto& task = tmp_state_context.task;
+
+    auto succ_unpacked_state_ptr = state_repository.get_unregistered_state();
+    auto& succ_unpacked_state = *succ_unpacked_state_ptr;
+    succ_unpacked_state.assign_unextended_part(tmp_state_context.unpacked_state);
+
+    process_effects(succ_unpacked_state, tmp_state_context, del_effects, add_effects);
+
+    for (const auto fact : del_effects)
+        if (succ_unpacked_state.get(fact.variable) == fact.value)
+            succ_unpacked_state.set(Data<fp::FDRFact<f::FluentTag>> { fact.variable, fp::FDRValue::none() });
+
+    for (const auto fact : add_effects)
+        succ_unpacked_state.set(fact);
+
+    auto succ_state = state_repository.register_state(succ_unpacked_state_ptr);
+
+    auto succ_state_context = StateContext { task, succ_unpacked_state, tmp_state_context.auxiliary_value };
+    if (task.get_task().get_metric())
+        succ_state_context.auxiliary_value = evaluate(task.get_task().get_metric().value().get_fexpr(), succ_state_context);
+    else
+        ++succ_state_context.auxiliary_value;  // Assume unit cost if no metric is given
+
+    return Node<Kind>(succ_state, succ_state_context.auxiliary_value);
+}
+
 // Ground action API
 
 template<TaskKind Kind>
@@ -145,34 +182,12 @@ template bool ActionExecutor::is_applicable(fp::GroundActionView action, const S
 template<TaskKind Kind>
 Node<Kind> ActionExecutor::apply_action(const StateContext<Kind>& state_context, fp::GroundActionView action, StateRepository<Kind>& state_repository)
 {
-    m_del_effects.clear();
-    m_add_effects.clear();
-
-    auto tmp_state_context = state_context;
-    auto& task = tmp_state_context.task;
-
-    auto succ_unpacked_state_ptr = state_repository.get_unregistered_state();
-    auto& succ_unpacked_state = *succ_unpacked_state_ptr;
-    succ_unpacked_state.assign_unextended_part(tmp_state_context.unpacked_state);
-
-    process_effects(action, succ_unpacked_state, tmp_state_context, m_del_effects, m_add_effects);
-
-    for (const auto fact : m_del_effects)
-        if (succ_unpacked_state.get(fact.variable) == fact.value)
-            succ_unpacked_state.set(Data<fp::FDRFact<f::FluentTag>> { fact.variable, fp::FDRValue::none() });
-
-    for (const auto fact : m_add_effects)
-        succ_unpacked_state.set(fact);
-
-    auto succ_state = state_repository.register_state(succ_unpacked_state_ptr);
-
-    auto succ_state_context = StateContext { task, succ_unpacked_state, tmp_state_context.auxiliary_value };
-    if (task.get_task().get_metric())
-        succ_state_context.auxiliary_value = evaluate(task.get_task().get_metric().value().get_fexpr(), succ_state_context);
-    else
-        ++succ_state_context.auxiliary_value;  // Assume unit cost if no metric is given
-
-    return Node<Kind>(succ_state, succ_state_context.auxiliary_value);
+    return apply_action_impl(state_context,
+                             state_repository,
+                             m_del_effects,
+                             m_add_effects,
+                             [&](auto& succ_unpacked_state, auto& tmp_state_context, auto& del_effects, auto& add_effects)
+                             { process_effects(action, succ_unpacked_state, tmp_state_context, del_effects, add_effects); });
 }
 
 template Node<LiftedTag>
@@ -204,42 +219,22 @@ Node<LiftedTag> ActionExecutor::apply_action(const StateContext<LiftedTag>& stat
                                              fp::FDRContext& fdr,
                                              StateRepository<LiftedTag>& state_repository)
 {
-    m_del_effects.clear();
-    m_add_effects.clear();
-
-    auto tmp_state_context = state_context;
-    auto& task = tmp_state_context.task;
-
-    auto succ_unpacked_state_ptr = state_repository.get_unregistered_state();
-    auto& succ_unpacked_state = *succ_unpacked_state_ptr;
-    succ_unpacked_state.assign_unextended_part(tmp_state_context.unpacked_state);
-
-    process_effects(action,
-                    state_context.task.get_formalism_task().get_variable_domains().action_domains.at(action.get_index()),
-                    succ_unpacked_state,
-                    tmp_state_context,
-                    grounder,
-                    fdr,
-                    m_cartesian_workspace,
-                    m_effect_families,
-                    m_del_effects,
-                    m_add_effects);
-
-    for (const auto fact : m_del_effects)
-        if (succ_unpacked_state.get(fact.variable) == fact.value)
-            succ_unpacked_state.set(Data<fp::FDRFact<f::FluentTag>> { fact.variable, fp::FDRValue::none() });
-
-    for (const auto fact : m_add_effects)
-        succ_unpacked_state.set(fact);
-
-    auto succ_state = state_repository.register_state(succ_unpacked_state_ptr);
-
-    auto succ_state_context = StateContext { task, succ_unpacked_state, tmp_state_context.auxiliary_value };
-    if (task.get_task().get_metric())
-        succ_state_context.auxiliary_value = evaluate(task.get_task().get_metric().value().get_fexpr(), succ_state_context);
-    else
-        ++succ_state_context.auxiliary_value;  // Assume unit cost if no metric is given
-
-    return Node<LiftedTag>(succ_state, succ_state_context.auxiliary_value);
+    return apply_action_impl(state_context,
+                             state_repository,
+                             m_del_effects,
+                             m_add_effects,
+                             [&](auto& succ_unpacked_state, auto& tmp_state_context, auto& del_effects, auto& add_effects)
+                             {
+                                 process_effects(action,
+                                                 state_context.task.get_formalism_task().get_variable_domains().action_domains.at(action.get_index()),
+                                                 succ_unpacked_state,
+                                                 tmp_state_context,
+                                                 grounder,
+                                                 fdr,
+                                                 m_cartesian_workspace,
+                                                 m_effect_families,
+                                                 del_effects,
+                                                 add_effects);
+                             });
 }
 }

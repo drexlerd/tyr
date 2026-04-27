@@ -21,14 +21,18 @@
 #include "tyr/formalism/declarations.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/state_data.hpp"
-//
+#include "tyr/planning/state_storage/config.hpp"
+
+#if defined(TYR_STATE_STORAGE_HASHSET)
 #include "tyr/planning/ground_task/state_storage/hash_set/atom.hpp"
 #include "tyr/planning/ground_task/state_storage/hash_set/fact.hpp"
+#include "tyr/planning/state_storage/hash_set/numeric.hpp"
+#elif defined(TYR_STATE_STORAGE_TREE)
 #include "tyr/planning/ground_task/state_storage/tree_compression/atom.hpp"
 #include "tyr/planning/ground_task/state_storage/tree_compression/fact.hpp"
-#include "tyr/planning/state_storage/config.hpp"
-#include "tyr/planning/state_storage/hash_set/numeric.hpp"
 #include "tyr/planning/state_storage/tree_compression/numeric.hpp"
+#endif
+
 #include "tyr/planning/task.hpp"
 
 #include <valla/valla.hpp>

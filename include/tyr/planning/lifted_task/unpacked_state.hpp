@@ -26,13 +26,11 @@
 #include "tyr/formalism/planning/views.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/lifted_task/state_iterators.hpp"
+#include "tyr/planning/lifted_task/state_storage.hpp"
 #include "tyr/planning/state_index.hpp"
+#include "tyr/planning/state_storage.hpp"
 #include "tyr/planning/state_iterators.hpp"
 #include "tyr/planning/unpacked_state.hpp"
-//
-#include "tyr/planning/lifted_task/state_storage/tree_compression/atom.hpp"
-#include "tyr/planning/lifted_task/state_storage/tree_compression/fact.hpp"
-#include "tyr/planning/state_storage/tree_compression/numeric.hpp"
 
 #include <boost/dynamic_bitset.hpp>
 #include <vector>

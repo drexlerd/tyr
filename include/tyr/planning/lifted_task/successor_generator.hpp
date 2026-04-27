@@ -26,13 +26,16 @@
 #include "tyr/formalism/planning/ground_action_view.hpp"
 #include "tyr/planning/action_executor.hpp"
 #include "tyr/planning/declarations.hpp"
-#include "tyr/planning/ground_task/match_tree/declarations.hpp"  // for Matc...
+#include "tyr/planning/ground_task/match_tree/declarations.hpp"
 #include "tyr/planning/lifted_task.hpp"
 #include "tyr/planning/lifted_task/axiom_evaluator.hpp"
 #include "tyr/planning/lifted_task/node.hpp"
 #include "tyr/planning/lifted_task/state_repository.hpp"
 #include "tyr/planning/lifted_task/state_view.hpp"
 #include "tyr/planning/successor_generator.hpp"
+
+#include <type_traits>
+#include <utility>
 
 namespace tyr::planning
 {
@@ -84,6 +87,13 @@ public:
 private:
     void compute_action_facts(const Node<LiftedTag>& node);
 
+    using ActionBindingCallback = void (*)(const Data<formalism::RelationBinding<formalism::planning::Action>>&, void*);
+
+    void for_each_applicable_action_binding_impl(const Node<LiftedTag>& node,
+                                                 Data<formalism::RelationBinding<formalism::planning::Action>>& scratch_binding,
+                                                 ActionBindingCallback callback,
+                                                 void* callback_data);
+
 private:
     std::shared_ptr<Task<LiftedTag>> m_task;
     ExecutionContextPtr m_execution_context;
@@ -115,29 +125,14 @@ void SuccessorGenerator<LiftedTag>::for_each_applicable_action_binding(const Nod
                                                                        Data<formalism::RelationBinding<formalism::planning::Action>>& scratch_binding,
                                                                        Callback&& callback)
 {
-    compute_action_facts(node);
-
-    const auto state_context = StateContext<LiftedTag>(*m_task, node.get_state().get_unpacked_state(), node.get_metric());
-    auto grounder_context = formalism::planning::GrounderContext { m_workspace.planning_builder, *m_task->get_repository(), scratch_binding.objects };
-    const auto& mapping = m_task->get_action_program().get_predicate_to_action_mapping();
-
-    for (const auto& set : m_workspace.facts.fact_sets.predicate.get_sets())
-    {
-        for (const auto& binding : set.get_bindings())
-        {
-            const auto it = mapping.find(binding.get_relation());
-            if (it == mapping.end())
-                continue;
-
-            scratch_binding.relation = it->second.get_index();
-            scratch_binding.objects.clear();
-            for (const auto object : binding.get_objects())
-                scratch_binding.objects.push_back(object.get_index());
-
-            if (m_executor.is_applicable(it->second, state_context, grounder_context, *m_task->get_fdr_context()))
-                callback(scratch_binding);
-        }
-    }
+    using CallbackStorage = std::remove_reference_t<Callback>;
+    auto callback_storage = &callback;
+    for_each_applicable_action_binding_impl(
+        node,
+        scratch_binding,
+        [](const Data<formalism::RelationBinding<formalism::planning::Action>>& binding, void* callback_data)
+        { (*static_cast<CallbackStorage*>(callback_data))(binding); },
+        callback_storage);
 }
 }
 

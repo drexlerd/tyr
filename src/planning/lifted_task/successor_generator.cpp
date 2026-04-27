@@ -194,6 +194,36 @@ Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_successor_node(const Node<Lif
     return m_executor.apply_action(state_context, action, grounder_context, *m_task->get_fdr_context(), *m_state_repository);
 }
 
+void SuccessorGenerator<LiftedTag>::for_each_applicable_action_binding_impl(const Node<LiftedTag>& node,
+                                                                            Data<formalism::RelationBinding<formalism::planning::Action>>& scratch_binding,
+                                                                            ActionBindingCallback callback,
+                                                                            void* callback_data)
+{
+    compute_action_facts(node);
+
+    const auto state_context = StateContext<LiftedTag>(*m_task, node.get_state().get_unpacked_state(), node.get_metric());
+    auto grounder_context = fp::GrounderContext { m_workspace.planning_builder, *m_task->get_repository(), scratch_binding.objects };
+    const auto& mapping = m_task->get_action_program().get_predicate_to_action_mapping();
+
+    for (const auto& set : m_workspace.facts.fact_sets.predicate.get_sets())
+    {
+        for (const auto& binding : set.get_bindings())
+        {
+            const auto it = mapping.find(binding.get_relation());
+            if (it == mapping.end())
+                continue;
+
+            scratch_binding.relation = it->second.get_index();
+            scratch_binding.objects.clear();
+            for (const auto object : binding.get_objects())
+                scratch_binding.objects.push_back(object.get_index());
+
+            if (m_executor.is_applicable(it->second, state_context, grounder_context, *m_task->get_fdr_context()))
+                callback(scratch_binding, callback_data);
+        }
+    }
+}
+
 // Lookup
 Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_node(Index<State<LiftedTag>> state_index)
 {
