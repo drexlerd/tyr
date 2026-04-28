@@ -26,6 +26,7 @@
 #include "tyr/planning/lifted_task/node.hpp"
 #include "tyr/planning/plan.hpp"
 
+#include <fmt/ostream.h>
 #include <iostream>
 
 namespace tyr::planning::gbfs_lazy
@@ -33,9 +34,7 @@ namespace tyr::planning::gbfs_lazy
 template<TaskKind Kind>
 void DefaultEventHandler<Kind>::on_expand_node_impl(const Node<Kind>& node) const
 {
-    std::cout << "[GBFS] ----------------------------------------\n"
-              << "[GBFS] Expanding node: " << node << "\n"
-              << std::endl;
+    fmt::print(std::cout, "[GBFS] ----------------------------------------\n[GBFS] Expanding node: {}\n\n", node);
 }
 
 template<TaskKind Kind>
@@ -46,8 +45,8 @@ void DefaultEventHandler<Kind>::on_expand_goal_node_impl(const Node<Kind>& node)
 template<TaskKind Kind>
 void DefaultEventHandler<Kind>::on_generate_node_impl(const LabeledNode<Kind>& labeled_succ_node) const
 {
-    std::cout << "[GBFS] Action: " << labeled_succ_node.label << "\n";
-    std::cout << "[GBFS] Successor node: " << labeled_succ_node.node << "\n" << std::endl;
+    fmt::print(std::cout, "[GBFS] Action: {}\n", labeled_succ_node.label);
+    fmt::print(std::cout, "[GBFS] Successor node: {}\n\n", labeled_succ_node.node);
 }
 
 template<TaskKind Kind>
@@ -72,7 +71,7 @@ void DefaultEventHandler<Kind>::on_new_best_h_value_impl(float_t h_value, uint64
 template<TaskKind Kind>
 void DefaultEventHandler<Kind>::on_end_search_impl() const
 {
-    std::cout << "[GBFS] Search ended.\n" << this->m_statistics << std::endl;
+    fmt::print(std::cout, "[GBFS] Search ended.\n{}\n", this->m_statistics);
 }
 
 template<TaskKind Kind>
@@ -82,7 +81,7 @@ void DefaultEventHandler<Kind>::on_solved_impl(const Plan<Kind>& plan) const
               << "[GBFS] Plan cost: " << plan.get_cost() << "\n"
               << "[GBFS] Plan length: " << plan.get_length() << std::endl;
 
-    std::cout << plan << std::endl;
+    fmt::print(std::cout, "{}\n", plan);
 }
 
 template<TaskKind Kind>

@@ -22,7 +22,7 @@
 #include "tyr/analysis/stratification.hpp"         // for RuleStratum, Rule...
 #include "tyr/common/declarations.hpp"             // for UnorderedSet
 #include "tyr/common/equal_to.hpp"                 // for EqualTo
-#include "tyr/common/formatter.hpp"                // for operator<<
+#include "tyr/common/formatter.hpp"
 #include "tyr/common/hash.hpp"                     // for Hash
 #include "tyr/common/types.hpp"                    // for IndexList
 #include "tyr/common/vector.hpp"                   // for View

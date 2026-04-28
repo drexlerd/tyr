@@ -21,45 +21,43 @@
 #include "tyr/formalism/formatter.hpp"
 #include "tyr/formalism/unification/substitution.hpp"
 
-namespace tyr
-{
+#include <sstream>
 
-namespace formalism::unification
+namespace fmt
 {
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const SubstitutionFunction<T>& el);
-}
 
 template<typename T>
-std::ostream& print(std::ostream& os, const formalism::unification::SubstitutionFunction<T>& el)
+struct formatter<tyr::formalism::unification::SubstitutionFunction<T>, char>
 {
-    os << "SubstitutionFunction(\n";
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
+    template<typename FormatContext>
+    auto format(const tyr::formalism::unification::SubstitutionFunction<T>& value, FormatContext& ctx) const
     {
-        IndentScope scope(os);
+        auto os = std::stringstream {};
+        os << "SubstitutionFunction(\n";
 
-        os << print_indent << "parameters = " << el.parameters() << "\n";
-
-        os << print_indent << "bindings = [\n";
         {
-            IndentScope scope(os);
-            for (const auto& parameter : el.parameters())
-                os << print_indent << parameter << " -> " << (el.is_bound(parameter) ? to_string(*el[parameter]) : "unbound") << "\n";
+            tyr::IndentScope scope(os);
+
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "parameters = ", value.parameters());
+
+            os << tyr::print_indent << "bindings = [\n";
+            {
+                tyr::IndentScope scope(os);
+                for (const auto& parameter : value.parameters())
+                {
+                    os << tyr::print_indent;
+                    fmt::print(os, "{} -> {}\n", parameter, value.is_bound(parameter) ? tyr::to_string(*value[parameter]) : "unbound");
+                }
+            }
         }
+        os << tyr::print_indent << ")";
+
+        return fmt::format_to(ctx.out(), "{}", os.str());
     }
-    os << print_indent << ")";
-
-    return os;
-}
-
-namespace formalism::unification
-{
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const SubstitutionFunction<T>& el)
-{
-    return tyr::print(os, el);
-}
-}
+};
 
 }
 

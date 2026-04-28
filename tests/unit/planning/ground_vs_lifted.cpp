@@ -27,7 +27,7 @@ namespace tyr::tests
 {
 namespace
 {
-fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_DIR)) / "data" / subdir; }
+fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_DIR)) / "data" / "tests" / subdir; }
 
 /// @brief Compare statistics that must be the same for both configurations
 /// Notes:

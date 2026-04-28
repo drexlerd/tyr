@@ -29,314 +29,272 @@
 #include <fmt/ranges.h>
 #include <ostream>
 
-namespace tyr
+fmt::format_context::iterator fmt::formatter<tyr::formalism::datalog::VariableDependencyGraph, char>::format(const tyr::formalism::datalog::VariableDependencyGraph& value,
+                                                                                   fmt::format_context& ctx) const
 {
-
-std::ostream& print(std::ostream& os, const formalism::datalog::VariableDependencyGraph& el)
-{
+    auto os = std::stringstream {};
     os << "graph {\n";
-
-    const auto k = el.k();
-
-    for (uint_t i = 0; i < k; ++i)
-    {
+    const auto k = value.k();
+    for (tyr::uint_t i = 0; i < k; ++i)
         fmt::print(os, "n{} [label=\"V{}\"];\n", i, i);
-    }
-
-    for (uint_t i = 0; i < k; ++i)
-    {
-        for (uint_t j = i + 1; j < k; ++j)
-        {
-            if (el.binary().has_dependency(i, j))
-            {
+    for (tyr::uint_t i = 0; i < k; ++i)
+        for (tyr::uint_t j = i + 1; j < k; ++j)
+            if (value.binary().has_dependency(i, j))
                 fmt::print(os, "n{} -- n{};\n", i, j);
-            }
-        }
-    }
-
     os << "}\n";
-
-    return os;
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::FunctionExpression>& el)
+fmt::format_context::iterator fmt::formatter<tyr::Data<tyr::formalism::datalog::FunctionExpression>, char>::format(
+    const tyr::Data<tyr::formalism::datalog::FunctionExpression>& value, fmt::format_context& ctx) const
 {
-    fmt::print(os, "{}", to_string(el.value));
-    return os;
+    return fmt::format_to(ctx.out(), "{}", value.value);
 }
 
-std::ostream& print(std::ostream& os, const formalism::datalog::FunctionExpressionView& el)
+fmt::format_context::iterator fmt::formatter<tyr::formalism::datalog::FunctionExpressionView, char>::format(const tyr::formalism::datalog::FunctionExpressionView& value,
+                                                                                  fmt::format_context& ctx) const
 {
-    fmt::print(os, "{}", to_string(el.get_variant()));
-    return os;
+    return fmt::format_to(ctx.out(), "{}", value.get_variant());
 }
 
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::GroundFunctionExpression>& el)
+fmt::format_context::iterator fmt::formatter<tyr::Data<tyr::formalism::datalog::GroundFunctionExpression>, char>::format(
+    const tyr::Data<tyr::formalism::datalog::GroundFunctionExpression>& value, fmt::format_context& ctx) const
 {
-    fmt::print(os, "{}", to_string(el.value));
-    return os;
+    return fmt::format_to(ctx.out(), "{}", value.value);
 }
 
-std::ostream& print(std::ostream& os, const formalism::datalog::GroundFunctionExpressionView& el)
+fmt::format_context::iterator fmt::formatter<tyr::formalism::datalog::GroundFunctionExpressionView, char>::format(
+    const tyr::formalism::datalog::GroundFunctionExpressionView& value, fmt::format_context& ctx) const
 {
-    fmt::print(os, "{}", to_string(el.get_variant()));
-    return os;
+    return fmt::format_to(ctx.out(), "{}", value.get_variant());
 }
 
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::ConjunctiveCondition>& el)
+fmt::format_context::iterator fmt::formatter<tyr::Data<tyr::formalism::datalog::ConjunctiveCondition>, char>::format(
+    const tyr::Data<tyr::formalism::datalog::ConjunctiveCondition>& value, fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "ConjunctiveCondition(\n";
     {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.index << "\n";
-
-        os << print_indent << "variables = " << el.variables << "\n";
-
-        os << print_indent << "static literals = " << el.static_literals << "\n";
-
-        os << print_indent << "fluent literals = " << el.fluent_literals << "\n";
-
-        os << print_indent << "numeric constraints = " << el.numeric_constraints << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "index = ", value.index);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "variables = ", value.variables);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static literals = ", value.static_literals);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent literals = ", value.fluent_literals);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "numeric constraints = ", value.numeric_constraints);
     }
-    os << print_indent << ")";
-
-    return os;
+    os << tyr::print_indent << ")";
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const formalism::datalog::ConjunctiveConditionView& el)
+fmt::format_context::iterator fmt::formatter<tyr::formalism::datalog::ConjunctiveConditionView, char>::format(const tyr::formalism::datalog::ConjunctiveConditionView& value,
+                                                                                    fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "ConjunctiveCondition(\n";
     {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.get_index() << "\n";
-
-        os << print_indent << "variables = " << el.get_variables() << "\n";
-
-        os << print_indent << "static literals = " << el.template get_literals<formalism::StaticTag>() << "\n";
-
-        os << print_indent << "fluent literals = " << el.template get_literals<formalism::FluentTag>() << "\n";
-
-        os << print_indent << "numeric constraints = " << el.get_numeric_constraints() << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "index = ", value.get_index());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "variables = ", value.get_variables());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static literals = ", value.template get_literals<tyr::formalism::StaticTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent literals = ", value.template get_literals<tyr::formalism::FluentTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "numeric constraints = ", value.get_numeric_constraints());
     }
-    os << print_indent << ")";
-
-    return os;
+    os << tyr::print_indent << ")";
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::Rule>& el)
+fmt::format_context::iterator fmt::formatter<tyr::Data<tyr::formalism::datalog::Rule>, char>::format(const tyr::Data<tyr::formalism::datalog::Rule>& value,
+                                                                            fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "Rule(\n";
     {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.index << "\n";
-
-        os << print_indent << "variables = " << el.variables << "\n";
-
-        os << print_indent << "head = " << el.head << "\n";
-
-        os << print_indent << "body = " << el.body << "\n";
-
-        os << print_indent << "cost = " << el.cost << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "index = ", value.index);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "variables = ", value.variables);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "head = ", value.head);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "body = ", value.body);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "cost = ", value.cost);
     }
-    os << print_indent << ")";
-
-    return os;
+    os << tyr::print_indent << ")";
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const formalism::datalog::RuleView& el)
+fmt::format_context::iterator fmt::formatter<tyr::formalism::datalog::RuleView, char>::format(const tyr::formalism::datalog::RuleView& value, fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "Rule(\n";
     {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.get_index() << "\n";
-
-        os << print_indent << "variables = " << el.get_variables() << "\n";
-
-        os << print_indent << "head = " << el.get_head() << "\n";
-
-        os << print_indent << "body = " << el.get_body() << "\n";
-
-        os << print_indent << "cost = " << el.get_cost() << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "index = ", value.get_index());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "variables = ", value.get_variables());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "head = ", value.get_head());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "body = ", value.get_body());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "cost = ", value.get_cost());
     }
-    os << print_indent << ")";
-
-    return os;
+    os << tyr::print_indent << ")";
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::GroundConjunctiveCondition>& el)
+fmt::format_context::iterator fmt::formatter<tyr::Data<tyr::formalism::datalog::GroundConjunctiveCondition>, char>::format(
+    const tyr::Data<tyr::formalism::datalog::GroundConjunctiveCondition>& value, fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "GroundConjunctiveCondition(\n";
     {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.index << "\n";
-
-        os << print_indent << "static literals = " << el.static_literals << "\n";
-
-        os << print_indent << "fluent literals = " << el.fluent_literals << "\n";
-
-        os << print_indent << "numeric constraints = " << el.numeric_constraints << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "index = ", value.index);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static literals = ", value.static_literals);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent literals = ", value.fluent_literals);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "numeric constraints = ", value.numeric_constraints);
     }
-    os << print_indent << ")";
-
-    return os;
+    os << tyr::print_indent << ")";
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const formalism::datalog::GroundConjunctiveConditionView& el)
+fmt::format_context::iterator fmt::formatter<tyr::formalism::datalog::GroundConjunctiveConditionView, char>::format(
+    const tyr::formalism::datalog::GroundConjunctiveConditionView& value, fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "GroundConjunctiveCondition(\n";
     {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.get_index() << "\n";
-
-        os << print_indent << "static literals = " << el.template get_literals<formalism::StaticTag>() << "\n";
-
-        os << print_indent << "fluent literals = " << el.template get_literals<formalism::FluentTag>() << "\n";
-
-        os << print_indent << "numeric constraints = " << el.get_numeric_constraints() << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "index = ", value.get_index());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static literals = ", value.template get_literals<tyr::formalism::StaticTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent literals = ", value.template get_literals<tyr::formalism::FluentTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "numeric constraints = ", value.get_numeric_constraints());
     }
-    os << print_indent << ")";
-
-    return os;
+    os << tyr::print_indent << ")";
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::GroundRule>& el)
+fmt::format_context::iterator fmt::formatter<tyr::Data<tyr::formalism::datalog::GroundRule>, char>::format(const tyr::Data<tyr::formalism::datalog::GroundRule>& value,
+                                                                                  fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "GroundRule(\n";
     {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.index << "\n";
-
-        os << print_indent << "head = " << el.head << "\n";
-
-        os << print_indent << "body = " << el.body << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "index = ", value.index);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "head = ", value.head);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "body = ", value.body);
     }
-    os << print_indent << ")";
-
-    return os;
+    os << tyr::print_indent << ")";
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const formalism::datalog::GroundRuleView& el)
+fmt::format_context::iterator fmt::formatter<tyr::formalism::datalog::GroundRuleView, char>::format(const tyr::formalism::datalog::GroundRuleView& value,
+                                                                           fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "GroundRule(\n";
     {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.get_index() << "\n";
-
-        os << print_indent << "head = " << el.get_head() << "\n";
-
-        os << print_indent << "body = " << el.get_body() << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "index = ", value.get_index());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "head = ", value.get_head());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "body = ", value.get_body());
     }
-    os << print_indent << ")";
-
-    return os;
+    os << tyr::print_indent << ")";
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::Program>& el)
+fmt::format_context::iterator fmt::formatter<tyr::Data<tyr::formalism::datalog::Program>, char>::format(const tyr::Data<tyr::formalism::datalog::Program>& value,
+                                                                               fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "Program(\n";
     {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.index << "\n";
-
-        os << print_indent << "static predicates =" << el.static_predicates << "\n";
-
-        os << print_indent << "fluent predicates = " << el.fluent_predicates << "\n";
-
-        os << print_indent << "static functions = " << el.static_functions << "\n";
-
-        os << print_indent << "fluent functions = " << el.fluent_functions << "\n";
-
-        os << print_indent << "objects = " << el.objects << "\n";
-
-        os << print_indent << "static atoms = " << el.static_atoms << "\n";
-
-        os << print_indent << "fluent atoms = " << el.fluent_atoms << "\n";
-
-        os << print_indent << "static fterms = " << el.static_fterm_values << "\n";
-
-        os << print_indent << "fluent fterms = " << el.fluent_fterm_values << "\n";
-
-        os << print_indent << "rules = " << el.rules << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "index = ", value.index);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static predicates =", value.static_predicates);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent predicates = ", value.fluent_predicates);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static functions = ", value.static_functions);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent functions = ", value.fluent_functions);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "objects = ", value.objects);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static atoms = ", value.static_atoms);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent atoms = ", value.fluent_atoms);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static fterms = ", value.static_fterm_values);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent fterms = ", value.fluent_fterm_values);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "rules = ", value.rules);
     }
-    os << print_indent << ")";
-
-    return os;
+    os << tyr::print_indent << ")";
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const formalism::datalog::ProgramView& el)
+fmt::format_context::iterator fmt::formatter<tyr::formalism::datalog::ProgramView, char>::format(const tyr::formalism::datalog::ProgramView& value, fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "Program(\n";
     {
-        IndentScope scope(os);
-
-        os << print_indent << "index = " << el.get_index() << "\n";
-
-        os << print_indent << "static predicates =" << el.template get_predicates<formalism::StaticTag>() << "\n";
-
-        os << print_indent << "fluent predicates = " << el.template get_predicates<formalism::FluentTag>() << "\n";
-
-        os << print_indent << "static functions = " << el.template get_functions<formalism::StaticTag>() << "\n";
-
-        os << print_indent << "fluent functions = " << el.template get_functions<formalism::FluentTag>() << "\n";
-
-        os << print_indent << "objects = " << el.get_objects() << "\n";
-
-        os << print_indent << "static atoms = " << el.template get_atoms<formalism::StaticTag>() << "\n";
-
-        os << print_indent << "fluent atoms = " << el.template get_atoms<formalism::FluentTag>() << "\n";
-
-        os << print_indent << "static fterms = " << el.template get_fterm_values<formalism::StaticTag>() << "\n";
-
-        os << print_indent << "fluent fterms = " << el.template get_fterm_values<formalism::FluentTag>() << "\n";
-
-        os << print_indent << "rules = " << el.get_rules() << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "index = ", value.get_index());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static predicates =", value.template get_predicates<tyr::formalism::StaticTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent predicates = ", value.template get_predicates<tyr::formalism::FluentTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static functions = ", value.template get_functions<tyr::formalism::StaticTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent functions = ", value.template get_functions<tyr::formalism::FluentTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "objects = ", value.get_objects());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static atoms = ", value.template get_atoms<tyr::formalism::StaticTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent atoms = ", value.template get_atoms<tyr::formalism::FluentTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static fterms = ", value.template get_fterm_values<tyr::formalism::StaticTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent fterms = ", value.template get_fterm_values<tyr::formalism::FluentTag>());
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "rules = ", value.get_rules());
     }
-    os << print_indent << ")";
-
-    return os;
-}
-
-namespace formalism::datalog
-{
-
-std::ostream& operator<<(std::ostream& os, const VariableDependencyGraph& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Data<FunctionExpression>& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const FunctionExpressionView& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Data<GroundFunctionExpression>& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const GroundFunctionExpressionView& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Data<ConjunctiveCondition>& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const ConjunctiveConditionView& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Data<Rule>& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const RuleView& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Data<GroundConjunctiveCondition>& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const GroundConjunctiveConditionView& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Data<GroundRule>& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const GroundRuleView& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Data<Program>& el) { return tyr::print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const ProgramView& el) { return tyr::print(os, el); }
-
-}
+    os << tyr::print_indent << ")";
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }

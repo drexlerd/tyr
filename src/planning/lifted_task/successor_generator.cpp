@@ -35,6 +35,8 @@
 #include "tyr/planning/successor_generator.hpp"
 #include "tyr/planning/task_utils.hpp"
 
+#include <fmt/ostream.h>
+
 namespace d = tyr::datalog;
 namespace f = tyr::formalism;
 namespace fp = tyr::formalism::planning;
@@ -240,16 +242,16 @@ void SuccessorGenerator<LiftedTag>::print_summary(size_t verbosity) const
         return;
 
     std::cout << "[Successor generator] Summary" << std::endl;
-    std::cout << m_workspace.statistics << std::endl;
+    fmt::print(std::cout, "{}\n", m_workspace.statistics);
     auto successor_generator_rule_statistics = std::vector<datalog::RuleStatistics> {};
     for (const auto& ws_rule : m_workspace.rules)
         successor_generator_rule_statistics.push_back(ws_rule->common.statistics);
-    std::cout << datalog::compute_aggregated_rule_statistics(successor_generator_rule_statistics) << std::endl;
+    fmt::print(std::cout, "{}\n", datalog::compute_aggregated_rule_statistics(successor_generator_rule_statistics));
     auto successor_generator_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
     for (const auto& ws_rule : m_workspace.rules)
         for (const auto& worker : ws_rule->worker)
             successor_generator_rule_worker_statistics.push_back(worker.solve.statistics);
-    std::cout << datalog::compute_aggregated_rule_worker_statistics(successor_generator_rule_worker_statistics) << std::endl;
+    fmt::print(std::cout, "{}\n", datalog::compute_aggregated_rule_worker_statistics(successor_generator_rule_worker_statistics));
 }
 
 void SuccessorGenerator<LiftedTag>::compute_action_facts(const Node<LiftedTag>& node)

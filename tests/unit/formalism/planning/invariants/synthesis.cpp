@@ -31,7 +31,7 @@ namespace
 {
 auto compute_lifted_task(const fs::path& domain_filepath, const fs::path& problem_filepath) { return fp::Parser(domain_filepath).parse_task(problem_filepath); }
 
-fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_DIR)) / "data" / subdir; }
+fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_DIR)) / "data" / "tests" / subdir; }
 
 inline std::vector<fpi::Invariant> sort_invariants(std::vector<fpi::Invariant> invariants)
 {

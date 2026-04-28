@@ -36,428 +36,344 @@
 #include <ranges>         // for transform, views
 #include <string>         // for basic_string
 
-namespace tyr
+fmt::format_context::iterator fmt::formatter<tyr::datalog::VertexAssignment, char>::format(const tyr::datalog::VertexAssignment& value, fmt::format_context& ctx) const
 {
-std::ostream& print(std::ostream& os, const datalog::VertexAssignment& el)
-{
-    fmt::print(os, "[{}/{}]", to_string(el.index), to_string(el.object));
-    return os;
+    return fmt::format_to(ctx.out(), "[{}/{}]", value.index, value.object);
 }
 
-std::ostream& print(std::ostream& os, const datalog::EdgeAssignment& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::EdgeAssignment, char>::format(const tyr::datalog::EdgeAssignment& value, fmt::format_context& ctx) const
 {
-    fmt::print(os, "[{}/{}, {}/{}]", to_string(el.first_index), to_string(el.first_object), to_string(el.second_index), to_string(el.second_object));
-    return os;
+    return fmt::format_to(ctx.out(), "[{}/{}, {}/{}]", value.first_index, value.first_object, value.second_index, value.second_object);
 }
 
-std::ostream& print(std::ostream& os, const datalog::details::Vertex& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::details::Vertex, char>::format(const tyr::datalog::details::Vertex& value, fmt::format_context& ctx) const
 {
-    fmt::print(os, "[{}/{}]", to_string(el.get_parameter_index()), to_string(el.get_object_index()));
-    return os;
+    return fmt::format_to(ctx.out(), "[{}/{}]", value.get_parameter_index(), value.get_object_index());
 }
 
-std::ostream& print(std::ostream& os, const datalog::details::Edge& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::details::Edge, char>::format(const tyr::datalog::details::Edge& value, fmt::format_context& ctx) const
 {
-    fmt::print(os, "[{}, {}]", to_string(el.vi()), to_string(el.vj()));
-    return os;
+    return fmt::format_to(ctx.out(), "[{}, {}]", value.vi(), value.vj());
 }
 
-std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralInfoMappings& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::details::RuleToLiteralInfoMappings, char>::format(const tyr::datalog::details::RuleToLiteralInfoMappings& value,
+                                                                                    fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "RuleToLiteralInfoMappings(\n";
-
     {
-        IndentScope scope(os);
-
-        os << print_indent << "parameter to literal infos = " << el.parameter_to_infos << "\n";
-
-        os << print_indent << "parameter pairs to literal infos = " << el.parameter_pairs_to_infos << "\n";
-
-        os << print_indent << "parameter to literal infos with constants = " << el.parameter_to_infos_with_constants << "\n";
-
-        os << print_indent << "literal infos with constants = " << el.infos_with_constants << "\n";
-
-        os << print_indent << "literal infos with constant pairs = " << el.infos_with_constant_pairs << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "parameter to literal infos = ", value.parameter_to_infos);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "parameter pairs to literal infos = ", value.parameter_pairs_to_infos);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "parameter to literal infos with constants = ", value.parameter_to_infos_with_constants);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "literal infos with constants = ", value.infos_with_constants);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "literal infos with constant pairs = ", value.infos_with_constant_pairs);
     }
-
     os << ")";
-
-    return os;
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralPositionMappings& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::details::RuleToLiteralPositionMappings, char>::format(const tyr::datalog::details::RuleToLiteralPositionMappings& value,
+                                                                                        fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "RuleToLiteralPositionMappings(\n";
-
     {
-        IndentScope scope(os);
-
-        os << print_indent << "constant positions = " << el.constant_positions << "\n";
-
-        os << print_indent << "parameter to positions = " << el.parameter_to_positions << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "constant positions = ", value.constant_positions);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "parameter to positions = ", value.parameter_to_positions);
     }
-
     os << ")";
-
-    return os;
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralInfo<T>& el)
+template<tyr::formalism::FactKind T>
+static fmt::format_context::iterator format_rule_to_literal_info(const tyr::datalog::details::RuleToLiteralInfo<T>& value, fmt::format_context& ctx)
 {
+    auto os = std::stringstream {};
     os << "RuleToLiteralInfo(\n";
-
     {
-        IndentScope scope(os);
-
-        os << print_indent << "predicate = " << el.predicate << "\n";
-
-        os << print_indent << "polarity = " << el.polarity << "\n";
-
-        os << print_indent << "position mappings = " << el.position_mappings << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "predicate = ", value.predicate);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "polarity = ", value.polarity);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "position mappings = ", value.position_mappings);
     }
-
     os << ")";
-
-    return os;
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const datalog::details::TaggedRuleToLiteralInfos<T>& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::StaticTag>, char>::format(
+    const tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::StaticTag>& value, fmt::format_context& ctx) const
 {
+    return format_rule_to_literal_info(value, ctx);
+}
+
+fmt::format_context::iterator fmt::formatter<tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::FluentTag>, char>::format(
+    const tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::FluentTag>& value, fmt::format_context& ctx) const
+{
+    return format_rule_to_literal_info(value, ctx);
+}
+
+template<tyr::formalism::FactKind T>
+static fmt::format_context::iterator format_tagged_rule_to_literal_infos(const tyr::datalog::details::TaggedRuleToLiteralInfos<T>& value, fmt::format_context& ctx)
+{
+    auto os = std::stringstream {};
     os << "TaggedRuleToLiteralInfos(\n";
-
     {
-        IndentScope scope(os);
-
-        os << print_indent << "literal infos = " << el.infos << "\n";
-
-        os << print_indent << "info mappings = " << el.info_mappings << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "literal infos = ", value.infos);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "info mappings = ", value.info_mappings);
     }
-
     os << ")";
-
-    return os;
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralInfos& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::StaticTag>, char>::format(
+    const tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::StaticTag>& value, fmt::format_context& ctx) const
 {
+    return format_tagged_rule_to_literal_infos(value, ctx);
+}
+
+fmt::format_context::iterator fmt::formatter<tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::FluentTag>, char>::format(
+    const tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::FluentTag>& value, fmt::format_context& ctx) const
+{
+    return format_tagged_rule_to_literal_infos(value, ctx);
+}
+
+fmt::format_context::iterator fmt::formatter<tyr::datalog::details::RuleToLiteralInfos, char>::format(const tyr::datalog::details::RuleToLiteralInfos& value,
+                                                                             fmt::format_context& ctx) const
+{
+    auto os = std::stringstream {};
     os << "RuleToLiteralInfos(\n";
-
     {
-        IndentScope scope(os);
-
-        os << print_indent << "static indexed = " << el.static_indexed << "\n";
-
-        os << print_indent << "fluent indexed = " << el.fluent_indexed << "\n";
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "static indexed = ", value.static_indexed);
+        os << tyr::print_indent;
+        fmt::print(os, "{}{}\n", "fluent indexed = ", value.fluent_indexed);
     }
-
     os << ")";
-
-    return os;
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const datalog::StaticConsistencyGraph& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::StaticConsistencyGraph, char>::format(const tyr::datalog::StaticConsistencyGraph&, fmt::format_context& ctx) const
 {
-    // fmt::print(
-    //     os,
-    //     "graph Tree {{\n\n{}\n\n{}\n}}",
-    //     fmt::join(el.get_vertices() | std::views::transform([&](auto&& arg) { return fmt::format("n{} [label=\"{}\"];", arg.get_index(), to_string(arg)); }),
-    //               "\n"),
-    //     fmt::join(el.get_edges()
-    //                   | std::views::transform([&](auto&& arg) { return fmt::format("n{} -- n{};", arg.get_src().get_index(), arg.get_dst().get_index()); }),
-    //               "\n"));
-
-    return os;
+    return ctx.out();
 }
 
-std::ostream& print(std::ostream& os, const datalog::kpkc::Vertex& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::kpkc::Vertex, char>::format(const tyr::datalog::kpkc::Vertex& value, fmt::format_context& ctx) const
 {
-    os << el.index;
-    return os;
+    return fmt::format_to(ctx.out(), "{}", value.index);
 }
 
-std::ostream& print(std::ostream& os, const datalog::kpkc::Edge& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::kpkc::Edge, char>::format(const tyr::datalog::kpkc::Edge& value, fmt::format_context& ctx) const
 {
-    os << "<" << el.src << " -- " << el.dst << ">";
-    return os;
+    return fmt::format_to(ctx.out(), "<{} -- {}>", value.src, value.dst);
 }
 
-std::ostream& print(std::ostream& os, const datalog::kpkc::VertexPartitions& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::kpkc::VertexPartitions, char>::format(const tyr::datalog::kpkc::VertexPartitions& value, fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "VertexPartitions(\n";
-
     {
-        IndentScope scope(os);
-
-        os << print_indent << "partitions = [";
-        for (uint_t p = 0; p < el.layout().k; ++p)
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent << "partitions = [";
+        for (tyr::uint_t p = 0; p < value.layout().k; ++p)
         {
-            const auto& info = el.layout().info.infos[p];
-            os << BitsetSpan<const uint64_t>(el.data().data() + info.block_offset, info.num_bits) << ", ";
+            const auto& info = value.layout().info.infos[p];
+            fmt::print(os, "{}, ", tyr::BitsetSpan<const uint64_t>(value.data().data() + info.block_offset, info.num_bits));
         }
         os << "]\n";
     }
-
     os << ")";
-
-    return os;
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const datalog::kpkc::DeduplicatedAdjacencyMatrix& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::kpkc::DeduplicatedAdjacencyMatrix, char>::format(const tyr::datalog::kpkc::DeduplicatedAdjacencyMatrix& value,
+                                                                                   fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "DeduplicatedAdjacencyMatrix(\n";
-
     {
-        IndentScope scope(os);
-
-        os << print_indent << "adjacency lists = [\n";
-        for (uint_t v = 0; v < el.layout().nv; ++v)
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent << "adjacency lists = [\n";
+        for (tyr::uint_t v = 0; v < value.layout().nv; ++v)
         {
-            IndentScope scope2(os);
-            os << print_indent << v << ": [";
-
-            for (uint_t p = 0; p < el.layout().k; ++p)
-                os << el.get_bitset(v, p) << ", ";
+            tyr::IndentScope scope2(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}: [", v);
+            for (tyr::uint_t p = 0; p < value.layout().k; ++p)
+                fmt::print(os, "{}, ", value.get_bitset(v, p));
             os << "]\n";
         }
         os << "]\n";
     }
-
     os << ")";
-
-    return os;
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const datalog::kpkc::PartitionedAdjacencyMatrix& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::kpkc::PartitionedAdjacencyMatrix, char>::format(const tyr::datalog::kpkc::PartitionedAdjacencyMatrix& value,
+                                                                                  fmt::format_context& ctx) const
 {
+    auto os = std::stringstream {};
     os << "PartitionedAdjacencyMatrix(\n";
-
     {
-        IndentScope scope(os);
-
-        os << print_indent << "affected partitions = [";
-        for (uint_t p = 0; p < el.layout().k; ++p)
+        tyr::IndentScope scope(os);
+        os << tyr::print_indent << "affected partitions = [";
+        for (tyr::uint_t p = 0; p < value.layout().k; ++p)
         {
-            const auto& info = el.layout().info.infos[p];
-            os << BitsetSpan<const uint64_t>(el.affected_partitions().data().data() + info.block_offset, info.num_bits) << ", ";
+            const auto& info = value.layout().info.infos[p];
+            fmt::print(os, "{}, ", tyr::BitsetSpan<const uint64_t>(value.affected_partitions().data().data() + info.block_offset, info.num_bits));
         }
         os << "]\n";
-
-        os << print_indent << "delta partitions = [";
-        for (uint_t p = 0; p < el.layout().k; ++p)
+        os << tyr::print_indent << "delta partitions = [";
+        for (tyr::uint_t p = 0; p < value.layout().k; ++p)
         {
-            const auto& info = el.layout().info.infos[p];
-            os << BitsetSpan<const uint64_t>(el.delta_partitions().data().data() + info.block_offset, info.num_bits) << ", ";
+            const auto& info = value.layout().info.infos[p];
+            fmt::print(os, "{}, ", tyr::BitsetSpan<const uint64_t>(value.delta_partitions().data().data() + info.block_offset, info.num_bits));
         }
         os << "]\n";
-
-        os << print_indent << "adjacency lists = [\n";
-        for (uint_t v = 0; v < el.layout().nv; ++v)
+        os << tyr::print_indent << "adjacency lists = [\n";
+        for (tyr::uint_t v = 0; v < value.layout().nv; ++v)
         {
-            IndentScope scope2(os);
-            os << print_indent << v << ": [";
-
-            for (uint_t p = 0; p < el.layout().k; ++p)
-                os << el.get_bitset(v, p) << ", ";
+            tyr::IndentScope scope2(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}: [", v);
+            for (tyr::uint_t p = 0; p < value.layout().k; ++p)
+                fmt::print(os, "{}, ", value.get_bitset(v, p));
             os << "]\n";
         }
         os << "]\n";
     }
-
     os << ")";
-
-    return os;
+    return fmt::format_to(ctx.out(), "{}", os.str());
 }
 
-std::ostream& print(std::ostream& os, const datalog::ProgramStatistics& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::ProgramStatistics, char>::format(const tyr::datalog::ProgramStatistics& value, fmt::format_context& ctx) const
 {
-    const double parallel_ns = static_cast<double>(to_ns(el.parallel_time));
-    const double total_ns = static_cast<double>(to_ns(el.total_time));
+    const double parallel_ns = static_cast<double>(tyr::to_ns(value.parallel_time));
+    const double total_ns = static_cast<double>(tyr::to_ns(value.total_time));
     const double frac = parallel_ns > 0.0 && total_ns > 0.0 ? parallel_ns / total_ns : 1.0;
+    const auto avg_total_us = value.num_executions > 0 ? tyr::to_us(value.total_time) / value.num_executions : 0.0;
 
-    const auto avg_total_us = el.num_executions > 0 ? to_us(el.total_time) / el.num_executions : 0.0;
-
-    fmt::print(os,
-               "[ProgramStatistics] N_exec = {:>10}    | executions\n"
-               "[ProgramStatistics] T_seq  = {:>10} ms | sequential time\n"
-               "[ProgramStatistics] T_par  = {:>10} ms | parallel time\n"
-               "[ProgramStatistics] T_tot  = {:>10} ms | total time\n"
-               "[ProgramStatistics] T_avg  = {:>10} us | average time\n"
-               "[ProgramStatistics] PF     = {:>10.2f}    | parallel fraction (T_par / T_tot)",
-               el.num_executions,
-               to_ms(el.total_time) - to_ms(el.parallel_time),
-               to_ms(el.parallel_time),
-               to_ms(el.total_time),
-               avg_total_us,
-               frac);
-
-    return os;
+    return fmt::format_to(ctx.out(),
+                          "[ProgramStatistics] N_exec = {:>10}    | executions\n"
+                          "[ProgramStatistics] T_seq  = {:>10} ms | sequential time\n"
+                          "[ProgramStatistics] T_par  = {:>10} ms | parallel time\n"
+                          "[ProgramStatistics] T_tot  = {:>10} ms | total time\n"
+                          "[ProgramStatistics] T_avg  = {:>10} us | average time\n"
+                          "[ProgramStatistics] PF     = {:>10.2f}    | parallel fraction (T_par / T_tot)",
+                          value.num_executions,
+                          tyr::to_ms(value.total_time) - tyr::to_ms(value.parallel_time),
+                          tyr::to_ms(value.parallel_time),
+                          tyr::to_ms(value.total_time),
+                          avg_total_us,
+                          frac);
 }
 
-std::ostream& print(std::ostream& os, const datalog::RuleStatistics& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::RuleStatistics, char>::format(const tyr::datalog::RuleStatistics& value, fmt::format_context& ctx) const
 {
-    const auto avg_total_us = el.num_executions > 0 ? to_us(el.total_time) / el.num_executions : 0.0;
-
-    fmt::print(os,
-               "[RuleStatistics] N_exec = {:>10}    | executions\n"
-               "[RuleStatistics] T_seq  = {:>10} ms | sequential time\n"
-               "[RuleStatistics] T_par  = {:>10} ms | parallel time\n"
-               "[RuleStatistics] T_tot  = {:>10} ms | total time\n"
-               "[RuleStatistics] T_avg  = {:>10} us | average time",
-               el.num_executions,
-               to_ms(el.initialize_time) + to_ms(el.process_pending_time),
-               to_ms(el.process_generate_time),
-               to_ms(el.total_time),
-               avg_total_us);
-
-    return os;
+    const auto avg_total_us = value.num_executions > 0 ? tyr::to_us(value.total_time) / value.num_executions : 0.0;
+    return fmt::format_to(ctx.out(),
+                          "[RuleStatistics] N_exec = {:>10}    | executions\n"
+                          "[RuleStatistics] T_seq  = {:>10} ms | sequential time\n"
+                          "[RuleStatistics] T_par  = {:>10} ms | parallel time\n"
+                          "[RuleStatistics] T_tot  = {:>10} ms | total time\n"
+                          "[RuleStatistics] T_avg  = {:>10} us | average time",
+                          value.num_executions,
+                          tyr::to_ms(value.initialize_time) + tyr::to_ms(value.process_pending_time),
+                          tyr::to_ms(value.process_generate_time),
+                          tyr::to_ms(value.total_time),
+                          avg_total_us);
 }
 
-std::ostream& print(std::ostream& os, const datalog::AggregatedRuleStatistics& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::AggregatedRuleStatistics, char>::format(const tyr::datalog::AggregatedRuleStatistics& value, fmt::format_context& ctx) const
 {
-    const auto avg_total_us = el.num_executions > 0 ? to_us(el.total_time) / el.num_executions : 0.0;
-
-    const double tot_max_ns = static_cast<double>(to_ns(el.tot_time_max));
-    const double tot_med_ns = static_cast<double>(to_ns(el.tot_time_median));
+    const auto avg_total_us = value.num_executions > 0 ? tyr::to_us(value.total_time) / value.num_executions : 0.0;
+    const double tot_max_ns = static_cast<double>(tyr::to_ns(value.tot_time_max));
+    const double tot_med_ns = static_cast<double>(tyr::to_ns(value.tot_time_median));
     const double tot_skew = tot_max_ns > 0.0 && tot_med_ns > 0.0 ? tot_max_ns / tot_med_ns : 1.0;
-
-    const double avg_max_ns = static_cast<double>(el.avg_time_max.count());
-    const double avg_med_ns = static_cast<double>(el.avg_time_median.count());
+    const double avg_max_ns = static_cast<double>(value.avg_time_max.count());
+    const double avg_med_ns = static_cast<double>(value.avg_time_median.count());
     const double avg_skew = avg_max_ns > 0.0 && avg_med_ns > 0.0 ? avg_max_ns / avg_med_ns : 1.0;
-
-    const auto parallel_ns = static_cast<double>(to_ns(el.process_generate_time));
-    const auto total_ns = static_cast<double>(to_ns(el.total_time));
+    const auto parallel_ns = static_cast<double>(tyr::to_ns(value.process_generate_time));
+    const auto total_ns = static_cast<double>(tyr::to_ns(value.total_time));
     const double frac = parallel_ns > 0.0 && total_ns > 0.0 ? parallel_ns / total_ns : 1.0;
 
-    fmt::print(os,
-               "[AggregatedRuleStatistics] N_exec     = {:>10}    | executions\n"
-               "[AggregatedRuleStatistics] N_samples  = {:>10}    | samples\n"
-               "[AggregatedRuleStatistics] T_seq      = {:>10} ms | sequential time\n"
-               "[AggregatedRuleStatistics] T_par      = {:>10} ms | parallel time\n"
-               "[AggregatedRuleStatistics] T_tot      = {:>10} ms | total time\n"
-               "[AggregatedRuleStatistics] T_avg      = {:>10} us | average time\n"
-               "[AggregatedRuleStatistics] PF         = {:>10.2f}    | parallel fraction (T_par / T_tot)\n"
-               "[AggregatedRuleStatistics] T_tot_min  = {:>10} ms | minimum total time\n"
-               "[AggregatedRuleStatistics] T_tot_max  = {:>10} ms | maximum total time\n"
-               "[AggregatedRuleStatistics] T_tot_med  = {:>10} ms | median total time\n"
-               "[AggregatedRuleStatistics] T_tot_skew = {:>10.2f}    | skew total time (T_tot_max / T_tot_med)\n"
-               "[AggregatedRuleStatistics] T_avg_min  = {:>10} us | minimum average time\n"
-               "[AggregatedRuleStatistics] T_avg_max  = {:>10} us | maximum average time\n"
-               "[AggregatedRuleStatistics] T_avg_med  = {:>10} us | median average time\n"
-               "[AggregatedRuleStatistics] T_avg_skew = {:>10.2f}    | skew average time (T_avg_max / T_avg_med)",
-               el.num_executions,
-               el.sample_count,
-               to_ms(el.initialize_time) + to_ms(el.process_pending_time),
-               to_ms(el.process_generate_time),
-               to_ms(el.total_time),
-               avg_total_us,
-               frac,
-               to_ms(el.tot_time_min),
-               to_ms(el.tot_time_max),
-               to_ms(el.tot_time_median),
-               tot_skew,
-               to_us(el.avg_time_min),
-               to_us(el.avg_time_max),
-               to_us(el.avg_time_median),
-               avg_skew);
-
-    return os;
+    return fmt::format_to(ctx.out(),
+                          "[AggregatedRuleStatistics] N_exec     = {:>10}    | executions\n"
+                          "[AggregatedRuleStatistics] N_samples  = {:>10}    | samples\n"
+                          "[AggregatedRuleStatistics] T_seq      = {:>10} ms | sequential time\n"
+                          "[AggregatedRuleStatistics] T_par      = {:>10} ms | parallel time\n"
+                          "[AggregatedRuleStatistics] T_tot      = {:>10} ms | total time\n"
+                          "[AggregatedRuleStatistics] T_avg      = {:>10} us | average time\n"
+                          "[AggregatedRuleStatistics] PF         = {:>10.2f}    | parallel fraction (T_par / T_tot)\n"
+                          "[AggregatedRuleStatistics] T_tot_min  = {:>10} ms | minimum total time\n"
+                          "[AggregatedRuleStatistics] T_tot_max  = {:>10} ms | maximum total time\n"
+                          "[AggregatedRuleStatistics] T_tot_med  = {:>10} ms | median total time\n"
+                          "[AggregatedRuleStatistics] T_tot_skew = {:>10.2f}    | skew total time (T_tot_max / T_tot_med)\n"
+                          "[AggregatedRuleStatistics] T_avg_min  = {:>10} us | minimum average time\n"
+                          "[AggregatedRuleStatistics] T_avg_max  = {:>10} us | maximum average time\n"
+                          "[AggregatedRuleStatistics] T_avg_med  = {:>10} us | median average time\n"
+                          "[AggregatedRuleStatistics] T_avg_skew = {:>10.2f}    | skew average time (T_avg_max / T_avg_med)",
+                          value.num_executions,
+                          value.sample_count,
+                          tyr::to_ms(value.initialize_time) + tyr::to_ms(value.process_pending_time),
+                          tyr::to_ms(value.process_generate_time),
+                          tyr::to_ms(value.total_time),
+                          avg_total_us,
+                          frac,
+                          tyr::to_ms(value.tot_time_min),
+                          tyr::to_ms(value.tot_time_max),
+                          tyr::to_ms(value.tot_time_median),
+                          tot_skew,
+                          tyr::to_us(value.avg_time_min),
+                          tyr::to_us(value.avg_time_max),
+                          tyr::to_us(value.avg_time_median),
+                          avg_skew);
 }
 
-std::ostream& print(std::ostream& os, const datalog::RuleWorkerStatistics& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::RuleWorkerStatistics, char>::format(const tyr::datalog::RuleWorkerStatistics& value, fmt::format_context& ctx) const
 {
-    const auto pen = static_cast<float_t>(el.num_pending_rules);
-    const auto gen = static_cast<float_t>(el.num_generated_rules);
-    auto overapproximation_ratio = (gen > 0) ? (pen + gen) / gen : float_t { 1.0 };
-
-    fmt::print(os,
-               "[RuleWorkerStatistics] N_exec = {:>10} | executions\n"
-               "[RuleWorkerStatistics] N_gen  = {:>10} | generated rules\n"
-               "[RuleWorkerStatistics] N_pen  = {:>10} | pending rules\n"
-               "[RuleWorkerStatistics] OA     = {:>10.2f} | overapproximation ratio (1 + N_pen / N_gen)",
-               el.num_executions,
-               el.num_generated_rules,
-               el.num_pending_rules,
-               overapproximation_ratio);
-
-    return os;
+    const auto pen = static_cast<tyr::float_t>(value.num_pending_rules);
+    const auto gen = static_cast<tyr::float_t>(value.num_generated_rules);
+    auto overapproximation_ratio = (gen > 0) ? (pen + gen) / gen : tyr::float_t { 1.0 };
+    return fmt::format_to(ctx.out(),
+                          "[RuleWorkerStatistics] N_exec = {:>10} | executions\n"
+                          "[RuleWorkerStatistics] N_gen  = {:>10} | generated rules\n"
+                          "[RuleWorkerStatistics] N_pen  = {:>10} | pending rules\n"
+                          "[RuleWorkerStatistics] OA     = {:>10.2f} | overapproximation ratio (1 + N_pen / N_gen)",
+                          value.num_executions,
+                          value.num_generated_rules,
+                          value.num_pending_rules,
+                          overapproximation_ratio);
 }
 
-std::ostream& print(std::ostream& os, const datalog::AggregatedRuleWorkerStatistics& el)
+fmt::format_context::iterator fmt::formatter<tyr::datalog::AggregatedRuleWorkerStatistics, char>::format(const tyr::datalog::AggregatedRuleWorkerStatistics& value,
+                                                                                fmt::format_context& ctx) const
 {
-    const auto pen = static_cast<float_t>(el.num_pending_rules);
-    const auto gen = static_cast<float_t>(el.num_generated_rules);
-    auto overapproximation_ratio = (gen > 0) ? (pen + gen) / gen : float_t { 1.0 };
-
-    fmt::print(os,
-               "[AggregatedRuleWorkerStatistics] N_exec =  {:>10} | executions\n"
-               "[AggregatedRuleWorkerStatistics] N_gen  =  {:>10} | generated rules\n"
-               "[AggregatedRuleWorkerStatistics] N_pen  =  {:>10} | pending rules\n"
-               "[AggregatedRuleWorkerStatistics] OA     =  {:>10.2f} | overapproximation ratio (1 + N_pen / N_gen)",
-               el.num_executions,
-               el.num_generated_rules,
-               el.num_pending_rules,
-               overapproximation_ratio);
-
-    return os;
-}
-
-namespace datalog
-{
-namespace details
-{
-std::ostream& operator<<(std::ostream& os, const RuleToLiteralInfoMappings& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const RuleToLiteralPositionMappings& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Vertex& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Edge& el) { return print(os, el); }
-
-template<formalism::FactKind T>
-std::ostream& operator<<(std::ostream& os, const RuleToLiteralInfo<T>& el)
-{
-    return print(os, el);
-}
-
-template<formalism::FactKind T>
-std::ostream& operator<<(std::ostream& os, const TaggedRuleToLiteralInfos<T>& el)
-{
-    return print(os, el);
-}
-
-std::ostream& operator<<(std::ostream& os, const RuleToLiteralInfos& el) { return print(os, el); }
-
-}  // end namespace details
-
-std::ostream& operator<<(std::ostream& os, const VertexAssignment& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const EdgeAssignment& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const StaticConsistencyGraph& el) { return print(os, el); }
-
-namespace kpkc
-{
-std::ostream& operator<<(std::ostream& os, const Vertex& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const Edge& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const VertexPartitions& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const DeduplicatedAdjacencyMatrix& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const PartitionedAdjacencyMatrix& el) { return print(os, el); }
-}
-
-std::ostream& operator<<(std::ostream& os, const ProgramStatistics& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const RuleStatistics& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const AggregatedRuleStatistics& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const RuleWorkerStatistics& el) { return print(os, el); }
-
-std::ostream& operator<<(std::ostream& os, const AggregatedRuleWorkerStatistics& el) { return print(os, el); }
-}  // end namespace datalog
+    const auto pen = static_cast<tyr::float_t>(value.num_pending_rules);
+    const auto gen = static_cast<tyr::float_t>(value.num_generated_rules);
+    auto overapproximation_ratio = (gen > 0) ? (pen + gen) / gen : tyr::float_t { 1.0 };
+    return fmt::format_to(ctx.out(),
+                          "[AggregatedRuleWorkerStatistics] N_exec =  {:>10} | executions\n"
+                          "[AggregatedRuleWorkerStatistics] N_gen  =  {:>10} | generated rules\n"
+                          "[AggregatedRuleWorkerStatistics] N_pen  =  {:>10} | pending rules\n"
+                          "[AggregatedRuleWorkerStatistics] OA     =  {:>10.2f} | overapproximation ratio (1 + N_pen / N_gen)",
+                          value.num_executions,
+                          value.num_generated_rules,
+                          value.num_pending_rules,
+                          overapproximation_ratio);
 }

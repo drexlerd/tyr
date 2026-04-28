@@ -22,7 +22,6 @@
 #include "tyr/common/iostream.hpp"
 #include "tyr/formalism/datas.hpp"
 #include "tyr/formalism/declarations.hpp"
-#include "tyr/formalism/formatter.hpp"
 #include "tyr/formalism/views.hpp"
 
 #include <fmt/core.h>
@@ -30,326 +29,252 @@
 #include <fmt/ranges.h>
 #include <ostream>
 
-namespace tyr
+template<>
+struct fmt::formatter<tyr::formalism::ParameterIndex, char>
 {
-/**
- * Forward declarations
- */
-namespace formalism
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const tyr::formalism::ParameterIndex& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "V{}", tyr::uint_t(value));
+    }
+};
+
+template<>
+struct fmt::formatter<tyr::formalism::OpEq, char>
 {
-inline std::ostream& operator<<(std::ostream& os, const ParameterIndex& el);
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(tyr::formalism::OpEq, FormatContext& ctx) const { return fmt::format_to(ctx.out(), "="); }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpEq el);
+template<>
+struct fmt::formatter<tyr::formalism::OpNe, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(tyr::formalism::OpNe, FormatContext& ctx) const { return fmt::format_to(ctx.out(), "!="); }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpNe el);
+template<>
+struct fmt::formatter<tyr::formalism::OpLe, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(tyr::formalism::OpLe, FormatContext& ctx) const { return fmt::format_to(ctx.out(), "<="); }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpLe el);
+template<>
+struct fmt::formatter<tyr::formalism::OpLt, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(tyr::formalism::OpLt, FormatContext& ctx) const { return fmt::format_to(ctx.out(), "<"); }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpLt el);
+template<>
+struct fmt::formatter<tyr::formalism::OpGe, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(tyr::formalism::OpGe, FormatContext& ctx) const { return fmt::format_to(ctx.out(), ">="); }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpGe el);
+template<>
+struct fmt::formatter<tyr::formalism::OpGt, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(tyr::formalism::OpGt, FormatContext& ctx) const { return fmt::format_to(ctx.out(), ">"); }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpGt el);
+template<>
+struct fmt::formatter<tyr::formalism::OpAdd, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(tyr::formalism::OpAdd, FormatContext& ctx) const { return fmt::format_to(ctx.out(), "+"); }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpAdd el);
+template<>
+struct fmt::formatter<tyr::formalism::OpSub, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(tyr::formalism::OpSub, FormatContext& ctx) const { return fmt::format_to(ctx.out(), "-"); }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpSub el);
+template<>
+struct fmt::formatter<tyr::formalism::OpMul, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(tyr::formalism::OpMul, FormatContext& ctx) const { return fmt::format_to(ctx.out(), "*"); }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpMul el);
+template<>
+struct fmt::formatter<tyr::formalism::OpDiv, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(tyr::formalism::OpDiv, FormatContext& ctx) const { return fmt::format_to(ctx.out(), "/"); }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpDiv el);
+template<>
+struct fmt::formatter<tyr::Data<tyr::formalism::Variable>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-inline std::ostream& operator<<(std::ostream& os, const Data<Variable>& el);
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::Variable>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.name);
+    }
+};
 
 template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<Variable>, C>& el);
+struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Variable>, C>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-inline std::ostream& operator<<(std::ostream& os, const Data<Object>& el);
+    template<typename FormatContext>
+    auto format(const tyr::View<tyr::Index<tyr::formalism::Variable>, C>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.get_name());
+    }
+};
 
-inline std::ostream& operator<<(std::ostream& os, const Data<formalism::Variable>& el);
+template<>
+struct fmt::formatter<tyr::Data<tyr::formalism::Object>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::Object>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.name);
+    }
+};
 
 template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<formalism::Variable>, C>& el);
+struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Object>, C>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<Object>, C>& el);
+    template<typename FormatContext>
+    auto format(const tyr::View<tyr::Index<tyr::formalism::Object>, C>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.get_name());
+    }
+};
 
 template<typename Tag>
-inline std::ostream& operator<<(std::ostream& os, const Data<RelationBinding<Tag>>& el);
-
-template<typename T, typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<RelationBinding<T>>, C>& el);
-
-template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const Index<formalism::RelationBinding<T>>& el);
-
-inline std::ostream& operator<<(std::ostream& os, const Data<Term>& el);
-
-template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Data<Term>, C>& el);
-
-template<FactKind T>
-inline std::ostream& operator<<(std::ostream& os, const Data<Predicate<T>>& el);
-
-template<FactKind T, typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<Predicate<T>>, C>& el);
-
-template<FactKind T>
-inline std::ostream& operator<<(std::ostream& os, const Data<Function<T>>& el);
-
-template<FactKind T, typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<Function<T>>, C>& el);
-
-}  // end namespace formalism
-
-/**
- * Definitions
- */
-
-inline std::ostream& print(std::ostream& os, const formalism::ParameterIndex& el)
+struct fmt::formatter<tyr::Data<tyr::formalism::RelationBinding<Tag>>, char>
 {
-    fmt::print(os, "V{}", uint_t(el));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-inline std::ostream& print(std::ostream& os, formalism::OpEq el)
-{
-    fmt::print(os, "=");
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, formalism::OpNe el)
-{
-    fmt::print(os, "!=");
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, formalism::OpLe el)
-{
-    fmt::print(os, "<=");
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, formalism::OpLt el)
-{
-    fmt::print(os, "<");
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, formalism::OpGe el)
-{
-    fmt::print(os, ">=");
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, formalism::OpGt el)
-{
-    fmt::print(os, ">");
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, formalism::OpAdd el)
-{
-    fmt::print(os, "+");
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, formalism::OpSub el)
-{
-    fmt::print(os, "-");
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, formalism::OpMul el)
-{
-    fmt::print(os, "*");
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, formalism::OpDiv el)
-{
-    fmt::print(os, "/");
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, const Data<formalism::Variable>& el)
-{
-    fmt::print(os, "{}", to_string(el.name));
-    return os;
-}
-
-template<typename C>
-inline std::ostream& print(std::ostream& os, const View<Index<formalism::Variable>, C>& el)
-{
-    fmt::print(os, "{}", to_string(el.get_name()));
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, const Data<formalism::Object>& el)
-{
-    fmt::print(os, "{}", to_string(el.name));
-    return os;
-}
-
-template<typename C>
-inline std::ostream& print(std::ostream& os, const View<Index<formalism::Object>, C>& el)
-{
-    fmt::print(os, "{}", to_string(el.get_name()));
-    return os;
-}
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::RelationBinding<Tag>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{} {}", value.relation, fmt::join(tyr::to_strings(value.objects), " "));
+    }
+};
 
 template<typename Tag>
-inline std::ostream& print(std::ostream& os, const Data<formalism::RelationBinding<Tag>>& el)
+struct fmt::formatter<tyr::Index<tyr::formalism::RelationBinding<Tag>>, char>
 {
-    fmt::print(os, "{} {}", to_string(el.relation), fmt::join(to_strings(el.objects), " "));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-template<typename T>
-inline std::ostream& print(std::ostream& os, const Index<formalism::RelationBinding<T>>& el)
-{
-    fmt::print(os, "<{},{}>", to_string(el.relation), to_string(el.row));
-    return os;
-}
+    template<typename FormatContext>
+    auto format(const tyr::Index<tyr::formalism::RelationBinding<Tag>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "<{},{}>", value.relation, value.row);
+    }
+};
 
-template<typename T, typename C>
-inline std::ostream& print(std::ostream& os, const View<Index<formalism::RelationBinding<T>>, C>& el)
+template<typename Tag, typename C>
+struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::RelationBinding<Tag>>, C>, char>
 {
-    fmt::print(os, "({})", fmt::join(to_strings(el.get_objects()), " "));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-inline std::ostream& print(std::ostream& os, const Data<formalism::Term>& el)
+    template<typename FormatContext>
+    auto format(const tyr::View<tyr::Index<tyr::formalism::RelationBinding<Tag>>, C>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({})", fmt::join(tyr::to_strings(value.get_objects()), " "));
+    }
+};
+
+template<>
+struct fmt::formatter<tyr::Data<tyr::formalism::Term>, char>
 {
-    fmt::print(os, "{}", to_string(el.value));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::Term>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.value);
+    }
+};
 
 template<typename C>
-inline std::ostream& print(std::ostream& os, const View<Data<formalism::Term>, C>& el)
+struct fmt::formatter<tyr::View<tyr::Data<tyr::formalism::Term>, C>, char>
 {
-    fmt::print(os, "{}", to_string(el.get_variant()));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-template<formalism::FactKind T>
-inline std::ostream& print(std::ostream& os, const Data<formalism::Predicate<T>>& el)
+    template<typename FormatContext>
+    auto format(const tyr::View<tyr::Data<tyr::formalism::Term>, C>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.get_variant());
+    }
+};
+
+template<tyr::formalism::FactKind T>
+struct fmt::formatter<tyr::Data<tyr::formalism::Predicate<T>>, char>
 {
-    fmt::print(os, "{}/{}", to_string(el.name), to_string(el.arity));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-template<formalism::FactKind T, typename C>
-inline std::ostream& print(std::ostream& os, const View<Index<formalism::Predicate<T>>, C>& el)
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::Predicate<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}/{}", value.name, value.arity);
+    }
+};
+
+template<tyr::formalism::FactKind T, typename C>
+struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Predicate<T>>, C>, char>
 {
-    fmt::print(os, "{}/{}", to_string(el.get_name()), to_string(el.get_arity()));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-template<formalism::FactKind T>
-inline std::ostream& print(std::ostream& os, const Data<formalism::Function<T>>& el)
+    template<typename FormatContext>
+    auto format(const tyr::View<tyr::Index<tyr::formalism::Predicate<T>>, C>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}/{}", value.get_name(), value.get_arity());
+    }
+};
+
+template<tyr::formalism::FactKind T>
+struct fmt::formatter<tyr::Data<tyr::formalism::Function<T>>, char>
 {
-    fmt::print(os, "{}/{}", to_string(el.name), to_string(el.arity));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-template<formalism::FactKind T, typename C>
-inline std::ostream& print(std::ostream& os, const View<Index<formalism::Function<T>>, C>& el)
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::Function<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}/{}", value.name, value.arity);
+    }
+};
+
+template<tyr::formalism::FactKind T, typename C>
+struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Function<T>>, C>, char>
 {
-    fmt::print(os, "{}/{}", to_string(el.get_name()), to_string(el.get_arity()));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-namespace formalism
-{
-inline std::ostream& operator<<(std::ostream& os, const ParameterIndex& el) { return tyr::print(os, el); }
+    template<typename FormatContext>
+    auto format(const tyr::View<tyr::Index<tyr::formalism::Function<T>>, C>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}/{}", value.get_name(), value.get_arity());
+    }
+};
 
-inline std::ostream& operator<<(std::ostream& os, OpEq el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, OpNe el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, OpLe el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, OpLt el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, OpGe el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, OpGt el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, OpAdd el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, OpSub el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, OpMul el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, OpDiv el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, const Data<Variable>& el) { return tyr::print(os, el); }
-
-template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<Variable>, C>& el)
-{
-    return tyr::print(os, el);
-}
-
-inline std::ostream& operator<<(std::ostream& os, const Data<Object>& el) { return tyr::print(os, el); }
-
-template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<Object>, C>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<typename Tag>
-inline std::ostream& operator<<(std::ostream& os, const Data<RelationBinding<Tag>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<typename T, typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<RelationBinding<T>>, C>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const Index<formalism::RelationBinding<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-inline std::ostream& operator<<(std::ostream& os, const Data<Term>& el) { return tyr::print(os, el); }
-
-template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Data<Term>, C>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-inline std::ostream& operator<<(std::ostream& os, const Data<Predicate<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T, typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<Predicate<T>>, C>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-inline std::ostream& operator<<(std::ostream& os, const Data<Function<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T, typename C>
-inline std::ostream& operator<<(std::ostream& os, const View<Index<Function<T>>, C>& el)
-{
-    return tyr::print(os, el);
-}
-
-}
-}
 #endif

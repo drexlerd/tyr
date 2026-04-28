@@ -19,7 +19,7 @@
 
 #include "tyr/common/comparators.hpp"  // for operator!=
 #include "tyr/common/equal_to.hpp"     // for EqualTo
-#include "tyr/common/formatter.hpp"    // for operator<<
+#include "tyr/common/formatter.hpp"
 #include "tyr/common/hash.hpp"         // for Hash
 #include "tyr/common/vector.hpp"       // for View
 #include "tyr/datalog/bottom_up.hpp"   // for solve_bottom_up
@@ -36,6 +36,7 @@
 #include "tyr/planning/task_utils.hpp"                  // for insert_fact_s...
 
 #include <cista/containers/hash_storage.h>  // for operator!=
+#include <fmt/ostream.h>
 #include <gtl/phmap.hpp>                    // for operator!=
 #include <utility>                          // for pair
 
@@ -116,16 +117,16 @@ void AxiomEvaluator<LiftedTag>::print_summary(size_t verbosity) const
         return;
 
     std::cout << "[Axiom evaluator] Summary" << std::endl;
-    std::cout << m_workspace.statistics << std::endl;
+    fmt::print(std::cout, "{}\n", m_workspace.statistics);
     auto axiom_evaluator_rule_statistics = std::vector<datalog::RuleStatistics> {};
     for (const auto& ws_rule : m_workspace.rules)
         axiom_evaluator_rule_statistics.push_back(ws_rule->common.statistics);
-    std::cout << datalog::compute_aggregated_rule_statistics(axiom_evaluator_rule_statistics) << std::endl;
+    fmt::print(std::cout, "{}\n", datalog::compute_aggregated_rule_statistics(axiom_evaluator_rule_statistics));
     auto axiom_evaluator_rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
     for (const auto& ws_rule : m_workspace.rules)
         for (const auto& worker : ws_rule->worker)
             axiom_evaluator_rule_worker_statistics.push_back(worker.solve.statistics);
-    std::cout << datalog::compute_aggregated_rule_worker_statistics(axiom_evaluator_rule_worker_statistics) << std::endl;
+    fmt::print(std::cout, "{}\n", datalog::compute_aggregated_rule_worker_statistics(axiom_evaluator_rule_worker_statistics));
 }
 
 static_assert(AxiomEvaluatorConcept<AxiomEvaluator<LiftedTag>, LiftedTag>);

@@ -30,448 +30,306 @@
 #include <fmt/ranges.h>
 #include <ostream>
 
-namespace tyr
+namespace fmt
 {
-/**
- * Forward declarations
- */
-namespace formalism::datalog
+
+template<tyr::formalism::OpKind Op, typename T>
+struct formatter<tyr::Data<tyr::formalism::datalog::UnaryOperator<Op, T>>, char>
 {
-std::ostream& operator<<(std::ostream& os, const VariableDependencyGraph& el);
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::UnaryOperator<Op, T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", Op {}, value.arg);
+    }
+};
 
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const Data<UnaryOperator<Op, T>>& el);
+template<tyr::formalism::OpKind Op, typename T>
+struct formatter<tyr::formalism::datalog::UnaryOperatorView<Op, T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::UnaryOperatorView<Op, T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", Op {}, value.get_arg());
+    }
+};
 
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const UnaryOperatorView<Op, T>& el);
+template<tyr::formalism::OpKind Op, typename T>
+struct formatter<tyr::Data<tyr::formalism::datalog::BinaryOperator<Op, T>>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::BinaryOperator<Op, T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {} {})", Op {}, value.lhs, value.rhs);
+    }
+};
 
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const Data<BinaryOperator<Op, T>>& el);
+template<tyr::formalism::OpKind Op, typename T>
+struct formatter<tyr::formalism::datalog::BinaryOperatorView<Op, T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::BinaryOperatorView<Op, T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {} {})", Op {}, value.get_lhs(), value.get_rhs());
+    }
+};
 
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const BinaryOperatorView<Op, T>& el);
+template<tyr::formalism::OpKind Op, typename T>
+struct formatter<tyr::Data<tyr::formalism::datalog::MultiOperator<Op, T>>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::MultiOperator<Op, T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", Op {}, fmt::join(tyr::to_strings(value.args), " "));
+    }
+};
 
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const Data<MultiOperator<Op, T>>& el);
-
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const MultiOperatorView<Op, T>& el);
+template<tyr::formalism::OpKind Op, typename T>
+struct formatter<tyr::formalism::datalog::MultiOperatorView<Op, T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::MultiOperatorView<Op, T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", Op {}, fmt::join(tyr::to_strings(value.get_args()), " "));
+    }
+};
 
 template<typename T>
-std::ostream& operator<<(std::ostream& os, const Data<ArithmeticOperator<T>>& el);
+struct formatter<tyr::Data<tyr::formalism::datalog::ArithmeticOperator<T>>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::ArithmeticOperator<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.value);
+    }
+};
 
 template<typename T>
-std::ostream& operator<<(std::ostream& os, const ArithmeticOperatorView<T>& el);
+struct formatter<tyr::formalism::datalog::ArithmeticOperatorView<T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::ArithmeticOperatorView<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.get_variant());
+    }
+};
 
 template<typename T>
-std::ostream& operator<<(std::ostream& os, const Data<BooleanOperator<T>>& el);
+struct formatter<tyr::Data<tyr::formalism::datalog::BooleanOperator<T>>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::BooleanOperator<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.value);
+    }
+};
 
 template<typename T>
-std::ostream& operator<<(std::ostream& os, const BooleanOperatorView<T>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<Atom<T>>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const AtomView<T>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<Literal<T>>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const LiteralView<T>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<GroundAtom<T>>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const GroundAtomView<T>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<GroundLiteral<T>>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const GroundLiteralView<T>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<FunctionTerm<T>>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const FunctionTermView<T>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<GroundFunctionTerm<T>>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const GroundFunctionTermView<T>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<GroundFunctionTermValue<T>>& el);
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const GroundFunctionTermValueView<T>& el);
-
-std::ostream& operator<<(std::ostream& os, const Data<FunctionExpression>& el);
-
-std::ostream& operator<<(std::ostream& os, const FunctionExpressionView& el);
-
-std::ostream& operator<<(std::ostream& os, const Data<GroundFunctionExpression>& el);
-
-std::ostream& operator<<(std::ostream& os, const GroundFunctionExpressionView& el);
-
-std::ostream& operator<<(std::ostream& os, const Data<ConjunctiveCondition>& el);
-
-std::ostream& operator<<(std::ostream& os, const ConjunctiveConditionView& el);
-
-std::ostream& operator<<(std::ostream& os, const Data<Rule>& el);
-
-std::ostream& operator<<(std::ostream& os, const RuleView& el);
-
-std::ostream& operator<<(std::ostream& os, const Data<GroundConjunctiveCondition>& el);
-
-std::ostream& operator<<(std::ostream& os, const GroundConjunctiveConditionView& el);
-
-std::ostream& operator<<(std::ostream& os, const Data<GroundRule>& el);
-
-std::ostream& operator<<(std::ostream& os, const GroundRuleView& el);
-
-std::ostream& operator<<(std::ostream& os, const Data<Program>& el);
-
-std::ostream& operator<<(std::ostream& os, const ProgramView& el);
-
-}  // end namespace formalism
-
-/**
- * Definitions
- */
-
-template<formalism::OpKind Op, typename T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::UnaryOperator<Op, T>>& el)
+struct formatter<tyr::formalism::datalog::BooleanOperatorView<T>, char>
 {
-    fmt::print(os, "({} {})", to_string(Op {}), to_string(el.arg));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::BooleanOperatorView<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.get_variant());
+    }
+};
 
-template<formalism::OpKind Op, typename T>
-std::ostream& print(std::ostream& os, const formalism::datalog::UnaryOperatorView<Op, T>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::Atom<T>>, char>
 {
-    fmt::print(os, "({} {})", to_string(Op {}), to_string(el.get_arg()));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::Atom<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", value.predicate, fmt::join(tyr::to_strings(value.terms), " "));
+    }
+};
 
-template<formalism::OpKind Op, typename T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::BinaryOperator<Op, T>>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::AtomView<T>, char>
 {
-    fmt::print(os, "({} {} {})", to_string(Op {}), to_string(el.lhs), to_string(el.rhs));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::AtomView<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", value.get_predicate().get_name(), fmt::join(tyr::to_strings(value.get_terms()), " "));
+    }
+};
 
-template<formalism::OpKind Op, typename T>
-std::ostream& print(std::ostream& os, const formalism::datalog::BinaryOperatorView<Op, T>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::Literal<T>>, char>
 {
-    fmt::print(os, "({} {} {})", to_string(Op {}), to_string(el.get_lhs()), to_string(el.get_rhs()));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::Literal<T>>& value, FormatContext& ctx) const
+    {
+        if (value.polarity)
+            return fmt::format_to(ctx.out(), "{}", value.atom);
+        return fmt::format_to(ctx.out(), "(not {})", value.atom);
+    }
+};
 
-template<formalism::OpKind Op, typename T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::MultiOperator<Op, T>>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::LiteralView<T>, char>
 {
-    fmt::print(os, "({} {})", to_string(Op {}), fmt::format("{}", fmt::join(to_strings(el.args), " ")));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::LiteralView<T>& value, FormatContext& ctx) const
+    {
+        if (value.get_polarity())
+            return fmt::format_to(ctx.out(), "{}", value.get_atom());
+        return fmt::format_to(ctx.out(), "(not {})", value.get_atom());
+    }
+};
 
-template<formalism::OpKind Op, typename T>
-std::ostream& print(std::ostream& os, const formalism::datalog::MultiOperatorView<Op, T>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::GroundAtom<T>>, char>
 {
-    fmt::print(os, "({} {})", to_string(Op {}), fmt::format("{}", fmt::join(to_strings(el.get_args()), " ")));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::GroundAtom<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", value.index.group, fmt::join(tyr::to_strings(value.objects), " "));
+    }
+};
 
-template<typename T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::ArithmeticOperator<T>>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::GroundAtomView<T>, char>
 {
-    fmt::print(os, "{}", to_string(el.value));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::GroundAtomView<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", value.get_predicate().get_name(), fmt::join(tyr::to_strings(value.get_row().get_objects()), " "));
+    }
+};
 
-template<typename T>
-std::ostream& print(std::ostream& os, const formalism::datalog::ArithmeticOperatorView<T>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::GroundLiteral<T>>, char>
 {
-    fmt::print(os, "{}", to_string(el.get_variant()));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::GroundLiteral<T>>& value, FormatContext& ctx) const
+    {
+        if (value.polarity)
+            return fmt::format_to(ctx.out(), "{}", value.atom);
+        return fmt::format_to(ctx.out(), "(not {})", value.atom);
+    }
+};
 
-template<typename T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::BooleanOperator<T>>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::GroundLiteralView<T>, char>
 {
-    fmt::print(os, "{}", to_string(el.value));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::GroundLiteralView<T>& value, FormatContext& ctx) const
+    {
+        if (value.get_polarity())
+            return fmt::format_to(ctx.out(), "{}", value.get_atom());
+        return fmt::format_to(ctx.out(), "(not {})", value.get_atom());
+    }
+};
 
-template<typename T>
-std::ostream& print(std::ostream& os, const formalism::datalog::BooleanOperatorView<T>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::FunctionTerm<T>>, char>
 {
-    fmt::print(os, "{}", to_string(el.get_variant()));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::FunctionTerm<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", value.function, fmt::join(tyr::to_strings(value.terms), " "));
+    }
+};
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::Atom<T>>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::FunctionTermView<T>, char>
 {
-    fmt::print(os, "({} {})", to_string(el.predicate), fmt::format("{}", fmt::join(to_strings(el.terms), " ")));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::FunctionTermView<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", value.get_function().get_name(), fmt::join(tyr::to_strings(value.get_terms()), " "));
+    }
+};
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const formalism::datalog::AtomView<T>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::GroundFunctionTerm<T>>, char>
 {
-    fmt::print(os, "({} {})", to_string(el.get_predicate().get_name()), fmt::format("{}", fmt::join(to_strings(el.get_terms()), " ")));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::GroundFunctionTerm<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", value.index.group, fmt::join(tyr::to_strings(value.objects), " "));
+    }
+};
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::Literal<T>>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::GroundFunctionTermView<T>, char>
 {
-    if (el.polarity)
-        print(os, to_string(el.atom));
-    else
-        fmt::print(os, "(not {})", to_string(el.atom));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::GroundFunctionTermView<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", value.get_function().get_name(), fmt::join(tyr::to_strings(value.get_row().get_objects()), " "));
+    }
+};
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const formalism::datalog::LiteralView<T>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::GroundFunctionTermValue<T>>, char>
 {
-    if (el.get_polarity())
-        print(os, to_string(el.get_atom()));
-    else
-        fmt::print(os, "(not {})", to_string(el.get_atom()));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::GroundFunctionTermValue<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "(= {} {})", value.fterm, value.value);
+    }
+};
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::GroundAtom<T>>& el)
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::GroundFunctionTermValueView<T>, char>
 {
-    fmt::print(os, "({} {})", to_string(el.index.group), fmt::format("{}", fmt::join(to_strings(el.objects), " ")));
-    return os;
-}
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::GroundFunctionTermValueView<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "(= {} {})", value.get_fterm(), value.get_value());
+    }
+};
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const formalism::datalog::GroundAtomView<T>& el)
-{
-    fmt::print(os, "({} {})", to_string(el.get_predicate().get_name()), fmt::format("{}", fmt::join(to_strings(el.get_row().get_objects()), " ")));
-    return os;
-}
+#define TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(Type)                                \
+    template<>                                                                       \
+    struct formatter<Type, char>                                                     \
+    {                                                                                \
+        constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }      \
+        auto format(const Type& value, format_context& ctx) const -> format_context::iterator; \
+    }
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::GroundLiteral<T>>& el)
-{
-    if (el.polarity)
-        print(os, to_string(el.atom));
-    else
-        fmt::print(os, "(not {})", to_string(el.atom));
-    return os;
-}
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::VariableDependencyGraph);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::FunctionExpression>);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::FunctionExpressionView);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::GroundFunctionExpression>);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::GroundFunctionExpressionView);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::ConjunctiveCondition>);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::ConjunctiveConditionView);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::Rule>);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::RuleView);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::GroundConjunctiveCondition>);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::GroundConjunctiveConditionView);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::GroundRule>);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::GroundRuleView);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::Program>);
+TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::ProgramView);
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const formalism::datalog::GroundLiteralView<T>& el)
-{
-    if (el.get_polarity())
-        print(os, to_string(el.get_atom()));
-    else
-        fmt::print(os, "(not {})", to_string(el.get_atom()));
-    return os;
-}
+#undef TYR_DECLARE_FORMALISM_DATALOG_FORMATTER
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::FunctionTerm<T>>& el)
-{
-    fmt::print(os, "({} {})", to_string(el.function), fmt::format("{}", fmt::join(to_strings(el.terms), " ")));
-    return os;
-}
-
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const formalism::datalog::FunctionTermView<T>& el)
-{
-    fmt::print(os, "({} {})", to_string(el.get_function().get_name()), fmt::format("{}", fmt::join(to_strings(el.get_terms()), " ")));
-    return os;
-}
-
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::GroundFunctionTerm<T>>& el)
-{
-    fmt::print(os, "({} {})", to_string(el.index.group), fmt::format("{}", fmt::join(to_strings(el.objects), " ")));
-    return os;
-}
-
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const formalism::datalog::GroundFunctionTermView<T>& el)
-{
-    fmt::print(os, "({} {})", to_string(el.get_function().get_name()), fmt::format("{}", fmt::join(to_strings(el.get_row().get_objects()), " ")));
-    return os;
-}
-
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const Data<formalism::datalog::GroundFunctionTermValue<T>>& el)
-{
-    fmt::print(os, "(= {} {})", to_string(el.fterm), to_string(el.value));
-    return os;
-}
-
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const formalism::datalog::GroundFunctionTermValueView<T>& el)
-{
-    fmt::print(os, "(= {} {})", to_string(el.get_fterm()), to_string(el.get_value()));
-    return os;
-}
-
-namespace formalism::datalog
-{
-
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const Data<UnaryOperator<Op, T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const UnaryOperatorView<Op, T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const Data<BinaryOperator<Op, T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const BinaryOperatorView<Op, T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const Data<MultiOperator<Op, T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<OpKind Op, typename T>
-std::ostream& operator<<(std::ostream& os, const MultiOperatorView<Op, T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const Data<ArithmeticOperator<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const ArithmeticOperatorView<T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const Data<BooleanOperator<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const BooleanOperatorView<T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<Atom<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const AtomView<T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<Literal<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const LiteralView<T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<GroundAtom<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const GroundAtomView<T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<GroundLiteral<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const GroundLiteralView<T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<FunctionTerm<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const FunctionTermView<T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<GroundFunctionTerm<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const GroundFunctionTermView<T>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const Data<GroundFunctionTermValue<T>>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const GroundFunctionTermValueView<T>& el)
-{
-    return tyr::print(os, el);
-}
-
-}
-}
+}  // namespace fmt
 #endif

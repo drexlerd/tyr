@@ -40,7 +40,7 @@ p::SuccessorGenerator<p::LiftedTag> create_successor_generator(std::shared_ptr<p
     return p::SuccessorGenerator<p::LiftedTag>(task, ExecutionContext::create(1));
 }
 
-fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_DIR)) / "data" / subdir; }
+fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_DIR)) / "data" / "tests" / subdir; }
 
 struct LiftedSuccessorCountCase
 {

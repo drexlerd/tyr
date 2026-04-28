@@ -11,7 +11,7 @@ JSON files.
 Keep benchmark instances in the same domain directory:
 
 ```text
-data/<category>/<domain>/
+data/profiling/<suite>/<domain>/
   domain.pddl
   profiling-1.pddl
   profiling-2.pddl
@@ -25,9 +25,9 @@ Example:
 {
   "domains": {
     "blocksworld-large-simple": {
-      "domain_file": "classical/blocksworld-large-simple/domain.pddl",
+      "domain_file": "profiling/htg/blocksworld-large-simple/domain.pddl",
       "tasks": {
-        "profiling-1": "classical/blocksworld-large-simple/profiling-1.pddl"
+        "profiling-1": "profiling/htg/blocksworld-large-simple/p-100-2.pddl"
       }
     }
   },

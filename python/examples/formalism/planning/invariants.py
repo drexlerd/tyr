@@ -4,8 +4,8 @@ Synthesize and inspect invariants from a planning domain.
 Example usage (run from the repository root):
 
     python3 python/examples/formalism/planning/invariants.py \
-        -d data/classical/gripper/domain.pddl \
-        -p data/classical/gripper/test-1.pddl
+        -d data/tests/classical/gripper/domain.pddl \
+        -p data/tests/classical/gripper/test-1.pddl
 
 Author: Dominik Drexler (dominik.drexler@liu.se)
 """

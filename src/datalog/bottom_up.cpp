@@ -50,6 +50,7 @@
 #include <algorithm>  // for all_of
 #include <assert.h>   // for assert
 #include <boost/dynamic_bitset.hpp>
+#include <fmt/ostream.h>
 #include <memory>  // for __sha...
 #include <oneapi/tbb/parallel_for_each.h>
 #include <oneapi/tbb/parallel_invoke.h>
@@ -122,8 +123,8 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
     if (!applicable)
     {
         std::cout << "Delta-KPKC generated false positive." << std::endl;
-        std::cout << rule << std::endl;
-        std::cout << ground_rule << std::endl;
+        fmt::print(std::cout, "{}\n", rule);
+        fmt::print(std::cout, "{}\n", ground_rule);
     }
 
     return applicable;

@@ -21,379 +21,481 @@
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 #include <ostream>
+#include <sstream>
 #include <vector>
 
-namespace tyr
+namespace fmt
 {
-namespace analysis
+
+template<>
+struct formatter<tyr::analysis::VariableDomain, char>
 {
-inline std::ostream& operator<<(std::ostream& os, const VariableDomain& el);
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::VariableDomain& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.objects);
+    }
+};
 
 template<typename Element, typename Payload>
-inline std::ostream& operator<<(std::ostream& os, const Scoped<Element, Payload>& el);
+struct formatter<tyr::analysis::Scoped<Element, Payload>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::Scoped<Element, Payload>& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "ElementDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "payload = ", value.payload);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
 
-inline std::ostream& operator<<(std::ostream& os, const ConditionalEffectDomain& el);
-inline std::ostream& operator<<(std::ostream& os, const ActionDomain& el);
-inline std::ostream& operator<<(std::ostream& os, const ProgramVariableDomains& el);
-inline std::ostream& operator<<(std::ostream& os, const TaskVariableDomains& el);
+template<typename Payload>
+struct formatter<tyr::analysis::Scoped<tyr::formalism::planning::Axiom, Payload>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::Scoped<tyr::formalism::planning::Axiom, Payload>& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "AxiomDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "payload = ", value.payload);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<typename Payload>
+struct formatter<tyr::analysis::Scoped<tyr::formalism::datalog::Rule, Payload>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::Scoped<tyr::formalism::datalog::Rule, Payload>& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "RuleDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "payload = ", value.payload);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<>
+struct formatter<tyr::analysis::ConditionalEffectDomain, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ConditionalEffectDomain& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "ConditionalEffectDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "condition domain = ", value.payload.condition_domain);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "effect domain = ", value.payload.effect_domain);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<>
+struct formatter<tyr::analysis::ActionDomain, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ActionDomain& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "ActionDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "precondition domain = ", value.payload.precondition_domain);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "effect domains = ", value.payload.effect_domains);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<>
+struct formatter<tyr::analysis::ConditionalEffectDomainData, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ConditionalEffectDomainData& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "ConditionalEffectDomainData(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "condition domain = ", value.condition_domain);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "effect domain = ", value.effect_domain);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<>
+struct formatter<tyr::analysis::ActionDomainData, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ActionDomainData& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "ActionDomainData(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "precondition domain = ", value.precondition_domain);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "effect domains = ", value.effect_domains);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<>
+struct formatter<tyr::analysis::ProgramVariableDomains, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ProgramVariableDomains& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "ProgramVariableDomains(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static predicate domains = ", value.static_predicate_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent predicate domains = ", value.fluent_predicate_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static function domains = ", value.static_function_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent function domains = ", value.fluent_function_domains);
+
+            for (const auto& [rule, domain] : value.rule_domains)
+            {
+                os << tyr::print_indent;
+                fmt::print(os, "rule {} domain = {}\n", rule, domain);
+            }
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<>
+struct formatter<tyr::analysis::TaskVariableDomains, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::TaskVariableDomains& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "TaskVariableDomains(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static predicate domains = ", value.static_predicate_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent predicate domains = ", value.fluent_predicate_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "derived predicate domains = ", value.derived_predicate_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static function domains = ", value.static_function_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent function domains = ", value.fluent_function_domains);
+
+            for (const auto& [action, domain] : value.action_domains)
+            {
+                os << tyr::print_indent;
+                fmt::print(os, "action {} domain = {}\n", action, domain);
+            }
+
+            for (const auto& [axiom, domain] : value.axiom_domains)
+            {
+                os << tyr::print_indent;
+                fmt::print(os, "axiom {} domain = {}\n", axiom, domain);
+            }
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
 
 template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const VariableDomainView<C>& el);
+struct formatter<tyr::analysis::ScopedView<tyr::formalism::planning::ConditionalEffect, tyr::analysis::ConditionalEffectDomainViewData<C>, C>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ScopedView<tyr::formalism::planning::ConditionalEffect, tyr::analysis::ConditionalEffectDomainViewData<C>, C>& value,
+                FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "ConditionalEffectDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element.get_index());
+            os << tyr::print_indent;
+            fmt::print(os, "{}\n", value.payload.condition_domain);
+            os << tyr::print_indent;
+            fmt::print(os, "{}\n", value.payload.effect_domain);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<typename C>
+struct formatter<tyr::analysis::ScopedView<tyr::formalism::planning::Action, tyr::analysis::ActionDomainViewData<C>, C>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ScopedView<tyr::formalism::planning::Action, tyr::analysis::ActionDomainViewData<C>, C>& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "ActionDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element.get_index());
+            os << tyr::print_indent;
+            fmt::print(os, "{}\n", value.payload.precondition_domain);
+
+            for (const auto& [conditional_effect, domain] : value.payload.effect_domains)
+            {
+                os << tyr::print_indent;
+                fmt::print(os, "{}\n", domain);
+            }
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
 
 template<typename Element, typename Payload, typename C>
-inline std::ostream& operator<<(std::ostream& os, const ScopedView<Element, Payload, C>& el);
-
-template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const ConditionalEffectDomainView<C>& el);
-
-template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const ActionDomainView<C>& el);
-
-inline std::ostream& operator<<(std::ostream& os, const ProgramVariableDomainsView& el);
-inline std::ostream& operator<<(std::ostream& os, const TaskVariableDomainsView& el);
-}  // namespace analysis
-
-inline std::ostream& print(std::ostream& os, const analysis::VariableDomain& el)
+struct formatter<tyr::analysis::ScopedView<Element, Payload, C>, char>
 {
-    os << el.objects;
-    return os;
-}
-
-template<typename Element, typename Payload>
-inline std::ostream& print(std::ostream& os, const analysis::Scoped<Element, Payload>& el)
-{
-    os << "ElementDomain(\n";
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ScopedView<Element, Payload, C>& value, FormatContext& ctx) const
     {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element << "\n";
-
-        os << print_indent << "payload = " << el.payload << "\n";
+        auto os = std::stringstream {};
+        os << "ElementDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element.get_index());
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "payload = ", value.payload);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
     }
-    os << print_indent << ")";
-    return os;
-}
-
-template<typename Element, typename Payload>
-inline std::ostream& print(std::ostream& os, const analysis::Scoped<formalism::planning::Axiom, Payload>& el)
-{
-    os << "AxiomDomain(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element << "\n";
-
-        os << print_indent << "payload = " << el.payload << "\n";
-    }
-    os << print_indent << ")";
-    return os;
-}
-
-template<typename Element, typename Payload>
-inline std::ostream& print(std::ostream& os, const analysis::Scoped<formalism::datalog::Rule, Payload>& el)
-{
-    os << "RuleDomain(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element << "\n";
-
-        os << print_indent << "payload = " << el.payload << "\n";
-    }
-    os << print_indent << ")";
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, const analysis::ConditionalEffectDomain& el)
-{
-    os << "ConditionalEffectDomain(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element << "\n";
-
-        os << print_indent << "condition domain = " << el.payload.condition_domain << "\n";
-
-        os << print_indent << "effect domain = " << el.payload.effect_domain << "\n";
-    }
-    os << print_indent << ")";
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, const analysis::ActionDomain& el)
-{
-    os << "ActionDomain(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element << "\n";
-
-        os << print_indent << "precondition domain = " << el.payload.precondition_domain << "\n";
-
-        os << print_indent << "effect domains = " << el.payload.effect_domains << "\n";
-    }
-    os << print_indent << ")";
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, const analysis::ProgramVariableDomains& el)
-{
-    os << "ProgramVariableDomains(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "static predicate domains = " << el.static_predicate_domains << "\n";
-
-        os << print_indent << "fluent predicate domains = " << el.fluent_predicate_domains << "\n";
-
-        os << print_indent << "static function domains = " << el.static_function_domains << "\n";
-
-        os << print_indent << "fluent function domains = " << el.fluent_function_domains << "\n";
-
-        for (const auto& [rule, domain] : el.rule_domains)
-            os << print_indent << "rule " << rule << " domain = " << domain << "\n";
-    }
-    os << print_indent << ")";
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, const analysis::TaskVariableDomains& el)
-{
-    os << "TaskVariableDomains(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "static predicate domains = " << el.static_predicate_domains << "\n";
-
-        os << print_indent << "fluent predicate domains = " << el.fluent_predicate_domains << "\n";
-
-        os << print_indent << "derived predicate domains = " << el.derived_predicate_domains << "\n";
-
-        os << print_indent << "static function domains = " << el.static_function_domains << "\n";
-
-        os << print_indent << "fluent function domains = " << el.fluent_function_domains << "\n";
-
-        for (const auto& [action, domain] : el.action_domains)
-            os << print_indent << "action " << action << " domain = " << domain << "\n";
-
-        for (const auto& [axiom, domain] : el.axiom_domains)
-            os << print_indent << "axiom " << axiom << " domain = " << domain << "\n";
-    }
-    os << print_indent << ")";
-    return os;
-}
-
-template<typename C>
-inline std::ostream& print(std::ostream& os, const analysis::VariableDomainView<C>& el)
-{
-    os << el.objects;
-    return os;
-}
-
-template<typename Element, typename Payload, typename C>
-inline std::ostream& print(std::ostream& os, const analysis::ScopedView<Element, Payload, C>& el)
-{
-    os << "ElementDomain(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element.get_index() << "\n";
-
-        os << print_indent << "payload = " << el.payload << "\n";
-    }
-    os << print_indent << ")";
-    return os;
-}
+};
 
 template<typename Payload, typename C>
-inline std::ostream& print(std::ostream& os, const analysis::ScopedView<formalism::planning::ConjunctiveCondition, Payload, C>& el)
+struct formatter<tyr::analysis::ScopedView<tyr::formalism::planning::ConjunctiveCondition, Payload, C>, char>
 {
-    os << "ConjunctiveConditionDomain(\n";
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ScopedView<tyr::formalism::planning::ConjunctiveCondition, Payload, C>& value, FormatContext& ctx) const
     {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element.get_index() << "\n";
-
-        os << print_indent << "payload = " << el.payload << "\n";
+        auto os = std::stringstream {};
+        os << "ConjunctiveConditionDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element.get_index());
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "payload = ", value.payload);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
     }
-    os << print_indent << ")";
-    return os;
-}
+};
 
 template<typename Payload, typename C>
-inline std::ostream& print(std::ostream& os, const analysis::ScopedView<formalism::planning::ConjunctiveEffect, Payload, C>& el)
+struct formatter<tyr::analysis::ScopedView<tyr::formalism::planning::ConjunctiveEffect, Payload, C>, char>
 {
-    os << "ConjunctiveEffectDomain(\n";
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ScopedView<tyr::formalism::planning::ConjunctiveEffect, Payload, C>& value, FormatContext& ctx) const
     {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element.get_index() << "\n";
-
-        os << print_indent << "payload = " << el.payload << "\n";
+        auto os = std::stringstream {};
+        os << "ConjunctiveEffectDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element.get_index());
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "payload = ", value.payload);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
     }
-    os << print_indent << ")";
-    return os;
-}
+};
 
 template<typename Payload, typename C>
-inline std::ostream& print(std::ostream& os, const analysis::ScopedView<formalism::planning::Axiom, Payload, C>& el)
+struct formatter<tyr::analysis::ScopedView<tyr::formalism::planning::Axiom, Payload, C>, char>
 {
-    os << "AxiomDomain(\n";
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ScopedView<tyr::formalism::planning::Axiom, Payload, C>& value, FormatContext& ctx) const
     {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element.get_index() << "\n";
-
-        os << print_indent << "payload = " << el.payload << "\n";
+        auto os = std::stringstream {};
+        os << "AxiomDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element.get_index());
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "payload = ", value.payload);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
     }
-    os << print_indent << ")";
-    return os;
-}
+};
 
 template<typename Payload, typename C>
-inline std::ostream& print(std::ostream& os, const analysis::ScopedView<formalism::datalog::Rule, Payload, C>& el)
+struct formatter<tyr::analysis::ScopedView<tyr::formalism::datalog::Rule, Payload, C>, char>
 {
-    os << "RuleDomain(\n";
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ScopedView<tyr::formalism::datalog::Rule, Payload, C>& value, FormatContext& ctx) const
     {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element.get_index() << "\n";
-
-        os << print_indent << "payload = " << el.payload << "\n";
+        auto os = std::stringstream {};
+        os << "RuleDomain(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "element = ", value.element.get_index());
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "payload = ", value.payload);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
     }
-    os << print_indent << ")";
-    return os;
-}
+};
 
 template<typename C>
-inline std::ostream& print(std::ostream& os, const analysis::ConditionalEffectDomainView<C>& el)
+struct formatter<tyr::analysis::VariableDomainView<C>, char>
 {
-    os << "ConditionalEffectDomain(\n";
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::VariableDomainView<C>& value, FormatContext& ctx) const
     {
-        IndentScope scope(os);
-
-        os << print_indent << "element = " << el.element.get_index() << "\n";
-
-        os << print_indent << el.payload.condition_domain << "\n";
-
-        os << print_indent << el.payload.effect_domain << "\n";
+        return fmt::format_to(ctx.out(), "{}", value.objects);
     }
-    os << print_indent << ")";
-    return os;
-}
+};
 
-template<typename C>
-inline std::ostream& print(std::ostream& os, const analysis::ActionDomainView<C>& el)
+template<>
+struct formatter<tyr::analysis::ProgramVariableDomainsView, char>
 {
-    os << "ActionDomain(\n";
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::ProgramVariableDomainsView& value, FormatContext& ctx) const
     {
-        IndentScope scope(os);
+        auto os = std::stringstream {};
+        os << "ProgramVariableDomains(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static predicate domains = ", value.static_predicate_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent predicate domains = ", value.fluent_predicate_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static function domains = ", value.static_function_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent function domains = ", value.fluent_function_domains);
 
-        os << print_indent << "element = " << el.element.get_index() << "\n";
-
-        os << print_indent << el.payload.precondition_domain << "\n";
-
-        for (const auto& [conditional_effect, domain] : el.payload.effect_domains)
-            os << print_indent << domain << "\n";
+            for (const auto& [rule, domain] : value.rule_domains)
+            {
+                os << tyr::print_indent;
+                fmt::print(os, "{}\n", domain);
+            }
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
     }
-    os << print_indent << ")";
-    return os;
-}
+};
 
-inline std::ostream& print(std::ostream& os, const analysis::ProgramVariableDomainsView& el)
+template<>
+struct formatter<tyr::analysis::TaskVariableDomainsView, char>
 {
-    os << "ProgramVariableDomains(\n";
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::analysis::TaskVariableDomainsView& value, FormatContext& ctx) const
     {
-        IndentScope scope(os);
+        auto os = std::stringstream {};
+        os << "TaskVariableDomains(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static predicate domains = ", value.static_predicate_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent predicate domains = ", value.fluent_predicate_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "derived predicate domains = ", value.derived_predicate_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static function domains = ", value.static_function_domains);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent function domains = ", value.fluent_function_domains);
 
-        os << print_indent << "static predicate domains = " << el.static_predicate_domains << "\n";
+            for (const auto& [action, domain] : value.action_domains)
+            {
+                os << tyr::print_indent;
+                fmt::print(os, "{}\n", domain);
+            }
 
-        os << print_indent << "fluent predicate domains = " << el.fluent_predicate_domains << "\n";
-
-        os << print_indent << "static function domains = " << el.static_function_domains << "\n";
-
-        os << print_indent << "fluent function domains = " << el.fluent_function_domains << "\n";
-
-        for (const auto& [rule, domain] : el.rule_domains)
-            os << print_indent << domain << "\n";
+            for (const auto& [axiom, domain] : value.axiom_domains)
+            {
+                os << tyr::print_indent;
+                fmt::print(os, "{}\n", domain);
+            }
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
     }
-    os << print_indent << ")";
-    return os;
-}
+};
 
-inline std::ostream& print(std::ostream& os, const analysis::TaskVariableDomainsView& el)
-{
-    os << "TaskVariableDomains(\n";
-    {
-        IndentScope scope(os);
-
-        os << print_indent << "static predicate domains = " << el.static_predicate_domains << "\n";
-
-        os << print_indent << "fluent predicate domains = " << el.fluent_predicate_domains << "\n";
-
-        os << print_indent << "derived predicate domains = " << el.derived_predicate_domains << "\n";
-
-        os << print_indent << "static function domains = " << el.static_function_domains << "\n";
-
-        os << print_indent << "fluent function domains = " << el.fluent_function_domains << "\n";
-
-        for (const auto& [action, domain] : el.action_domains)
-            os << print_indent << domain << "\n";
-
-        for (const auto& [axiom, domain] : el.axiom_domains)
-            os << print_indent << domain << "\n";
-    }
-    os << print_indent << ")";
-    return os;
-}
-
-namespace analysis
-{
-inline std::ostream& operator<<(std::ostream& os, const VariableDomain& el) { return tyr::print(os, el); }
-
-template<typename Element, typename Payload>
-inline std::ostream& operator<<(std::ostream& os, const Scoped<Element, Payload>& el)
-{
-    return tyr::print(os, el);
-}
-
-inline std::ostream& operator<<(std::ostream& os, const ConditionalEffectDomain& el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, const ActionDomain& el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, const ProgramVariableDomains& el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, const TaskVariableDomains& el) { return tyr::print(os, el); }
-
-template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const VariableDomainView<C>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<typename Element, typename Payload, typename C>
-inline std::ostream& operator<<(std::ostream& os, const ScopedView<Element, Payload, C>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const ConditionalEffectDomainView<C>& el)
-{
-    return tyr::print(os, el);
-}
-
-template<typename C>
-inline std::ostream& operator<<(std::ostream& os, const ActionDomainView<C>& el)
-{
-    return tyr::print(os, el);
-}
-
-inline std::ostream& operator<<(std::ostream& os, const ProgramVariableDomainsView& el) { return tyr::print(os, el); }
-
-inline std::ostream& operator<<(std::ostream& os, const TaskVariableDomainsView& el) { return tyr::print(os, el); }
-
-}  // namespace analysis
-}  // namespace tyr
+}  // namespace fmt
 
 #endif

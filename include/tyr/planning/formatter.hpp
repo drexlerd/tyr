@@ -18,69 +18,233 @@
 #ifndef TYR_PLANNING_FORMATTER_HPP_
 #define TYR_PLANNING_FORMATTER_HPP_
 
+#include "tyr/common/chrono.hpp"
 #include "tyr/common/formatter.hpp"
+#include "tyr/formalism/planning/formatter.hpp"
+#include "tyr/planning/algorithms/statistics.hpp"
 #include "tyr/planning/declarations.hpp"
+#include "tyr/planning/ground_task.hpp"
+#include "tyr/planning/lifted_task.hpp"
+#include "tyr/planning/plan.hpp"
 #include "tyr/planning/state_view.hpp"
 
 #include <ostream>
+#include <sstream>
+#include <utility>
+#include <vector>
 
-namespace tyr
+namespace fmt
 {
 
-std::ostream& print(std::ostream& os, const planning::LiftedTask& el);
-
-std::ostream& print(std::ostream& os, const planning::GroundTask& el);
-
-std::ostream& print(std::ostream& os, const Data<planning::State<planning::LiftedTag>>& el);
-
-std::ostream& print(std::ostream& os, const planning::UnpackedState<planning::LiftedTag>& el);
-
-std::ostream& print(std::ostream& os, const Data<planning::State<planning::GroundTag>>& el);
-
-std::ostream& print(std::ostream& os, const planning::UnpackedState<planning::GroundTag>& el);
-
-std::ostream& print(std::ostream& os, const planning::Statistics& el);
-
-std::ostream& print(std::ostream& os, const planning::ProgressStatistics& el);
-
-template<planning::TaskKind Kind>
-std::ostream& print(std::ostream& os, const planning::StateView<Kind>& el);
-
-template<planning::TaskKind Kind>
-std::ostream& print(std::ostream& os, const planning::Node<Kind>& el);
-
-template<planning::TaskKind Kind>
-std::ostream& print(std::ostream& os, const planning::Plan<Kind>& el);
-
-namespace planning
+template<>
+struct formatter<tyr::planning::LiftedTask, char>
 {
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::planning::LiftedTask& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.get_task());
+    }
+};
 
-std::ostream& operator<<(std::ostream& os, const LiftedTask& el);
+template<>
+struct formatter<tyr::planning::GroundTask, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::planning::GroundTask& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.get_task());
+    }
+};
 
-std::ostream& operator<<(std::ostream& os, const GroundTask& el);
+template<>
+struct formatter<tyr::Data<tyr::planning::State<tyr::planning::LiftedTag>>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::planning::State<tyr::planning::LiftedTag>>&, FormatContext& ctx) const
+    {
+        return ctx.out();
+    }
+};
 
-std::ostream& operator<<(std::ostream& os, const Data<State<LiftedTag>>& el);
+template<>
+struct formatter<tyr::planning::UnpackedState<tyr::planning::LiftedTag>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::planning::UnpackedState<tyr::planning::LiftedTag>&, FormatContext& ctx) const
+    {
+        return ctx.out();
+    }
+};
 
-std::ostream& operator<<(std::ostream& os, const UnpackedState<LiftedTag>& el);
+template<>
+struct formatter<tyr::Data<tyr::planning::State<tyr::planning::GroundTag>>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::planning::State<tyr::planning::GroundTag>>&, FormatContext& ctx) const
+    {
+        return ctx.out();
+    }
+};
 
-std::ostream& operator<<(std::ostream& os, const Data<State<GroundTag>>& el);
+template<>
+struct formatter<tyr::planning::UnpackedState<tyr::planning::GroundTag>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::planning::UnpackedState<tyr::planning::GroundTag>&, FormatContext& ctx) const
+    {
+        return ctx.out();
+    }
+};
 
-std::ostream& operator<<(std::ostream& os, const UnpackedState<GroundTag>& el);
+template<>
+struct formatter<tyr::planning::Statistics, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::planning::Statistics& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(),
+                              "[Search] Search time: {} ms ({} ns)\n"
+                              "[Search] Number of expanded states: {}\n"
+                              "[Search] Number of generated states: {}\n"
+                              "[Search] Number of pruned states: {}",
+                              tyr::to_ms(value.get_search_time()),
+                              tyr::to_ns(value.get_search_time()),
+                              value.get_num_expanded(),
+                              value.get_num_generated(),
+                              value.get_num_pruned());
+    }
+};
 
-std::ostream& operator<<(std::ostream& os, const Statistics& el);
+template<>
+struct formatter<tyr::planning::ProgressStatistics, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::planning::ProgressStatistics& value, FormatContext& ctx) const
+    {
+        if (value.get_snapshots().empty())
+        {
+            return fmt::format_to(ctx.out(), "[Search] No progress statistics available.");
+        }
 
-std::ostream& operator<<(std::ostream& os, const ProgressStatistics& el);
+        const auto& last = value.get_snapshots().back();
+        return fmt::format_to(ctx.out(),
+                              "[Search] Number of expanded states at last snapshot: {}\n"
+                              "[Search] Number of generated states at last snapshot: {}\n"
+                              "[Search] Number of pruned states at last snapshot: {}",
+                              last.get_num_expanded(),
+                              last.get_num_generated(),
+                              last.get_num_pruned());
+    }
+};
 
-template<TaskKind Kind>
-std::ostream& operator<<(std::ostream& os, const StateView<Kind>& el);
+template<tyr::planning::TaskKind Kind>
+struct formatter<tyr::planning::StateView<Kind>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::planning::StateView<Kind>& value, FormatContext& ctx) const
+    {
+        auto static_atoms = std::vector<tyr::formalism::planning::GroundAtomView<tyr::formalism::StaticTag>> {};
+        for (auto&& atom : value.get_static_atoms_view())
+        {
+            static_atoms.push_back(atom);
+        }
 
-template<TaskKind Kind>
-std::ostream& operator<<(std::ostream& os, const Node<Kind>& el);
+        auto fluent_facts = std::vector<tyr::formalism::planning::FDRFactView<tyr::formalism::FluentTag>> {};
+        for (auto&& fact : value.get_fluent_facts_view())
+        {
+            if (fact.has_value())
+            {
+                fluent_facts.push_back(fact);
+            }
+        }
 
-template<TaskKind Kind>
-std::ostream& operator<<(std::ostream& os, const Plan<Kind>& el);
+        auto derived_atoms = std::vector<tyr::formalism::planning::GroundAtomView<tyr::formalism::DerivedTag>> {};
+        for (auto&& atom : value.get_derived_atoms_view())
+        {
+            derived_atoms.push_back(atom);
+        }
 
-}
-}
+        auto static_fterm_values = std::vector<tyr::formalism::planning::GroundFunctionTermViewValuePair<tyr::formalism::StaticTag>> {};
+        for (auto&& fterm_value : value.get_static_fterm_values_view())
+        {
+            static_fterm_values.push_back(fterm_value);
+        }
+
+        auto fluent_fterm_values = std::vector<tyr::formalism::planning::GroundFunctionTermViewValuePair<tyr::formalism::FluentTag>> {};
+        for (auto&& fterm_value : value.get_fluent_fterm_values_view())
+        {
+            fluent_fterm_values.push_back(fterm_value);
+        }
+
+        auto os = std::stringstream {};
+        os << "State(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "index = ", value.get_index());
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static atoms = ", static_atoms);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent atoms = ", fluent_facts);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "derived atoms = ", derived_atoms);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static numeric variables = ", static_fterm_values);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent numeric variables = ", fluent_fterm_values);
+        }
+
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<tyr::planning::TaskKind Kind>
+struct formatter<tyr::planning::Node<Kind>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::planning::Node<Kind>& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "Node(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "metric value = ", value.get_metric());
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "state = ", value.get_state());
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<tyr::planning::TaskKind Kind>
+struct formatter<tyr::planning::Plan<Kind>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::planning::Plan<Kind>& value, FormatContext& ctx) const
+    {
+        auto out = ctx.out();
+        for (const auto& labeled_node : value.get_labeled_succ_nodes())
+        {
+            out = fmt::format_to(out, "{}\n", std::make_pair(labeled_node.label, tyr::formalism::planning::PlanFormatting()));
+        }
+        return out;
+    }
+};
+
+}  // namespace fmt
 
 #endif

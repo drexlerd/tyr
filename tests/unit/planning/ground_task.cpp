@@ -40,7 +40,7 @@ p::SuccessorGenerator<p::GroundTag> create_successor_generator(std::shared_ptr<p
     return p::SuccessorGenerator<p::GroundTag>(task, ExecutionContext::create(1));
 }
 
-fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_DIR)) / "data" / subdir; }
+fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_DIR)) / "data" / "tests" / subdir; }
 
 struct GroundTaskCase
 {

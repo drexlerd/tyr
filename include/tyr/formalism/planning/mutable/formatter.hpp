@@ -31,64 +31,134 @@
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 #include <ostream>
+#include <sstream>
 
-namespace tyr
+template<tyr::formalism::FactKind T>
+struct fmt::formatter<tyr::formalism::planning::MutableAtom<T>, char>
 {
-/**
- * Forward declarations
- */
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-namespace formalism::planning
+    template<typename FormatContext>
+    auto format(const tyr::formalism::planning::MutableAtom<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {})", tyr::to_string(value.predicate.get_name()), fmt::join(tyr::to_strings(value.terms), " "));
+    }
+};
+
+template<tyr::formalism::FactKind T>
+struct fmt::formatter<tyr::formalism::planning::MutableLiteral<T>, char>
 {
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const MutableAtom<T>& el);
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const MutableLiteral<T>& el);
+    template<typename FormatContext>
+    auto format(const tyr::formalism::planning::MutableLiteral<T>& value, FormatContext& ctx) const
+    {
+        if (value.polarity)
+        {
+            return fmt::format_to(ctx.out(), "({})", tyr::to_string(value.atom));
+        }
+        return fmt::format_to(ctx.out(), "(not {})", tyr::to_string(value.atom));
+    }
+};
 
-std::ostream& operator<<(std::ostream& os, const ConditionalEffect& el);
-
-std::ostream& operator<<(std::ostream& os, const ConjunctiveCondition& el);
-
-std::ostream& operator<<(std::ostream& os, const ConjunctiveEffect& el);
-
-std::ostream& operator<<(std::ostream& os, const Action& el);
-}
-
-/**
- * Declarations
- */
-
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const formalism::planning::MutableAtom<T>& el);
-
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const formalism::planning::MutableLiteral<T>& el);
-
-std::ostream& print(std::ostream& os, const formalism::planning::MutableConditionalEffect& el);
-
-std::ostream& print(std::ostream& os, const formalism::planning::MutableConjunctiveCondition& el);
-
-std::ostream& print(std::ostream& os, const formalism::planning::MutableConjunctiveEffect& el);
-
-std::ostream& print(std::ostream& os, const formalism::planning::MutableAction& el);
-
-namespace formalism::planning
+template<>
+struct fmt::formatter<tyr::formalism::planning::MutableConditionalEffect, char>
 {
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const MutableAtom<T>& el);
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-template<FactKind T>
-std::ostream& operator<<(std::ostream& os, const MutableLiteral<T>& el);
+    template<typename FormatContext>
+    auto format(const tyr::formalism::planning::MutableConditionalEffect& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "MutableConditionalEffect(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "num parent variables = ", value.num_parent_variables);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "num variables = ", value.num_variables);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "condition = ", value.condition);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "effect = ", value.effect);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
 
-std::ostream& operator<<(std::ostream& os, const MutableConditionalEffect& el);
+template<>
+struct fmt::formatter<tyr::formalism::planning::MutableConjunctiveCondition, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-std::ostream& operator<<(std::ostream& os, const MutableConjunctiveCondition& el);
+    template<typename FormatContext>
+    auto format(const tyr::formalism::planning::MutableConjunctiveCondition& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "ConjunctiveCondition(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "num parent variables = ", value.num_parent_variables);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "num variables = ", value.num_variables);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "static literals = ", value.static_literals);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "fluent literals = ", value.fluent_literals);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
 
-std::ostream& operator<<(std::ostream& os, const MutableConjunctiveEffect& el);
+template<>
+struct fmt::formatter<tyr::formalism::planning::MutableConjunctiveEffect, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
-std::ostream& operator<<(std::ostream& os, const MutableAction& el);
-}
-}
+    template<typename FormatContext>
+    auto format(const tyr::formalism::planning::MutableConjunctiveEffect& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "MutableConjunctiveEffect(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "num parent variables = ", value.num_parent_variables);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "num variables = ", value.num_variables);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "literals = ", value.literals);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
+
+template<>
+struct fmt::formatter<tyr::formalism::planning::MutableAction, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const tyr::formalism::planning::MutableAction& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "Action(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "num variables = ", value.num_variables);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "condition = ", value.condition);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "effects = ", value.effects);
+        }
+        os << tyr::print_indent << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
 
 #endif

@@ -1,21 +1,21 @@
 {
     "domains": {
         "blocksworld-large-simple": {
-            "domain_file": "classical/blocksworld-large-simple/domain.pddl",
+            "domain_file": "profiling/htg/blocksworld-large-simple/domain.pddl",
             "tasks": {
-                "profiling-1": "classical/blocksworld-large-simple/profiling-1.pddl"
+                "profiling-1": "profiling/htg/blocksworld-large-simple/p-100-2.pddl"
             }
         },
         "logistics-large-simple": {
-            "domain_file": "classical/logistics-large-simple/domain.pddl",
+            "domain_file": "profiling/htg/logistics-large-simple/domain.pddl",
             "tasks": {
-                "profiling-1": "classical/logistics-large-simple/profiling-1.pddl"
+                "profiling-1": "profiling/htg/logistics-large-simple/p-a1-c1-s1000-p10-t1-g1.pddl"
             }
         },
         "rovers-large-simple": {
-            "domain_file": "classical/rovers-large-simple/domain.pddl",
+            "domain_file": "profiling/htg/rovers-large-simple/domain.pddl",
             "tasks": {
-                "profiling-1": "classical/rovers-large-simple/profiling-1.pddl"
+                "profiling-1": "profiling/htg/rovers-large-simple/p-r1-w1000-o1-1-g2.pddl"
             }
         }
     },

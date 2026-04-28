@@ -21,10 +21,13 @@
 #include "tyr/common/declarations.hpp"
 #include "tyr/common/dynamic_bitset.hpp"
 #include "tyr/common/index_mixins.hpp"
+#include "tyr/common/types.hpp"
 #include "tyr/common/uint_mixins.hpp"
+#include "tyr/common/vector.hpp"
 
 #include <array>
 #include <fmt/core.h>
+#include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 #include <map>
@@ -34,6 +37,7 @@
 #include <set>
 #include <span>
 #include <sstream>
+#include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
@@ -43,212 +47,257 @@
 namespace tyr
 {
 
-/**
- * Forward declarations
- */
-
-/// --- operator<<
-
-template<typename T, size_t N>
-std::ostream& operator<<(std::ostream& os, const std::array<T, N>& el);
-
-template<typename Key, typename T, typename Compare, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const std::map<Key, T, Compare, Allocator>& el);
-
-template<typename T1, typename T2>
-std::ostream& operator<<(std::ostream& os, const std::pair<T1, T2>& el);
-
-template<typename Key, typename Compare, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const std::set<Key, Compare, Allocator>& el);
-
-template<typename... Ts>
-std::ostream& operator<<(std::ostream& os, const std::tuple<Ts...>& el);
-
-template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator>& el);
-
-template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const gtl::flat_hash_map<Key, T, Hash, KeyEqual, Allocator>& el);
-
-template<typename Key, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const std::unordered_set<Key, Hash, KeyEqual, Allocator>& el);
-
-template<typename Key, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const gtl::flat_hash_set<Key, Hash, KeyEqual, Allocator>& el);
-
-template<typename T, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const std::vector<T, Allocator>& el);
-
-template<typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& operator<<(std::ostream& os, const std::variant<Ts...>& el);
-
-template<typename Derived>
-std::ostream& operator<<(std::ostream& os, const IndexMixin<Derived>& el);
-
-template<typename Derived>
-std::ostream& operator<<(std::ostream& os, const FixedUintMixin<Derived>& el);
-
-template<std::unsigned_integral Block>
-std::ostream& operator<<(std::ostream& os, const BitsetSpan<Block>& el);
-
-inline std::ostream& operator<<(std::ostream& os, const std::monostate& el);
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const std::optional<T>& el);
-
-template<typename T, std::size_t Extent>
-std::ostream& operator<<(std::ostream& os, const std::span<T, Extent>& el);
-
-// cista
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const ::cista::optional<T>& el);
-
-template<typename C, typename T>
-std::ostream& operator<<(std::ostream& os, const View<::cista::optional<T>, C>& el);
-
-template<typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& operator<<(std::ostream& os, const ::cista::offset::variant<Ts...>& el);
-
-template<typename C, typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& operator<<(std::ostream& os, const View<::cista::offset::variant<Ts...>, C>& el);
-
-template<typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator>
-std::ostream& operator<<(std::ostream& os, const ::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>& el);
-
-template<typename C, typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator>
-std::ostream& operator<<(std::ostream& os, const View<::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>, C>& el);
-
-/// --- print
-
-template<typename T, size_t N>
-std::ostream& print(std::ostream& os, const std::array<T, N>& el);
-
-template<typename Key, typename T, typename Compare, typename Allocator>
-std::ostream& print(std::ostream& os, const std::map<Key, T, Compare, Allocator>& el);
-
-template<typename T1, typename T2>
-std::ostream& print(std::ostream& os, const std::pair<T1, T2>& el);
-
-template<typename Key, typename Compare, typename Allocator>
-std::ostream& print(std::ostream& os, const std::set<Key, Compare, Allocator>& el);
-
-template<typename... Ts>
-std::ostream& print(std::ostream& os, const std::tuple<Ts...>& el);
-
-template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& print(std::ostream& os, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator>& el);
-
-template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& print(std::ostream& os, const gtl::flat_hash_map<Key, T, Hash, KeyEqual, Allocator>& el);
-
-template<typename Key, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& print(std::ostream& os, const std::unordered_set<Key, Hash, KeyEqual, Allocator>& el);
-
-template<typename Key, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& print(std::ostream& os, const gtl::flat_hash_set<Key, Hash, KeyEqual, Allocator>& el);
-
-template<typename T, typename Allocator>
-std::ostream& print(std::ostream& os, const std::vector<T, Allocator>& el);
-
-template<typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& print(std::ostream& os, const std::variant<Ts...>& el);
-
-template<typename Derived>
-std::ostream& print(std::ostream& os, const IndexMixin<Derived>& el);
-
-template<typename Derived>
-std::ostream& print(std::ostream& os, const FixedUintMixin<Derived>& el);
-
-template<std::unsigned_integral Block>
-std::ostream& print(std::ostream& os, const BitsetSpan<Block>& el);
-
-inline std::ostream& print(std::ostream& os, const std::monostate& el);
-
-template<typename T>
-std::ostream& print(std::ostream& os, const std::optional<T>& el);
-
-template<typename T, std::size_t Extent>
-std::ostream& print(std::ostream& os, const std::span<T, Extent>& el);
-
-// cista
-
-template<typename T>
-std::ostream& print(std::ostream& os, const ::cista::optional<T>& el);
-
-template<typename C, typename T>
-std::ostream& print(std::ostream& os, const View<::cista::optional<T>, C>& el);
-
-template<typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& print(std::ostream& os, const ::cista::offset::variant<Ts...>& el);
-
-template<typename C, typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& print(std::ostream& os, const View<::cista::offset::variant<Ts...>, C>& el);
-
-template<typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator>
-std::ostream& print(std::ostream& os, const ::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>& el);
-
-template<typename C, typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator>
-std::ostream& print(std::ostream& os, const View<::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>, C>& el);
-
-/**
- * ADL-enabled stream helper: finds operator<< in the type's namespace
- */
-
-template<class T>
-std::ostream& print(std::ostream& os, const T& t)
-{
-    return os << t;
-}
-
-/**
- * Helpers to materialize strings
- */
-
-template<class T>
-concept PointerLike = requires(T t) {
-    { static_cast<bool>(t) } -> std::convertible_to<bool>;
-    { *t };
-};
-
-template<class T>
-concept OptionalLike = requires(T t) {
-    { t.has_value() } -> std::convertible_to<bool>;
-    { *t };
-};
-
 template<typename T>
 std::string to_string(const T& element)
 {
-    std::stringstream ss;
-
-    if constexpr (OptionalLike<T>)
-    {
-        if (element.has_value())
-            print(ss, *element);
-        else
-            ss << "<nullopt>";
-    }
-    else if constexpr (PointerLike<T>)
-    {
-        if (element)
-            print(ss, *element);
-        else
-            ss << "<nullptr>";
-    }
-    else
-    {
-        print(ss, element);
-    }
-
-    return ss.str();
+    return fmt::format("{}", element);
 }
+
+}  // namespace tyr
+
+namespace fmt
+{
+
+template<typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator, typename Char>
+struct range_format_kind<::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>, Char, void> : std::false_type
+{
+};
+
+template<typename Ptr, typename Char>
+struct range_format_kind<::cista::basic_string<Ptr>, Char, void> : std::false_type
+{
+};
+
+template<typename C, typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator, typename Char>
+struct range_format_kind<tyr::View<::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>, C>, Char, void> : std::false_type
+{
+};
+
+template<typename K, typename V, typename Allocator, typename Char>
+struct range_format_kind<gtl::flat_hash_map<K, V, tyr::Hash<K>, tyr::EqualTo<K>, Allocator>, Char, void> : std::false_type
+{
+};
+
+template<typename T>
+struct formatter<tyr::Index<T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const tyr::Index<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", tyr::uint_t(value));
+    }
+};
+
+template<typename T>
+struct formatter<std::optional<T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const std::optional<T>& value, FormatContext& ctx) const
+    {
+        if (value.has_value())
+            return fmt::format_to(ctx.out(), "{}", value.value());
+        return fmt::format_to(ctx.out(), "<nullopt>");
+    }
+};
+
+template<typename T>
+struct formatter<std::shared_ptr<T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const std::shared_ptr<T>& value, FormatContext& ctx) const
+    {
+        if (value)
+            return fmt::format_to(ctx.out(), "{}", *value);
+        return fmt::format_to(ctx.out(), "<nullptr>");
+    }
+};
+
+template<typename T, typename Deleter>
+struct formatter<std::unique_ptr<T, Deleter>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const std::unique_ptr<T, Deleter>& value, FormatContext& ctx) const
+    {
+        if (value)
+            return fmt::format_to(ctx.out(), "{}", *value);
+        return fmt::format_to(ctx.out(), "<nullptr>");
+    }
+};
+
+template<typename K, typename V, typename Allocator>
+struct formatter<gtl::flat_hash_map<K, V, tyr::Hash<K>, tyr::EqualTo<K>, Allocator>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const gtl::flat_hash_map<K, V, tyr::Hash<K>, tyr::EqualTo<K>, Allocator>& value, FormatContext& ctx) const
+    {
+        auto out = fmt::format_to(ctx.out(), "{{");
+        auto first = true;
+        for (const auto& [key, mapped] : value)
+        {
+            if (!first)
+                out = fmt::format_to(out, ", ");
+            first = false;
+            out = fmt::format_to(out, "{}: {}", key, mapped);
+        }
+        return fmt::format_to(out, "}}");
+    }
+};
+
+template<typename T>
+struct formatter<::cista::optional<T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const ::cista::optional<T>& value, FormatContext& ctx) const
+    {
+        if (value.has_value())
+            return fmt::format_to(ctx.out(), "{}", value.value());
+        return fmt::format_to(ctx.out(), "<nullopt>");
+    }
+};
+
+template<typename... Ts>
+    requires(sizeof...(Ts) > 0)
+struct formatter<::cista::offset::variant<Ts...>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const ::cista::offset::variant<Ts...>& value, FormatContext& ctx) const
+    {
+        return std::visit(
+            [&](auto&& arg)
+            {
+                return fmt::format_to(ctx.out(), "{}", arg);
+            },
+            value);
+    }
+};
+
+template<typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator>
+struct formatter<::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const ::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>& value, FormatContext& ctx) const
+    {
+        auto out = fmt::format_to(ctx.out(), "[");
+        bool first = true;
+        for (const auto& element : value)
+        {
+            if (!first)
+                out = fmt::format_to(out, ", ");
+            first = false;
+            out = fmt::format_to(out, "{}", element);
+        }
+        return fmt::format_to(out, "]");
+    }
+};
+
+template<typename C, typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator>
+struct formatter<tyr::View<::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>, C>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const tyr::View<::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>, C>& value, FormatContext& ctx) const
+    {
+        auto out = fmt::format_to(ctx.out(), "[");
+        bool first = true;
+        for (const auto& element : value)
+        {
+            if (!first)
+                out = fmt::format_to(out, ", ");
+            first = false;
+            out = fmt::format_to(out, "{}", element);
+        }
+        return fmt::format_to(out, "]");
+    }
+};
+
+template<typename C, typename T>
+struct formatter<tyr::View<::cista::optional<T>, C>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const tyr::View<::cista::optional<T>, C>& value, FormatContext& ctx) const
+    {
+        if (value.has_value())
+            return fmt::format_to(ctx.out(), "{}", value.value());
+        return fmt::format_to(ctx.out(), "<nullopt>");
+    }
+};
+
+template<typename C, typename... Ts>
+    requires(sizeof...(Ts) > 0)
+struct formatter<tyr::View<::cista::offset::variant<Ts...>, C>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const tyr::View<::cista::offset::variant<Ts...>, C>& value, FormatContext& ctx) const
+    {
+        return visit(
+            [&](auto&& arg)
+            {
+                return fmt::format_to(ctx.out(), "{}", arg);
+            },
+            value);
+    }
+};
+
+template<std::unsigned_integral Block>
+struct formatter<tyr::BitsetSpan<Block>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const tyr::BitsetSpan<Block>& value, FormatContext& ctx) const
+    {
+        auto out = fmt::format_to(ctx.out(), "{{");
+        size_t pos = value.find_first();
+        bool first = true;
+        while (pos != tyr::BitsetSpan<Block>::npos)
+        {
+            if (!first)
+                out = fmt::format_to(out, ", ");
+            first = false;
+            out = fmt::format_to(out, "{}", pos);
+            pos = value.find_next(pos);
+        }
+        return fmt::format_to(out, "}}");
+    }
+};
+
+template<>
+struct formatter<std::monostate, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const std::monostate&, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "monostate");
+    }
+};
+
+}  // namespace fmt
+
+namespace tyr
+{
 
 template<std::ranges::input_range Range>
 std::vector<std::string> to_strings(const Range& range)
@@ -259,353 +308,6 @@ std::vector<std::string> to_strings(const Range& range)
     for (const auto& element : range)
         result.push_back(to_string(element));
     return result;
-}
-
-/**
- * Definitions
- */
-
-template<std::ranges::input_range Range>
-std::ostream& print_range(std::ostream& os, const Range& r, std::string_view open = "[", std::string_view close = "]")
-{
-    os << open;
-    bool first = true;
-    for (auto const& x : r)
-    {
-        if (!first)
-            os << ", ";
-        first = false;
-        print(os, x);  // <-- calls your entire print stack, indentation-aware
-    }
-    os << close;
-    return os;
-}
-
-/// --- operator<<
-
-template<typename T, size_t N>
-std::ostream& operator<<(std::ostream& os, const std::array<T, N>& el)
-{
-    return print(os, el);
-}
-
-template<typename Key, typename T, typename Compare, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const std::map<Key, T, Compare, Allocator>& el)
-{
-    return print(os, el);
-}
-
-template<typename T1, typename T2>
-std::ostream& operator<<(std::ostream& os, const std::pair<T1, T2>& el)
-{
-    return print(os, el);
-}
-
-template<typename Key, typename Compare, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const std::set<Key, Compare, Allocator>& el)
-{
-    return print(os, el);
-}
-
-template<typename... Ts>
-std::ostream& operator<<(std::ostream& os, const std::tuple<Ts...>& el)
-{
-    return print(os, el);
-}
-
-template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator>& el)
-{
-    return print(os, el);
-}
-
-template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const gtl::flat_hash_map<Key, T, Hash, KeyEqual, Allocator>& el)
-{
-    return print(os, el);
-}
-
-template<typename Key, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const std::unordered_set<Key, Hash, KeyEqual, Allocator>& el)
-{
-    return print(os, el);
-}
-
-template<typename Key, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const gtl::flat_hash_set<Key, Hash, KeyEqual, Allocator>& el)
-{
-    return print(os, el);
-}
-
-template<typename T, typename Allocator>
-std::ostream& operator<<(std::ostream& os, const std::vector<T, Allocator>& el)
-{
-    return print(os, el);
-}
-
-template<typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& operator<<(std::ostream& os, const std::variant<Ts...>& el)
-{
-    return print(os, el);
-}
-
-template<typename Derived>
-std::ostream& operator<<(std::ostream& os, const IndexMixin<Derived>& el)
-{
-    return print(os, el);
-}
-
-template<typename Derived>
-std::ostream& operator<<(std::ostream& os, const FixedUintMixin<Derived>& el)
-{
-    return print(os, el);
-}
-
-template<std::unsigned_integral Block>
-std::ostream& operator<<(std::ostream& os, const BitsetSpan<Block>& el)
-{
-    return print(os, el);
-}
-
-inline std::ostream& operator<<(std::ostream& os, const std::monostate& el) { return print(os, el); }
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const std::optional<T>& el)
-{
-    return print(os, el);
-}
-
-template<typename T, std::size_t Extent>
-std::ostream& operator<<(std::ostream& os, const std::span<T, Extent>& el)
-{
-    return print(os, el);
-}
-
-// cista
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const ::cista::optional<T>& el)
-{
-    return print(os, el);
-}
-
-template<typename C, typename T>
-std::ostream& operator<<(std::ostream& os, const View<::cista::optional<T>, C>& el)
-{
-    return print(os, el);
-}
-
-template<typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& operator<<(std::ostream& os, const ::cista::offset::variant<Ts...>& el)
-{
-    return print(os, el);
-}
-
-template<typename C, typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& operator<<(std::ostream& os, const View<::cista::offset::variant<Ts...>, C>& el)
-{
-    return print(os, el);
-}
-
-template<typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator>
-std::ostream& operator<<(std::ostream& os, const ::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>& el)
-{
-    return print(os, el);
-}
-
-template<typename C, typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator>
-std::ostream& operator<<(std::ostream& os, const View<::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>, C>& el)
-{
-    return print(os, el);
-}
-
-/// --- print
-
-template<typename T, size_t N>
-std::ostream& print(std::ostream& os, const std::array<T, N>& el)
-{
-    return print_range(os, el, "<", ">");
-}
-
-template<typename Key, typename T, typename Compare, typename Allocator>
-std::ostream& print(std::ostream& os, const std::map<Key, T, Compare, Allocator>& el)
-{
-    return print_range(os, el, "{", "}");
-}
-
-template<typename T1, typename T2>
-std::ostream& print(std::ostream& os, const std::pair<T1, T2>& el)
-{
-    os << "<";
-    print(os, el.first);
-    os << ", ";
-    print(os, el.second);
-    os << ">";
-    return os;
-}
-
-template<typename Key, typename Compare, typename Allocator>
-std::ostream& print(std::ostream& os, const std::set<Key, Compare, Allocator>& el)
-{
-    return print_range(os, el, "{", "}");
-}
-
-template<typename... Ts>
-std::ostream& print(std::ostream& os, const std::tuple<Ts...>& tuple)
-{
-    os << "<";
-    if constexpr (sizeof...(Ts) > 0)
-    {
-        std::size_t n = 0;
-        std::apply([&os, &n](const Ts&... args) { ((os << (n++ == 0 ? "" : ", "), print(os, args)), ...); }, tuple);
-    }
-    os << ">";
-    return os;
-}
-
-template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& print(std::ostream& os, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator>& el)
-{
-    return print_range(os, el, "{", "}");
-}
-
-template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& print(std::ostream& os, const gtl::flat_hash_map<Key, T, Hash, KeyEqual, Allocator>& el)
-{
-    return print_range(os, el, "{", "}");
-}
-
-template<typename Key, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& print(std::ostream& os, const std::unordered_set<Key, Hash, KeyEqual, Allocator>& el)
-{
-    return print_range(os, el, "{", "}");
-}
-
-template<typename Key, typename Hash, typename KeyEqual, typename Allocator>
-std::ostream& print(std::ostream& os, const gtl::flat_hash_set<Key, Hash, KeyEqual, Allocator>& el)
-{
-    return print_range(os, el, "{", "}");
-}
-
-template<typename T, typename Allocator>
-std::ostream& print(std::ostream& os, const std::vector<T, Allocator>& el)
-{
-    return print_range(os, el, "[", "]");
-}
-
-template<typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& print(std::ostream& os, const std::variant<Ts...>& el)
-{
-    std::visit([&](auto&& arg) { print(os, arg); }, el);
-    return os;
-}
-
-template<typename Derived>
-std::ostream& print(std::ostream& os, const IndexMixin<Derived>& el)
-{
-    return print(os, el.get_value());
-}
-
-template<typename Derived>
-std::ostream& print(std::ostream& os, const FixedUintMixin<Derived>& el)
-{
-    return print(os, el.value());
-}
-
-template<std::unsigned_integral Block>
-std::ostream& print(std::ostream& os, const BitsetSpan<Block>& el)
-{
-    os << "{";
-
-    size_t pos = el.find_first();
-    bool first = true;
-
-    while (pos != BitsetSpan<Block>::npos)
-    {
-        if (!first)
-            os << ", ";
-        first = false;
-
-        os << pos;
-        pos = el.find_next(pos);
-    }
-
-    os << "}";
-    return os;
-}
-
-inline std::ostream& print(std::ostream& os, const std::monostate& el)
-{
-    os << "monostate";
-    return os;
-}
-
-template<typename T>
-std::ostream& print(std::ostream& os, const std::optional<T>& el)
-{
-    if (el.has_value())
-        print(os, el.value());
-    else
-        os << "<nullopt>";
-    return os;
-}
-
-template<typename T, std::size_t Extent>
-std::ostream& print(std::ostream& os, const std::span<T, Extent>& el)
-{
-    return print_range(os, el, "[", "]");
-}
-
-template<typename T>
-std::ostream& print(std::ostream& os, const ::cista::optional<T>& el)
-{
-    if (el.has_value())
-        print(os, el.value());
-    else
-        os << "<nullopt>";
-    return os;
-}
-
-template<typename C, typename T>
-std::ostream& print(std::ostream& os, const View<::cista::optional<T>, C>& el)
-{
-    if (el.has_value())
-        print(os, el.value());
-    else
-        os << "<nullopt>";
-    return os;
-}
-
-template<typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& print(std::ostream& os, const ::cista::offset::variant<Ts...>& el)
-{
-    std::visit([&](auto&& arg) { print(os, arg); }, el);
-    return os;
-}
-
-template<typename C, typename... Ts>
-    requires(sizeof...(Ts) > 0)
-std::ostream& print(std::ostream& os, const View<::cista::offset::variant<Ts...>, C>& el)
-{
-    visit([&os](auto&& arg) { print(os, arg); }, el);
-    return os;
-}
-
-template<typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator>
-std::ostream& print(std::ostream& os, const ::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>& el)
-{
-    return print_range(os, el, "[", "]");
-}
-
-template<typename C, typename T, template<typename> typename Ptr, bool IndexPointers, typename TemplateSizeType, class Allocator>
-std::ostream& print(std::ostream& os, const View<::cista::basic_vector<T, Ptr, IndexPointers, TemplateSizeType, Allocator>, C>& el)
-{
-    return print_range(os, el, "[", "]");
 }
 
 }

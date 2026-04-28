@@ -27,28 +27,41 @@
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 #include <ostream>
+#include <sstream>
 
-namespace tyr
+namespace fmt
 {
-/**
- * Forward declarations
- */
 
-namespace formalism::planning::invariant
+template<>
+struct formatter<tyr::formalism::planning::invariant::Invariant, char>
 {
-std::ostream& operator<<(std::ostream& os, const Invariant& el);
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const tyr::formalism::planning::invariant::Invariant& value, FormatContext& ctx) const
+    {
+        auto os = std::stringstream {};
+        os << "Invariant(\n";
+
+        {
+            tyr::IndentScope indent { os };
+
+            os << tyr::print_indent;
+            fmt::print(os, "num_rigid_variables = {},\n", value.num_rigid_variables);
+            os << tyr::print_indent;
+            fmt::print(os, "num_counted_variables = {},\n", value.num_counted_variables);
+            os << tyr::print_indent;
+            fmt::print(os, "atoms = {},\n", value.atoms);
+            os << tyr::print_indent;
+            fmt::print(os, "predicates = {},\n", value.predicates);
+        }
+
+        os << ")";
+
+        return fmt::format_to(ctx.out(), "{}", os.str());
+    }
+};
 
 }
 
-/**
- * Declarations
- */
-
-std::ostream& print(std::ostream& os, const formalism::planning::invariant::Invariant& el);
-
-namespace formalism::planning::invariant
-{
-std::ostream& operator<<(std::ostream& os, const Invariant& el);
-}
-}
 #endif

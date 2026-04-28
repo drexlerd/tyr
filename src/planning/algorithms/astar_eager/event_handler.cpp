@@ -26,6 +26,7 @@
 #include "tyr/planning/lifted_task/node.hpp"
 #include "tyr/planning/plan.hpp"
 
+#include <fmt/ostream.h>
 #include <iostream>
 
 namespace tyr::planning::astar_eager
@@ -33,9 +34,7 @@ namespace tyr::planning::astar_eager
 template<TaskKind Kind>
 void DefaultEventHandler<Kind>::on_expand_node_impl(const Node<Kind>& node) const
 {
-    std::cout << "[ASTAR] ----------------------------------------\n"
-              << "[ASTAR] Expanding node: " << node << "\n"
-              << std::endl;
+    fmt::print(std::cout, "[ASTAR] ----------------------------------------\n[ASTAR] Expanding node: {}\n\n", node);
 }
 
 template<TaskKind Kind>
@@ -46,8 +45,8 @@ void DefaultEventHandler<Kind>::on_expand_goal_node_impl(const Node<Kind>& node)
 template<TaskKind Kind>
 void DefaultEventHandler<Kind>::on_generate_node_impl(const LabeledNode<Kind>& labeled_succ_node) const
 {
-    std::cout << "[ASTAR] Action: " << labeled_succ_node.label << "\n";
-    std::cout << "[ASTAR] Successor node: " << labeled_succ_node.node << "\n" << std::endl;
+    fmt::print(std::cout, "[ASTAR] Action: {}\n", labeled_succ_node.label);
+    fmt::print(std::cout, "[ASTAR] Successor node: {}\n\n", labeled_succ_node.node);
 }
 
 template<TaskKind Kind>
@@ -87,7 +86,7 @@ void DefaultEventHandler<Kind>::on_finish_f_layer_impl(float_t f_value, uint64_t
 template<TaskKind Kind>
 void DefaultEventHandler<Kind>::on_end_search_impl() const
 {
-    std::cout << "[ASTAR] Search ended.\n" << this->get_statistics() << "\n" << this->get_progress_statistics() << std::endl;
+    fmt::print(std::cout, "[ASTAR] Search ended.\n{}\n{}\n", this->get_statistics(), this->get_progress_statistics());
 }
 
 template<TaskKind Kind>
@@ -97,7 +96,7 @@ void DefaultEventHandler<Kind>::on_solved_impl(const Plan<Kind>& plan) const
               << "[ASTAR] Plan cost: " << plan.get_cost() << "\n"
               << "[ASTAR] Plan length: " << plan.get_length() << std::endl;
 
-    std::cout << plan << std::endl;
+    fmt::print(std::cout, "{}\n", plan);
 }
 
 template<TaskKind Kind>

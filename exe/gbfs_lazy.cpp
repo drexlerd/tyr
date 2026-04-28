@@ -17,6 +17,7 @@
 
 #include <argparse/argparse.hpp>
 #include <chrono>
+#include <fmt/ostream.h>
 #include <fstream>
 #include <queue>
 #include <tyr/tyr.hpp>
@@ -84,10 +85,10 @@ int main(int argc, char** argv)
         auto lifted_task = planning::LiftedTask::create(parser.parse_task(problem_filepath));
 
         if (verbosity > 0)
-            std::cout << domain << std::endl;
+            fmt::print(std::cout, "{}\n", domain);
 
         if (verbosity > 0)
-            std::cout << *lifted_task << std::endl;
+            fmt::print(std::cout, "{}\n", *lifted_task);
 
         auto execution_context = ExecutionContext::create(num_worker_threads);
 
@@ -126,7 +127,7 @@ int main(int argc, char** argv)
                     std::cerr << "Error opening file!" << std::endl;
                     return 1;
                 }
-                plan_file << result.plan.value();
+                fmt::print(plan_file, "{}", result.plan.value());
                 plan_file.close();
             }
 
@@ -184,7 +185,7 @@ int main(int argc, char** argv)
                         std::cerr << "Error opening file!" << std::endl;
                         return 1;
                     }
-                    plan_file << result.plan.value();
+                    fmt::print(plan_file, "{}", result.plan.value());
                     plan_file.close();
                 }
 

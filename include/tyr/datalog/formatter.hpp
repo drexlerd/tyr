@@ -19,106 +19,53 @@
 #define TYR_DATALOG_FORMATTER_HPP_
 
 #include "tyr/common/formatter.hpp"
+#include "tyr/common/iostream.hpp"
 #include "tyr/datalog/declarations.hpp"
 #include "tyr/formalism/declarations.hpp"  // for Context
 
+#include <fmt/ostream.h>
 #include <iosfwd>  // for ostream
+#include <sstream>
 
-namespace tyr
+namespace fmt
 {
-extern std::ostream& print(std::ostream& os, const datalog::VertexAssignment& el);
 
-extern std::ostream& print(std::ostream& os, const datalog::EdgeAssignment& el);
+#define TYR_DECLARE_DATALOG_FORMATTER(Type)                                          \
+    template<>                                                                       \
+    struct formatter<Type, char>                                                     \
+    {                                                                                \
+        constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }      \
+        auto format(const Type& value, format_context& ctx) const -> format_context::iterator; \
+    }
 
-extern std::ostream& print(std::ostream& os, const datalog::details::Vertex& el);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::VertexAssignment);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::EdgeAssignment);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::Vertex);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::Edge);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::RuleToLiteralInfoMappings);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::RuleToLiteralPositionMappings);
 
-extern std::ostream& print(std::ostream& os, const datalog::details::Edge& el);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::StaticTag>);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::FluentTag>);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::StaticTag>);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::FluentTag>);
 
-extern std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralInfoMappings& el);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::RuleToLiteralInfos);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::StaticConsistencyGraph);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::kpkc::Vertex);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::kpkc::Edge);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::kpkc::VertexPartitions);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::kpkc::DeduplicatedAdjacencyMatrix);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::kpkc::PartitionedAdjacencyMatrix);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::ProgramStatistics);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::RuleStatistics);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::AggregatedRuleStatistics);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::RuleWorkerStatistics);
+TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::AggregatedRuleWorkerStatistics);
 
-extern std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralPositionMappings& el);
+#undef TYR_DECLARE_DATALOG_FORMATTER
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralInfo<T>& el);
 
-template<formalism::FactKind T>
-std::ostream& print(std::ostream& os, const datalog::details::TaggedRuleToLiteralInfos<T>& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::details::RuleToLiteralInfos& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::StaticConsistencyGraph& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::kpkc::Vertex& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::kpkc::Edge& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::kpkc::VertexPartitions& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::kpkc::DeduplicatedAdjacencyMatrix& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::kpkc::PartitionedAdjacencyMatrix& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::ProgramStatistics& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::RuleStatistics& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::AggregatedRuleStatistics& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::RuleWorkerStatistics& el);
-
-extern std::ostream& print(std::ostream& os, const datalog::AggregatedRuleWorkerStatistics& el);
-
-namespace datalog
-{
-namespace details
-{
-extern std::ostream& operator<<(std::ostream& os, const Vertex& el);
-
-extern std::ostream& operator<<(std::ostream& os, const Edge& el);
-
-extern std::ostream& operator<<(std::ostream& os, const RuleToLiteralInfoMappings& el);
-
-extern std::ostream& operator<<(std::ostream& os, const RuleToLiteralPositionMappings& el);
-
-template<formalism::FactKind T>
-std::ostream& operator<<(std::ostream& os, const RuleToLiteralInfo<T>& el);
-
-template<formalism::FactKind T>
-std::ostream& operator<<(std::ostream& os, const TaggedRuleToLiteralInfos<T>& el);
-
-extern std::ostream& operator<<(std::ostream& os, const RuleToLiteralInfos& el);
-}  // end namespace details
-
-extern std::ostream& operator<<(std::ostream& os, const VertexAssignment& el);
-
-extern std::ostream& operator<<(std::ostream& os, const EdgeAssignment& el);
-
-extern std::ostream& operator<<(std::ostream& os, const StaticConsistencyGraph& el);
-
-namespace kpkc
-{
-extern std::ostream& operator<<(std::ostream& os, const Vertex& el);
-
-extern std::ostream& operator<<(std::ostream& os, const Edge& el);
-
-extern std::ostream& operator<<(std::ostream& os, const VertexPartitions& el);
-
-extern std::ostream& operator<<(std::ostream& os, const DeduplicatedAdjacencyMatrix& el);
-
-extern std::ostream& operator<<(std::ostream& os, const PartitionedAdjacencyMatrix& el);
-
-}
-
-extern std::ostream& operator<<(std::ostream& os, const ProgramStatistics& el);
-
-extern std::ostream& operator<<(std::ostream& os, const RuleStatistics& el);
-
-extern std::ostream& operator<<(std::ostream& os, const AggregatedRuleStatistics& el);
-
-extern std::ostream& operator<<(std::ostream& os, const RuleWorkerStatistics& el);
-
-extern std::ostream& operator<<(std::ostream& os, const AggregatedRuleWorkerStatistics& el);
-}  // end namespace datalog
-}
+}  // namespace fmt
 
 #endif

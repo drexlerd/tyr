@@ -30,6 +30,8 @@
 #include "tyr/planning/lifted_task/unpacked_state.hpp"
 #include "tyr/planning/task_utils.hpp"
 
+#include <fmt/ostream.h>
+
 namespace tyr::planning
 {
 
@@ -95,16 +97,16 @@ public:
             return;
 
         std::cout << "[RPGHeuristic] Summary" << std::endl;
-        std::cout << m_workspace.statistics << std::endl;
+        fmt::print(std::cout, "{}\n", m_workspace.statistics);
         auto rule_statistics = std::vector<datalog::RuleStatistics> {};
         for (const auto& ws_rule : m_workspace.rules)
             rule_statistics.push_back(ws_rule->common.statistics);
-        std::cout << datalog::compute_aggregated_rule_statistics(rule_statistics) << std::endl;
+        fmt::print(std::cout, "{}\n", datalog::compute_aggregated_rule_statistics(rule_statistics));
         auto rule_worker_statistics = std::vector<datalog::RuleWorkerStatistics> {};
         for (const auto& ws_rule : m_workspace.rules)
             for (const auto& worker : ws_rule->worker)
                 rule_worker_statistics.push_back(worker.solve.statistics);
-        std::cout << datalog::compute_aggregated_rule_worker_statistics(rule_worker_statistics) << std::endl;
+        fmt::print(std::cout, "{}\n", datalog::compute_aggregated_rule_worker_statistics(rule_worker_statistics));
     }
 
 protected:

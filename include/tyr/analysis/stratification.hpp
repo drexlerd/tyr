@@ -18,7 +18,7 @@
 #ifndef TYR_ANALYSIS_STRATIFICATION_HPP_
 #define TYR_ANALYSIS_STRATIFICATION_HPP_
 
-#include "tyr/common/formatter.hpp"                // for operator<<
+#include "tyr/common/formatter.hpp"
 #include "tyr/common/types.hpp"                    // for IndexList
 #include "tyr/formalism/datalog/declarations.hpp"  // for Program (ptr only), Rule
 #include "tyr/formalism/datalog/repository.hpp"
