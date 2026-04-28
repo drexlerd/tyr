@@ -305,31 +305,110 @@ struct formatter<tyr::formalism::datalog::GroundFunctionTermValueView<T>, char>
     }
 };
 
-#define TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(Type)                                \
-    template<>                                                                       \
-    struct formatter<Type, char>                                                     \
-    {                                                                                \
-        constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }      \
-        auto format(const Type& value, format_context& ctx) const -> format_context::iterator; \
-    }
+template<>
+struct formatter<tyr::formalism::datalog::VariableDependencyGraph, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::formalism::datalog::VariableDependencyGraph& value, format_context& ctx) const -> format_context::iterator;
+};
 
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::VariableDependencyGraph);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::FunctionExpression>);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::FunctionExpressionView);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::GroundFunctionExpression>);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::GroundFunctionExpressionView);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::ConjunctiveCondition>);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::ConjunctiveConditionView);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::Rule>);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::RuleView);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::GroundConjunctiveCondition>);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::GroundConjunctiveConditionView);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::GroundRule>);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::GroundRuleView);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::Data<tyr::formalism::datalog::Program>);
-TYR_DECLARE_FORMALISM_DATALOG_FORMATTER(tyr::formalism::datalog::ProgramView);
+template<>
+struct formatter<tyr::Data<tyr::formalism::datalog::FunctionExpression>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::Data<tyr::formalism::datalog::FunctionExpression>& value, format_context& ctx) const -> format_context::iterator;
+};
 
-#undef TYR_DECLARE_FORMALISM_DATALOG_FORMATTER
+template<>
+struct formatter<tyr::formalism::datalog::FunctionExpressionView, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::formalism::datalog::FunctionExpressionView& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::Data<tyr::formalism::datalog::GroundFunctionExpression>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::Data<tyr::formalism::datalog::GroundFunctionExpression>& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::formalism::datalog::GroundFunctionExpressionView, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::formalism::datalog::GroundFunctionExpressionView& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::Data<tyr::formalism::datalog::ConjunctiveCondition>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::Data<tyr::formalism::datalog::ConjunctiveCondition>& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::formalism::datalog::ConjunctiveConditionView, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::formalism::datalog::ConjunctiveConditionView& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::Data<tyr::formalism::datalog::Rule>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::Data<tyr::formalism::datalog::Rule>& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::formalism::datalog::RuleView, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::formalism::datalog::RuleView& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::Data<tyr::formalism::datalog::GroundConjunctiveCondition>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::Data<tyr::formalism::datalog::GroundConjunctiveCondition>& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::formalism::datalog::GroundConjunctiveConditionView, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::formalism::datalog::GroundConjunctiveConditionView& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::Data<tyr::formalism::datalog::GroundRule>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::Data<tyr::formalism::datalog::GroundRule>& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::formalism::datalog::GroundRuleView, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::formalism::datalog::GroundRuleView& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::Data<tyr::formalism::datalog::Program>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::Data<tyr::formalism::datalog::Program>& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::formalism::datalog::ProgramView, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::formalism::datalog::ProgramView& value, format_context& ctx) const -> format_context::iterator;
+};
 
 }  // namespace fmt
 #endif

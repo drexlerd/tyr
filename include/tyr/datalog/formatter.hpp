@@ -30,40 +30,159 @@
 namespace fmt
 {
 
-#define TYR_DECLARE_DATALOG_FORMATTER(Type)                                          \
-    template<>                                                                       \
-    struct formatter<Type, char>                                                     \
-    {                                                                                \
-        constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }      \
-        auto format(const Type& value, format_context& ctx) const -> format_context::iterator; \
-    }
+template<>
+struct formatter<tyr::datalog::VertexAssignment, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::VertexAssignment& value, format_context& ctx) const -> format_context::iterator;
+};
 
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::VertexAssignment);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::EdgeAssignment);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::Vertex);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::Edge);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::RuleToLiteralInfoMappings);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::RuleToLiteralPositionMappings);
+template<>
+struct formatter<tyr::datalog::EdgeAssignment, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::EdgeAssignment& value, format_context& ctx) const -> format_context::iterator;
+};
 
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::StaticTag>);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::FluentTag>);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::StaticTag>);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::FluentTag>);
+template<>
+struct formatter<tyr::datalog::details::Vertex, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::details::Vertex& value, format_context& ctx) const -> format_context::iterator;
+};
 
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::details::RuleToLiteralInfos);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::StaticConsistencyGraph);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::kpkc::Vertex);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::kpkc::Edge);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::kpkc::VertexPartitions);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::kpkc::DeduplicatedAdjacencyMatrix);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::kpkc::PartitionedAdjacencyMatrix);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::ProgramStatistics);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::RuleStatistics);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::AggregatedRuleStatistics);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::RuleWorkerStatistics);
-TYR_DECLARE_DATALOG_FORMATTER(tyr::datalog::AggregatedRuleWorkerStatistics);
+template<>
+struct formatter<tyr::datalog::details::Edge, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::details::Edge& value, format_context& ctx) const -> format_context::iterator;
+};
 
-#undef TYR_DECLARE_DATALOG_FORMATTER
+template<>
+struct formatter<tyr::datalog::details::RuleToLiteralInfoMappings, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::details::RuleToLiteralInfoMappings& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::details::RuleToLiteralPositionMappings, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::details::RuleToLiteralPositionMappings& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::StaticTag>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::StaticTag>& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::FluentTag>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::FluentTag>& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::StaticTag>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::StaticTag>& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::FluentTag>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::FluentTag>& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::details::RuleToLiteralInfos, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::details::RuleToLiteralInfos& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::StaticConsistencyGraph, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::StaticConsistencyGraph& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::kpkc::Vertex, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::kpkc::Vertex& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::kpkc::Edge, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::kpkc::Edge& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::kpkc::VertexPartitions, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::kpkc::VertexPartitions& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::kpkc::DeduplicatedAdjacencyMatrix, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::kpkc::DeduplicatedAdjacencyMatrix& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::kpkc::PartitionedAdjacencyMatrix, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::kpkc::PartitionedAdjacencyMatrix& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::ProgramStatistics, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::ProgramStatistics& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::RuleStatistics, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::RuleStatistics& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::AggregatedRuleStatistics, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::AggregatedRuleStatistics& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::RuleWorkerStatistics, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::RuleWorkerStatistics& value, format_context& ctx) const -> format_context::iterator;
+};
+
+template<>
+struct formatter<tyr::datalog::AggregatedRuleWorkerStatistics, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto format(const tyr::datalog::AggregatedRuleWorkerStatistics& value, format_context& ctx) const -> format_context::iterator;
+};
 
 
 }  // namespace fmt
