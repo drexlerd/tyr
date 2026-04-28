@@ -34,8 +34,6 @@ struct ActionAlignment
 {
     MutableAtom<FluentTag> pattern;
     ActionSubstitution sigma;
-
-    friend bool operator==(const ActionAlignment&, const ActionAlignment&) = default;
 };
 
 bool covers(const Invariant& inv, const MutableAtom<FluentTag>& element);

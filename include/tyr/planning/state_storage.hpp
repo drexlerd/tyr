@@ -32,7 +32,7 @@ namespace tyr::planning
  */
 
 template<TaskKind Kind, typename Tag>
-class StateStorageContext;
+struct StateStorageContext;
 
 /**
  * Backend

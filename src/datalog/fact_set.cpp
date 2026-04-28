@@ -406,8 +406,8 @@ void TaggedFactSets<T>::reset() noexcept
     function.reset();
 }
 
-template class TaggedFactSets<f::StaticTag>;
-template class TaggedFactSets<f::FluentTag>;
+template struct TaggedFactSets<f::StaticTag>;
+template struct TaggedFactSets<f::FluentTag>;
 
 /**
  * FactSets

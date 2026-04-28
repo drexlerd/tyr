@@ -563,8 +563,8 @@ void TaggedAssignmentSets<T>::reset() noexcept
     function.reset();
 }
 
-template class TaggedAssignmentSets<f::StaticTag>;
-template class TaggedAssignmentSets<f::FluentTag>;
+template struct TaggedAssignmentSets<f::StaticTag>;
+template struct TaggedAssignmentSets<f::FluentTag>;
 
 /**
  * AssignmentSets

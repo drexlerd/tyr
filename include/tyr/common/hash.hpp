@@ -30,6 +30,7 @@
 #include <optional>
 #include <set>
 #include <span>
+#include <type_traits>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -54,10 +55,22 @@ inline size_t hash_combine(const Ts&... rest) noexcept;
 ///
 /// Forwards to std::hash by default.
 /// Specializations can be injected into the namespace.
-template<typename T>
+template<typename T = void>
 struct Hash
 {
     size_t operator()(const T& el) const noexcept { return std::hash<T> {}(el); }
+};
+
+template<>
+struct Hash<void>
+{
+    using is_transparent = void;
+
+    template<typename T>
+    size_t operator()(const T& el) const noexcept
+    {
+        return Hash<std::remove_cvref_t<T>> {}(el);
+    }
 };
 
 template<>

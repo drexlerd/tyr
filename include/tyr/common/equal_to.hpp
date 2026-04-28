@@ -41,10 +41,22 @@ namespace tyr
 ///
 /// Forwards to std::equal_to by default.
 /// Specializations can be injected into the namespace.
-template<typename T>
+template<typename T = void>
 struct EqualTo
 {
     bool operator()(const T& lhs, const T& rhs) const noexcept { return std::equal_to<T> {}(lhs, rhs); }
+};
+
+template<>
+struct EqualTo<void>
+{
+    using is_transparent = void;
+
+    template<typename T, typename U>
+    bool operator()(const T& lhs, const U& rhs) const noexcept
+    {
+        return EqualTo<std::remove_cvref_t<T>> {}(lhs, rhs);
+    }
 };
 
 template<>

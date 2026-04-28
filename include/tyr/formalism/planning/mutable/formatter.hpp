@@ -21,11 +21,12 @@
 #include "tyr/common/formatter.hpp"
 #include "tyr/common/iostream.hpp"
 #include "tyr/formalism/formatter.hpp"
-#include "tyr/formalism/planning/mutable/action.hpp"
 #include "tyr/formalism/planning/mutable/atom.hpp"
-#include "tyr/formalism/planning/mutable/conditional_effect.hpp"
+#include "tyr/formalism/planning/mutable/literal.hpp"
 #include "tyr/formalism/planning/mutable/conjunctive_condition.hpp"
 #include "tyr/formalism/planning/mutable/conjunctive_effect.hpp"
+#include "tyr/formalism/planning/mutable/conditional_effect.hpp"
+#include "tyr/formalism/planning/mutable/action.hpp"
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
