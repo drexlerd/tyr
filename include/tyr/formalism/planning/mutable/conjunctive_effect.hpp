@@ -57,12 +57,12 @@ struct MutableConjunctiveEffect
 
     friend bool operator==(const MutableConjunctiveEffect& lhs, const MutableConjunctiveEffect& rhs)
     {
-        return lhs.identifying_members() == rhs.identifying_members();
+        return EqualTo<MutableConjunctiveEffect> {}(lhs, rhs);
     }
 
     friend bool operator<(const MutableConjunctiveEffect& lhs, const MutableConjunctiveEffect& rhs)
     {
-        return lhs.identifying_members() < rhs.identifying_members();
+        return Less<MutableConjunctiveEffect> {}(lhs, rhs);
     }
 };
 

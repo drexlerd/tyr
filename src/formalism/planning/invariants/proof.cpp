@@ -80,10 +80,10 @@ std::vector<EffectAtomRef> collect_relevant_effect_atoms(const MutableAction& op
     return result;
 }
 
-std::map<PredicateView<FluentTag>, MutableLiteralList<FluentTag>>
+Map<PredicateView<FluentTag>, MutableLiteralList<FluentTag>>
 build_add_effect_produced_by_pred(const MutableAction& op, const MutableConditionalEffect& add_effect, const MutableAtom<FluentTag>& add_atom)
 {
-    std::map<PredicateView<FluentTag>, MutableLiteralList<FluentTag>> produced_by_pred;
+    Map<PredicateView<FluentTag>, MutableLiteralList<FluentTag>> produced_by_pred;
 
     for (const auto& lit : op.condition.fluent_literals)
         produced_by_pred[lit.atom.predicate].push_back(lit);
@@ -137,7 +137,7 @@ ConstraintSystem make_param_system(const MutableAction& op, const MutableConditi
             const auto r1 = representative_of(t1);
             const auto r2 = representative_of(t2);
 
-            if (r1 != r2)
+            if (!tyr::EqualTo<ConstraintTerm> {}(r1, r2))
                 param_system.add_inequality_disjunction(InequalityDisjunction({ { t1, t2 } }));
         }
     }
@@ -149,7 +149,7 @@ std::optional<ConstraintSystem> make_balance_system(const MutableConditionalEffe
                                                     const MutableAtom<FluentTag>& add_atom,
                                                     const MutableConditionalEffect& del_effect,
                                                     const MutableAtom<FluentTag>& del_atom,
-                                                    const std::map<PredicateView<FluentTag>, MutableLiteralList<FluentTag>>& produced_by_pred)
+                                                    const Map<PredicateView<FluentTag>, MutableLiteralList<FluentTag>>& produced_by_pred)
 {
     ConstraintSystem system;
 

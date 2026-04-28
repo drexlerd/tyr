@@ -43,9 +43,9 @@ struct MutableLiteral
 
     auto identifying_members() const noexcept { return std::tie(atom, polarity); }
 
-    friend bool operator==(const MutableLiteral& lhs, const MutableLiteral& rhs) { return lhs.identifying_members() == rhs.identifying_members(); }
+    friend bool operator==(const MutableLiteral& lhs, const MutableLiteral& rhs) { return EqualTo<MutableLiteral> {}(lhs, rhs); }
 
-    friend bool operator<(const MutableLiteral& lhs, const MutableLiteral& rhs) { return lhs.identifying_members() < rhs.identifying_members(); }
+    friend bool operator<(const MutableLiteral& lhs, const MutableLiteral& rhs) { return Less<MutableLiteral> {}(lhs, rhs); }
 };
 
 template<FactKind T>

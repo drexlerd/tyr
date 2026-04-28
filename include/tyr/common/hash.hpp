@@ -113,9 +113,6 @@ struct Hash<::cista::optional<T>>
     }
 };
 
-/// @brief Hash specialization for double.
-///
-/// Returns fixed salt for NaN.
 template<std::floating_point T>
 struct Hash<T>
 {
@@ -128,10 +125,6 @@ struct Hash<T>
     }
 };
 
-/// @brief Hash specialization for std::array.
-///
-/// Combines the hashes of all elements in the array.
-/// @tparam T
 template<typename T, size_t N>
 struct Hash<std::array<T, N>>
 {
@@ -144,20 +137,12 @@ struct Hash<std::array<T, N>>
     }
 };
 
-/// @brief Hash specialization for std::reference_wrapper.
-///
-/// Hashes whatever .get() returns.
-/// @tparam T
 template<typename T>
 struct Hash<std::reference_wrapper<T>>
 {
     size_t operator()(const std::reference_wrapper<T>& ref) const noexcept { return Hash<std::remove_cvref_t<T>> {}(ref.get()); }
 };
 
-/// @brief Hash specialization for std::set.
-///
-/// Combines the hashes of all elements in the set.
-/// @tparam T
 template<typename Key, typename Compare, typename Allocator>
 struct Hash<std::set<Key, Compare, Allocator>>
 {
@@ -170,11 +155,6 @@ struct Hash<std::set<Key, Compare, Allocator>>
     }
 };
 
-/// @brief Hash specialization for std::map.
-///
-/// Combines the hashes of all elements in the map.
-/// @tparam K is the key type.
-/// @tparam V is the value type
 template<typename Key, typename T, typename Compare, typename Allocator>
 struct Hash<std::map<Key, T, Compare, Allocator>>
 {
@@ -187,10 +167,6 @@ struct Hash<std::map<Key, T, Compare, Allocator>>
     }
 };
 
-/// @brief Hash specialization for std::vector.
-///
-/// Combines the hashes of all elements in the vector.
-/// @tparam T
 template<typename T, typename Allocator>
 struct Hash<std::vector<T, Allocator>>
 {
@@ -203,21 +179,12 @@ struct Hash<std::vector<T, Allocator>>
     }
 };
 
-/// @brief Hash specialization for a std::pair.
-///
-/// Combines the hashes for first and second.
-/// @tparam T1
-/// @tparam T2
 template<typename T1, typename T2>
 struct Hash<std::pair<T1, T2>>
 {
     size_t operator()(const std::pair<T1, T2>& pair) const noexcept { return hash_combine(pair.first, pair.second); }
 };
 
-/// @brief Hash specialization for a std::tuple.
-///
-/// Combines the hashes of all elements in the tuple.
-/// @tparam ...Ts
 template<typename... Ts>
 struct Hash<std::tuple<Ts...>>
 {
@@ -229,10 +196,6 @@ struct Hash<std::tuple<Ts...>>
     }
 };
 
-/// @brief Hash specialization for a std::variant.
-///
-/// Hashes the underlying object.
-/// @tparam ...Ts
 template<typename... Ts>
 struct Hash<std::variant<Ts...>>
 {
@@ -242,19 +205,12 @@ struct Hash<std::variant<Ts...>>
     }
 };
 
-/// @brief Hash specialization for a std::optional.
-///
-/// Hashes the underlying object if it exists, otherwise, returns 0.
-/// @tparam T
 template<typename T>
 struct Hash<std::optional<T>>
 {
     size_t operator()(const std::optional<T>& optional) const noexcept { return optional.has_value() ? Hash<std::remove_cvref_t<T>> {}(optional.value()) : 0; }
 };
 
-/// @brief Hash specialization for a std::span.
-///
-/// Combines the hashes of the the pointer and size.
 template<typename T, std::size_t Extent>
 struct Hash<std::span<T, Extent>>
 {
@@ -267,10 +223,6 @@ struct Hash<std::span<T, Extent>>
     }
 };
 
-/// @brief std::hash specialization for types T that satisfy `Identifiable`.
-/// Dereferences the underlying pointer before forwarding the call to the std::hash
-/// specialization of `IdentifiableMembersView` of T to compute a hash based on all members.
-/// @tparam T is the type.
 template<typename T>
 struct Hash<ObserverPtr<T>>
 {
@@ -289,9 +241,6 @@ struct Hash<BitsetSpan<Block>>
     }
 };
 
-/// @brief std::hash specialization for an `IdentifiableMembersView`
-/// that computes a hash based on all members.
-/// @tparam ...Ts are the types of all members.
 template<Identifiable T>
 struct Hash<T>
 {
@@ -310,10 +259,6 @@ struct Hash<T>
  * Definitions
  */
 
-/// @brief Computes that hash for and object and combines it into the seed using Boost's hash combine function.
-/// @tparam T is the type of the object.
-/// @param seed is the seed.
-/// @param value is the object.
 template<typename T>
 inline void hash_combine(size_t& seed, const T& value) noexcept
 {

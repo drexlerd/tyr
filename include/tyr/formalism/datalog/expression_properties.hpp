@@ -18,6 +18,7 @@
 #ifndef TYR_FORMALISM_DATALOG_EXPRESSION_PROPERTIES_HPP_
 #define TYR_FORMALISM_DATALOG_EXPRESSION_PROPERTIES_HPP_
 
+#include "tyr/common/comparators.hpp"
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
@@ -114,7 +115,7 @@ inline auto collect_fterms(LiftedBooleanOperatorView element)
     auto result = UnorderedSet<FunctionTermView<T>> {};
     visit([&](auto&& arg) { collect_fterms(arg, result); }, element.get_variant());
     auto result_vec = std::vector<FunctionTermView<T>>(result.begin(), result.end());
-    std::sort(result_vec.begin(), result_vec.end());
+    std::sort(result_vec.begin(), result_vec.end(), Less<FunctionTermView<T>> {});
     return result_vec;
 }
 }

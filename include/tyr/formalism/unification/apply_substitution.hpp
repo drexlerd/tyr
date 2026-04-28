@@ -18,6 +18,7 @@
 #ifndef TYR_FORMALISM_UNIFICATION_APPLY_SUBSTITUTION_HPP_
 #define TYR_FORMALISM_UNIFICATION_APPLY_SUBSTITUTION_HPP_
 
+#include "tyr/common/equal_to.hpp"
 #include "tyr/formalism/unification/structure_traits.hpp"
 #include "tyr/formalism/unification/structure_traits_impl.hpp"
 #include "tyr/formalism/unification/substitution.hpp"
@@ -118,7 +119,7 @@ template<TermSubstitution S1, TermSubstitution S2>
         auto value = Data<Term>(parameter);
         value = apply_substitution_fixpoint(apply_substitution_fixpoint(value, inner), outer);
 
-        if (value != Data<Term>(parameter))
+        if (!EqualTo<Data<Term>> {}(value, Data<Term>(parameter)))
         {
             [[maybe_unused]] const auto inserted = result.assign(parameter, value);
             assert(inserted);

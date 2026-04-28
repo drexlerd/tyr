@@ -78,7 +78,7 @@ bool instantiate_matches_ground_atom(const MutableAtom<FluentTag>& pattern,
                                      std::optional<Index<Object>> counted_value,
                                      GroundAtomView<FluentTag> ground_atom)
 {
-    if (pattern.predicate != ground_atom.get_predicate())
+    if (!tyr::EqualTo<PredicateView<FluentTag>> {}(pattern.predicate, ground_atom.get_predicate()))
         return false;
     if (pattern.terms.size() != ground_atom.get_row().get_objects().size())
         return false;
@@ -154,7 +154,7 @@ instantiate_group(const Invariant& inv, const std::vector<Index<Object>>& rigid_
 
         for (const auto atom : all_atoms)
         {
-            if (pattern.predicate != atom.get_predicate())
+            if (!tyr::EqualTo<PredicateView<FluentTag>> {}(pattern.predicate, atom.get_predicate()))
                 continue;
             if (pattern.terms.size() != atom.get_row().get_objects().size())
                 continue;
@@ -186,7 +186,7 @@ struct PrecomputedGroup
 
     auto identifying_members() const noexcept { return std::tie(inv_index, rigid_values, atoms); }
 
-    friend bool operator<(const PrecomputedGroup& lhs, const PrecomputedGroup& rhs) { return lhs.identifying_members() < rhs.identifying_members(); }
+    friend bool operator<(const PrecomputedGroup& lhs, const PrecomputedGroup& rhs) { return tyr::Less<PrecomputedGroup> {}(lhs, rhs); }
 };
 
 struct GroupKey
@@ -197,14 +197,14 @@ struct GroupKey
     auto identifying_members() const noexcept { return std::tie(invariant_index, rigid_values); }
 
     friend bool operator==(const GroupKey&, const GroupKey&) = default;
-    friend bool operator<(const GroupKey& lhs, const GroupKey& rhs) { return lhs.identifying_members() < rhs.identifying_members(); }
+    friend bool operator<(const GroupKey& lhs, const GroupKey& rhs) { return tyr::Less<GroupKey> {}(lhs, rhs); }
 };
 
 std::vector<PrecomputedGroup>
 precompute_groups(const GroundAtomViewList<FluentTag>& initial_atoms, const GroundAtomViewList<FluentTag>& all_atoms, const InvariantList& invariants)
 {
     std::vector<PrecomputedGroup> groups;
-    std::set<GroupKey> seen_keys;
+    Set<GroupKey> seen_keys;
 
     for (size_t inv_index = 0; inv_index < invariants.size(); ++inv_index)
     {
@@ -217,7 +217,7 @@ precompute_groups(const GroundAtomViewList<FluentTag>& initial_atoms, const Grou
 
             for (const auto& part : inv.atoms)
             {
-                if (part.predicate != atom.get_predicate())
+                if (!tyr::EqualTo<PredicateView<FluentTag>> {}(part.predicate, atom.get_predicate()))
                     continue;
                 if (!initial_atom_matches_part(inv, part, atom))
                     continue;
@@ -237,14 +237,17 @@ precompute_groups(const GroundAtomViewList<FluentTag>& initial_atoms, const Grou
                 size_t initial_count = 0;
                 for (const auto gatom : instantiated_group)
                 {
-                    if (std::find(initial_atoms.begin(), initial_atoms.end(), gatom) != initial_atoms.end())
+                    if (std::find_if(initial_atoms.begin(),
+                                     initial_atoms.end(),
+                                     [&](const auto initial_atom) { return tyr::EqualTo<GroundAtomView<FluentTag>> {}(initial_atom, gatom); })
+                        != initial_atoms.end())
                         ++initial_count;
                 }
 
                 if (initial_count > 1)
                     continue;
 
-                std::sort(instantiated_group.begin(), instantiated_group.end());
+                std::sort(instantiated_group.begin(), instantiated_group.end(), tyr::Less<GroundAtomView<FluentTag>> {});
 
                 groups.push_back(PrecomputedGroup {
                     .inv_index = inv_index,
@@ -356,7 +359,7 @@ compute_mutex_groups(const GroundAtomViewList<FluentTag>& initial_atoms, const G
         assert(uint_t(all_atoms[i].get_index()) == i);
 
     auto groups = precompute_groups(initial_atoms, all_atoms, invariants);
-    std::sort(groups.begin(), groups.end());
+    std::sort(groups.begin(), groups.end(), tyr::Less<PrecomputedGroup> {});
 
     return choose_groups_greedily(groups, all_atoms);
 }

@@ -35,6 +35,8 @@ static_assert(fu::TermUnifiableStructure<Data<f::Term>>);
 Data<f::Term> parameter(size_t index) { return Data<f::Term>(f::ParameterIndex(index)); }
 
 Data<f::Term> object(size_t index) { return Data<f::Term>(Index<f::Object>(index)); }
+
+void expect_term_eq(const Data<f::Term>& lhs, const Data<f::Term>& rhs) { EXPECT_TRUE(EqualTo<Data<f::Term>> {}(lhs, rhs)); }
 }
 
 TEST(TyrTests, TyrFormalismUnificationApplySubstitutionFixpoint)
@@ -44,10 +46,10 @@ TEST(TyrTests, TyrFormalismUnificationApplySubstitutionFixpoint)
     EXPECT_TRUE(sigma.assign(f::ParameterIndex(0), parameter(1)));
     EXPECT_TRUE(sigma.assign(f::ParameterIndex(1), object(7)));
 
-    EXPECT_EQ(fu::apply_substitution(parameter(0), sigma), parameter(1));
-    EXPECT_EQ(fu::apply_substitution_once(parameter(0), sigma), parameter(1));
-    EXPECT_EQ(fu::apply_substitution_fixpoint(parameter(0), sigma), object(7));
-    EXPECT_EQ(fu::apply_substitution_fixpoint(parameter(2), sigma), parameter(2));
+    expect_term_eq(fu::apply_substitution(parameter(0), sigma), parameter(1));
+    expect_term_eq(fu::apply_substitution_once(parameter(0), sigma), parameter(1));
+    expect_term_eq(fu::apply_substitution_fixpoint(parameter(0), sigma), object(7));
+    expect_term_eq(fu::apply_substitution_fixpoint(parameter(2), sigma), parameter(2));
 }
 
 TEST(TyrTests, TyrFormalismUnificationApplySubstitutionFixpointStopsOnCycle)
@@ -57,8 +59,8 @@ TEST(TyrTests, TyrFormalismUnificationApplySubstitutionFixpointStopsOnCycle)
     EXPECT_TRUE(sigma.assign(f::ParameterIndex(0), parameter(1)));
     EXPECT_TRUE(sigma.assign(f::ParameterIndex(1), parameter(0)));
 
-    EXPECT_EQ(fu::apply_substitution_fixpoint(parameter(0), sigma), parameter(0));
-    EXPECT_EQ(fu::apply_substitution_fixpoint(parameter(1), sigma), parameter(1));
+    expect_term_eq(fu::apply_substitution_fixpoint(parameter(0), sigma), parameter(0));
+    expect_term_eq(fu::apply_substitution_fixpoint(parameter(1), sigma), parameter(1));
 }
 
 TEST(TyrTests, TyrFormalismUnificationComposeSubstitutions)
@@ -80,13 +82,13 @@ TEST(TyrTests, TyrFormalismUnificationComposeSubstitutions)
     ASSERT_TRUE(composed[f::ParameterIndex(1)].has_value());
     ASSERT_TRUE(composed[f::ParameterIndex(2)].has_value());
 
-    EXPECT_EQ(*composed[f::ParameterIndex(0)], object(4));
-    EXPECT_EQ(*composed[f::ParameterIndex(1)], object(4));
-    EXPECT_EQ(*composed[f::ParameterIndex(2)], object(9));
+    expect_term_eq(*composed[f::ParameterIndex(0)], object(4));
+    expect_term_eq(*composed[f::ParameterIndex(1)], object(4));
+    expect_term_eq(*composed[f::ParameterIndex(2)], object(9));
 
-    EXPECT_EQ(fu::apply_substitution_fixpoint(parameter(0), composed), object(4));
-    EXPECT_EQ(fu::apply_substitution_fixpoint(parameter(1), composed), object(4));
-    EXPECT_EQ(fu::apply_substitution_fixpoint(parameter(2), composed), object(9));
+    expect_term_eq(fu::apply_substitution_fixpoint(parameter(0), composed), object(4));
+    expect_term_eq(fu::apply_substitution_fixpoint(parameter(1), composed), object(4));
+    expect_term_eq(fu::apply_substitution_fixpoint(parameter(2), composed), object(9));
 }
 
 TEST(TyrTests, TyrFormalismUnificationSubstitutionTryGet)
@@ -102,7 +104,7 @@ TEST(TyrTests, TyrFormalismUnificationSubstitutionTryGet)
     auto* slot = sigma.try_get(f::ParameterIndex(1));
     ASSERT_NE(slot, nullptr);
     ASSERT_TRUE(slot->has_value());
-    EXPECT_EQ(**slot, object(11));
+    expect_term_eq(**slot, object(11));
     EXPECT_TRUE(sigma.has_binding(f::ParameterIndex(1)));
     EXPECT_FALSE(sigma.has_binding(f::ParameterIndex(0)));
 }
@@ -121,9 +123,9 @@ TEST(TyrTests, TyrFormalismUnificationSubstitutionForEachBindingAndIdentity)
 
     ASSERT_EQ(seen.size(), 2);
     EXPECT_EQ(seen[0].first, f::ParameterIndex(0));
-    EXPECT_EQ(seen[0].second, object(1));
+    expect_term_eq(seen[0].second, object(1));
     EXPECT_EQ(seen[1].first, f::ParameterIndex(2));
-    EXPECT_EQ(seen[1].second, object(2));
+    expect_term_eq(seen[1].second, object(2));
 }
 
 TEST(TyrTests, TyrFormalismUnificationMatchTermBindsSigmaParameters)
@@ -135,7 +137,7 @@ TEST(TyrTests, TyrFormalismUnificationMatchTermBindsSigmaParameters)
 
     EXPECT_TRUE(fu::match_term(parameter(0), object(3), state));
     ASSERT_TRUE(state.sigma[f::ParameterIndex(0)].has_value());
-    EXPECT_EQ(*state.sigma[f::ParameterIndex(0)], object(3));
+    expect_term_eq(*state.sigma[f::ParameterIndex(0)], object(3));
 }
 
 TEST(TyrTests, TyrFormalismUnificationMatchTermRejectsConflictingBindings)
@@ -171,7 +173,7 @@ TEST(TyrTests, TyrFormalismUnificationMatchExReportsFailure)
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(result.failure, fu::MatchFailure::none);
     ASSERT_TRUE(result.state->sigma[f::ParameterIndex(0)].has_value());
-    EXPECT_EQ(*result.state->sigma[f::ParameterIndex(0)], object(8));
+    expect_term_eq(*result.state->sigma[f::ParameterIndex(0)], object(8));
 }
 
 TEST(TyrTests, TyrFormalismUnificationMatchExReportsStructureMismatch)

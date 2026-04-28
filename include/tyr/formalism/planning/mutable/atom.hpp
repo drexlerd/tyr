@@ -60,8 +60,8 @@ struct MutableAtom
 
     auto identifying_members() const noexcept { return std::tie(predicate, terms); }
 
-    friend bool operator==(const MutableAtom& lhs, const MutableAtom& rhs) { return lhs.identifying_members() == rhs.identifying_members(); }
-    friend bool operator<(const MutableAtom& lhs, const MutableAtom& rhs) { return lhs.identifying_members() < rhs.identifying_members(); }
+    friend bool operator==(const MutableAtom& lhs, const MutableAtom& rhs) { return EqualTo<MutableAtom> {}(lhs, rhs); }
+    friend bool operator<(const MutableAtom& lhs, const MutableAtom& rhs) { return Less<MutableAtom> {}(lhs, rhs); }
 };
 
 template<FactKind T>
@@ -78,7 +78,7 @@ struct structure_traits<tyr::formalism::planning::MutableAtom<T>>
     template<typename F>
     static bool zip_terms(const Type& lhs, const Type& rhs, F&& f)
     {
-        if (lhs.predicate != rhs.predicate)
+        if (!EqualTo<tyr::formalism::planning::PredicateView<T>> {}(lhs.predicate, rhs.predicate))
             return false;
 
         if (lhs.terms.size() != rhs.terms.size())

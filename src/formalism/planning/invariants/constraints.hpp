@@ -36,9 +36,9 @@ struct InvariantParameter
 
     auto identifying_members() const noexcept { return std::tie(index); }
 
-    friend bool operator==(const InvariantParameter& lhs, const InvariantParameter& rhs) { return lhs.identifying_members() == rhs.identifying_members(); }
+    friend bool operator==(const InvariantParameter& lhs, const InvariantParameter& rhs) { return tyr::EqualTo<InvariantParameter> {}(lhs, rhs); }
 
-    friend bool operator<(const InvariantParameter& lhs, const InvariantParameter& rhs) { return lhs.identifying_members() < rhs.identifying_members(); }
+    friend bool operator<(const InvariantParameter& lhs, const InvariantParameter& rhs) { return tyr::Less<InvariantParameter> {}(lhs, rhs); }
 };
 
 struct VariableTerm
@@ -47,9 +47,9 @@ struct VariableTerm
 
     auto identifying_members() const noexcept { return std::tie(index); }
 
-    friend bool operator==(const VariableTerm& lhs, const VariableTerm& rhs) { return lhs.identifying_members() == rhs.identifying_members(); }
+    friend bool operator==(const VariableTerm& lhs, const VariableTerm& rhs) { return tyr::EqualTo<VariableTerm> {}(lhs, rhs); }
 
-    friend bool operator<(const VariableTerm& lhs, const VariableTerm& rhs) { return lhs.identifying_members() < rhs.identifying_members(); }
+    friend bool operator<(const VariableTerm& lhs, const VariableTerm& rhs) { return tyr::Less<VariableTerm> {}(lhs, rhs); }
 };
 
 struct ObjectTerm
@@ -58,9 +58,9 @@ struct ObjectTerm
 
     auto identifying_members() const noexcept { return std::tie(index); }
 
-    friend bool operator==(const ObjectTerm& lhs, const ObjectTerm& rhs) { return lhs.identifying_members() == rhs.identifying_members(); }
+    friend bool operator==(const ObjectTerm& lhs, const ObjectTerm& rhs) { return tyr::EqualTo<ObjectTerm> {}(lhs, rhs); }
 
-    friend bool operator<(const ObjectTerm& lhs, const ObjectTerm& rhs) { return lhs.identifying_members() < rhs.identifying_members(); }
+    friend bool operator<(const ObjectTerm& lhs, const ObjectTerm& rhs) { return tyr::Less<ObjectTerm> {}(lhs, rhs); }
 };
 
 using ConstraintTerm = std::variant<InvariantParameter, VariableTerm, ObjectTerm>;
@@ -79,12 +79,12 @@ struct EqualityConjunction
     explicit EqualityConjunction(std::vector<std::pair<ConstraintTerm, ConstraintTerm>> equalities_);
 
     bool is_consistent() const;
-    const std::map<ConstraintTerm, ConstraintTerm>& get_representative() const;
+    const Map<ConstraintTerm, ConstraintTerm>& get_representative() const;
 
 private:
     mutable bool m_computed = false;
     mutable bool m_consistent = true;
-    mutable std::map<ConstraintTerm, ConstraintTerm> m_representative;
+    mutable Map<ConstraintTerm, ConstraintTerm> m_representative;
 
     void compute() const;
 };

@@ -59,12 +59,12 @@ struct MutableConditionalEffect
 
     friend bool operator==(const MutableConditionalEffect& lhs, const MutableConditionalEffect& rhs)
     {
-        return lhs.identifying_members() == rhs.identifying_members();
+        return EqualTo<MutableConditionalEffect> {}(lhs, rhs);
     }
 
     friend bool operator<(const MutableConditionalEffect& lhs, const MutableConditionalEffect& rhs)
     {
-        return lhs.identifying_members() < rhs.identifying_members();
+        return Less<MutableConditionalEffect> {}(lhs, rhs);
     }
 };
 

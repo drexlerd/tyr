@@ -21,6 +21,7 @@
 #define TYR_COMMON_CANONICALIZATION_HPP_
 
 #include "tyr/common/comparators.hpp"
+#include "tyr/common/equal_to.hpp"
 #include "tyr/common/types.hpp"
 
 #include <algorithm>
@@ -31,13 +32,15 @@ namespace tyr
 template<typename T>
 bool is_canonical(const IndexList<T>& list)
 {
-    return std::is_sorted(list.begin(), list.end());
+    using Element = std::remove_cvref_t<decltype(*list.begin())>;
+    return std::is_sorted(list.begin(), list.end(), Less<Element> {});
 }
 
 template<typename T>
 bool is_canonical(const DataList<T>& list)
 {
-    return std::is_sorted(list.begin(), list.end());
+    using Element = std::remove_cvref_t<decltype(*list.begin())>;
+    return std::is_sorted(list.begin(), list.end(), Less<Element> {});
 }
 
 template<typename T>
@@ -50,18 +53,26 @@ template<typename T>
 void canonicalize(IndexList<T>& list)
 {
     if (!is_canonical(list))
-        std::sort(list.begin(), list.end());
+    {
+        using Element = std::remove_cvref_t<decltype(*list.begin())>;
+        std::sort(list.begin(), list.end(), Less<Element> {});
+    }
 
-    list.erase(std::unique(list.begin(), list.end()), list.end());
+    using Element = std::remove_cvref_t<decltype(*list.begin())>;
+    list.erase(std::unique(list.begin(), list.end(), EqualTo<Element> {}), list.end());
 }
 
 template<typename T>
 void canonicalize(DataList<T>& list)
 {
     if (!is_canonical(list))
-        std::sort(list.begin(), list.end());
+    {
+        using Element = std::remove_cvref_t<decltype(*list.begin())>;
+        std::sort(list.begin(), list.end(), Less<Element> {});
+    }
 
-    list.erase(std::unique(list.begin(), list.end()), list.end());
+    using Element = std::remove_cvref_t<decltype(*list.begin())>;
+    list.erase(std::unique(list.begin(), list.end(), EqualTo<Element> {}), list.end());
 }
 
 template<typename T>

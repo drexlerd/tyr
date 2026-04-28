@@ -130,7 +130,7 @@ void Matcher::query(const MutableAtom<FluentTag>& atom, QueryResult& result, Que
 
         for (const auto& pattern : inv.atoms)
         {
-            if (pattern.predicate != atom.predicate)
+            if (!tyr::EqualTo<PredicateView<FluentTag>> {}(pattern.predicate, atom.predicate))
                 continue;
 
             if (pattern.terms.size() != atom.terms.size())

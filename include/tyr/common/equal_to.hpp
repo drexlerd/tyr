@@ -237,10 +237,6 @@ struct EqualTo<std::span<T, Extent>>
     }
 };
 
-/// @brief EqualTo specialization for types T that satisfy `Identifiable`.
-/// Dereferences the underlying pointer before forwarding the call to the std::equal_to
-/// specialization of `IdentifiableMemberView` of T to pairwise compare all members.
-/// @tparam T is the type.
 template<typename T>
 struct EqualTo<ObserverPtr<T>>
 {
@@ -253,13 +249,10 @@ struct EqualTo<BitsetSpan<Block>>
     bool operator()(const BitsetSpan<Block>& lhs, const BitsetSpan<Block>& rhs) const noexcept { return lhs == rhs; }
 };
 
-/// @brief EqualTo specialization for an `IdentifiableMembersView`
-/// that pairwise compares all members.
-/// @tparam ...Ts are the types of all members.
 template<Identifiable T>
 struct EqualTo<T>
 {
-    using is_transparent = void;  // <-- enables hetero lookup
+    using is_transparent = void;
 
     using MembersTupleType = decltype(std::declval<T>().identifying_members());
 
@@ -268,7 +261,6 @@ struct EqualTo<T>
         return EqualTo<std::remove_cvref_t<MembersTupleType>> {}(lhs.identifying_members(), rhs.identifying_members());
     }
 
-    // Mixed overloads required by Abseil: (T, view) and (view, T)
     template<class U>
         requires std::same_as<std::remove_cvref_t<U>, MembersTupleType>
     bool operator()(const T& a, const U& v) const noexcept
@@ -283,7 +275,6 @@ struct EqualTo<T>
         return EqualTo<std::remove_cvref_t<MembersTupleType>> {}(v, b.identifying_members());
     }
 
-    // Optional: view-view compare (handy for testing)
     template<class U, class V>
         requires(std::same_as<std::remove_cvref_t<U>, MembersTupleType> && std::same_as<std::remove_cvref_t<V>, MembersTupleType>)
     bool operator()(const U& u, const V& v) const noexcept

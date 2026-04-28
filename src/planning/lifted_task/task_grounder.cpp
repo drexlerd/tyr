@@ -18,6 +18,7 @@
 #include "tyr/planning/lifted_task/task_grounder.hpp"
 
 #include "tyr/analysis/declarations.hpp"
+#include "tyr/common/comparators.hpp"
 #include "tyr/common/dynamic_bitset.hpp"
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
@@ -486,8 +487,8 @@ GroundTaskInstantiationResult instantiate_ground_task(LiftedTask& lifted_task,  
             }
         }
     }
-    std::sort(fluent_atoms.begin(), fluent_atoms.end());
-    std::sort(derived_atoms.begin(), derived_atoms.end());
+    std::sort(fluent_atoms.begin(), fluent_atoms.end(), tyr::Less<fp::GroundAtomView<f::FluentTag>> {});
+    std::sort(derived_atoms.begin(), derived_atoms.end(), tyr::Less<fp::GroundAtomView<f::DerivedTag>> {});
 
     auto fluent_atoms_set = UnorderedSet<fp::GroundAtomView<f::FluentTag>>(fluent_atoms.begin(), fluent_atoms.end());
     auto derived_atoms_set = UnorderedSet<fp::GroundAtomView<f::DerivedTag>>(derived_atoms.begin(), derived_atoms.end());

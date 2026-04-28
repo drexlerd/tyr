@@ -74,7 +74,7 @@ void EqualityConjunction::compute() const
         return;
     m_computed = true;
 
-    std::map<ConstraintTerm, size_t> ids;
+    Map<ConstraintTerm, size_t> ids;
     std::vector<ConstraintTerm> terms;
 
     auto get_id = [&](const ConstraintTerm& t) -> size_t
@@ -100,7 +100,7 @@ void EqualityConjunction::compute() const
     for (const auto& [a, b] : equalities)
         dsu.unite(ids.at(a), ids.at(b));
 
-    std::map<size_t, std::vector<ConstraintTerm>> classes;
+    Map<size_t, std::vector<ConstraintTerm>> classes;
     for (size_t i = 0; i < terms.size(); ++i)
         classes[dsu.find(i)].push_back(terms[i]);
 
@@ -143,7 +143,7 @@ bool EqualityConjunction::is_consistent() const
     return m_consistent;
 }
 
-const std::map<ConstraintTerm, ConstraintTerm>& EqualityConjunction::get_representative() const
+const Map<ConstraintTerm, ConstraintTerm>& EqualityConjunction::get_representative() const
 {
     compute();
     return m_representative;
@@ -180,13 +180,13 @@ EqualityConjunction ConstraintSystem::combine_equality_conjunctions(const std::v
 
 bool ConstraintSystem::is_solvable() const
 {
-    auto inequality_disjunction_ok = [](const InequalityDisjunction& disj, const std::map<ConstraintTerm, ConstraintTerm>& rep) -> bool
+    auto inequality_disjunction_ok = [](const InequalityDisjunction& disj, const Map<ConstraintTerm, ConstraintTerm>& rep) -> bool
     {
         for (const auto& [a, b] : disj.parts)
         {
             const auto ra = rep.contains(a) ? rep.at(a) : a;
             const auto rb = rep.contains(b) ? rep.at(b) : b;
-            if (ra != rb)
+            if (!tyr::EqualTo<ConstraintTerm> {}(ra, rb))
                 return true;
         }
         return false;
@@ -299,7 +299,7 @@ ConstraintTerm make_invariant_parameter_term(size_t index) { return InvariantPar
 
 EqualityConjunction make_cover_equality_conjunction(const MutableAtom<FluentTag>& pattern, const MutableAtom<FluentTag>& atom, const Invariant& inv)
 {
-    assert(pattern.predicate == atom.predicate);
+    assert(tyr::EqualTo<PredicateView<FluentTag>> {}(pattern.predicate, atom.predicate));
     assert(pattern.terms.size() == atom.terms.size());
 
     std::vector<std::pair<ConstraintTerm, ConstraintTerm>> equalities;
@@ -333,7 +333,7 @@ void ensure_cover(ConstraintSystem& system, const MutableAtom<FluentTag>& patter
 
 void ensure_inequality(ConstraintSystem& system, const MutableAtom<FluentTag>& lhs, const MutableAtom<FluentTag>& rhs)
 {
-    if (lhs.predicate != rhs.predicate || lhs.terms.empty())
+    if (!tyr::EqualTo<PredicateView<FluentTag>> {}(lhs.predicate, rhs.predicate) || lhs.terms.empty())
         return;
 
     std::vector<std::pair<ConstraintTerm, ConstraintTerm>> parts;
@@ -347,8 +347,8 @@ void ensure_inequality(ConstraintSystem& system, const MutableAtom<FluentTag>& l
 
 void ensure_conjunction_sat(ConstraintSystem& system, const MutableLiteralList<FluentTag>& lits)
 {
-    std::map<PredicateView<FluentTag>, MutableLiteralList<FluentTag>> pos;
-    std::map<PredicateView<FluentTag>, MutableLiteralList<FluentTag>> neg;
+    Map<PredicateView<FluentTag>, MutableLiteralList<FluentTag>> pos;
+    Map<PredicateView<FluentTag>, MutableLiteralList<FluentTag>> neg;
 
     for (const auto& lit : lits)
     {

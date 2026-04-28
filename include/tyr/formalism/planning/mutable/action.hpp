@@ -53,9 +53,9 @@ struct MutableAction
 
     auto identifying_members() const noexcept { return std::tie(num_variables, condition, effects); }
 
-    friend bool operator==(const MutableAction& lhs, const MutableAction& rhs) { return lhs.identifying_members() == rhs.identifying_members(); }
+    friend bool operator==(const MutableAction& lhs, const MutableAction& rhs) { return EqualTo<MutableAction> {}(lhs, rhs); }
 
-    friend bool operator<(const MutableAction& lhs, const MutableAction& rhs) { return lhs.identifying_members() < rhs.identifying_members(); }
+    friend bool operator<(const MutableAction& lhs, const MutableAction& rhs) { return Less<MutableAction> {}(lhs, rhs); }
 };
 
 using MutableActionList = std::vector<MutableAction>;

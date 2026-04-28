@@ -60,8 +60,8 @@ struct Invariant
 
     void canonicalize()
     {
-        std::sort(atoms.begin(), atoms.end());
-        atoms.erase(std::unique(atoms.begin(), atoms.end()), atoms.end());
+        std::sort(atoms.begin(), atoms.end(), tyr::Less<MutableAtom<FluentTag>> {});
+        atoms.erase(std::unique(atoms.begin(), atoms.end(), tyr::EqualTo<MutableAtom<FluentTag>> {}), atoms.end());
 
         predicates.clear();
         for (const auto& atom : atoms)
@@ -70,9 +70,9 @@ struct Invariant
 
     auto identifying_members() const noexcept { return std::tie(num_rigid_variables, num_counted_variables, atoms); }
 
-    friend bool operator==(const Invariant& lhs, const Invariant& rhs) { return lhs.identifying_members() == rhs.identifying_members(); }
+    friend bool operator==(const Invariant& lhs, const Invariant& rhs) { return tyr::EqualTo<Invariant> {}(lhs, rhs); }
 
-    friend bool operator<(const Invariant& lhs, const Invariant& rhs) { return lhs.identifying_members() < rhs.identifying_members(); }
+    friend bool operator<(const Invariant& lhs, const Invariant& rhs) { return tyr::Less<Invariant> {}(lhs, rhs); }
 };
 
 using InvariantList = std::vector<Invariant>;

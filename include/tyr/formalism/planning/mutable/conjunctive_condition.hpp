@@ -65,12 +65,12 @@ struct MutableConjunctiveCondition
 
     friend bool operator==(const MutableConjunctiveCondition& lhs, const MutableConjunctiveCondition& rhs)
     {
-        return lhs.identifying_members() == rhs.identifying_members();
+        return EqualTo<MutableConjunctiveCondition> {}(lhs, rhs);
     }
 
     friend bool operator<(const MutableConjunctiveCondition& lhs, const MutableConjunctiveCondition& rhs)
     {
-        return lhs.identifying_members() < rhs.identifying_members();
+        return Less<MutableConjunctiveCondition> {}(lhs, rhs);
     }
 };
 

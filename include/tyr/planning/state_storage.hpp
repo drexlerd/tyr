@@ -32,20 +32,20 @@ namespace tyr::planning
  */
 
 template<TaskKind Kind, typename Tag>
-struct StateStorageContext;
+class StateStorageContext;
 
 /**
  * Backend
  */
 
 template<TaskKind Kind, typename Tag>
-struct AtomStorageBackend;
+class AtomStorageBackend;
 
 template<TaskKind Kind, typename Tag>
-struct FactStorageBackend;
+class FactStorageBackend;
 
 template<TaskKind Kind, typename Tag>
-struct NumericStorageBackend;
+class NumericStorageBackend;
 
 /**
  * Packed

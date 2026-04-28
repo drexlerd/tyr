@@ -27,7 +27,9 @@ namespace tyr::formalism::planning::invariant
 
 inline const MutableAtom<FluentTag>* find_part(const Invariant& inv, PredicateView<FluentTag> predicate)
 {
-    const auto it = std::find_if(inv.atoms.begin(), inv.atoms.end(), [&](const auto& atom) { return atom.predicate == predicate; });
+    const auto it = std::find_if(inv.atoms.begin(),
+                                 inv.atoms.end(),
+                                 [&](const auto& atom) { return tyr::EqualTo<PredicateView<FluentTag>> {}(atom.predicate, predicate); });
 
     return (it == inv.atoms.end()) ? nullptr : &*it;
 }

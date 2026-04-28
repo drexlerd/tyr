@@ -55,9 +55,9 @@ struct fmt::formatter<tyr::formalism::planning::MutableLiteral<T>, char>
     {
         if (value.polarity)
         {
-            return fmt::format_to(ctx.out(), "({})", tyr::to_string(value.atom));
+            return fmt::format_to(ctx.out(), "({})", value.atom);
         }
-        return fmt::format_to(ctx.out(), "(not {})", tyr::to_string(value.atom));
+        return fmt::format_to(ctx.out(), "(not {})", value.atom);
     }
 };
 

@@ -119,7 +119,7 @@ public:
             slot = value;
             return true;
         }
-        return *slot == value;
+        return EqualTo<T> {}(*slot, value);
     }
 
     /// Returns true iff no parameter in the domain currently has a bound value.

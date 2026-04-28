@@ -33,10 +33,10 @@ namespace
 
 using PositionMapping = std::vector<std::pair<size_t, std::optional<ParameterIndex>>>;
 
-std::map<ParameterIndex, Data<Term>>
+Map<ParameterIndex, Data<Term>>
 get_parameters_from_part(const MutableAtom<FluentTag>& part, const MutableAtom<FluentTag>& literal, size_t num_rigid_variables)
 {
-    std::map<ParameterIndex, Data<Term>> result;
+    Map<ParameterIndex, Data<Term>> result;
 
     for (size_t pos = 0; pos < part.terms.size(); ++pos)
     {
@@ -114,11 +114,11 @@ std::vector<PositionMapping> possible_mappings(const MutableAtom<FluentTag>& par
 
     const auto own_parameters = get_parameters_from_part(part, own_literal, num_rigid_variables);
 
-    std::map<Data<Term>, std::vector<ParameterIndex>> ownarg_to_invariant_parameters;
+    Map<Data<Term>, std::vector<ParameterIndex>> ownarg_to_invariant_parameters;
     for (const auto& [inv_param, term] : own_parameters)
         ownarg_to_invariant_parameters[term].push_back(inv_param);
 
-    std::map<Data<Term>, std::vector<size_t>> other_arg_to_positions;
+    Map<Data<Term>, std::vector<size_t>> other_arg_to_positions;
     for (size_t pos = 0; pos < other_literal.terms.size(); ++pos)
         other_arg_to_positions[other_literal.terms[pos]].push_back(pos);
 

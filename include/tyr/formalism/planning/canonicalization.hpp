@@ -49,13 +49,13 @@ bool is_canonical(const Data<BinaryOperator<Op, T>>& data)
 template<typename T>
 bool is_canonical(const Data<BinaryOperator<OpAdd, T>>& data)
 {
-    return data.lhs <= data.rhs;
+    return LessEqual<T> {}(data.lhs, data.rhs);
 }
 
 template<typename T>
 bool is_canonical(const Data<BinaryOperator<OpMul, T>>& data)
 {
-    return data.lhs <= data.rhs;
+    return LessEqual<T> {}(data.lhs, data.rhs);
 }
 
 template<OpKind Op, typename T>
@@ -230,14 +230,14 @@ void canonicalize(Data<BinaryOperator<Op, T>>& data)
 template<typename T>
 void canonicalize(Data<BinaryOperator<OpAdd, T>>& data)
 {
-    if (data.lhs > data.rhs)
+    if (Greater<T> {}(data.lhs, data.rhs))
         std::swap(data.lhs, data.rhs);
 }
 
 template<typename T>
 void canonicalize(Data<BinaryOperator<OpMul, T>>& data)
 {
-    if (data.lhs > data.rhs)
+    if (Greater<T> {}(data.lhs, data.rhs))
         std::swap(data.lhs, data.rhs);
 }
 

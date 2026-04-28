@@ -25,6 +25,13 @@ namespace fp = tyr::formalism::planning;
 
 namespace tyr::tests
 {
+namespace
+{
+void expect_ground_fexpr_eq(const Data<fp::GroundFunctionExpression>& lhs, const Data<fp::GroundFunctionExpression>& rhs)
+{
+    EXPECT_TRUE(EqualTo<Data<fp::GroundFunctionExpression>> {}(lhs, rhs));
+}
+}
 
 TEST(TyrTests, TyrFormalismBuilder)
 {
@@ -37,7 +44,7 @@ TEST(TyrTests, TyrFormalismBuilder)
 
         numeric_effect.fexpr.value = 0.5;
 
-        EXPECT_EQ(numeric_effect.fexpr, Data<fp::GroundFunctionExpression>(0.5));
+        expect_ground_fexpr_eq(numeric_effect.fexpr, Data<fp::GroundFunctionExpression>(0.5));
     }
 
     {
@@ -47,7 +54,7 @@ TEST(TyrTests, TyrFormalismBuilder)
 
         numeric_effect.fexpr.value = 1.5;
 
-        EXPECT_EQ(numeric_effect.fexpr, Data<fp::GroundFunctionExpression>(1.5));
+        expect_ground_fexpr_eq(numeric_effect.fexpr, Data<fp::GroundFunctionExpression>(1.5));
     }
 }
 }

@@ -18,6 +18,7 @@
 #ifndef TYR_PLANNING_SEARCH_SPACE_HPP_
 #define TYR_PLANNING_SEARCH_SPACE_HPP_
 
+#include "tyr/common/equal_to.hpp"
 #include "tyr/common/segmented_vector.hpp"
 #include "tyr/planning/applicability.hpp"
 #include "tyr/planning/formatter.hpp"
@@ -69,7 +70,7 @@ LabeledNodeList<Kind> extract_labeled_node_trajectory(const NodeList<Kind>& node
 
         for (const auto& labeled_succ_node : labeled_succ_nodes)
         {
-            if (labeled_succ_node.node == node_trajectory[i])
+            if (EqualTo<Node<Kind>> {}(labeled_succ_node.node, node_trajectory[i]))
             {
                 labeled_node_trajectory.push_back(labeled_succ_node);
                 cur_node = labeled_succ_node.node;
