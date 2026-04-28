@@ -29,8 +29,11 @@
 #include <fmt/ranges.h>
 #include <ostream>
 
+namespace fmt
+{
+
 template<>
-struct fmt::formatter<tyr::formalism::ParameterIndex, char>
+struct formatter<tyr::formalism::ParameterIndex, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -42,7 +45,7 @@ struct fmt::formatter<tyr::formalism::ParameterIndex, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::OpEq, char>
+struct formatter<tyr::formalism::OpEq, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -50,7 +53,7 @@ struct fmt::formatter<tyr::formalism::OpEq, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::OpNe, char>
+struct formatter<tyr::formalism::OpNe, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -58,7 +61,7 @@ struct fmt::formatter<tyr::formalism::OpNe, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::OpLe, char>
+struct formatter<tyr::formalism::OpLe, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -66,7 +69,7 @@ struct fmt::formatter<tyr::formalism::OpLe, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::OpLt, char>
+struct formatter<tyr::formalism::OpLt, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -74,7 +77,7 @@ struct fmt::formatter<tyr::formalism::OpLt, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::OpGe, char>
+struct formatter<tyr::formalism::OpGe, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -82,7 +85,7 @@ struct fmt::formatter<tyr::formalism::OpGe, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::OpGt, char>
+struct formatter<tyr::formalism::OpGt, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -90,7 +93,7 @@ struct fmt::formatter<tyr::formalism::OpGt, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::OpAdd, char>
+struct formatter<tyr::formalism::OpAdd, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -98,7 +101,7 @@ struct fmt::formatter<tyr::formalism::OpAdd, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::OpSub, char>
+struct formatter<tyr::formalism::OpSub, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -106,7 +109,7 @@ struct fmt::formatter<tyr::formalism::OpSub, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::OpMul, char>
+struct formatter<tyr::formalism::OpMul, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -114,7 +117,7 @@ struct fmt::formatter<tyr::formalism::OpMul, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::OpDiv, char>
+struct formatter<tyr::formalism::OpDiv, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -122,7 +125,7 @@ struct fmt::formatter<tyr::formalism::OpDiv, char>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::Variable>, char>
+struct formatter<tyr::Data<tyr::formalism::Variable>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -134,7 +137,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::Variable>, char>
 };
 
 template<typename C>
-struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Variable>, C>, char>
+struct formatter<tyr::View<tyr::Index<tyr::formalism::Variable>, C>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -146,7 +149,7 @@ struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Variable>, C>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::Object>, char>
+struct formatter<tyr::Data<tyr::formalism::Object>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -158,7 +161,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::Object>, char>
 };
 
 template<typename C>
-struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Object>, C>, char>
+struct formatter<tyr::View<tyr::Index<tyr::formalism::Object>, C>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -170,7 +173,7 @@ struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Object>, C>, char>
 };
 
 template<typename Tag>
-struct fmt::formatter<tyr::Data<tyr::formalism::RelationBinding<Tag>>, char>
+struct formatter<tyr::Data<tyr::formalism::RelationBinding<Tag>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -182,7 +185,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::RelationBinding<Tag>>, char>
 };
 
 template<typename Tag>
-struct fmt::formatter<tyr::Index<tyr::formalism::RelationBinding<Tag>>, char>
+struct formatter<tyr::Index<tyr::formalism::RelationBinding<Tag>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -194,7 +197,7 @@ struct fmt::formatter<tyr::Index<tyr::formalism::RelationBinding<Tag>>, char>
 };
 
 template<typename Tag, typename C>
-struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::RelationBinding<Tag>>, C>, char>
+struct formatter<tyr::View<tyr::Index<tyr::formalism::RelationBinding<Tag>>, C>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -206,7 +209,7 @@ struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::RelationBinding<Tag>>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::Term>, char>
+struct formatter<tyr::Data<tyr::formalism::Term>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -218,7 +221,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::Term>, char>
 };
 
 template<typename C>
-struct fmt::formatter<tyr::View<tyr::Data<tyr::formalism::Term>, C>, char>
+struct formatter<tyr::View<tyr::Data<tyr::formalism::Term>, C>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -230,7 +233,7 @@ struct fmt::formatter<tyr::View<tyr::Data<tyr::formalism::Term>, C>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::Predicate<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::Predicate<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -242,7 +245,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::Predicate<T>>, char>
 };
 
 template<tyr::formalism::FactKind T, typename C>
-struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Predicate<T>>, C>, char>
+struct formatter<tyr::View<tyr::Index<tyr::formalism::Predicate<T>>, C>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -254,7 +257,7 @@ struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Predicate<T>>, C>, ch
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::Function<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::Function<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -266,7 +269,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::Function<T>>, char>
 };
 
 template<tyr::formalism::FactKind T, typename C>
-struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Function<T>>, C>, char>
+struct formatter<tyr::View<tyr::Index<tyr::formalism::Function<T>>, C>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -276,5 +279,7 @@ struct fmt::formatter<tyr::View<tyr::Index<tyr::formalism::Function<T>>, C>, cha
         return fmt::format_to(ctx.out(), "{}/{}", value.get_name(), value.get_arity());
     }
 };
+
+}
 
 #endif

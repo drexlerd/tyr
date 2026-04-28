@@ -21,12 +21,12 @@
 #include "tyr/common/formatter.hpp"
 #include "tyr/common/iostream.hpp"
 #include "tyr/formalism/formatter.hpp"
+#include "tyr/formalism/planning/mutable/action.hpp"
 #include "tyr/formalism/planning/mutable/atom.hpp"
-#include "tyr/formalism/planning/mutable/literal.hpp"
+#include "tyr/formalism/planning/mutable/conditional_effect.hpp"
 #include "tyr/formalism/planning/mutable/conjunctive_condition.hpp"
 #include "tyr/formalism/planning/mutable/conjunctive_effect.hpp"
-#include "tyr/formalism/planning/mutable/conditional_effect.hpp"
-#include "tyr/formalism/planning/mutable/action.hpp"
+#include "tyr/formalism/planning/mutable/literal.hpp"
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
@@ -34,8 +34,11 @@
 #include <ostream>
 #include <sstream>
 
+namespace fmt
+{
+
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::MutableAtom<T>, char>
+struct formatter<tyr::formalism::planning::MutableAtom<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -47,7 +50,7 @@ struct fmt::formatter<tyr::formalism::planning::MutableAtom<T>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::MutableLiteral<T>, char>
+struct formatter<tyr::formalism::planning::MutableLiteral<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -56,14 +59,14 @@ struct fmt::formatter<tyr::formalism::planning::MutableLiteral<T>, char>
     {
         if (value.polarity)
         {
-            return fmt::format_to(ctx.out(), "({})", value.atom);
+            return fmt::format_to(ctx.out(), "{}", value.atom);
         }
         return fmt::format_to(ctx.out(), "(not {})", value.atom);
     }
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::MutableConjunctiveCondition, char>
+struct formatter<tyr::formalism::planning::MutableConjunctiveCondition, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -89,7 +92,7 @@ struct fmt::formatter<tyr::formalism::planning::MutableConjunctiveCondition, cha
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::MutableConjunctiveEffect, char>
+struct formatter<tyr::formalism::planning::MutableConjunctiveEffect, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -113,7 +116,7 @@ struct fmt::formatter<tyr::formalism::planning::MutableConjunctiveEffect, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::MutableConditionalEffect, char>
+struct formatter<tyr::formalism::planning::MutableConditionalEffect, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -139,7 +142,7 @@ struct fmt::formatter<tyr::formalism::planning::MutableConditionalEffect, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::MutableAction, char>
+struct formatter<tyr::formalism::planning::MutableAction, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -161,5 +164,7 @@ struct fmt::formatter<tyr::formalism::planning::MutableAction, char>
         return fmt::format_to(ctx.out(), "{}", os.str());
     }
 };
+
+}
 
 #endif

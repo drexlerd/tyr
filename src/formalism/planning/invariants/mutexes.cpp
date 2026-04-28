@@ -185,8 +185,6 @@ struct PrecomputedGroup
     GroundAtomViewList<FluentTag> atoms;
 
     auto identifying_members() const noexcept { return std::tie(inv_index, rigid_values, atoms); }
-
-    friend bool operator<(const PrecomputedGroup& lhs, const PrecomputedGroup& rhs) { return tyr::Less<PrecomputedGroup> {}(lhs, rhs); }
 };
 
 struct GroupKey
@@ -195,9 +193,6 @@ struct GroupKey
     std::vector<Index<Object>> rigid_values;
 
     auto identifying_members() const noexcept { return std::tie(invariant_index, rigid_values); }
-
-    friend bool operator==(const GroupKey&, const GroupKey&) = default;
-    friend bool operator<(const GroupKey& lhs, const GroupKey& rhs) { return tyr::Less<GroupKey> {}(lhs, rhs); }
 };
 
 std::vector<PrecomputedGroup>

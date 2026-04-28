@@ -40,23 +40,26 @@ struct PlanFormatting
 };
 }  // namespace tyr::formalism::planning
 
-template<>
-struct fmt::formatter<tyr::formalism::planning::ConjunctiveEffectView, char>;
+namespace fmt
+{
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::GroundConjunctiveEffectView, char>;
+struct formatter<tyr::formalism::planning::ConjunctiveEffectView, char>;
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::ActionBindingView, char>;
+struct formatter<tyr::formalism::planning::GroundConjunctiveEffectView, char>;
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::AxiomBindingView, char>;
+struct formatter<tyr::formalism::planning::ActionBindingView, char>;
+
+template<>
+struct formatter<tyr::formalism::planning::AxiomBindingView, char>;
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::FDRFactView<T>, char>;
+struct formatter<tyr::formalism::planning::FDRFactView<T>, char>;
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::FDRValue, char>
+struct formatter<tyr::formalism::planning::FDRValue, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -68,7 +71,7 @@ struct fmt::formatter<tyr::formalism::planning::FDRValue, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::OpAssign, char>
+struct formatter<tyr::formalism::planning::OpAssign, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -79,7 +82,7 @@ struct fmt::formatter<tyr::formalism::planning::OpAssign, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::OpIncrease, char>
+struct formatter<tyr::formalism::planning::OpIncrease, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -90,7 +93,7 @@ struct fmt::formatter<tyr::formalism::planning::OpIncrease, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::OpDecrease, char>
+struct formatter<tyr::formalism::planning::OpDecrease, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -101,7 +104,7 @@ struct fmt::formatter<tyr::formalism::planning::OpDecrease, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::OpScaleUp, char>
+struct formatter<tyr::formalism::planning::OpScaleUp, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -112,7 +115,7 @@ struct fmt::formatter<tyr::formalism::planning::OpScaleUp, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::OpScaleDown, char>
+struct formatter<tyr::formalism::planning::OpScaleDown, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -123,7 +126,7 @@ struct fmt::formatter<tyr::formalism::planning::OpScaleDown, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::Minimize, char>
+struct formatter<tyr::formalism::planning::Minimize, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -134,7 +137,7 @@ struct fmt::formatter<tyr::formalism::planning::Minimize, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::Maximize, char>
+struct formatter<tyr::formalism::planning::Maximize, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -145,7 +148,7 @@ struct fmt::formatter<tyr::formalism::planning::Maximize, char>
 };
 
 template<tyr::formalism::OpKind Op, typename T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::UnaryOperator<Op, T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::UnaryOperator<Op, T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -156,7 +159,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::UnaryOperator<Op, T>>,
 };
 
 template<tyr::formalism::OpKind Op, typename T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::BinaryOperator<Op, T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::BinaryOperator<Op, T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -167,7 +170,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::BinaryOperator<Op, T>>
 };
 
 template<tyr::formalism::OpKind Op, typename T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::MultiOperator<Op, T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::MultiOperator<Op, T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -178,7 +181,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::MultiOperator<Op, T>>,
 };
 
 template<typename T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::ArithmeticOperator<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::ArithmeticOperator<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -189,7 +192,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::ArithmeticOperator<T>>
 };
 
 template<typename T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::BooleanOperator<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::BooleanOperator<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -200,7 +203,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::BooleanOperator<T>>, c
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::Atom<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::Atom<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -211,7 +214,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::Atom<T>>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::Literal<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::Literal<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -226,7 +229,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::Literal<T>>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundAtom<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundAtom<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -237,7 +240,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundAtom<T>>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundLiteral<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundLiteral<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -252,7 +255,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundLiteral<T>>, cha
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::FunctionTerm<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::FunctionTerm<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -263,7 +266,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::FunctionTerm<T>>, char
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundFunctionTerm<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundFunctionTerm<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -274,7 +277,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundFunctionTerm<T>>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundFunctionTermValue<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundFunctionTermValue<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -285,7 +288,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundFunctionTermValu
 };
 
 template<tyr::formalism::planning::NumericEffectOpKind Op, tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::NumericEffect<Op, T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::NumericEffect<Op, T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -296,7 +299,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::NumericEffect<Op, T>>,
 };
 
 template<tyr::formalism::planning::NumericEffectOpKind Op, tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundNumericEffect<Op, T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundNumericEffect<Op, T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -307,7 +310,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundNumericEffect<Op
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::NumericEffectOperator<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::NumericEffectOperator<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -318,7 +321,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::NumericEffectOperator<
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundNumericEffectOperator<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundNumericEffectOperator<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -329,7 +332,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundNumericEffectOpe
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::FDRVariable<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::FDRVariable<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -350,7 +353,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::FDRVariable<T>>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::FDRFact<T>>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::FDRFact<T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -361,7 +364,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::FDRFact<T>>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::FunctionExpression>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::FunctionExpression>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -372,7 +375,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::FunctionExpression>, c
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundFunctionExpression>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundFunctionExpression>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -383,7 +386,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundFunctionExpressi
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::ConjunctiveCondition>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::ConjunctiveCondition>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -412,7 +415,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::ConjunctiveCondition>,
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundConjunctiveCondition>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundConjunctiveCondition>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -441,7 +444,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundConjunctiveCondi
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::ConditionalEffect>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::ConditionalEffect>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -466,7 +469,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::ConditionalEffect>, ch
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundConditionalEffect>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundConditionalEffect>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -489,7 +492,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundConditionalEffec
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::ConjunctiveEffect>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::ConjunctiveEffect>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -514,7 +517,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::ConjunctiveEffect>, ch
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundConjunctiveEffect>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundConjunctiveEffect>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -541,7 +544,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundConjunctiveEffec
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::Action>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::Action>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -568,7 +571,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::Action>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundAction>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundAction>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -593,7 +596,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundAction>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::Axiom>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::Axiom>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -618,7 +621,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::Axiom>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundAxiom>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::GroundAxiom>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -643,7 +646,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::GroundAxiom>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::Metric>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::Metric>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -654,7 +657,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::Metric>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::Task>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::Task>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -695,7 +698,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::Task>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::Domain>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::Domain>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -734,7 +737,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::Domain>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::Data<tyr::formalism::planning::FDRTask>, char>
+struct formatter<tyr::Data<tyr::formalism::planning::FDRTask>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -787,7 +790,7 @@ struct fmt::formatter<tyr::Data<tyr::formalism::planning::FDRTask>, char>
 };
 
 template<tyr::formalism::OpKind Op, typename T>
-struct fmt::formatter<tyr::formalism::planning::UnaryOperatorView<Op, T>, char>
+struct formatter<tyr::formalism::planning::UnaryOperatorView<Op, T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -798,7 +801,7 @@ struct fmt::formatter<tyr::formalism::planning::UnaryOperatorView<Op, T>, char>
 };
 
 template<tyr::formalism::OpKind Op, typename T>
-struct fmt::formatter<tyr::formalism::planning::BinaryOperatorView<Op, T>, char>
+struct formatter<tyr::formalism::planning::BinaryOperatorView<Op, T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -809,7 +812,7 @@ struct fmt::formatter<tyr::formalism::planning::BinaryOperatorView<Op, T>, char>
 };
 
 template<tyr::formalism::OpKind Op, typename T>
-struct fmt::formatter<tyr::formalism::planning::MultiOperatorView<Op, T>, char>
+struct formatter<tyr::formalism::planning::MultiOperatorView<Op, T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -820,7 +823,7 @@ struct fmt::formatter<tyr::formalism::planning::MultiOperatorView<Op, T>, char>
 };
 
 template<typename T>
-struct fmt::formatter<tyr::formalism::planning::ArithmeticOperatorView<T>, char>
+struct formatter<tyr::formalism::planning::ArithmeticOperatorView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -831,7 +834,7 @@ struct fmt::formatter<tyr::formalism::planning::ArithmeticOperatorView<T>, char>
 };
 
 template<typename T>
-struct fmt::formatter<tyr::formalism::planning::BooleanOperatorView<T>, char>
+struct formatter<tyr::formalism::planning::BooleanOperatorView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -842,7 +845,7 @@ struct fmt::formatter<tyr::formalism::planning::BooleanOperatorView<T>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::AtomView<T>, char>
+struct formatter<tyr::formalism::planning::AtomView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -853,7 +856,7 @@ struct fmt::formatter<tyr::formalism::planning::AtomView<T>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::LiteralView<T>, char>
+struct formatter<tyr::formalism::planning::LiteralView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -868,7 +871,7 @@ struct fmt::formatter<tyr::formalism::planning::LiteralView<T>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::GroundAtomView<T>, char>
+struct formatter<tyr::formalism::planning::GroundAtomView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -882,7 +885,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundAtomView<T>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::GroundLiteralView<T>, char>
+struct formatter<tyr::formalism::planning::GroundLiteralView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -897,7 +900,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundLiteralView<T>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::FunctionTermView<T>, char>
+struct formatter<tyr::formalism::planning::FunctionTermView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -908,7 +911,7 @@ struct fmt::formatter<tyr::formalism::planning::FunctionTermView<T>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::GroundFunctionTermView<T>, char>
+struct formatter<tyr::formalism::planning::GroundFunctionTermView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -922,7 +925,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundFunctionTermView<T>, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::GroundFunctionTermValueView<T>, char>
+struct formatter<tyr::formalism::planning::GroundFunctionTermValueView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -933,7 +936,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundFunctionTermValueView<T>, 
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::FunctionExpressionView, char>
+struct formatter<tyr::formalism::planning::FunctionExpressionView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -944,7 +947,7 @@ struct fmt::formatter<tyr::formalism::planning::FunctionExpressionView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::GroundFunctionExpressionView, char>
+struct formatter<tyr::formalism::planning::GroundFunctionExpressionView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -955,7 +958,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundFunctionExpressionView, ch
 };
 
 template<tyr::formalism::planning::NumericEffectOpKind Op, tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::NumericEffectView<Op, T>, char>
+struct formatter<tyr::formalism::planning::NumericEffectView<Op, T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -966,7 +969,7 @@ struct fmt::formatter<tyr::formalism::planning::NumericEffectView<Op, T>, char>
 };
 
 template<tyr::formalism::planning::NumericEffectOpKind Op, tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::GroundNumericEffectView<Op, T>, char>
+struct formatter<tyr::formalism::planning::GroundNumericEffectView<Op, T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -977,7 +980,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundNumericEffectView<Op, T>, 
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::NumericEffectOperatorView<T>, char>
+struct formatter<tyr::formalism::planning::NumericEffectOperatorView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -988,7 +991,7 @@ struct fmt::formatter<tyr::formalism::planning::NumericEffectOperatorView<T>, ch
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::GroundNumericEffectOperatorView<T>, char>
+struct formatter<tyr::formalism::planning::GroundNumericEffectOperatorView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -999,7 +1002,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundNumericEffectOperatorView<
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::ConjunctiveConditionView, char>
+struct formatter<tyr::formalism::planning::ConjunctiveConditionView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1028,7 +1031,7 @@ struct fmt::formatter<tyr::formalism::planning::ConjunctiveConditionView, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::FDRFactView<T>, char>
+struct formatter<tyr::formalism::planning::FDRFactView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1052,7 +1055,7 @@ struct fmt::formatter<tyr::formalism::planning::FDRFactView<T>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::GroundConjunctiveConditionView, char>
+struct formatter<tyr::formalism::planning::GroundConjunctiveConditionView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1081,7 +1084,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundConjunctiveConditionView, 
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::ConjunctiveEffectView, char>
+struct formatter<tyr::formalism::planning::ConjunctiveEffectView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1106,7 +1109,7 @@ struct fmt::formatter<tyr::formalism::planning::ConjunctiveEffectView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::GroundConjunctiveEffectView, char>
+struct formatter<tyr::formalism::planning::GroundConjunctiveEffectView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1133,7 +1136,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundConjunctiveEffectView, cha
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::ConditionalEffectView, char>
+struct formatter<tyr::formalism::planning::ConditionalEffectView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1158,7 +1161,7 @@ struct fmt::formatter<tyr::formalism::planning::ConditionalEffectView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::GroundConditionalEffectView, char>
+struct formatter<tyr::formalism::planning::GroundConditionalEffectView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1181,7 +1184,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundConditionalEffectView, cha
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::ActionView, char>
+struct formatter<tyr::formalism::planning::ActionView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1208,7 +1211,7 @@ struct fmt::formatter<tyr::formalism::planning::ActionView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::ActionBindingView, char>
+struct formatter<tyr::formalism::planning::ActionBindingView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1219,7 +1222,7 @@ struct fmt::formatter<tyr::formalism::planning::ActionBindingView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::AxiomBindingView, char>
+struct formatter<tyr::formalism::planning::AxiomBindingView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1230,7 +1233,7 @@ struct fmt::formatter<tyr::formalism::planning::AxiomBindingView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::GroundActionView, char>
+struct formatter<tyr::formalism::planning::GroundActionView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1257,7 +1260,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundActionView, char>
 };
 
 template<>
-struct fmt::formatter<std::pair<tyr::formalism::planning::GroundActionView, tyr::formalism::planning::PlanFormatting>, char>
+struct formatter<std::pair<tyr::formalism::planning::GroundActionView, tyr::formalism::planning::PlanFormatting>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1273,7 +1276,7 @@ struct fmt::formatter<std::pair<tyr::formalism::planning::GroundActionView, tyr:
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::AxiomView, char>
+struct formatter<tyr::formalism::planning::AxiomView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1298,7 +1301,7 @@ struct fmt::formatter<tyr::formalism::planning::AxiomView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::GroundAxiomView, char>
+struct formatter<tyr::formalism::planning::GroundAxiomView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1325,7 +1328,7 @@ struct fmt::formatter<tyr::formalism::planning::GroundAxiomView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::MetricView, char>
+struct formatter<tyr::formalism::planning::MetricView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1336,7 +1339,7 @@ struct fmt::formatter<tyr::formalism::planning::MetricView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::TaskView, char>
+struct formatter<tyr::formalism::planning::TaskView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1377,7 +1380,7 @@ struct fmt::formatter<tyr::formalism::planning::TaskView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::DomainView, char>
+struct formatter<tyr::formalism::planning::DomainView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1416,7 +1419,7 @@ struct fmt::formatter<tyr::formalism::planning::DomainView, char>
 };
 
 template<tyr::formalism::FactKind T>
-struct fmt::formatter<tyr::formalism::planning::FDRVariableView<T>, char>
+struct formatter<tyr::formalism::planning::FDRVariableView<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1437,7 +1440,7 @@ struct fmt::formatter<tyr::formalism::planning::FDRVariableView<T>, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::FDRTaskView, char>
+struct formatter<tyr::formalism::planning::FDRTaskView, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
@@ -1490,7 +1493,7 @@ struct fmt::formatter<tyr::formalism::planning::FDRTaskView, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::PlanningDomain, char>
+struct formatter<tyr::formalism::planning::PlanningDomain, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -1502,7 +1505,7 @@ struct fmt::formatter<tyr::formalism::planning::PlanningDomain, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::PlanningTask, char>
+struct formatter<tyr::formalism::planning::PlanningTask, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -1514,7 +1517,7 @@ struct fmt::formatter<tyr::formalism::planning::PlanningTask, char>
 };
 
 template<>
-struct fmt::formatter<tyr::formalism::planning::PlanningFDRTask, char>
+struct formatter<tyr::formalism::planning::PlanningFDRTask, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
@@ -1524,5 +1527,7 @@ struct fmt::formatter<tyr::formalism::planning::PlanningFDRTask, char>
         return fmt::format_to(ctx.out(), "{}", value.get_task());
     }
 };
+
+}
 
 #endif
