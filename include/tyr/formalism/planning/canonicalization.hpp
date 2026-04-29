@@ -24,6 +24,7 @@
 #include "tyr/common/comparators.hpp"
 #include "tyr/formalism/canonicalization.hpp"
 #include "tyr/formalism/planning/datas.hpp"
+#include "tyr/formalism/planning/declarations.hpp"
 
 #include <algorithm>
 

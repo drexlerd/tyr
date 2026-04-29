@@ -100,8 +100,6 @@ def collect_metadata(args, executable: pathlib.Path, test_dir: pathlib.Path, out
             "command": sys.argv,
             "suite_json": str(args.suite_json),
             "output_dir": str(output_dir),
-            "dry_run_benchmark_min_time": args.dry_run_benchmark_min_time,
-            "dry_run_timeout_seconds": args.dry_run_timeout,
             "benchmark_min_time": args.benchmark_min_time,
             "benchmark_repetitions": args.benchmark_repetitions,
             "benchmark_report_aggregates_only": args.benchmark_report_aggregates_only,
@@ -207,58 +205,6 @@ def write_log_entry(log_file, run_name: str, phase: str, result):
         log_file.write("\n")
 
 
-def run_dry_runs(
-    benchmark_executable: pathlib.Path,
-    output_dir: pathlib.Path,
-    cases,
-    min_time: str,
-    timeout: float,
-):
-    results = []
-    dry_run_log_file = output_dir / "dry-run.log"
-
-    with dry_run_log_file.open("w") as dry_run_log:
-        for case in cases:
-            run_name = case["run_name"]
-            command = build_benchmark_command(
-                benchmark_executable,
-                run_name,
-                min_time,
-                None,
-                1,
-                True,
-            )
-            result = run_command(command, timeout)
-            write_log_entry(dry_run_log, run_name, "dry-run", result)
-
-            results.append(
-                {
-                    "run_name": run_name,
-                    "command": command,
-                    "status": result["status"],
-                    "exit_code": result["exit_code"],
-                    "duration_seconds": result["duration_seconds"],
-                }
-            )
-            case["dry_run_status"] = result["status"]
-            case["dry_run_duration_seconds"] = result["duration_seconds"]
-            case["dry_run_exit_code"] = result["exit_code"]
-
-            if result["status"] == "timed_out":
-                case["status"] = "timed_out"
-                case["benchmark_status"] = "skipped"
-                case["benchmark_skip_reason"] = "dry_run_timed_out"
-                case["dry_run_timeout_seconds"] = timeout
-            elif result["status"] == "failed":
-                case["status"] = "failed"
-                case["benchmark_status"] = "skipped"
-                case["benchmark_skip_reason"] = "dry_run_failed"
-            else:
-                case["status"] = "not_run"
-
-    return results
-
-
 def run_benchmarks(
     benchmark_executable: pathlib.Path,
     output_dir: pathlib.Path,
@@ -269,14 +215,12 @@ def run_benchmarks(
     timeout: float,
 ):
     results = []
+    failures = []
     benchmark_output_dir = output_dir / "benchmark-results"
     benchmark_log_file = output_dir / "benchmark.log"
 
     with benchmark_log_file.open("w") as benchmark_log:
         for case in cases:
-            if case["dry_run_status"] != "passed":
-                continue
-
             run_name = case["run_name"]
             result_file = benchmark_output_dir / f"{run_name}.json"
             temp_result_file = result_file.with_name(f"{result_file.name}.tmp")
@@ -297,35 +241,47 @@ def run_benchmarks(
 
             if result["status"] == "passed":
                 temp_result_file.replace(result_file)
+                results.append(
+                    {
+                        "run_name": run_name,
+                        "command": command,
+                        "status": result["status"],
+                        "exit_code": result["exit_code"],
+                        "result_file": str(result_file),
+                        "duration_seconds": result["duration_seconds"],
+                    }
+                )
             else:
                 temp_result_file.unlink(missing_ok=True)
-
-            results.append(
-                {
+                reason = "benchmark_timed_out" if result["status"] == "timed_out" else "benchmark_failed"
+                failure = {
                     "run_name": run_name,
                     "command": command,
                     "status": result["status"],
                     "exit_code": result["exit_code"],
-                    "result_file": str(result_file),
                     "duration_seconds": result["duration_seconds"],
+                    "reason": reason,
                 }
-            )
+                if result["status"] == "timed_out":
+                    failure["timeout_seconds"] = timeout
+                failures.append(failure)
+
             case["status"] = result["status"]
             case["benchmark_status"] = result["status"]
             case["benchmark_duration_seconds"] = result["duration_seconds"]
             case["benchmark_exit_code"] = result["exit_code"]
             if result["status"] == "passed":
                 case["benchmark_result_file"] = str(result_file)
-            elif result["status"] == "timed_out":
-                case["benchmark_timeout_seconds"] = timeout
+            else:
+                case["benchmark_failure_reason"] = failure["reason"]
+                if result["status"] == "timed_out":
+                    case["benchmark_timeout_seconds"] = timeout
 
-    return results
+    return results, failures
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Dry-run each profiling case with a hard timeout, then benchmark the cases that pass."
-    )
+    parser = argparse.ArgumentParser(description="Run each profiling benchmark case with a hard wall-clock timeout.")
     parser.add_argument("--executable", type=pathlib.Path, required=True, help="Profiling benchmark executable to run.")
     parser.add_argument(
         "--output-dir",
@@ -341,17 +297,6 @@ def main():
     parser.add_argument("--benchmark-min-time", default="0.1s", help="Google Benchmark --benchmark_min_time value.")
     parser.add_argument("--benchmark-repetitions", type=int, help="Google Benchmark --benchmark_repetitions value.")
     parser.add_argument(
-        "--dry-run-benchmark-min-time",
-        default="0.001s",
-        help="Google Benchmark --benchmark_min_time value used for dry-run screening.",
-    )
-    parser.add_argument(
-        "--dry-run-timeout",
-        type=float,
-        default=10.0,
-        help="Hard wall-clock timeout in seconds for each dry-run subprocess.",
-    )
-    parser.add_argument(
         "--benchmark-timeout",
         type=float,
         default=60.0,
@@ -363,8 +308,6 @@ def main():
         help="Forward --benchmark_report_aggregates_only=true to Google Benchmark.",
     )
     args = parser.parse_args()
-    if args.dry_run_timeout <= 0:
-        parser.error("--dry-run-timeout must be greater than 0.")
     if args.benchmark_timeout <= 0:
         parser.error("--benchmark-timeout must be greater than 0.")
 
@@ -379,14 +322,7 @@ def main():
     cases = load_cases(suite)
     metadata = collect_metadata(args, executable, test_dir, output_dir)
 
-    dry_run_results = run_dry_runs(
-        executable,
-        output_dir,
-        cases,
-        args.dry_run_benchmark_min_time,
-        args.dry_run_timeout,
-    )
-    benchmark_results = run_benchmarks(
+    benchmark_results, benchmark_failures = run_benchmarks(
         executable,
         output_dir,
         cases,
@@ -408,8 +344,8 @@ def main():
         "timed_out": groups["timed_out"],
         "failed": groups["failed"],
         "not_run": groups["not_run"],
-        "dry_run_results": dry_run_results,
         "benchmark_results": benchmark_results,
+        "benchmark_failures": benchmark_failures,
         "counts": {
             "passed": len(groups["passed"]),
             "timed_out": len(groups["timed_out"]),

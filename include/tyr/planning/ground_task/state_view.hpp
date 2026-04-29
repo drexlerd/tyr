@@ -21,9 +21,9 @@
 #include "tyr/formalism/planning/declarations.hpp"
 #include "tyr/formalism/planning/repository.hpp"
 #include "tyr/formalism/planning/views.hpp"
+#include "tyr/common/shared_object_pool.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/ground_task/state_iterators.hpp"
-#include "tyr/planning/ground_task/unpacked_state.hpp"
 #include "tyr/planning/state_iterators.hpp"
 #include "tyr/planning/state_view.hpp"
 #include "tyr/planning/task.hpp"
@@ -40,6 +40,11 @@ public:
 
     View(std::shared_ptr<planning::StateRepository<planning::GroundTag>> owner,
          SharedObjectPoolPtr<planning::UnpackedState<planning::GroundTag>> unpacked) noexcept;
+    View(const View&);
+    View(View&&) noexcept;
+    View& operator=(const View&);
+    View& operator=(View&&) noexcept;
+    ~View();
 
     Index<planning::State<planning::GroundTag>> get_index() const;
 
@@ -105,50 +110,6 @@ private:
 };
 
 using GroundStateView = View<Index<planning::State<planning::GroundTag>>, std::shared_ptr<planning::StateRepository<planning::GroundTag>>>;
-
-/**
- * Implemntations
- */
-
-inline GroundStateView::View(std::shared_ptr<planning::StateRepository<planning::GroundTag>> owner,
-                             SharedObjectPoolPtr<planning::UnpackedState<planning::GroundTag>> unpacked) noexcept :
-    m_state_repository(std::move(owner)),
-    m_unpacked(std::move(unpacked))
-{
-}
-
-inline Index<planning::State<planning::GroundTag>> GroundStateView::get_index() const { return m_unpacked->get_index(); }
-
-inline formalism::planning::FDRValue GroundStateView::get(Index<formalism::planning::FDRVariable<formalism::FluentTag>> index) const
-{
-    return m_unpacked->get(index);
-}
-
-inline float_t GroundStateView::get(Index<formalism::planning::GroundFunctionTerm<formalism::FluentTag>> index) const { return m_unpacked->get(index); }
-
-inline bool GroundStateView::test(Index<formalism::planning::GroundAtom<formalism::DerivedTag>> index) const { return m_unpacked->test(index); }
-
-inline const std::shared_ptr<planning::StateRepository<planning::GroundTag>>& GroundStateView::get_state_repository() const noexcept
-{
-    return m_state_repository;
-}
-
-inline const planning::UnpackedState<planning::GroundTag>& GroundStateView::get_unpacked_state() const noexcept { return *m_unpacked; }
-
-inline const std::vector<uint_t>& GroundStateView::get_fluent_values() const noexcept { return m_unpacked->get_atoms<formalism::FluentTag>().values; }
-
-inline bool GroundStateView::test(formalism::planning::GroundAtomView<formalism::StaticTag> view) const { return test(view.get_index()); }
-
-inline float_t GroundStateView::get(formalism::planning::GroundFunctionTermView<formalism::StaticTag> view) const { return get(view.get_index()); }
-
-inline formalism::planning::FDRValue GroundStateView::get(formalism::planning::FDRVariableView<formalism::FluentTag> view) const
-{
-    return get(view.get_index());
-}
-
-inline float_t GroundStateView::get(formalism::planning::GroundFunctionTermView<formalism::FluentTag> view) const { return get(view.get_index()); }
-
-inline bool GroundStateView::test(formalism::planning::GroundAtomView<formalism::DerivedTag> view) const { return test(view.get_index()); }
 
 inline auto GroundStateView::get_static_atoms_view() const noexcept
 {

@@ -1,10 +1,10 @@
 # Profiling
 
 Profiling code lives next to a small JSON suite file. The JSON file selects the
-benchmark instances, and the runner first screens each profiling task with a
-short Google Benchmark dry run in its own subprocess with a hard wall-clock
-timeout. Only cases that pass the dry run are benchmarked and written to result
-JSON files.
+benchmark instances, and the runner executes each profiling task in its own
+Google Benchmark subprocess with a hard wall-clock timeout. Successful cases are
+written to result JSON files. Failed and timed-out cases are recorded separately
+with their failure reason.
 
 ## Data Layout
 
@@ -79,7 +79,6 @@ profiling/runner.py \
   --executable build/profiling/planning/lifted_task/successor_generator \
   --output-dir profiling-results/planning/lifted_task/successor_generator \
   --suite-json profiling/planning/lifted_task/successor_generator.json \
-  --dry-run-timeout 10 \
   --benchmark-min-time 0.1s \
   --benchmark-timeout 60
 ```
@@ -87,30 +86,28 @@ profiling/runner.py \
 This writes:
 
 ```text
-profiling-results/planning/lifted_task/successor_generator/dry-run.log
 profiling-results/planning/lifted_task/successor_generator/benchmark.log
 profiling-results/planning/lifted_task/successor_generator/summary.json
 profiling-results/planning/lifted_task/successor_generator/benchmark-results/<run_name>.json
 ```
 
-The runner first runs one dry-run subprocess per case. If a dry run exceeds
-`--dry-run-timeout`, the runner kills it, marks the case as `timed_out`, and
-continues with the remaining cases. Failed or timed-out dry runs are not sent to
-the real benchmark phase, so they do not produce benchmark result JSON files.
+The runner runs one benchmark subprocess per case. If a subprocess exceeds
+`--benchmark-timeout`, the runner kills it, marks the case as `timed_out`, and
+continues with the remaining cases.
 
 Benchmark result JSON files are written through a temporary file and moved into
 place only after a successful benchmark subprocess, so failed or timed-out
-benchmark subprocesses do not leave stale result files behind.
+benchmark subprocesses do not leave stale result files behind. Successful runs
+are listed in `benchmark_results`. Failed and timed-out runs are omitted from
+`benchmark_results` and listed in `benchmark_failures` with a `reason` field.
 
 The summary JSON records git, build, host, and runner metadata. Each case records
-its dry-run status, benchmark status, benchmark duration, and benchmark result
-path when a benchmark completed successfully.
+its benchmark status, benchmark duration, failure reason when applicable, and
+benchmark result path when a benchmark completed successfully.
 
 `--benchmark-min-time` is forwarded to Google Benchmark and controls sampling
 time after a benchmark iteration returns. `--benchmark-timeout` is the hard
 wall-clock limit for the whole per-case benchmark subprocess.
-`--dry-run-benchmark-min-time` controls the dry-run sampling target and defaults
-to `0.001s`.
 
 For more stable timings, pass Google Benchmark repetition options through the
 runner:
@@ -120,7 +117,6 @@ profiling/runner.py \
   --executable build/profiling/planning/lifted_task/successor_generator \
   --output-dir profiling-results/planning/lifted_task/successor_generator \
   --suite-json profiling/planning/lifted_task/successor_generator.json \
-  --dry-run-timeout 10 \
   --benchmark-min-time 0.1s \
   --benchmark-timeout 60 \
   --benchmark-repetitions 5 \
