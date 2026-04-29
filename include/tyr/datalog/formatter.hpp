@@ -37,45 +37,6 @@
 #include <sstream>
 #include <string>
 
-namespace tyr::datalog::details
-{
-
-template<formalism::FactKind T, typename FormatContext>
-auto format_rule_to_literal_info(const RuleToLiteralInfo<T>& value, FormatContext& ctx)
-{
-    auto os = std::stringstream {};
-    os << "RuleToLiteralInfo(\n";
-    {
-        IndentScope scope(os);
-        os << print_indent;
-        fmt::print(os, "{}{}\n", "predicate = ", value.predicate);
-        os << print_indent;
-        fmt::print(os, "{}{}\n", "polarity = ", value.polarity);
-        os << print_indent;
-        fmt::print(os, "{}{}\n", "position mappings = ", value.position_mappings);
-    }
-    os << ")";
-    return fmt::format_to(ctx.out(), "{}", os.str());
-}
-
-template<formalism::FactKind T, typename FormatContext>
-auto format_tagged_rule_to_literal_infos(const TaggedRuleToLiteralInfos<T>& value, FormatContext& ctx)
-{
-    auto os = std::stringstream {};
-    os << "TaggedRuleToLiteralInfos(\n";
-    {
-        IndentScope scope(os);
-        os << print_indent;
-        fmt::print(os, "{}{}\n", "literal infos = ", value.infos);
-        os << print_indent;
-        fmt::print(os, "{}{}\n", "info mappings = ", value.info_mappings);
-    }
-    os << ")";
-    return fmt::format_to(ctx.out(), "{}", os.str());
-}
-
-}  // namespace tyr::datalog::details
-
 namespace fmt
 {
 
@@ -171,47 +132,47 @@ struct formatter<tyr::datalog::details::RuleToLiteralPositionMappings, char>
     }
 };
 
-template<>
-struct formatter<tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::StaticTag>, char>
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::datalog::details::RuleToLiteralInfo<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
-    auto format(const tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::StaticTag>& value, FormatContext& ctx) const
+    auto format(const tyr::datalog::details::RuleToLiteralInfo<T>& value, FormatContext& ctx) const
     {
-        return tyr::datalog::details::format_rule_to_literal_info(value, ctx);
+        auto os = std::stringstream {};
+        os << "RuleToLiteralInfo(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "predicate = ", value.predicate);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "polarity = ", value.polarity);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "position mappings = ", value.position_mappings);
+        }
+        os << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
     }
 };
 
-template<>
-struct formatter<tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::FluentTag>, char>
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::datalog::details::TaggedRuleToLiteralInfos<T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
-    auto format(const tyr::datalog::details::RuleToLiteralInfo<tyr::formalism::FluentTag>& value, FormatContext& ctx) const
+    auto format(const tyr::datalog::details::TaggedRuleToLiteralInfos<T>& value, FormatContext& ctx) const
     {
-        return tyr::datalog::details::format_rule_to_literal_info(value, ctx);
-    }
-};
-
-template<>
-struct formatter<tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::StaticTag>, char>
-{
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-    template<typename FormatContext>
-    auto format(const tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::StaticTag>& value, FormatContext& ctx) const
-    {
-        return tyr::datalog::details::format_tagged_rule_to_literal_infos(value, ctx);
-    }
-};
-
-template<>
-struct formatter<tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::FluentTag>, char>
-{
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-    template<typename FormatContext>
-    auto format(const tyr::datalog::details::TaggedRuleToLiteralInfos<tyr::formalism::FluentTag>& value, FormatContext& ctx) const
-    {
-        return tyr::datalog::details::format_tagged_rule_to_literal_infos(value, ctx);
+        auto os = std::stringstream {};
+        os << "TaggedRuleToLiteralInfos(\n";
+        {
+            tyr::IndentScope scope(os);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "literal infos = ", value.infos);
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "info mappings = ", value.info_mappings);
+        }
+        os << ")";
+        return fmt::format_to(ctx.out(), "{}", os.str());
     }
 };
 
