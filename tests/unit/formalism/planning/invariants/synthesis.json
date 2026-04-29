@@ -1,0 +1,2410 @@
+{
+  "cases": [
+    {
+      "name": "Agricola",
+      "domain_file": "data/tests/classical/agricola/domain.pddl",
+      "task_file": "data/tests/classical/agricola/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "current_stage",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "current_worker",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "max_worker",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "num_food",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "space_rooms",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "space_rooms",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "built_rooms",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "space_rooms",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Airport",
+      "domain_file": "data/tests/classical/airport/domain.pddl",
+      "task_file": "data/tests/classical/airport/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at-segment",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "facing",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "is-pushing",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "is-pushing",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "airborne",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "at-segment",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "is-moving",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "is-pushing",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "is-moving",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "is-pushing",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "is-moving",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "is-parked",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "is-pushing",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Assembly",
+      "domain_file": "data/tests/classical/assembly/domain.pddl",
+      "task_file": "data/tests/classical/assembly/test-1.pddl",
+      "invariants": []
+    },
+    {
+      "name": "Barman",
+      "domain_file": "data/tests/classical/barman/domain.pddl",
+      "task_file": "data/tests/classical/barman/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "shaker-level",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "holding",
+              "parameters": [
+                1,
+                0
+              ]
+            },
+            {
+              "predicate": "ontable",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "handempty",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "holding",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Blocks3",
+      "domain_file": "data/tests/classical/blocks_3/domain.pddl",
+      "task_file": "data/tests/classical/blocks_3/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "clear",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "on",
+              "parameters": [
+                1,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "on",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "on-table",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Blocks4",
+      "domain_file": "data/tests/classical/blocks_4/domain.pddl",
+      "task_file": "data/tests/classical/blocks_4/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "arm-empty",
+              "parameters": []
+            },
+            {
+              "predicate": "holding",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "clear",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "holding",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "on",
+              "parameters": [
+                1,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "holding",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "on",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "on-table",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Childsnack",
+      "domain_file": "data/tests/classical/childsnack/domain.pddl",
+      "task_file": "data/tests/classical/childsnack/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_bread",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_bread",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_content",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_content",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "notexist",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "notexist",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_sandwich",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "notexist",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_bread",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "at_kitchen_sandwich",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_content",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "at_kitchen_sandwich",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_sandwich",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "notexist",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "no_gluten_sandwich",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "notexist",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_bread",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "no_gluten_sandwich",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_content",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "no_gluten_sandwich",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "no_gluten_sandwich",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "notexist",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_kitchen_sandwich",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "notexist",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "ontray",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Delivery",
+      "domain_file": "data/tests/classical/delivery/domain.pddl",
+      "task_file": "data/tests/classical/delivery/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "carrying",
+              "parameters": [
+                1,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "carrying",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "empty",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Driverlog",
+      "domain_file": "data/tests/classical/driverlog/domain.pddl",
+      "task_file": "data/tests/classical/driverlog/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "driving",
+              "parameters": [
+                1,
+                0
+              ]
+            },
+            {
+              "predicate": "empty",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "driving",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "in",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ferry",
+      "domain_file": "data/tests/classical/ferry/domain.pddl",
+      "task_file": "data/tests/classical/ferry/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at-ferry",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "on",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "empty-ferry",
+              "parameters": []
+            },
+            {
+              "predicate": "on",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "FoCounters",
+      "domain_file": "data/tests/numeric/fo-counters/domain.pddl",
+      "task_file": "data/tests/numeric/fo-counters/test-1.pddl",
+      "invariants": []
+    },
+    {
+      "name": "Grid",
+      "domain_file": "data/tests/classical/grid/domain.pddl",
+      "task_file": "data/tests/classical/grid/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at-robot",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "locked",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "locked",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "holding",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "arm-empty",
+              "parameters": []
+            },
+            {
+              "predicate": "holding",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "locked",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "open",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "locked",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "open",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Gripper",
+      "domain_file": "data/tests/classical/gripper/domain.pddl",
+      "task_file": "data/tests/classical/gripper/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at-robby",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "carry",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "carry",
+              "parameters": [
+                1,
+                0
+              ]
+            },
+            {
+              "predicate": "free",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Hiking",
+      "domain_file": "data/tests/classical/hiking/domain.pddl",
+      "task_file": "data/tests/classical/hiking/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_tent",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_person",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_car",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "walked",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "down",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "up",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "down",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "up",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Logistics",
+      "domain_file": "data/tests/classical/logistics/domain.pddl",
+      "task_file": "data/tests/classical/logistics/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "in",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Miconic",
+      "domain_file": "data/tests/classical/miconic/domain.pddl",
+      "task_file": "data/tests/classical/miconic/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 2,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "origin",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "origin",
+              "parameters": [
+                1,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "origin",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "lift-at",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "boarded",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "origin",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "boarded",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "origin",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "served",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MiconicFulladl",
+      "domain_file": "data/tests/classical/miconic-fulladl/domain.pddl",
+      "task_file": "data/tests/classical/miconic-fulladl/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "lift-at",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MiconicSimpleadl",
+      "domain_file": "data/tests/classical/miconic-simpleadl/domain.pddl",
+      "task_file": "data/tests/classical/miconic-simpleadl/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "lift-at",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Parcprinter",
+      "domain_file": "data/tests/classical/parcprinter/domain.pddl",
+      "task_file": "data/tests/classical/parcprinter/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "location",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 3,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "notprintedwith",
+              "parameters": [
+                0,
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 2,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "notprintedwith",
+              "parameters": [
+                2,
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 2,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "notprintedwith",
+              "parameters": [
+                0,
+                2,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 2,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "notprintedwith",
+              "parameters": [
+                0,
+                1,
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "uninitialized",
+              "parameters": []
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 2,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "hasimage",
+              "parameters": [
+                0,
+                1,
+                2
+              ]
+            },
+            {
+              "predicate": "notprintedwith",
+              "parameters": [
+                0,
+                1,
+                2
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pathways",
+      "domain_file": "data/tests/classical/pathways/domain.pddl",
+      "task_file": "data/tests/classical/pathways/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "num-subs",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Philosophers",
+      "domain_file": "data/tests/classical/philosophers/domain.pddl",
+      "task_file": "data/tests/classical/philosophers/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at-process",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "queue-head",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "queue-tail",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "queue-size",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "activate",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "enabled",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "pending",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "advance-head",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "advance-tail",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "settled",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "advance-head",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "advance-tail",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "settled",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PsrMiddle",
+      "domain_file": "data/tests/classical/psr-middle/domain.pddl",
+      "task_file": "data/tests/classical/psr-middle/test-1.pddl",
+      "invariants": []
+    },
+    {
+      "name": "Pushworld",
+      "domain_file": "data/tests/classical/pushworld/domain.pddl",
+      "task_file": "data/tests/classical/pushworld/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Refuel",
+      "domain_file": "data/tests/numeric/refuel/domain.pddl",
+      "task_file": "data/tests/numeric/refuel/test-1.pddl",
+      "invariants": []
+    },
+    {
+      "name": "RefuelAdl",
+      "domain_file": "data/tests/numeric/refuel-adl/domain.pddl",
+      "task_file": "data/tests/numeric/refuel-adl/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reward",
+      "domain_file": "data/tests/classical/reward/domain.pddl",
+      "task_file": "data/tests/classical/reward/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "reward",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "reward",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "picked",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "reward",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "picked",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "reward",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rovers",
+      "domain_file": "data/tests/classical/rovers/domain.pddl",
+      "task_file": "data/tests/classical/rovers/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "at_soil_sample",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_soil_sample",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "at_rock_sample",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_rock_sample",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "empty",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "full",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "empty",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "full",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_rock_sample",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "have_rock_analysis",
+              "parameters": [
+                1,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_soil_sample",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "have_soil_analysis",
+              "parameters": [
+                1,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_soil_sample",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "empty",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "full",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at_rock_sample",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "at_soil_sample",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "full",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "available",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "channel_free",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "available",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "channel_free",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "communicated_rock_data",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "available",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "channel_free",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "communicated_soil_data",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Satellite",
+      "domain_file": "data/tests/classical/satellite/domain.pddl",
+      "task_file": "data/tests/classical/satellite/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "pointing",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "power_avail",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "power_on",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Schedule",
+      "domain_file": "data/tests/classical/schedule/domain.pddl",
+      "task_file": "data/tests/classical/schedule/test-1.pddl",
+      "invariants": []
+    },
+    {
+      "name": "Sokoban",
+      "domain_file": "data/tests/classical/sokoban/domain.pddl",
+      "task_file": "data/tests/classical/sokoban/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at-robot",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "clear",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                1,
+                0
+              ]
+            },
+            {
+              "predicate": "clear",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Spanner",
+      "domain_file": "data/tests/classical/spanner/domain.pddl",
+      "task_file": "data/tests/classical/spanner/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "useable",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "useable",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "loose",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "loose",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "carrying",
+              "parameters": [
+                1,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "loose",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "tightened",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "loose",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "tightened",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "tightened",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "useable",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tpp",
+      "domain_file": "data/tests/numeric/tpp/domain.pddl",
+      "task_file": "data/tests/numeric/tpp/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "loc",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Transport",
+      "domain_file": "data/tests/classical/transport/domain.pddl",
+      "task_file": "data/tests/classical/transport/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "capacity",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "in",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Visitall",
+      "domain_file": "data/tests/classical/visitall/domain.pddl",
+      "task_file": "data/tests/classical/visitall/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "at-robot",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Woodworking",
+      "domain_file": "data/tests/classical/woodworking/domain.pddl",
+      "task_file": "data/tests/classical/woodworking/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 0,
+          "atoms": [
+            {
+              "predicate": "unused",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 0,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "unused",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "surface-condition",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "unused",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "treatment",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "unused",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "unused",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "wood",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "empty",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "in-highspeed-saw",
+              "parameters": [
+                1,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "available",
+              "parameters": [
+                0
+              ]
+            },
+            {
+              "predicate": "in-highspeed-saw",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "unused",
+              "parameters": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Zenotravel",
+      "domain_file": "data/tests/numeric/zenotravel/domain.pddl",
+      "task_file": "data/tests/numeric/zenotravel/test-1.pddl",
+      "invariants": [
+        {
+          "num_rigid_variables": 1,
+          "num_counted_variables": 1,
+          "atoms": [
+            {
+              "predicate": "located",
+              "parameters": [
+                0,
+                1
+              ]
+            },
+            {
+              "predicate": "in",
+              "parameters": [
+                0,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

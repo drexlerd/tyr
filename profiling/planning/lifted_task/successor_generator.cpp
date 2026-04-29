@@ -1,6 +1,6 @@
+#include "tyr/common/json_loader.hpp"
 #include "tyr/planning/lifted_task/successor_generator.hpp"
 
-#include "../../json_loader.hpp"
 #include "tyr/formalism/planning/parser.hpp"
 #include "tyr/formalism/planning/views.hpp"
 #include "tyr/planning/lifted_task.hpp"
@@ -27,7 +27,7 @@ struct BenchmarkCase
 
 std::vector<BenchmarkCase> load_cases()
 {
-    const auto document = tyr::profiling::load_json_file(tyr::profiling::profiling_path("planning/lifted_task/successor_generator.json"));
+    const auto document = tyr::common::load_json_file(tyr::common::profiling_path("planning/lifted_task/successor_generator.json"));
     const auto& root = document.as_object();
     const auto& domains = root.at("domains").as_object();
 
@@ -37,14 +37,14 @@ std::vector<BenchmarkCase> load_cases()
     {
         const auto& domain_object = domain_value.as_object();
         const auto domain_name = std::string(domain_name_key);
-        const auto domain = tyr::profiling::data_path(json::value_to<std::string>(domain_object.at("domain_file")));
+        const auto domain = tyr::common::data_path(json::value_to<std::string>(domain_object.at("domain_file")));
         const auto& tasks = domain_object.at("tasks").as_object();
 
         for (const auto& [task_name_key, task_value] : tasks)
         {
             const auto task_name = std::string(task_name_key);
             const auto run_name = domain_name + "/" + task_name;
-            const auto task = tyr::profiling::data_path(json::value_to<std::string>(task_value));
+            const auto task = tyr::common::data_path(json::value_to<std::string>(task_value));
 
             result.push_back(BenchmarkCase { run_name, domain, task });
         }
