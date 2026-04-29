@@ -28,6 +28,8 @@
 #include "tyr/formalism/planning/views.hpp"
 #include "tyr/planning/applicability_decl.hpp"
 #include "tyr/planning/declarations.hpp"
+#include "tyr/planning/ground_task.hpp"
+#include "tyr/planning/lifted_task.hpp"
 #include "tyr/planning/node.hpp"
 
 #include <algorithm>

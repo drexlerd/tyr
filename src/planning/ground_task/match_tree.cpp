@@ -17,8 +17,8 @@
 
 #include "tyr/planning/ground_task/match_tree/match_tree.hpp"
 
-#include "tyr/common/types.hpp"
 #include "tyr/buffer/declarations.hpp"
+#include "tyr/common/types.hpp"
 #include "tyr/formalism/planning/declarations.hpp"
 #include "tyr/formalism/planning/formatter.hpp"
 #include "tyr/formalism/planning/repository.hpp"
