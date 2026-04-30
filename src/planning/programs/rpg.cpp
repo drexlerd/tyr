@@ -77,10 +77,6 @@ auto create_delete_free_goal(fp::GroundConjunctiveConditionView goal,
         if (const auto literal = merge_p2d(fact, true, translation_context.p2d.fluent_to_fluent_predicate, context))
             conj_cond.fluent_literals.push_back(literal->get_index());
 
-    for (const auto literal : goal.get_literals<formalism::DerivedTag>())
-        if (literal.get_polarity())
-            conj_cond.fluent_literals.push_back(merge_p2d(literal, translation_context.p2d.derived_to_fluent_predicate, context).first.get_index());
-
     for (const auto numeric_constraint : goal.get_numeric_constraints())
         conj_cond.numeric_constraints.push_back(merge_p2d(numeric_constraint, context));
 
@@ -258,9 +254,6 @@ const datalog::ProgramContext& RPGProgram::get_program_context() const noexcept 
 
 const datalog::ConstProgramWorkspace& RPGProgram::get_const_program_workspace() const noexcept { return m_program_workspace; }
 
-formalism::datalog::GroundConjunctiveConditionView RPGProgram::get_goal() const noexcept
-{
-    return m_program_context.get_program().get_goal().value();
-}
+formalism::datalog::GroundConjunctiveConditionView RPGProgram::get_goal() const noexcept { return m_program_context.get_program().get_goal().value(); }
 
 }
