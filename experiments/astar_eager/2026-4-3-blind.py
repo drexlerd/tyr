@@ -53,7 +53,7 @@ if REMOTE:
         cpus_per_task=1,
         extra_options="#SBATCH --account=naiss2025-5-382")
     
-    ENV.MAX_TASKS = 300
+    # ENV.MAX_TASKS = 300
 else:
     ENV = LocalEnvironment(processes=6)
 
