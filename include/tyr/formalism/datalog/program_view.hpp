@@ -18,10 +18,12 @@
 #ifndef TYR_FORMALISM_DATALOG_PROGRAM_VIEW_HPP_
 #define TYR_FORMALISM_DATALOG_PROGRAM_VIEW_HPP_
 
+#include "tyr/common/optional.hpp"
 #include "tyr/common/types.hpp"
 #include "tyr/common/vector.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 #include "tyr/formalism/datalog/ground_atom_index.hpp"
+#include "tyr/formalism/datalog/ground_conjunctive_condition_index.hpp"
 #include "tyr/formalism/datalog/ground_function_term_value_index.hpp"
 #include "tyr/formalism/datalog/program_index.hpp"
 #include "tyr/formalism/datalog/rule_view.hpp"
@@ -65,6 +67,10 @@ public:
     auto get_fterm_values() const noexcept
     {
         return make_view(get_data().template get_fterm_values<T>(), *m_context);
+    }
+    auto get_goal() const noexcept
+    {
+        return make_view(get_data().goal, *m_context);
     }
     auto get_rules() const noexcept { return make_view(get_data().rules, *m_context); }
 

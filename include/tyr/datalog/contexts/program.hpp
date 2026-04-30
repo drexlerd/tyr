@@ -60,6 +60,8 @@ struct ProgramExecutionContext
         const auto& or_annot() const noexcept { return m_ws.or_annot; }
         auto& and_annot() noexcept { return m_ws.and_annot; }
         const auto& and_annot() const noexcept { return m_ws.and_annot; }
+        auto& numeric_and_annot() noexcept { return m_ws.numeric_and_annot; }
+        const auto& numeric_and_annot() const noexcept { return m_ws.numeric_and_annot; }
         auto& tp() noexcept { return m_ws.tp; }
         const auto& tp() const noexcept { return m_ws.tp; }
         auto& rules() noexcept { return m_ws.rules; }
@@ -98,10 +100,10 @@ struct ProgramExecutionContext
         for (auto& vec : out.or_annot())
             vec.clear();
         out.and_annot().clear();
+        out.numeric_and_annot().clear();
 
         // Initialize the termination policy.
-        out.tp().clear();
-        out.tp().set_goals(out.facts().goal_fact_sets);
+        out.tp().reset();
 
         // Initialize first fact layer.
         for (const auto& set : out.facts().fact_sets.predicate.get_sets())
@@ -110,11 +112,19 @@ struct ProgramExecutionContext
             {
                 out.or_ap().initialize_annotation(binding, out.or_annot());
                 out.tp().achieve(binding);
+                out.facts().assignment_sets.predicate.insert(binding);
             }
         }
 
-        // Initialize assignment sets
-        out.facts().assignment_sets.insert(out.facts().fact_sets);
+        // Initialize first numeric assignment layer.
+        for (const auto& set : out.facts().fact_sets.function.get_sets())
+        {
+            const auto bindings = set.get_bindings();
+            const auto& values = set.get_values();
+
+            for (uint_t i = 0; i < bindings.size(); ++i)
+                out.facts().assignment_sets.function.insert(bindings[i], ClosedInterval<float_t>(values[i], values[i]));
+        }
 
         // Reset cost buckets.
         out.cost_buckets().clear();

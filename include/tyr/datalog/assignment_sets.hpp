@@ -129,16 +129,19 @@ public:
 
     void reset() noexcept;
 
-    void insert(formalism::datalog::FunctionBindingView<T> binding, float_t value);
-    void insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value);
+    bool insert(formalism::datalog::FunctionBindingView<T> binding, ClosedInterval<float_t> interval);
+    bool insert(formalism::datalog::FunctionBindingView<T> binding, float_t value);
+    bool insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value);
 
     ClosedInterval<float_t> operator[](const EmptyAssignment& assignment) const noexcept;
     ClosedInterval<float_t> operator[](const VertexAssignment& assignment) const noexcept;
     ClosedInterval<float_t> operator[](const EdgeAssignment& assignment) const noexcept;
+    ClosedInterval<float_t> operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept;
 
     ClosedInterval<float_t> at(const EmptyAssignment& assignment) const noexcept;
     ClosedInterval<float_t> at(const VertexAssignment& assignment) const noexcept;
     ClosedInterval<float_t> at(const EdgeAssignment& assignment) const noexcept;
+    ClosedInterval<float_t> at(formalism::datalog::FunctionBindingView<T> binding) const noexcept;
 
     size_t size() const noexcept;
     const PerfectAssignmentHash& get_hash() const noexcept;
@@ -156,11 +159,15 @@ public:
 
     void reset() noexcept;
 
-    void insert(formalism::datalog::GroundFunctionTermView<T> function_term, float_t value);
+    bool insert(formalism::datalog::FunctionBindingView<T> binding, ClosedInterval<float_t> interval);
+    bool insert(formalism::datalog::GroundFunctionTermView<T> function_term, float_t value);
+    bool insert(formalism::datalog::GroundFunctionTermView<T> function_term, ClosedInterval<float_t> interval);
     void insert(formalism::datalog::GroundFunctionTermListView<T> function_terms, const std::vector<float_t>& values);
     void insert(formalism::datalog::GroundFunctionTermValueListView<T> fterm_values);
 
     const FunctionAssignmentSet<T>& get_set(Index<formalism::Function<T>> index) const noexcept;
+    ClosedInterval<float_t> operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept;
+    ClosedInterval<float_t> at(formalism::datalog::FunctionBindingView<T> binding) const noexcept;
     std::vector<FunctionAssignmentSet<T>>& get_sets() noexcept;
     const std::vector<FunctionAssignmentSet<T>>& get_sets() const noexcept;
 

@@ -18,6 +18,7 @@
 #ifndef TYR_DATALOG_WORKSPACES_PROGRAM_HPP_
 #define TYR_DATALOG_WORKSPACES_PROGRAM_HPP_
 
+#include "tyr/common/closed_interval.hpp"
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
 #include "tyr/datalog/policies/annotation_concept.hpp"
@@ -34,6 +35,7 @@
 #include <chrono>
 #include <oneapi/tbb/enumerable_thread_specific.h>
 #include <optional>
+#include <tuple>
 #include <vector>
 
 namespace tyr::datalog
@@ -41,9 +43,26 @@ namespace tyr::datalog
 class CostBuckets
 {
 public:
-    using ViewType = formalism::datalog::PredicateBindingView<formalism::FluentTag>;
-    using Bucket = UnorderedSet<ViewType>;
+    using PredicateViewType = formalism::datalog::PredicateBindingView<formalism::FluentTag>;
+    using FunctionViewType = formalism::datalog::FunctionBindingView<formalism::FluentTag>;
+    using PredicateBucket = UnorderedSet<PredicateViewType>;
+    using FunctionBucket = UnorderedMap<FunctionViewType, ClosedInterval<float_t>>;
     using Cost = uint_t;
+
+    struct Bucket
+    {
+        PredicateBucket predicates;
+        FunctionBucket functions;
+
+        void clear()
+        {
+            predicates.clear();
+            functions.clear();
+        }
+
+        [[nodiscard]] bool empty() const noexcept { return predicates.empty() && functions.empty(); }
+        [[nodiscard]] size_t size() const noexcept { return predicates.size() + functions.size(); }
+    };
 
     CostBuckets() : m_buckets(1), m_current(0), m_total_size(0) {}
 
@@ -65,26 +84,45 @@ public:
             m_buckets.resize(static_cast<size_t>(c) + 1);
     }
 
-    bool insert(Cost c, ViewType a)
+    bool insert(Cost c, PredicateViewType a)
     {
         resize_to_fit(c);
-        const auto [it, inserted] = m_buckets[c].insert(a);
+        const auto [it, inserted] = m_buckets[c].predicates.insert(a);
         if (inserted)
             ++m_total_size;
         return inserted;
     }
 
-    bool erase(Cost c, ViewType a)
+    bool insert(Cost c, FunctionViewType f, ClosedInterval<float_t> interval)
+    {
+        resize_to_fit(c);
+
+        auto& bucket = m_buckets[c].functions;
+        auto [it, inserted] = bucket.emplace(f, interval);
+
+        if (inserted)
+        {
+            ++m_total_size;
+        }
+        else
+        {
+            it->second = hull(it->second, interval);
+        }
+
+        return inserted;
+    }
+
+    bool erase(Cost c, PredicateViewType a)
     {
         if (c >= m_buckets.size())
             return false;
-        const auto erased = m_buckets[c].erase(a) > 0;
+        const auto erased = m_buckets[c].predicates.erase(a) > 0;
         if (erased)
             --m_total_size;
         return erased;
     }
 
-    void update(const CostUpdate& update, ViewType a)
+    void update(const CostUpdate& update, PredicateViewType a)
     {
         if (update.old_cost.has_value())
             erase(*update.old_cost, a);
@@ -106,12 +144,20 @@ public:
         return m_current < m_buckets.size();
     }
 
-    const Bucket& get_current_bucket() const
+    const PredicateBucket& get_current_bucket() const
     {
-        static const Bucket kEmpty {};
+        static const PredicateBucket kEmpty {};
         if (m_current >= m_buckets.size())
             return kEmpty;
-        return m_buckets[m_current];
+        return m_buckets[m_current].predicates;
+    }
+
+    const FunctionBucket& get_current_function_bucket() const
+    {
+        static const FunctionBucket kEmpty {};
+        if (m_current >= m_buckets.size())
+            return kEmpty;
+        return m_buckets[m_current].functions;
     }
 
 private:
@@ -131,6 +177,7 @@ struct ProgramWorkspace
     OrAP or_ap;
     OrAnnotationsList or_annot;
     AndAnnotationsMap and_annot;
+    NumericAndAnnotationsMap numeric_and_annot;
 
     TP tp;
 

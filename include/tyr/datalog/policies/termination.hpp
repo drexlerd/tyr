@@ -20,6 +20,7 @@
 
 #include "tyr/common/config.hpp"
 #include "tyr/common/dynamic_bitset.hpp"
+#include "tyr/datalog/assignment_sets.hpp"
 #include "tyr/datalog/fact_sets.hpp"
 #include "tyr/datalog/policies/aggregation.hpp"
 #include "tyr/datalog/policies/annotation_types.hpp"
@@ -31,6 +32,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <concepts>
+#include <optional>
 
 namespace tyr::datalog
 {
@@ -40,9 +42,9 @@ class NoTerminationPolicy
 public:
     NoTerminationPolicy() = default;
 
-    void set_goals(const PredicateFactSets<formalism::FluentTag>& goals) {}
+    void set_goals(formalism::datalog::GroundConjunctiveConditionView goals) {}
     void achieve(formalism::datalog::PredicateBindingView<formalism::FluentTag> binding) noexcept {}
-    bool check() const noexcept { return false; }
+    bool check(const AssignmentSets& assignment_sets) const noexcept { return false; }
     Cost get_total_cost(const OrAnnotationsList& or_annot) const noexcept { return Cost(0); }
     void reset() noexcept {}
     void clear() noexcept {}
@@ -52,13 +54,14 @@ template<typename AggregationFunction>
 class TerminationPolicy
 {
 public:
-    explicit TerminationPolicy(size_t num_fluent_predicates);
+    TerminationPolicy(formalism::datalog::PredicateListView<formalism::FluentTag> fluent_predicates,
+                      const formalism::datalog::Repository& repository);
 
-    void set_goals(const PredicateFactSets<formalism::FluentTag>& goals);
+    void set_goals(formalism::datalog::GroundConjunctiveConditionView goals);
 
     void achieve(formalism::datalog::PredicateBindingView<formalism::FluentTag> binding) noexcept;
 
-    bool check() const noexcept;
+    bool check(const AssignmentSets& assignment_sets) const noexcept;
 
     Cost get_total_cost(const OrAnnotationsList& or_annot) const noexcept;
 
@@ -72,6 +75,8 @@ private:
     std::vector<boost::dynamic_bitset<>> unsat_goals;
     size_t num_unsat_goals;
 
+    PredicateFactSets<formalism::FluentTag> goal_fact_sets;
+    std::optional<formalism::datalog::GroundConjunctiveConditionView> goal;
     std::vector<formalism::datalog::PredicateBindingView<formalism::FluentTag>> bindings;
 
     AggregationFunction agg;

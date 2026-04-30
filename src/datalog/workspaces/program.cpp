@@ -42,6 +42,7 @@ ProgramWorkspace<OrAP, AndAP, TP>::ProgramWorkspace(ProgramContext& context, con
     or_ap(or_ap),
     or_annot(context.get_program().get_predicates<formalism::FluentTag>().size()),
     and_annot(),
+    numeric_and_annot(),
     tp(tp),
     rules(),
     planning_builder(),

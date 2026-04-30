@@ -41,6 +41,14 @@ namespace tyr::datalog
 {
 namespace
 {
+template<typename T>
+bool update_interval(ClosedInterval<T>& target, ClosedInterval<T> source)
+{
+    const auto old = target;
+    target = hull(target, source);
+    return target != old;
+}
+
 [[maybe_unused]] inline bool contains(const analysis::VariableDomainList& parameter_domains, const VertexAssignment& assignment)
 {
     const auto& objects = parameter_domains[uint_t(assignment.index)].objects;
@@ -320,16 +328,17 @@ void FunctionAssignmentSet<T>::reset() noexcept
 }
 
 template<formalism::FactKind T>
-void FunctionAssignmentSet<T>::insert(formalism::datalog::FunctionBindingView<T> binding, float_t value)
+bool FunctionAssignmentSet<T>::insert(formalism::datalog::FunctionBindingView<T> binding, ClosedInterval<float_t> interval)
 {
     const auto objects = binding.get_objects();
     const auto arity = objects.size();
+    auto changed = false;
 
     {
         const auto rank = EmptyAssignment::rank;
 
         auto& empty_assignment_bound = m_set[rank];
-        empty_assignment_bound = hull(empty_assignment_bound, ClosedInterval<float_t>(value, value));
+        changed |= update_interval(empty_assignment_bound, interval);
     }
 
     for (uint_t first_index = 0; first_index < arity; ++first_index)
@@ -341,7 +350,7 @@ void FunctionAssignmentSet<T>::insert(formalism::datalog::FunctionBindingView<T>
             const auto rank = m_hash.get_rank<false>(VertexAssignment(formalism::ParameterIndex(first_index), first_object.get_index()));
 
             auto& single_assignment_bound = m_set[rank];
-            single_assignment_bound = hull(single_assignment_bound, ClosedInterval<float_t>(value, value));
+            changed |= update_interval(single_assignment_bound, interval);
         }
 
         for (uint_t second_index = first_index + 1; second_index < arity; ++second_index)
@@ -356,15 +365,23 @@ void FunctionAssignmentSet<T>::insert(formalism::datalog::FunctionBindingView<T>
                                                                     second_object.get_index()));
 
             auto& double_assignment_bound = m_set[rank];
-            double_assignment_bound = hull(double_assignment_bound, ClosedInterval<float_t>(value, value));
+            changed |= update_interval(double_assignment_bound, interval);
         }
     }
+
+    return changed;
 }
 
 template<formalism::FactKind T>
-void FunctionAssignmentSet<T>::insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value)
+bool FunctionAssignmentSet<T>::insert(formalism::datalog::FunctionBindingView<T> binding, float_t value)
 {
-    insert(fterm_value.get_fterm().get_row(), fterm_value.get_value());
+    return insert(binding, ClosedInterval<float_t>(value, value));
+}
+
+template<formalism::FactKind T>
+bool FunctionAssignmentSet<T>::insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value)
+{
+    return insert(fterm_value.get_fterm().get_row(), fterm_value.get_value());
 }
 
 template<formalism::FactKind T>
@@ -386,6 +403,37 @@ ClosedInterval<float_t> FunctionAssignmentSet<T>::operator[](const EdgeAssignmen
 }
 
 template<formalism::FactKind T>
+ClosedInterval<float_t> FunctionAssignmentSet<T>::operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept
+{
+    const auto objects = binding.get_objects();
+    const auto arity = objects.size();
+
+    auto result = (*this)[EmptyAssignment()];
+    if (empty(result))
+        return result;
+
+    for (uint_t i = 0; i < arity; ++i)
+    {
+        result = intersect(result, (*this)[VertexAssignment(formalism::ParameterIndex(i), objects[i].get_index())]);
+        if (empty(result))
+            return result;
+
+        for (uint_t j = i + 1; j < arity; ++j)
+        {
+            result = intersect(result,
+                               (*this)[EdgeAssignment(formalism::ParameterIndex(i),
+                                                      objects[i].get_index(),
+                                                      formalism::ParameterIndex(j),
+                                                      objects[j].get_index())]);
+            if (empty(result))
+                return result;
+        }
+    }
+
+    return result;
+}
+
+template<formalism::FactKind T>
 ClosedInterval<float_t> FunctionAssignmentSet<T>::at(const EmptyAssignment& assignment) const noexcept
 {
     return m_set[EmptyAssignment::rank];
@@ -401,6 +449,37 @@ template<formalism::FactKind T>
 ClosedInterval<float_t> FunctionAssignmentSet<T>::at(const EdgeAssignment& assignment) const noexcept
 {
     return m_set[m_hash.template get_rank<true>(assignment)];
+}
+
+template<formalism::FactKind T>
+ClosedInterval<float_t> FunctionAssignmentSet<T>::at(formalism::datalog::FunctionBindingView<T> binding) const noexcept
+{
+    const auto objects = binding.get_objects();
+    const auto arity = objects.size();
+
+    auto result = at(EmptyAssignment());
+    if (empty(result))
+        return result;
+
+    for (uint_t i = 0; i < arity; ++i)
+    {
+        result = intersect(result, at(VertexAssignment(formalism::ParameterIndex(i), objects[i].get_index())));
+        if (empty(result))
+            return result;
+
+        for (uint_t j = i + 1; j < arity; ++j)
+        {
+            result = intersect(result,
+                               at(EdgeAssignment(formalism::ParameterIndex(i),
+                                                 objects[i].get_index(),
+                                                 formalism::ParameterIndex(j),
+                                                 objects[j].get_index())));
+            if (empty(result))
+                return result;
+        }
+    }
+
+    return result;
 }
 
 template<formalism::FactKind T>
@@ -450,9 +529,21 @@ void FunctionAssignmentSets<T>::reset() noexcept
 }
 
 template<formalism::FactKind T>
-void FunctionAssignmentSets<T>::insert(formalism::datalog::GroundFunctionTermView<T> function_term, float_t value)
+bool FunctionAssignmentSets<T>::insert(formalism::datalog::FunctionBindingView<T> binding, ClosedInterval<float_t> interval)
 {
-    m_sets[function_term.get_function().get_index().get_value()].insert(function_term.get_row(), value);
+    return m_sets[binding.get_relation().get_index().get_value()].insert(binding, interval);
+}
+
+template<formalism::FactKind T>
+bool FunctionAssignmentSets<T>::insert(formalism::datalog::GroundFunctionTermView<T> function_term, float_t value)
+{
+    return m_sets[function_term.get_function().get_index().get_value()].insert(function_term.get_row(), value);
+}
+
+template<formalism::FactKind T>
+bool FunctionAssignmentSets<T>::insert(formalism::datalog::GroundFunctionTermView<T> function_term, ClosedInterval<float_t> interval)
+{
+    return m_sets[function_term.get_function().get_index().get_value()].insert(function_term.get_row(), interval);
 }
 
 template<formalism::FactKind T>
@@ -475,6 +566,18 @@ template<formalism::FactKind T>
 const FunctionAssignmentSet<T>& FunctionAssignmentSets<T>::get_set(Index<formalism::Function<T>> index) const noexcept
 {
     return m_sets[index.get_value()];
+}
+
+template<formalism::FactKind T>
+ClosedInterval<float_t> FunctionAssignmentSets<T>::operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept
+{
+    return get_set(binding.get_relation().get_index())[binding];
+}
+
+template<formalism::FactKind T>
+ClosedInterval<float_t> FunctionAssignmentSets<T>::at(formalism::datalog::FunctionBindingView<T> binding) const noexcept
+{
+    return get_set(binding.get_relation().get_index()).at(binding);
 }
 
 template<formalism::FactKind T>

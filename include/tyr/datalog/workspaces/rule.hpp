@@ -170,12 +170,20 @@ struct PredicateHeadIteration
     void clear() noexcept { rows.clear(); }
 };
 
+struct FunctionHeadUpdate
+{
+    Index<formalism::Row> row;
+    float_t value;
+
+    FunctionHeadUpdate(Index<formalism::Row> row, float_t value) : row(row), value(value) {}
+
+    auto identifying_members() const noexcept { return std::tie(row, value); }
+};
+
 struct FunctionHeadIteration
 {
-    using Update = std::pair<Index<formalism::Row>, float_t>;
-
     Index<formalism::Function<formalism::FluentTag>> relation;
-    UnorderedSet<Update> updates;
+    UnorderedSet<FunctionHeadUpdate> updates;
 
     FunctionHeadIteration() = default;
     explicit FunctionHeadIteration(Index<formalism::Function<formalism::FluentTag>> relation) : relation(relation), updates() {}
@@ -227,6 +235,7 @@ struct RuleWorkspace
 
         // Annotations stored in program_overlay_repository
         AndAnnotationsMap and_annot;
+        NumericAndAnnotationsMap numeric_and_annot;
 
         /// KPKC
         kpkc::Workspace kpkc_workspace;
@@ -374,6 +383,7 @@ RuleWorkspace<AndAP>::Iteration::Iteration(formalism::datalog::RepositoryFactory
         },
         cws.get_rule().get_head())),
     and_annot(),
+    numeric_and_annot(),
     kpkc_workspace(common.kpkc.get_graph_layout())
 {
 }
@@ -384,6 +394,7 @@ void RuleWorkspace<AndAP>::Iteration::clear() noexcept
     workspace_overlay_repository.clear();
     std::visit([](auto& arg) { arg.clear(); }, head);
     and_annot.clear();
+    numeric_and_annot.clear();
 }
 
 template<typename AndAP>

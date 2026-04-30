@@ -30,8 +30,6 @@ struct FactsWorkspace
     TaggedFactSets<formalism::FluentTag> fact_sets;
     TaggedAssignmentSets<formalism::FluentTag> assignment_sets;
 
-    PredicateFactSets<formalism::FluentTag> goal_fact_sets;
-
     explicit FactsWorkspace(formalism::datalog::PredicateListView<formalism::FluentTag> predicates,
                             formalism::datalog::FunctionListView<formalism::FluentTag> functions,
                             const analysis::PredicateDomainMap<formalism::FluentTag>& predicate_domains,

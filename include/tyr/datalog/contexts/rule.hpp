@@ -91,6 +91,7 @@ public:
 
         auto& kpkc_workspace() noexcept { return m_ws_worker.iteration.kpkc_workspace; }
         auto& and_annot() noexcept { return m_ws_worker.iteration.and_annot; }
+        auto& numeric_and_annot() noexcept { return m_ws_worker.iteration.numeric_and_annot; }
         auto& head() noexcept { return m_ws_worker.iteration.head; }
 
         auto& applicability_check_pool() noexcept { return m_ws_worker.solve.applicability_check_pool; }

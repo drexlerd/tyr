@@ -695,6 +695,8 @@ struct formatter<tyr::Data<tyr::formalism::datalog::Program>, char>
             os << tyr::print_indent;
             fmt::print(os, "{}{}\n", "fluent fterms = ", value.fluent_fterm_values);
             os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "goal = ", value.goal);
+            os << tyr::print_indent;
             fmt::print(os, "{}{}\n", "rules = ", value.rules);
         }
         os << tyr::print_indent << ")";
@@ -733,6 +735,8 @@ struct formatter<tyr::formalism::datalog::ProgramView, char>
             fmt::print(os, "{}{}\n", "static fterms = ", value.template get_fterm_values<tyr::formalism::StaticTag>());
             os << tyr::print_indent;
             fmt::print(os, "{}{}\n", "fluent fterms = ", value.template get_fterm_values<tyr::formalism::FluentTag>());
+            os << tyr::print_indent;
+            fmt::print(os, "{}{}\n", "goal = ", value.get_goal());
             os << tyr::print_indent;
             fmt::print(os, "{}{}\n", "rules = ", value.get_rules());
         }

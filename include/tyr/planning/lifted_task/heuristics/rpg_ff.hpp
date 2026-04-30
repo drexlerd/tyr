@@ -54,14 +54,22 @@ public:
     const UnorderedSet<formalism::planning::GroundActionView>& get_preferred_action_views() override;
 
     bool mark_atom(formalism::datalog::PredicateBindingView<formalism::FluentTag> atom);
+    bool mark_function(formalism::datalog::FunctionBindingView<formalism::FluentTag> function);
 
 private:
     void extract_relaxed_plan_and_preferred_actions(formalism::datalog::PredicateBindingView<formalism::FluentTag> atom,
                                                     const StateContext<LiftedTag>& state_context,
                                                     formalism::planning::GrounderContext& grounder_context);
+    void extract_relaxed_plan_and_preferred_actions(formalism::datalog::FunctionBindingView<formalism::FluentTag> function,
+                                                    const StateContext<LiftedTag>& state_context,
+                                                    formalism::planning::GrounderContext& grounder_context);
+    void extract_relaxed_plan_and_preferred_actions(const datalog::Witness& witness,
+                                                    const StateContext<LiftedTag>& state_context,
+                                                    formalism::planning::GrounderContext& grounder_context);
 
 private:
     std::vector<boost::dynamic_bitset<>> m_markings;
+    std::vector<boost::dynamic_bitset<>> m_function_markings;
 
     /// For grounding actions
     IndexList<formalism::Object> m_binding;

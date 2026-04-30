@@ -58,8 +58,10 @@ private:
 };
 
 using AndAnnotationsMap = UnorderedMap<formalism::datalog::PredicateBindingView<formalism::FluentTag>, Witness>;
+using NumericAndAnnotationsMap = UnorderedMap<formalism::datalog::FunctionBindingView<formalism::FluentTag>, Witness>;
 
 static_assert(sizeof(AndAnnotationsMap::value_type) == 40);
+static_assert(sizeof(NumericAndAnnotationsMap::value_type) == 40);
 
 struct CostUpdate
 {

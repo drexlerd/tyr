@@ -37,38 +37,6 @@ namespace tyr::planning
 {
 namespace
 {
-template<typename Op>
-struct DatalogNumericEffectOp;
-
-template<>
-struct DatalogNumericEffectOp<fp::OpAssign>
-{
-    using type = fd::OpAssign;
-};
-template<>
-struct DatalogNumericEffectOp<fp::OpIncrease>
-{
-    using type = fd::OpIncrease;
-};
-template<>
-struct DatalogNumericEffectOp<fp::OpDecrease>
-{
-    using type = fd::OpDecrease;
-};
-template<>
-struct DatalogNumericEffectOp<fp::OpScaleUp>
-{
-    using type = fd::OpScaleUp;
-};
-template<>
-struct DatalogNumericEffectOp<fp::OpScaleDown>
-{
-    using type = fd::OpScaleDown;
-};
-
-template<typename Op>
-using DatalogNumericEffectOpT = typename DatalogNumericEffectOp<Op>::type;
-
 void fill_delete_free_condition(fp::ActionView action,
                                 fp::ConditionalEffectView cond_eff,
                                 TranslationContext& translation_context,
@@ -83,6 +51,8 @@ void fill_delete_free_condition(fp::ActionView action,
     for (const auto literal : action.get_condition().get_literals<formalism::FluentTag>())
         if (literal.get_polarity())
             conj_cond.fluent_literals.push_back(merge_p2d(literal, translation_context.p2d.fluent_to_fluent_predicate, context).first.get_index());
+    for (const auto numeric_constraint : action.get_condition().get_numeric_constraints())
+        conj_cond.numeric_constraints.push_back(merge_p2d(numeric_constraint, context));
 
     for (const auto variable : cond_eff.get_variables())
         conj_cond.variables.push_back(merge_p2d(variable, context).first.get_index());
@@ -91,35 +61,31 @@ void fill_delete_free_condition(fp::ActionView action,
     for (const auto literal : cond_eff.get_condition().template get_literals<formalism::FluentTag>())
         if (literal.get_polarity())
             conj_cond.fluent_literals.push_back(merge_p2d(literal, translation_context.p2d.fluent_to_fluent_predicate, context).first.get_index());
+    for (const auto numeric_constraint : cond_eff.get_condition().get_numeric_constraints())
+        conj_cond.numeric_constraints.push_back(merge_p2d(numeric_constraint, context));
 }
 
-template<fp::NumericEffectOpKind Op>
-auto merge_numeric_effect(fp::NumericEffectView<Op, formalism::FluentTag> effect, formalism::planning::MergeDatalogContext& context)
+auto create_delete_free_goal(fp::GroundConjunctiveConditionView goal,
+                             TranslationContext& translation_context,
+                             formalism::planning::MergeDatalogContext& context)
 {
-    using DOp = DatalogNumericEffectOpT<Op>;
+    auto conj_cond_ptr = context.builder.get_builder<formalism::datalog::GroundConjunctiveCondition>();
+    auto& conj_cond = *conj_cond_ptr;
+    conj_cond.clear();
 
-    auto numeric_effect_ptr = context.builder.get_builder<fd::NumericEffect<DOp, formalism::FluentTag>>();
-    auto& numeric_effect = *numeric_effect_ptr;
-    numeric_effect.clear();
+    for (const auto fact : goal.get_facts<formalism::PositiveTag>())
+        if (const auto literal = merge_p2d(fact, true, translation_context.p2d.fluent_to_fluent_predicate, context))
+            conj_cond.fluent_literals.push_back(literal->get_index());
 
-    numeric_effect.fterm = merge_p2d(effect.get_fterm(), context).first.get_index();
-    numeric_effect.fexpr = merge_p2d(effect.get_fexpr(), context);
+    for (const auto literal : goal.get_literals<formalism::DerivedTag>())
+        if (literal.get_polarity())
+            conj_cond.fluent_literals.push_back(merge_p2d(literal, translation_context.p2d.derived_to_fluent_predicate, context).first.get_index());
 
-    canonicalize(numeric_effect);
-    return context.destination.get_or_create(numeric_effect);
-}
+    for (const auto numeric_constraint : goal.get_numeric_constraints())
+        conj_cond.numeric_constraints.push_back(merge_p2d(numeric_constraint, context));
 
-auto merge_numeric_effect_operator(fp::NumericEffectOperatorView<formalism::FluentTag> effect, formalism::planning::MergeDatalogContext& context)
-{
-    using Operator = fd::NumericEffectOperator<formalism::FluentTag>;
-    using OperatorData = Data<Operator>;
-
-    return visit(
-        [&](auto&& arg) -> OperatorData
-        {
-            return OperatorData(typename OperatorData::Variant(merge_numeric_effect(arg, context).first.get_index()));
-        },
-        effect.get_variant());
+    canonicalize(conj_cond);
+    return context.destination.get_or_create(conj_cond);
 }
 
 auto create_cond_effect_rule(fp::ActionView action,
@@ -171,7 +137,7 @@ auto create_cond_numeric_effect_rule(fp::ActionView action,
 
     rule.variables = new_conj_cond.get_variables().get_data();
     rule.body = new_conj_cond.get_index();
-    rule.head = merge_numeric_effect_operator(effect, context);
+    rule.head = merge_p2d(effect, context);
     rule.cost = 1;
 
     canonicalize(rule);
@@ -250,6 +216,8 @@ auto create_program(fp::TaskView task, TranslationContext& translation_context, 
     for (const auto fterm_value : task.get_fterm_values<f::FluentTag>())
         program.fluent_fterm_values.push_back(fp::merge_p2d(fterm_value, context).first.get_index());
 
+    program.goal = create_delete_free_goal(task.get_goal(), translation_context, context).first.get_index();
+
     for (const auto action : task.get_domain().get_actions())
         translate_action_to_delete_free_rules(action, program, translation_context, context, rule_to_action);
 
@@ -289,5 +257,10 @@ datalog::ProgramContext& RPGProgram::get_program_context() noexcept { return m_p
 const datalog::ProgramContext& RPGProgram::get_program_context() const noexcept { return m_program_context; }
 
 const datalog::ConstProgramWorkspace& RPGProgram::get_const_program_workspace() const noexcept { return m_program_workspace; }
+
+formalism::datalog::GroundConjunctiveConditionView RPGProgram::get_goal() const noexcept
+{
+    return m_program_context.get_program().get_goal().value();
+}
 
 }
