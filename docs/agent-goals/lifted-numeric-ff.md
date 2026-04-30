@@ -14,6 +14,7 @@ Implement lifted numeric relaxed planning support for a metric-FF-style heuristi
   - Interval-based numeric expression evaluation.
   - Tests for numeric effects and mixed propositional/numeric applicability.
   - Supporting the general numeric planning fragment.
+  - We will enforce monotonicity during rule evaluation by lower and upper bounds of numeric intervals
 - Out of scope:
   - Matching the informativity of Metric-FF due to the generality.
 
@@ -33,28 +34,21 @@ Implement lifted numeric relaxed planning support for a metric-FF-style heuristi
 ## Tasks
 The agent should work on the highest unchecked task in this list. The agent must not mark tasks as complete.
 
-- [ ] Datalog Rule and GroundRule with numeric head.
+- [ ] Extend Datalog Rule and GroundRule two support two head types: Atom and NumericEffectOperator.
   - Interesting files:
     - `docs/agent-goals/lifted-numeric-ff.md`
     - `include/tyr/formalism/planning/declarations.hpp`
     - `include/tyr/formalism/planning/numeric_effect_data.hpp`
     - `include/tyr/formalism/planning/ground_numeric_effect_data.hpp`
-  - Likely modification areas:
-    - Documentation or design notes for the feature branch.
-  - Validation:
-    - No build required for documentation-only changes.
-  - Notes:
-    - Specify interval expression rules, effect widening rules, duplicate effect policy, infinity/epsilon behavior, and applicability interpretation.
-
-- [ ] Add unit tests for interval numeric expression and effect semantics.
-  - Interesting files:
-    - `tests/unit/formalism/planning/`
+    - `include/tyr/planning/programs/`
     - `include/tyr/formalism/planning/`
-    - `src/formalism/planning/`
   - Likely modification areas:
-    - New or existing numeric interval/effect test files.
+    - `include/tyr/formalism/datalog/rule.hpp`
+    - `include/tyr/formalism/datalog/ground_rule.hpp`
   - Validation:
-    - `cmake --build build --target core -j24`
-    - Run the targeted numeric unit test executable.
+    - Build and test suite passes
   - Notes:
-    - Cover all numeric operators, division by zero-crossing intervals, and monotone bound widening.
+    - Represent numeric effects in the datalog component,i.e., it should mirror how it is done in the `formalism/planning` component.
+    - We want Rule and GroundRule to have `cista::offset::variant` head.
+    - We want the RPGProgram in `planning/programs/rpg.hpp` to also translate numeric effects into respective datalog rules
+
