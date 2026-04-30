@@ -103,7 +103,7 @@ MEMORY_LIMIT = 8000
 exp = Experiment(environment=ENV)
 exp.add_parser(SearchParser())
 exp.add_parser(AStarEagerParser())
-# exp.add_parser(DatalogParser())
+exp.add_parser(DatalogParser())
 
 PLANNER_DIR = REPO / "build" / "exe" / "astar_eager"
 

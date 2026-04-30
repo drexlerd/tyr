@@ -71,6 +71,7 @@ class SearchParser(Parser):
         self.add_pattern("cost", r"\[.*\] Plan cost: (\d+)", type=int)
         self.add_pattern("length", r"\[.*\] Plan length: (\d+)", type=int)
         self.add_pattern("initial_h_value", r"\[.*\] Start node h_value: (\d+)", type=int)
+        self.add_pattern("initial_f_value", r"\[.*\] Start node f_value: (\d+)", type=int)
 
         self.add_pattern("search_time_ms", r"\[Search\] Search time: (\d+) ms", type=int)
         self.add_pattern("search_time_ns", r"\[Search\] Search time: \d+ ms \((\d+) ns\)", type=int)
@@ -108,6 +109,7 @@ class SearchParser(Parser):
             "unsolvable",
             "invalid",
             "initial_h_value",
+            "initial_f_value",
             Attribute("search_time_s", function=geometric_mean, digits=2),
             "num_expanded",
             "num_generated",
