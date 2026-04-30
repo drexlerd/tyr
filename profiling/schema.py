@@ -86,19 +86,37 @@ def validate_suite(suite):
 
 
 def validate_attribute_value(attribute_name, attribute_config, value):
+    normalize_attribute_value(attribute_name, attribute_config, value)
+
+
+def normalize_attribute_value(attribute_name, attribute_config, value):
     if value is None:
-        return
+        return None
 
     attribute_type = AttributeType(attribute_config["type"])
 
-    if attribute_type == AttributeType.BOOL and not isinstance(value, bool):
-        raise ValueError(f"Attribute '{attribute_name}' expected bool value, got {type(value).__name__}.")
+    if attribute_type == AttributeType.BOOL:
+        if not isinstance(value, bool):
+            raise ValueError(f"Attribute '{attribute_name}' expected bool value, got {type(value).__name__}.")
+        return value
 
-    if attribute_type == AttributeType.FLOAT and not isinstance(value, (int, float)):
-        raise ValueError(f"Attribute '{attribute_name}' expected float value, got {type(value).__name__}.")
+    if attribute_type == AttributeType.FLOAT:
+        if not (isinstance(value, (int, float)) and not isinstance(value, bool)):
+            raise ValueError(f"Attribute '{attribute_name}' expected float value, got {type(value).__name__}.")
+        return value
 
-    if attribute_type == AttributeType.INT and not (isinstance(value, int) and not isinstance(value, bool)):
+    if attribute_type == AttributeType.INT:
+        if isinstance(value, bool):
+            raise ValueError(f"Attribute '{attribute_name}' expected int value, got bool.")
+        if isinstance(value, int):
+            return value
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
         raise ValueError(f"Attribute '{attribute_name}' expected int value, got {type(value).__name__}.")
 
-    if attribute_type == AttributeType.STR and not isinstance(value, str):
-        raise ValueError(f"Attribute '{attribute_name}' expected str value, got {type(value).__name__}.")
+    if attribute_type == AttributeType.STR:
+        if not isinstance(value, str):
+            raise ValueError(f"Attribute '{attribute_name}' expected str value, got {type(value).__name__}.")
+        return value
+
+    raise ValueError(f"Attribute '{attribute_name}' has unsupported type '{attribute_config['type']}'.")

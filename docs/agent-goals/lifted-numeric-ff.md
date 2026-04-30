@@ -33,7 +33,7 @@ Implement lifted numeric relaxed planning support for a metric-FF-style heuristi
 ## Tasks
 The agent should work on the highest unchecked task in this list. The agent must not mark tasks as complete.
 
-- [ ] Write down numeric relaxation semantics.
+- [ ] Datalog Rule and GroundRule with numeric head.
   - Interesting files:
     - `docs/agent-goals/lifted-numeric-ff.md`
     - `include/tyr/formalism/planning/declarations.hpp`

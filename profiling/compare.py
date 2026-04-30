@@ -4,7 +4,7 @@ import json
 import pathlib
 import sys
 
-from schema import AttributeCompare, validate_attribute_value, validate_attributes
+from schema import AttributeCompare, normalize_attribute_value, validate_attributes
 
 
 def load_json(path: pathlib.Path):
@@ -143,8 +143,8 @@ def compare_attributes(old_benchmarks, new_benchmarks, attributes):
             old_value = old.get(attribute_name)
             new_value = new.get(attribute_name)
             rule = config.get("compare")
-            validate_attribute_value(attribute_name, config, old_value)
-            validate_attribute_value(attribute_name, config, new_value)
+            old_value = normalize_attribute_value(attribute_name, config, old_value)
+            new_value = normalize_attribute_value(attribute_name, config, new_value)
             status = compare_attribute_value(old_value, new_value, rule)
             comparison = {
                 "benchmark": benchmark_name,
