@@ -29,7 +29,8 @@ AddRPGHeuristic<LiftedTag>::AddRPGHeuristic(std::shared_ptr<Task<LiftedTag>> tas
         datalog::OrAnnotationPolicy(),
         datalog::AndAnnotationPolicy<datalog::SumAggregation>(),
         datalog::TerminationPolicy<datalog::SumAggregation>(
-            task->get_rpg_program().get_program_context().get_program().get_predicates<formalism::FluentTag>().size()))
+            task->get_rpg_program().get_program_context().get_program().get_predicates<formalism::FluentTag>(),
+            task->get_rpg_program().get_program_context().get_workspace_repository()))
 {
 }
 

@@ -22,6 +22,7 @@
 #include "tyr/common/types_utils.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 #include "tyr/formalism/datalog/ground_atom_index.hpp"
+#include "tyr/formalism/datalog/ground_conjunctive_condition_index.hpp"
 #include "tyr/formalism/datalog/ground_function_term_value_index.hpp"
 #include "tyr/formalism/datalog/program_index.hpp"
 #include "tyr/formalism/datalog/rule_index.hpp"
@@ -44,6 +45,7 @@ struct Data<formalism::datalog::Program>
     IndexList<formalism::datalog::GroundAtom<formalism::FluentTag>> fluent_atoms;
     IndexList<formalism::datalog::GroundFunctionTermValue<formalism::StaticTag>> static_fterm_values;
     IndexList<formalism::datalog::GroundFunctionTermValue<formalism::FluentTag>> fluent_fterm_values;
+    ::cista::optional<Index<formalism::datalog::GroundConjunctiveCondition>> goal;
     IndexList<formalism::datalog::Rule> rules;
 
     Data() = default;
@@ -57,6 +59,7 @@ struct Data<formalism::datalog::Program>
          IndexList<formalism::datalog::GroundAtom<formalism::FluentTag>> fluent_atoms,
          IndexList<formalism::datalog::GroundFunctionTermValue<formalism::StaticTag>> static_fterm_values,
          IndexList<formalism::datalog::GroundFunctionTermValue<formalism::FluentTag>> fluent_fterm_values,
+         ::cista::optional<Index<formalism::datalog::GroundConjunctiveCondition>> goal,
          IndexList<formalism::datalog::Rule> rules) :
         index(index),
         static_predicates(std::move(static_predicates)),
@@ -68,6 +71,7 @@ struct Data<formalism::datalog::Program>
         fluent_atoms(std::move(fluent_atoms)),
         static_fterm_values(std::move(static_fterm_values)),
         fluent_fterm_values(std::move(fluent_fterm_values)),
+        goal(goal),
         rules(std::move(rules))
     {
     }
@@ -88,6 +92,7 @@ struct Data<formalism::datalog::Program>
         tyr::clear(fluent_atoms);
         tyr::clear(static_fterm_values);
         tyr::clear(fluent_fterm_values);
+        tyr::clear(goal);
         tyr::clear(rules);
     }
 
@@ -147,6 +152,7 @@ struct Data<formalism::datalog::Program>
                         fluent_atoms,
                         static_fterm_values,
                         fluent_fterm_values,
+                        goal,
                         rules);
     }
     auto identifying_members() const noexcept
@@ -160,6 +166,7 @@ struct Data<formalism::datalog::Program>
                         fluent_atoms,
                         static_fterm_values,
                         fluent_fterm_values,
+                        goal,
                         rules);
     }
 };

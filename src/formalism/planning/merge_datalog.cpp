@@ -90,6 +90,18 @@ merge_p2d(GroundLiteralView<DerivedTag> element,
           const UnorderedMap<PredicateView<DerivedTag>, formalism::datalog::PredicateView<FluentTag>>& predicate_mapping,
           MergeDatalogContext& context);
 
+std::optional<formalism::datalog::GroundLiteralView<FluentTag>>
+merge_p2d(FDRFactView<FluentTag> element,
+          bool polarity,
+          const UnorderedMap<PredicateView<FluentTag>, formalism::datalog::PredicateView<FluentTag>>& predicate_mapping,
+          MergeDatalogContext& context);
+
+std::pair<formalism::datalog::GroundConjunctiveConditionView, bool>
+merge_p2d(GroundConjunctiveConditionView element,
+          const UnorderedMap<PredicateView<FluentTag>, formalism::datalog::PredicateView<FluentTag>>& fluent_predicate_mapping,
+          const UnorderedMap<PredicateView<DerivedTag>, formalism::datalog::PredicateView<FluentTag>>& derived_predicate_mapping,
+          MergeDatalogContext& context);
+
 // Numeric
 
 template std::pair<formalism::datalog::FunctionView<StaticTag>, bool> merge_p2d(FunctionView<StaticTag> element, MergeDatalogContext& context);

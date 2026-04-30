@@ -50,24 +50,14 @@ public:
         m_execution_context(std::move(execution_context)),
         m_workspace(m_task->get_rpg_program().get_program_context(), m_task->get_rpg_program().get_const_program_workspace(), or_ap, and_ap, tp)
     {
-        set_goal(m_task->get_task().get_goal());
+        m_workspace.tp.set_goals(m_task->get_rpg_program().get_goal());
     }
 
     void set_goal(formalism::planning::GroundConjunctiveConditionView goal) override
     {
-        m_workspace.facts.goal_fact_sets.reset();
-
         auto merge_context = formalism::planning::MergeDatalogContext { m_workspace.datalog_builder, m_workspace.workspace_repository };
-
-        for (const auto fact : goal.get_facts<formalism::PositiveTag>())
-        {
-            assert(fact.has_value());
-            m_workspace.facts.goal_fact_sets.insert(
-                formalism::planning::merge_p2d(fact.get_atom().value(),
-                                               m_task->get_rpg_program().get_translation_context().p2d.fluent_to_fluent_predicate,
-                                               merge_context)
-                    .first);
-        }
+        const auto& p2d = m_task->get_rpg_program().get_translation_context().p2d;
+        m_workspace.tp.set_goals(formalism::planning::merge_p2d(goal, p2d.fluent_to_fluent_predicate, p2d.derived_to_fluent_predicate, merge_context).first);
     }
 
     float_t evaluate(const StateView<LiftedTag>& state) override
@@ -81,13 +71,17 @@ public:
                                         m_task->get_rpg_program().get_translation_context().p2d.fluent_to_fluent_predicate,
                                         merge_context,
                                         m_workspace.facts.fact_sets);
+        insert_numeric_variables_to_fact_set(state.get_unpacked_state(), *m_task->get_repository(), merge_context, m_workspace.facts.fact_sets);
 
         auto ctx = datalog::ProgramExecutionContext(m_workspace, m_task->get_rpg_program().get_const_program_workspace());
         ctx.clear();
 
         m_execution_context->arena().execute([&] { datalog::solve_bottom_up(ctx); });
 
-        return (m_workspace.tp.check()) ? self().extract_cost_and_set_preferred_actions_impl(state) : std::numeric_limits<float_t>::infinity();
+        return (m_workspace.tp.check(datalog::AssignmentSets { m_task->get_rpg_program().get_const_program_workspace().facts.assignment_sets,
+                                                               m_workspace.facts.assignment_sets })) ?
+                   self().extract_cost_and_set_preferred_actions_impl(state) :
+                   std::numeric_limits<float_t>::infinity();
     }
 
     const auto& get_workspace() const noexcept { return m_workspace; }

@@ -125,6 +125,16 @@ bool is_valid_binding(formalism::datalog::LiftedBooleanOperatorListView elements
 
 bool is_valid_binding(formalism::datalog::ConjunctiveConditionView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
 
+template<formalism::datalog::NumericEffectOpKind Op, formalism::FactKind T>
+float_t is_valid_binding(formalism::datalog::NumericEffectView<Op, T> element,
+                         const FactSets& fact_sets,
+                         formalism::datalog::GrounderContext& context);
+
+template<formalism::FactKind T>
+float_t is_valid_binding(formalism::datalog::NumericEffectOperatorView<T> element,
+                         const FactSets& fact_sets,
+                         formalism::datalog::GrounderContext& context);
+
 }
 
 #ifdef TYR_HEADER_INSTANTIATION

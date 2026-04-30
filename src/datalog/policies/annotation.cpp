@@ -212,6 +212,30 @@ void AndAnnotationPolicy<AggregationFunction>::update_annotation(formalism::data
     delta_and_annot.insert_or_assign(delta_head, *witness);
 }
 
+template<typename AggregationFunction>
+void AndAnnotationPolicy<AggregationFunction>::update_annotation(formalism::datalog::FunctionBindingView<formalism::FluentTag> program_head,
+                                                                 formalism::datalog::FunctionBindingView<formalism::FluentTag> delta_head,
+                                                                 uint_t current_cost,
+                                                                 formalism::datalog::RuleView rule,
+                                                                 formalism::datalog::ConjunctiveConditionView witness_condition,
+                                                                 const OrAnnotationsList& or_annot,
+                                                                 NumericAndAnnotationsMap& delta_numeric_and_annot,
+                                                                 formalism::datalog::GrounderContext& delta_context,
+                                                                 formalism::datalog::GrounderContext& iteration_context) const
+{
+    const auto best_cost = std::numeric_limits<uint_t>::max();
+    const auto cur_cost_lower_bound = current_cost + rule.get_cost();
+
+    if (best_cost <= cur_cost_lower_bound)
+        return;
+
+    const auto witness = try_ground_better_witness<AggregationFunction>(best_cost, rule, witness_condition, delta_context, iteration_context, or_annot);
+    if (!witness)
+        return;
+
+    delta_numeric_and_annot.insert_or_assign(delta_head, *witness);
+}
+
 template class AndAnnotationPolicy<SumAggregation>;
 template class AndAnnotationPolicy<MaxAggregation>;
 

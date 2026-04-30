@@ -176,6 +176,53 @@ merge_p2d(GroundLiteralView<T_SRC> element,  //
     return context.destination.get_or_create(literal);
 }
 
+TYR_INLINE_IMPL std::optional<formalism::datalog::GroundLiteralView<FluentTag>>
+merge_p2d(FDRFactView<FluentTag> element,
+          bool polarity,
+          const UnorderedMap<PredicateView<FluentTag>, formalism::datalog::PredicateView<FluentTag>>& predicate_mapping,
+          MergeDatalogContext& context)
+{
+    if (!element.has_value())
+        return std::nullopt;
+
+    auto literal_ptr = context.builder.template get_builder<formalism::datalog::GroundLiteral<FluentTag>>();
+    auto& literal = *literal_ptr;
+    literal.clear();
+    literal.polarity = polarity;
+    literal.atom = merge_p2d(element.get_atom().value(), predicate_mapping, context).first.get_index();
+
+    formalism::datalog::canonicalize(literal);
+    return context.destination.get_or_create(literal).first;
+}
+
+TYR_INLINE_IMPL std::pair<formalism::datalog::GroundConjunctiveConditionView, bool>
+merge_p2d(GroundConjunctiveConditionView element,
+          const UnorderedMap<PredicateView<FluentTag>, formalism::datalog::PredicateView<FluentTag>>& fluent_predicate_mapping,
+          const UnorderedMap<PredicateView<DerivedTag>, formalism::datalog::PredicateView<FluentTag>>& derived_predicate_mapping,
+          MergeDatalogContext& context)
+{
+    auto condition_ptr = context.builder.template get_builder<formalism::datalog::GroundConjunctiveCondition>();
+    auto& condition = *condition_ptr;
+    condition.clear();
+
+    for (const auto fact : element.template get_facts<PositiveTag>())
+        if (const auto literal = merge_p2d(fact, true, fluent_predicate_mapping, context))
+            condition.fluent_literals.push_back(literal->get_index());
+
+    for (const auto fact : element.template get_facts<NegativeTag>())
+        if (const auto literal = merge_p2d(fact, false, fluent_predicate_mapping, context))
+            condition.fluent_literals.push_back(literal->get_index());
+
+    for (const auto literal : element.template get_literals<DerivedTag>())
+        condition.fluent_literals.push_back(merge_p2d(literal, derived_predicate_mapping, context).first.get_index());
+
+    for (const auto numeric_constraint : element.get_numeric_constraints())
+        condition.numeric_constraints.push_back(merge_p2d(numeric_constraint, context));
+
+    formalism::datalog::canonicalize(condition);
+    return context.destination.get_or_create(condition);
+}
+
 // Numeric
 
 template<FactKind T>
@@ -247,6 +294,60 @@ std::pair<formalism::datalog::GroundFunctionTermValueView<T>, bool> merge_p2d(Gr
 
     canonicalize(fterm_value);
     return context.destination.get_or_create(fterm_value);
+}
+
+template<formalism::datalog::NumericEffectOpKind DOp, NumericEffectOpKind Op>
+std::pair<formalism::datalog::NumericEffectView<DOp, FluentTag>, bool>
+merge_numeric_effect_as(NumericEffectView<Op, FluentTag> element, MergeDatalogContext& context)
+{
+    auto numeric_effect_ptr = context.builder.template get_builder<formalism::datalog::NumericEffect<DOp, FluentTag>>();
+    auto& numeric_effect = *numeric_effect_ptr;
+    numeric_effect.clear();
+
+    numeric_effect.fterm = merge_p2d(element.get_fterm(), context).first.get_index();
+    numeric_effect.fexpr = merge_p2d(element.get_fexpr(), context);
+
+    canonicalize(numeric_effect);
+    return context.destination.get_or_create(numeric_effect);
+}
+
+TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpAssign, FluentTag>, bool>
+merge_p2d(NumericEffectView<OpAssign, FluentTag> element, MergeDatalogContext& context)
+{
+    return merge_numeric_effect_as<formalism::datalog::OpAssign>(element, context);
+}
+
+TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpIncrease, FluentTag>, bool>
+merge_p2d(NumericEffectView<OpIncrease, FluentTag> element, MergeDatalogContext& context)
+{
+    return merge_numeric_effect_as<formalism::datalog::OpIncrease>(element, context);
+}
+
+TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpDecrease, FluentTag>, bool>
+merge_p2d(NumericEffectView<OpDecrease, FluentTag> element, MergeDatalogContext& context)
+{
+    return merge_numeric_effect_as<formalism::datalog::OpDecrease>(element, context);
+}
+
+TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpScaleUp, FluentTag>, bool>
+merge_p2d(NumericEffectView<OpScaleUp, FluentTag> element, MergeDatalogContext& context)
+{
+    return merge_numeric_effect_as<formalism::datalog::OpScaleUp>(element, context);
+}
+
+TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpScaleDown, FluentTag>, bool>
+merge_p2d(NumericEffectView<OpScaleDown, FluentTag> element, MergeDatalogContext& context)
+{
+    return merge_numeric_effect_as<formalism::datalog::OpScaleDown>(element, context);
+}
+
+TYR_INLINE_IMPL Data<formalism::datalog::NumericEffectOperator<FluentTag>> merge_p2d(NumericEffectOperatorView<FluentTag> element,
+                                                                                      MergeDatalogContext& context)
+{
+    using OperatorData = Data<formalism::datalog::NumericEffectOperator<FluentTag>>;
+
+    return visit([&](auto&& arg) { return OperatorData(typename OperatorData::Variant(merge_p2d(arg, context).first.get_index())); },
+                 element.get_variant());
 }
 
 TYR_INLINE_IMPL Data<formalism::datalog::FunctionExpression> merge_p2d(FunctionExpressionView element, MergeDatalogContext& context)

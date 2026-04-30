@@ -164,7 +164,7 @@ inline bool is_canonical(const Data<Program>& data)
 {
     return is_canonical(data.static_predicates) && is_canonical(data.fluent_predicates) && is_canonical(data.static_functions)
            && is_canonical(data.fluent_functions) && is_canonical(data.objects) && is_canonical(data.static_atoms) && is_canonical(data.fluent_atoms)
-           && is_canonical(data.static_fterm_values) && is_canonical(data.fluent_fterm_values) && is_canonical(data.rules);
+           && is_canonical(data.static_fterm_values) && is_canonical(data.fluent_fterm_values) && is_canonical(data.goal) && is_canonical(data.rules);
 }
 
 /**
@@ -326,6 +326,7 @@ inline void canonicalize(Data<Program>& data)
     canonicalize(data.fluent_atoms);
     canonicalize(data.static_fterm_values);
     canonicalize(data.fluent_fterm_values);
+    canonicalize(data.goal);
     canonicalize(data.rules);
 }
 

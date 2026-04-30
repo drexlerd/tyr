@@ -50,10 +50,12 @@
 #include <algorithm>  // for all_of
 #include <assert.h>   // for assert
 #include <boost/dynamic_bitset.hpp>
+#include <cmath>
 #include <fmt/ostream.h>
 #include <memory>  // for __sha...
 #include <oneapi/tbb/parallel_for_each.h>
 #include <oneapi/tbb/parallel_invoke.h>
+#include <optional>
 #include <tuple>       // for opera...
 #include <type_traits>
 #include <utility>     // for pair
@@ -81,6 +83,42 @@ static void create_general_binding(std::span<const kpkc::Vertex> clique, const S
 
         binding[p] = vertex.get_object_index();
     }
+}
+
+template<AndAnnotationPolicyConcept AndAP>
+static void insert_numeric_update(fd::NumericEffectOperatorView<f::FluentTag> head,
+                                  fd::RuleView rule,
+                                  fd::ConjunctiveConditionView witness_condition,
+                                  const FactSets& fact_sets,
+                                  Cost current_cost,
+                                  const OrAnnotationsList& or_annot,
+                                  const AndAP& and_ap,
+                                  fd::GrounderContext& solve_context,
+                                  fd::GrounderContext& iteration_context,
+                                  RuleHeadIteration& head_iteration,
+                                  NumericAndAnnotationsMap& numeric_and_annot)
+{
+    const auto value = is_valid_binding(head, fact_sets, iteration_context);
+    if (std::isnan(value))
+        return;
+
+    visit(
+        [&](auto&& effect)
+        {
+            const auto program_head = fd::ground(effect.get_fterm(), iteration_context).first.get_row();
+            const auto worker_head = fd::ground(effect.get_fterm(), solve_context).first;
+            std::get<FunctionHeadIteration>(head_iteration).updates.emplace(worker_head.get_row().get_index().row, value);
+            and_ap.update_annotation(program_head,
+                                     worker_head.get_row(),
+                                     current_cost,
+                                     rule,
+                                     witness_condition,
+                                     or_annot,
+                                     numeric_and_annot,
+                                     solve_context,
+                                     iteration_context);
+        },
+        head.get_variant());
 }
 
 template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
@@ -123,7 +161,17 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                 }
                 else
                 {
-                    // Numeric effect heads are intentionally not propagated by the propositional bottom-up engine yet.
+                    insert_numeric_update(head,
+                                          in.cws_rule().get_rule(),
+                                          in.cws_rule().get_witness_rule().get_body(),
+                                          in.fact_sets(),
+                                          in.cost_buckets().current_cost(),
+                                          in.or_annot(),
+                                          in.and_ap(),
+                                          out.ground_context_solve(),
+                                          out.ground_context_iteration(),
+                                          out.head(),
+                                          out.numeric_and_annot());
                 }
             },
             in.cws_rule().get_rule().get_head());
@@ -227,7 +275,37 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
             }
             else
             {
-                // Numeric effect heads are intentionally not propagated by the propositional bottom-up engine yet.
+                auto applicability_check = out.applicability_check_pool().get_or_allocate(in.cws_rule().get_nullary_condition(),
+                                                                                          in.cws_rule().get_conflicting_overapproximation_rule().get_body(),
+                                                                                          in.fact_sets(),
+                                                                                          out.ground_context_iteration());
+
+                if (!applicability_check->is_statically_applicable())
+                    return;
+
+                if (applicability_check->is_dynamically_applicable(in.fact_sets(), out.ground_context_iteration()))
+                {
+                    insert_numeric_update(head,
+                                          in.cws_rule().get_rule(),
+                                          in.cws_rule().get_witness_rule().get_body(),
+                                          in.fact_sets(),
+                                          in.cost_buckets().current_cost(),
+                                          in.or_annot(),
+                                          in.and_ap(),
+                                          out.ground_context_solve(),
+                                          out.ground_context_iteration(),
+                                          out.head(),
+                                          out.numeric_and_annot());
+                }
+                else
+                {
+                    ++out.statistics().num_pending_rules;
+
+                    const auto overapproximation_worker_head =
+                        fd::ground_binding(in.cws_rule().get_conflicting_overapproximation_rule(), out.ground_context_solve()).first;
+
+                    out.pending_rules().emplace(overapproximation_worker_head, std::move(applicability_check));
+                }
             }
         },
         in.cws_rule().get_rule().get_head());
@@ -370,8 +448,25 @@ void process_pending(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                     }
                     else
                     {
-                        // Numeric effect heads are intentionally not propagated by the propositional bottom-up engine yet.
-                        ++it;
+                        if (it->second->is_dynamically_applicable(in.fact_sets(), out.ground_context_iteration()))
+                        {
+                            insert_numeric_update(head,
+                                                  in.cws_rule().get_rule(),
+                                                  in.cws_rule().get_witness_rule().get_body(),
+                                                  in.fact_sets(),
+                                                  in.cost_buckets().current_cost(),
+                                                  in.or_annot(),
+                                                  in.and_ap(),
+                                                  out.ground_context_solve(),
+                                                  out.ground_context_iteration(),
+                                                  out.head(),
+                                                  out.numeric_and_annot());
+                            it = out.pending_rules().erase(it);
+                        }
+                        else
+                        {
+                            ++it;
+                        }
                     }
                 },
                 in.cws_rule().get_rule().get_head());
@@ -398,7 +493,7 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
         // std::cout << "Cost: " << cost_buckets.current_cost() << std::endl;
 
         // Check whether min cost for goal was proven.
-        if (tp.check())
+        if (tp.check(AssignmentSets { ctx.in().program().facts().assignment_sets, facts.assignment_sets }))
         {
             return;
         }
@@ -471,6 +566,7 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                 const auto i = uint_t(rule_index);
                 auto merge_context = fd::MergeContext { program_out.datalog_builder(), program_out.workspace_repository() };
                 const auto& ws_rule = program_out.rules()[i];
+                const auto rule_cost = ctx.in().program().rules()[i]->get_rule().get_cost();
 
                 for (const auto& worker : ws_rule->worker)
                 {
@@ -502,7 +598,21 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                             }
                             else
                             {
-                                // Numeric effect head rows are not merged into numeric fact sets yet.
+                                for (const auto& update : head_iteration.updates)
+                                {
+                                    const auto worker_head =
+                                        make_view(Index<f::RelationBinding<f::Function<f::FluentTag>>> { head_iteration.relation, update.row },
+                                                  worker.solve.program_overlay_repository);
+
+                                    const auto program_head = fd::merge_d2d(worker_head, merge_context).first;
+                                    const auto it = worker.iteration.numeric_and_annot.find(worker_head);
+                                    if (it != worker.iteration.numeric_and_annot.end())
+                                        program_out.numeric_and_annot().insert_or_assign(program_head, it->second);
+
+                                    cost_buckets.insert(cost_buckets.current_cost() + rule_cost,
+                                                        program_head,
+                                                        ClosedInterval<float_t>(update.value, update.value));
+                                }
                             }
                         },
                         worker.iteration.head);
@@ -526,6 +636,14 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                     // Update fact sets
                     facts.fact_sets.predicate.insert(head);
                     facts.assignment_sets.predicate.insert(head);
+                }
+            }
+
+            for (const auto& [head, interval] : cost_buckets.get_current_function_bucket())
+            {
+                if (facts.assignment_sets.function.insert(head, interval))
+                {
+                    scheduler.on_generate(head.get_index().relation);
                 }
             }
         }

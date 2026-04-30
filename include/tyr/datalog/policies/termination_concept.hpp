@@ -19,6 +19,7 @@
 #define TYR_SOLVER_POLICIES_TERMINATION_CONCEPT_HPP_
 
 #include "tyr/common/config.hpp"
+#include "tyr/datalog/assignment_sets.hpp"
 #include "tyr/datalog/fact_sets.hpp"
 #include "tyr/datalog/policies/aggregation.hpp"
 #include "tyr/datalog/policies/annotation_types.hpp"
@@ -35,11 +36,12 @@ template<typename T>
 concept TerminationPolicyConcept = requires(T& p,
                                             const T& cp,
                                             formalism::datalog::PredicateBindingView<formalism::FluentTag> binding,
-                                            const PredicateFactSets<formalism::FluentTag>& goals,
+                                            formalism::datalog::GroundConjunctiveConditionView goals,
+                                            const AssignmentSets& assignment_sets,
                                             const OrAnnotationsList& or_annot) {
     { p.set_goals(goals) } -> std::same_as<void>;
     { p.achieve(binding) } -> std::same_as<void>;
-    { cp.check() } -> std::same_as<bool>;
+    { cp.check(assignment_sets) } -> std::same_as<bool>;
     { cp.get_total_cost(or_annot) } -> std::same_as<Cost>;
     { p.reset() } -> std::same_as<void>;
     { p.clear() } -> std::same_as<void>;

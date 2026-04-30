@@ -66,6 +66,18 @@ public:
                            formalism::datalog::GrounderContext& iteration_context) const noexcept
     {
     }
+
+    void update_annotation(formalism::datalog::FunctionBindingView<formalism::FluentTag> program_head,
+                           formalism::datalog::FunctionBindingView<formalism::FluentTag> delta_head,
+                           uint_t current_cost,
+                           formalism::datalog::RuleView rule,
+                           formalism::datalog::ConjunctiveConditionView witness_condition,
+                           const OrAnnotationsList& or_annot,
+                           NumericAndAnnotationsMap& delta_numeric_and_annot,
+                           formalism::datalog::GrounderContext& delta_context,
+                           formalism::datalog::GrounderContext& iteration_context) const
+    {
+    }
 };
 
 class OrAnnotationPolicy
@@ -93,6 +105,16 @@ public:
                            formalism::datalog::ConjunctiveConditionView witness_condition,
                            const OrAnnotationsList& or_annot,
                            AndAnnotationsMap& delta_and_annot,
+                           formalism::datalog::GrounderContext& delta_context,
+                           formalism::datalog::GrounderContext& iteration_context) const;
+
+    void update_annotation(formalism::datalog::FunctionBindingView<formalism::FluentTag> program_head,
+                           formalism::datalog::FunctionBindingView<formalism::FluentTag> delta_head,
+                           uint_t current_cost,
+                           formalism::datalog::RuleView rule,
+                           formalism::datalog::ConjunctiveConditionView witness_condition,
+                           const OrAnnotationsList& or_annot,
+                           NumericAndAnnotationsMap& delta_numeric_and_annot,
                            formalism::datalog::GrounderContext& delta_context,
                            formalism::datalog::GrounderContext& iteration_context) const;
 };

@@ -75,6 +75,25 @@ is_valid_binding(formalism::datalog::LiteralListView<formalism::StaticTag> eleme
 template bool
 is_valid_binding(formalism::datalog::LiteralListView<formalism::FluentTag> elements, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
 
+template float_t is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpAssign, formalism::FluentTag> element,
+                                  const FactSets& fact_sets,
+                                  formalism::datalog::GrounderContext& context);
+template float_t is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpIncrease, formalism::FluentTag> element,
+                                  const FactSets& fact_sets,
+                                  formalism::datalog::GrounderContext& context);
+template float_t is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpDecrease, formalism::FluentTag> element,
+                                  const FactSets& fact_sets,
+                                  formalism::datalog::GrounderContext& context);
+template float_t is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpScaleUp, formalism::FluentTag> element,
+                                  const FactSets& fact_sets,
+                                  formalism::datalog::GrounderContext& context);
+template float_t is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpScaleDown, formalism::FluentTag> element,
+                                  const FactSets& fact_sets,
+                                  formalism::datalog::GrounderContext& context);
+template float_t is_valid_binding(formalism::datalog::NumericEffectOperatorView<formalism::FluentTag> element,
+                                  const FactSets& fact_sets,
+                                  formalism::datalog::GrounderContext& context);
+
 }
 
 #endif

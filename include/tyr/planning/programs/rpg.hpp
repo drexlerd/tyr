@@ -44,6 +44,7 @@ public:
     datalog::ProgramContext& get_program_context() noexcept;
     const datalog::ProgramContext& get_program_context() const noexcept;
     const datalog::ConstProgramWorkspace& get_const_program_workspace() const noexcept;
+    formalism::datalog::GroundConjunctiveConditionView get_goal() const noexcept;
 
 private:
     TranslationContext m_translation_context;

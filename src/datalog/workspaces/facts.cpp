@@ -33,8 +33,7 @@ FactsWorkspace::FactsWorkspace(fd::PredicateListView<f::FluentTag> predicates,
                                fd::GroundFunctionTermValueListView<formalism::FluentTag> fterm_values,
                                const formalism::datalog::Repository& workspace_repository) :
     fact_sets(predicates, functions, atoms, fterm_values, workspace_repository),
-    assignment_sets(predicates, functions, predicate_domains, function_domains, num_objects, fact_sets),
-    goal_fact_sets(predicates, workspace_repository)
+    assignment_sets(predicates, functions, predicate_domains, function_domains, num_objects, fact_sets)
 {
 }
 

@@ -228,4 +228,56 @@ is_valid_binding(formalism::datalog::ConjunctiveConditionView element, const Fac
            && is_valid_binding(element.get_numeric_constraints(), fact_sets, context);
 }
 
+namespace details
+{
+template<typename Op>
+float_t apply_numeric_effect(Op, float_t lhs, float_t rhs)
+{
+    if constexpr (std::is_same_v<Op, formalism::datalog::OpAssign>)
+        return rhs;
+    else if constexpr (std::is_same_v<Op, formalism::datalog::OpIncrease>)
+        return lhs + rhs;
+    else if constexpr (std::is_same_v<Op, formalism::datalog::OpDecrease>)
+        return lhs - rhs;
+    else if constexpr (std::is_same_v<Op, formalism::datalog::OpScaleUp>)
+        return lhs * rhs;
+    else if constexpr (std::is_same_v<Op, formalism::datalog::OpScaleDown>)
+        return lhs / rhs;
+    else
+        static_assert(dependent_false<Op>::value, "Missing case");
+}
+
+}
+
+template<formalism::datalog::NumericEffectOpKind Op, formalism::FactKind T>
+float_t is_valid_binding(formalism::datalog::NumericEffectView<Op, T> element,
+                         const FactSets& fact_sets,
+                         formalism::datalog::GrounderContext& context)
+{
+    const auto rhs = is_valid_binding(element.get_fexpr(), fact_sets, context);
+    if (std::isnan(rhs))
+        return std::numeric_limits<float_t>::quiet_NaN();
+
+    if constexpr (std::is_same_v<Op, formalism::datalog::OpAssign>)
+    {
+        return rhs;
+    }
+    else
+    {
+        const auto lhs = is_valid_binding(element.get_fterm(), fact_sets, context);
+        if (std::isnan(lhs))
+            return std::numeric_limits<float_t>::quiet_NaN();
+
+        return details::apply_numeric_effect(Op {}, lhs, rhs);
+    }
+}
+
+template<formalism::FactKind T>
+float_t is_valid_binding(formalism::datalog::NumericEffectOperatorView<T> element,
+                         const FactSets& fact_sets,
+                         formalism::datalog::GrounderContext& context)
+{
+    return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
+}
+
 }
