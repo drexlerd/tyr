@@ -30,11 +30,12 @@ Implement lifted numeric relaxed planning support for a metric-FF-style heuristi
 
 ## Notes
 - The relaxation intentionally widens lower/upper bounds and may be imprecise.
+- Compile with 8 cores only.
 
 ## Tasks
 The agent should work on the highest unchecked task in this list. The agent must not mark tasks as complete.
 
-- [ ] Extend Datalog Rule and GroundRule two support two head types: Atom and NumericEffectOperator.
+- [x] Extend Datalog Rule and GroundRule two support two head types: Atom and NumericEffectOperator.
   - Interesting files:
     - `docs/agent-goals/lifted-numeric-ff.md`
     - `include/tyr/formalism/planning/declarations.hpp`
@@ -51,4 +52,25 @@ The agent should work on the highest unchecked task in this list. The agent must
     - Represent numeric effects in the datalog component,i.e., it should mirror how it is done in the `formalism/planning` component.
     - We want Rule and GroundRule to have `cista::offset::variant` head.
     - We want the RPGProgram in `planning/programs/rpg.hpp` to also translate numeric effects into respective datalog rules
+
+- [] Patch semi-naive evaluation to support two head types: Atom and NumericEffectOperator.
+  - Interesting files:
+    - `docs/agent-goals/lifted-numeric-ff.md`
+    - `include/tyr/planning/programs/`
+    - `include/tyr/formalism/datalog/`
+    - `include/tyr/datalog/bottomup.hpp`
+    - `src/datalog/bottomup.cpp`
+    - `include/tyr/datalog/workspaces/program.hpp`
+    - `src/datalog/workspaces/program.cpp`
+  - Likely modification areas:
+    - `include/tyr/datalog/bottomup.hpp`
+    - `src/datalog/bottomup.cpp`
+    - `include/tyr/datalog/workspaces/program.hpp`
+    - `src/datalog/workspaces/program.cpp`
+  - Validation:
+    - Build and test suite passes
+  - Notes:
+    - Patch CostBuckets to also store ClosedInterval<float_t> for ground function terms
+    - Add is_valid_binding for numeric effects. If the function expression yields NaN the rule is inapplicable.
+ 
 

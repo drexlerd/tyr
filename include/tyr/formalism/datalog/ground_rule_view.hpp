@@ -19,11 +19,13 @@
 #define TYR_FORMALISM_DATALOG_GROUND_RULE_VIEW_HPP_
 
 #include "tyr/common/types.hpp"
+#include "tyr/common/variant.hpp"
 #include "tyr/common/vector.hpp"
 #include "tyr/formalism/binding_view.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 #include "tyr/formalism/datalog/ground_atom_view.hpp"
 #include "tyr/formalism/datalog/ground_conjunctive_condition_view.hpp"
+#include "tyr/formalism/datalog/ground_numeric_effect_operator_view.hpp"
 #include "tyr/formalism/datalog/ground_rule_index.hpp"
 #include "tyr/formalism/datalog/rule_view.hpp"
 

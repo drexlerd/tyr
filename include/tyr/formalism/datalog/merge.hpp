@@ -98,6 +98,12 @@ Data<ArithmeticOperator<T>> merge_d2d(ArithmeticOperatorView<T> element, MergeCo
 template<typename T>
 Data<BooleanOperator<T>> merge_d2d(BooleanOperatorView<T> element, MergeContext& context);
 
+template<NumericEffectOpKind Op, FactKind T>
+std::pair<NumericEffectView<Op, T>, bool> merge_d2d(NumericEffectView<Op, T> element, MergeContext& context);
+
+template<FactKind T>
+Data<NumericEffectOperator<T>> merge_d2d(NumericEffectOperatorView<T> element, MergeContext& context);
+
 std::pair<ConjunctiveConditionView, bool> merge_d2d(ConjunctiveConditionView element, MergeContext& context);
 
 std::pair<GroundConjunctiveConditionView, bool> merge_d2d(GroundConjunctiveConditionView element, MergeContext& context);

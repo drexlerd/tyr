@@ -35,10 +35,12 @@
 #include "tyr/formalism/datalog/repository.hpp"
 #include "tyr/formalism/datalog/views.hpp"
 
+#include <cassert>
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <optional>
 #include <ranges>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 
 namespace f = tyr::formalism;
@@ -1374,7 +1376,17 @@ std::pair<fd::RuleView, bool> create_overapproximation_rule(size_t k, fd::RuleVi
 
     rule.variables = element.get_variables().get_data();
     rule.body = create_overapproximation_conjunctive_condition(k, element.get_body(), context).first.get_index();
-    rule.head = merge_d2d(element.get_head(), merge_context).first.get_index();
+    rule.head = visit(
+        [&](auto&& head) -> decltype(rule.head)
+        {
+            using Head = std::decay_t<decltype(head)>;
+
+            if constexpr (std::is_same_v<Head, fd::AtomView<f::FluentTag>>)
+                return merge_d2d(head, merge_context).first.get_index();
+            else
+                return merge_d2d(head, merge_context);
+        },
+        element.get_head());
 
     canonicalize(rule);
     return context.get_or_create(rule);
@@ -1390,7 +1402,17 @@ std::pair<fd::RuleView, bool> create_static_overapproximation_rule(size_t k, fd:
 
     rule.variables = element.get_variables().get_data();
     rule.body = create_static_overapproximation_conjunctive_condition(k, element.get_body(), context).first.get_index();
-    rule.head = merge_d2d(element.get_head(), merge_context).first.get_index();
+    rule.head = visit(
+        [&](auto&& head) -> decltype(rule.head)
+        {
+            using Head = std::decay_t<decltype(head)>;
+
+            if constexpr (std::is_same_v<Head, fd::AtomView<f::FluentTag>>)
+                return merge_d2d(head, merge_context).first.get_index();
+            else
+                return merge_d2d(head, merge_context);
+        },
+        element.get_head());
 
     canonicalize(rule);
     return context.get_or_create(rule);
@@ -1406,7 +1428,17 @@ std::pair<fd::RuleView, bool> create_overapproximation_conflicting_rule(size_t k
 
     rule.variables = element.get_variables().get_data();
     rule.body = create_overapproximation_conflicting_conjunctive_condition(k, element.get_body(), context).first.get_index();
-    rule.head = merge_d2d(element.get_head(), merge_context).first.get_index();
+    rule.head = visit(
+        [&](auto&& head) -> decltype(rule.head)
+        {
+            using Head = std::decay_t<decltype(head)>;
+
+            if constexpr (std::is_same_v<Head, fd::AtomView<f::FluentTag>>)
+                return merge_d2d(head, merge_context).first.get_index();
+            else
+                return merge_d2d(head, merge_context);
+        },
+        element.get_head());
 
     canonicalize(rule);
     return context.get_or_create(rule);

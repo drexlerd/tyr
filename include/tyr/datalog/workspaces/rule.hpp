@@ -35,9 +35,13 @@
 #include "tyr/formalism/object_index.hpp"
 
 #include <atomic>
+#include <cassert>
 #include <chrono>
 #include <oneapi/tbb/enumerable_thread_specific.h>
 #include <oneapi/tbb/spin_mutex.h>
+#include <utility>
+#include <type_traits>
+#include <variant>
 #include <vector>
 
 namespace tyr::datalog
@@ -155,6 +159,32 @@ public:
     }
 };
 
+struct PredicateHeadIteration
+{
+    Index<formalism::Predicate<formalism::FluentTag>> relation;
+    UnorderedSet<Index<formalism::Row>> rows;
+
+    PredicateHeadIteration() = default;
+    explicit PredicateHeadIteration(Index<formalism::Predicate<formalism::FluentTag>> relation) : relation(relation), rows() {}
+
+    void clear() noexcept { rows.clear(); }
+};
+
+struct FunctionHeadIteration
+{
+    using Update = std::pair<Index<formalism::Row>, float_t>;
+
+    Index<formalism::Function<formalism::FluentTag>> relation;
+    UnorderedSet<Update> updates;
+
+    FunctionHeadIteration() = default;
+    explicit FunctionHeadIteration(Index<formalism::Function<formalism::FluentTag>> relation) : relation(relation), updates() {}
+
+    void clear() noexcept { updates.clear(); }
+};
+
+using RuleHeadIteration = std::variant<PredicateHeadIteration, FunctionHeadIteration>;
+
 template<typename AndAP>
 struct RuleWorkspace
 {
@@ -193,8 +223,7 @@ struct RuleWorkspace
         formalism::datalog::Repository workspace_overlay_repository;
 
         /// Heads
-        Index<formalism::Predicate<formalism::FluentTag>> head_predicate;
-        UnorderedSet<Index<formalism::Row>> head_rows;
+        RuleHeadIteration head;
 
         // Annotations stored in program_overlay_repository
         AndAnnotationsMap and_annot;
@@ -324,8 +353,26 @@ void RuleWorkspace<AndAP>::Common::initialize_iteration(const StaticConsistencyG
 template<typename AndAP>
 RuleWorkspace<AndAP>::Iteration::Iteration(formalism::datalog::RepositoryFactory& factory, const ConstRuleWorkspace& cws, const Common& common) :
     workspace_overlay_repository(factory.create(&common.workspace_repository)),
-    head_predicate(cws.get_rule().get_head().get_predicate().get_index()),
-    head_rows(),
+    head(visit(
+        [](auto&& head) -> RuleHeadIteration
+        {
+            using Head = std::decay_t<decltype(head)>;
+
+            if constexpr (std::is_same_v<Head, formalism::datalog::AtomView<formalism::FluentTag>>)
+            {
+                return PredicateHeadIteration(head.get_predicate().get_index());
+            }
+            else
+            {
+                return visit(
+                    [](auto&& effect) -> RuleHeadIteration
+                    {
+                        return FunctionHeadIteration(effect.get_fterm().get_function().get_index());
+                    },
+                    head.get_variant());
+            }
+        },
+        cws.get_rule().get_head())),
     and_annot(),
     kpkc_workspace(common.kpkc.get_graph_layout())
 {
@@ -335,7 +382,7 @@ template<typename AndAP>
 void RuleWorkspace<AndAP>::Iteration::clear() noexcept
 {
     workspace_overlay_repository.clear();
-    head_rows.clear();
+    std::visit([](auto& arg) { arg.clear(); }, head);
     and_annot.clear();
 }
 

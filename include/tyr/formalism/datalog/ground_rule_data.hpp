@@ -20,6 +20,7 @@
 
 #include "tyr/common/types.hpp"
 #include "tyr/common/types_utils.hpp"
+#include "tyr/common/variant.hpp"
 #include "tyr/common/vector.hpp"
 #include "tyr/formalism/binding_index.hpp"
 #include "tyr/formalism/datalog/boolean_operator_data.hpp"
@@ -27,6 +28,7 @@
 #include "tyr/formalism/datalog/ground_atom_index.hpp"
 #include "tyr/formalism/datalog/ground_conjunctive_condition_index.hpp"
 #include "tyr/formalism/datalog/ground_literal_index.hpp"
+#include "tyr/formalism/datalog/ground_numeric_effect_operator_data.hpp"
 #include "tyr/formalism/datalog/ground_rule_index.hpp"
 #include "tyr/formalism/datalog/rule_index.hpp"
 
@@ -35,16 +37,19 @@ namespace tyr
 template<>
 struct Data<formalism::datalog::GroundRule>
 {
+    using Head = ::cista::offset::variant<Index<formalism::datalog::GroundAtom<formalism::FluentTag>>,
+                                         Data<formalism::datalog::GroundNumericEffectOperator<formalism::FluentTag>>>;
+
     Index<formalism::datalog::GroundRule> index;
     Index<formalism::RelationBinding<formalism::datalog::Rule>> binding;
     Index<formalism::datalog::GroundConjunctiveCondition> body;
-    Index<formalism::datalog::GroundAtom<formalism::FluentTag>> head;
+    Head head;
 
     Data() = default;
     Data(Index<formalism::datalog::GroundRule> index,
          Index<formalism::RelationBinding<formalism::datalog::Rule>> binding,
          Index<formalism::datalog::GroundConjunctiveCondition> body,
-         Index<formalism::datalog::GroundAtom<formalism::FluentTag>> head) :
+         Head head) :
         index(index),
         binding(binding),
         body(body),
@@ -68,7 +73,7 @@ struct Data<formalism::datalog::GroundRule>
     auto identifying_members() const noexcept { return std::tie(binding); }
 };
 
-static_assert(uses_trivial_storage_v<formalism::datalog::GroundRule>);
+static_assert(!uses_trivial_storage_v<formalism::datalog::GroundRule>);
 
 }
 

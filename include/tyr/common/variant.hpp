@@ -40,16 +40,16 @@ public:
     template<typename U>
     bool is() const noexcept
     {
-        return std::holds_alternative<U>(index_variant());
+        return cista::holds_alternative<U>(index_variant());
     }
 
     template<typename U>
     decltype(auto) get() const noexcept
     {
         if constexpr (ViewConcept<U, C>)
-            return make_view(std::get<U>(index_variant()), get_context());
+            return make_view(cista::get<U>(index_variant()), get_context());
         else
-            return std::get<U>(index_variant());
+            return cista::get<U>(index_variant());
     }
 
     template<typename F>

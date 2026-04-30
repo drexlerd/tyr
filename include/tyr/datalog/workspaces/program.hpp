@@ -33,6 +33,7 @@
 
 #include <chrono>
 #include <oneapi/tbb/enumerable_thread_specific.h>
+#include <optional>
 #include <vector>
 
 namespace tyr::datalog
@@ -153,7 +154,7 @@ struct ConstProgramWorkspace
 {
     ConstFactsWorkspace facts;
 
-    std::vector<ConstRuleWorkspace> rules;
+    std::vector<std::optional<ConstRuleWorkspace>> rules;
 
     explicit ConstProgramWorkspace(ProgramContext& context);
 };

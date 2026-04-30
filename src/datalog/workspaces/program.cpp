@@ -46,13 +46,18 @@ ProgramWorkspace<OrAP, AndAP, TP>::ProgramWorkspace(ProgramContext& context, con
     rules(),
     planning_builder(),
     datalog_builder(),
-    schedulers(create_schedulers(context.get_strata(), context.get_listeners(), program_repository)),
+    schedulers(create_schedulers(context.get_strata(),
+                                 context.get_listeners(),
+                                 program_repository,
+                                 context.get_program().get_predicates<formalism::FluentTag>().size(),
+                                 context.get_program().get_functions<formalism::FluentTag>().size())),
     cost_buckets(),
     statistics()
 {
     for (uint_t i = 0; i < context.get_program().get_rules().size(); ++i)
-        rules.emplace_back(
-            std::make_unique<RuleWorkspace<AndAP>>(context.get_repository_factory(), program_repository, workspace_repository, cws.rules[i], and_ap));
+        rules.emplace_back(cws.rules[i].has_value() ?
+                               std::make_unique<RuleWorkspace<AndAP>>(context.get_repository_factory(), program_repository, workspace_repository, *cws.rules[i], and_ap) :
+                               nullptr);
 }
 
 template struct ProgramWorkspace<NoOrAnnotationPolicy, NoAndAnnotationPolicy, NoTerminationPolicy>;
@@ -72,13 +77,16 @@ ConstProgramWorkspace::ConstProgramWorkspace(ProgramContext& context) :
           context.get_program_repository()),
     rules()
 {
-    rules.reserve(context.get_program().get_rules().size());  // Ensure enough space to avoid move on reallocation
+    rules.resize(context.get_program().get_rules().size());  // Ensure enough space to avoid move on reallocation
     for (uint_t i = 0; i < context.get_program().get_rules().size(); ++i)
-        rules.emplace_back(context.get_program().get_rules()[i],
-                           context.get_workspace_repository(),
-                           context.get_domains().rule_domains.at(context.get_program().get_rules()[i].get_index()).payload,
-                           context.get_program().get_objects().size(),
-                           context.get_program().get_predicates<formalism::FluentTag>().size(),
-                           facts.assignment_sets);
+    {
+        const auto rule = context.get_program().get_rules()[i];
+        rules[i].emplace(rule,
+                         context.get_workspace_repository(),
+                         context.get_domains().rule_domains.at(rule.get_index()).payload,
+                         context.get_program().get_objects().size(),
+                         context.get_program().get_predicates<formalism::FluentTag>().size(),
+                         facts.assignment_sets);
+    }
 }
 }

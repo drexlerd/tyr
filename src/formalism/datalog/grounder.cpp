@@ -53,6 +53,13 @@ template std::pair<GroundAtomView<FluentTag>, bool> ground(AtomView<FluentTag> e
 template std::pair<GroundLiteralView<StaticTag>, bool> ground(LiteralView<StaticTag> element, GrounderContext& context);
 template std::pair<GroundLiteralView<FluentTag>, bool> ground(LiteralView<FluentTag> element, GrounderContext& context);
 
+template std::pair<GroundNumericEffectView<OpAssign, FluentTag>, bool> ground(NumericEffectView<OpAssign, FluentTag> element, GrounderContext& context);
+template std::pair<GroundNumericEffectView<OpIncrease, FluentTag>, bool> ground(NumericEffectView<OpIncrease, FluentTag> element, GrounderContext& context);
+template std::pair<GroundNumericEffectView<OpDecrease, FluentTag>, bool> ground(NumericEffectView<OpDecrease, FluentTag> element, GrounderContext& context);
+template std::pair<GroundNumericEffectView<OpScaleUp, FluentTag>, bool> ground(NumericEffectView<OpScaleUp, FluentTag> element, GrounderContext& context);
+template std::pair<GroundNumericEffectView<OpScaleDown, FluentTag>, bool> ground(NumericEffectView<OpScaleDown, FluentTag> element, GrounderContext& context);
+template Data<GroundNumericEffectOperator<FluentTag>> ground(NumericEffectOperatorView<FluentTag> element, GrounderContext& context);
+
 template std::pair<PredicateBindingView<StaticTag>, bool> ground_binding(AtomView<StaticTag> element, GrounderContext& context);
 template std::pair<PredicateBindingView<FluentTag>, bool> ground_binding(AtomView<FluentTag> element, GrounderContext& context);
 

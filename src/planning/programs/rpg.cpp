@@ -37,21 +37,44 @@ namespace tyr::planning
 {
 namespace
 {
+template<typename Op>
+struct DatalogNumericEffectOp;
 
-auto create_cond_effect_rule(fp::ActionView action,
-                             fp::ConditionalEffectView cond_eff,
-                             fp::AtomView<formalism::FluentTag> effect,
-                             TranslationContext& translation_context,
-                             formalism::planning::MergeDatalogContext& context)
+template<>
+struct DatalogNumericEffectOp<fp::OpAssign>
 {
-    auto rule_ptr = context.builder.get_builder<formalism::datalog::Rule>();
-    auto& rule = *rule_ptr;
-    rule.clear();
+    using type = fd::OpAssign;
+};
+template<>
+struct DatalogNumericEffectOp<fp::OpIncrease>
+{
+    using type = fd::OpIncrease;
+};
+template<>
+struct DatalogNumericEffectOp<fp::OpDecrease>
+{
+    using type = fd::OpDecrease;
+};
+template<>
+struct DatalogNumericEffectOp<fp::OpScaleUp>
+{
+    using type = fd::OpScaleUp;
+};
+template<>
+struct DatalogNumericEffectOp<fp::OpScaleDown>
+{
+    using type = fd::OpScaleDown;
+};
 
-    auto conj_cond_ptr = context.builder.get_builder<formalism::datalog::ConjunctiveCondition>();
-    auto& conj_cond = *conj_cond_ptr;
-    conj_cond.clear();
+template<typename Op>
+using DatalogNumericEffectOpT = typename DatalogNumericEffectOp<Op>::type;
 
+void fill_delete_free_condition(fp::ActionView action,
+                                fp::ConditionalEffectView cond_eff,
+                                TranslationContext& translation_context,
+                                formalism::planning::MergeDatalogContext& context,
+                                Data<formalism::datalog::ConjunctiveCondition>& conj_cond)
+{
     // Action parameter may get deleted.
     for (const auto& variable : action.get_variables())
         conj_cond.variables.push_back(merge_p2d(variable, context).first.get_index());
@@ -68,6 +91,52 @@ auto create_cond_effect_rule(fp::ActionView action,
     for (const auto literal : cond_eff.get_condition().template get_literals<formalism::FluentTag>())
         if (literal.get_polarity())
             conj_cond.fluent_literals.push_back(merge_p2d(literal, translation_context.p2d.fluent_to_fluent_predicate, context).first.get_index());
+}
+
+template<fp::NumericEffectOpKind Op>
+auto merge_numeric_effect(fp::NumericEffectView<Op, formalism::FluentTag> effect, formalism::planning::MergeDatalogContext& context)
+{
+    using DOp = DatalogNumericEffectOpT<Op>;
+
+    auto numeric_effect_ptr = context.builder.get_builder<fd::NumericEffect<DOp, formalism::FluentTag>>();
+    auto& numeric_effect = *numeric_effect_ptr;
+    numeric_effect.clear();
+
+    numeric_effect.fterm = merge_p2d(effect.get_fterm(), context).first.get_index();
+    numeric_effect.fexpr = merge_p2d(effect.get_fexpr(), context);
+
+    canonicalize(numeric_effect);
+    return context.destination.get_or_create(numeric_effect);
+}
+
+auto merge_numeric_effect_operator(fp::NumericEffectOperatorView<formalism::FluentTag> effect, formalism::planning::MergeDatalogContext& context)
+{
+    using Operator = fd::NumericEffectOperator<formalism::FluentTag>;
+    using OperatorData = Data<Operator>;
+
+    return visit(
+        [&](auto&& arg) -> OperatorData
+        {
+            return OperatorData(typename OperatorData::Variant(merge_numeric_effect(arg, context).first.get_index()));
+        },
+        effect.get_variant());
+}
+
+auto create_cond_effect_rule(fp::ActionView action,
+                             fp::ConditionalEffectView cond_eff,
+                             fp::AtomView<formalism::FluentTag> effect,
+                             TranslationContext& translation_context,
+                             formalism::planning::MergeDatalogContext& context)
+{
+    auto rule_ptr = context.builder.get_builder<formalism::datalog::Rule>();
+    auto& rule = *rule_ptr;
+    rule.clear();
+
+    auto conj_cond_ptr = context.builder.get_builder<formalism::datalog::ConjunctiveCondition>();
+    auto& conj_cond = *conj_cond_ptr;
+    conj_cond.clear();
+
+    fill_delete_free_condition(action, cond_eff, translation_context, context, conj_cond);
 
     canonicalize(conj_cond);
     const auto new_conj_cond = context.destination.get_or_create(conj_cond).first;
@@ -75,6 +144,34 @@ auto create_cond_effect_rule(fp::ActionView action,
     rule.variables = new_conj_cond.get_variables().get_data();
     rule.body = new_conj_cond.get_index();
     rule.head = merge_p2d(effect, translation_context.p2d.fluent_to_fluent_predicate, context).first.get_index();
+    rule.cost = 1;
+
+    canonicalize(rule);
+    return context.destination.get_or_create(rule);
+}
+
+auto create_cond_numeric_effect_rule(fp::ActionView action,
+                                     fp::ConditionalEffectView cond_eff,
+                                     fp::NumericEffectOperatorView<formalism::FluentTag> effect,
+                                     TranslationContext& translation_context,
+                                     formalism::planning::MergeDatalogContext& context)
+{
+    auto rule_ptr = context.builder.get_builder<formalism::datalog::Rule>();
+    auto& rule = *rule_ptr;
+    rule.clear();
+
+    auto conj_cond_ptr = context.builder.get_builder<formalism::datalog::ConjunctiveCondition>();
+    auto& conj_cond = *conj_cond_ptr;
+    conj_cond.clear();
+
+    fill_delete_free_condition(action, cond_eff, translation_context, context, conj_cond);
+
+    canonicalize(conj_cond);
+    const auto new_conj_cond = context.destination.get_or_create(conj_cond).first;
+
+    rule.variables = new_conj_cond.get_variables().get_data();
+    rule.body = new_conj_cond.get_index();
+    rule.head = merge_numeric_effect_operator(effect, context);
     rule.cost = 1;
 
     canonicalize(rule);
@@ -95,6 +192,14 @@ void translate_action_to_delete_free_rules(fp::ActionView action,
                 continue;  /// ignore delete effects
 
             const auto rule = create_cond_effect_rule(action, cond_eff, literal.get_atom(), translation_context, context).first;
+
+            program.rules.push_back(rule.get_index());
+            rule_to_action.emplace(rule, action);
+        }
+
+        for (const auto numeric_effect : cond_eff.get_effect().get_numeric_effects())
+        {
+            const auto rule = create_cond_numeric_effect_rule(action, cond_eff, numeric_effect, translation_context, context).first;
 
             program.rules.push_back(rule.get_index());
             rule_to_action.emplace(rule, action);

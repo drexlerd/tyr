@@ -152,13 +152,9 @@ void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(forma
     // Divide case: recursively call for preconditions.
 
     auto datalog_grounder_context = formalism::datalog::GrounderContext { m_workspace.datalog_builder, m_workspace.workspace_repository, m_workspace.binding };
+    const auto& const_rule_workspace = *m_task->get_rpg_program().get_const_program_workspace().rules[uint_t(rule.get_index())];
 
-    for (const auto literal : m_task->get_rpg_program()
-                                  .get_const_program_workspace()
-                                  .rules[uint_t(rule.get_index())]
-                                  .get_witness_rule()
-                                  .get_body()
-                                  .get_literals<formalism::FluentTag>())
+    for (const auto literal : const_rule_workspace.get_witness_rule().get_body().get_literals<formalism::FluentTag>())
     {
         // Cannot do this before the loop because of overwrites during recursion; we could binding from a builder and place it into the grounder context.
         datalog_grounder_context.binding.clear();

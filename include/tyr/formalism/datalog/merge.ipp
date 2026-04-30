@@ -322,6 +322,26 @@ Data<BooleanOperator<T>> merge_d2d(BooleanOperatorView<T> element, MergeContext&
     return visit([&](auto&& arg) { return Data<BooleanOperator<T>>(merge_d2d(arg, context).first.get_index()); }, element.get_variant());
 }
 
+template<NumericEffectOpKind Op, FactKind T>
+std::pair<NumericEffectView<Op, T>, bool> merge_d2d(NumericEffectView<Op, T> element, MergeContext& context)
+{
+    auto numeric_effect_ptr = context.builder.template get_builder<NumericEffect<Op, T>>();
+    auto& numeric_effect = *numeric_effect_ptr;
+    numeric_effect.clear();
+
+    numeric_effect.fterm = merge_d2d(element.get_fterm(), context).first.get_index();
+    numeric_effect.fexpr = merge_d2d(element.get_fexpr(), context);
+
+    canonicalize(numeric_effect);
+    return context.destination.get_or_create(numeric_effect);
+}
+
+template<FactKind T>
+Data<NumericEffectOperator<T>> merge_d2d(NumericEffectOperatorView<T> element, MergeContext& context)
+{
+    return visit([&](auto&& arg) { return Data<NumericEffectOperator<T>>(merge_d2d(arg, context).first.get_index()); }, element.get_variant());
+}
+
 TYR_INLINE_IMPL std::pair<ConjunctiveConditionView, bool> merge_d2d(ConjunctiveConditionView element, MergeContext& context)
 {
     auto conj_cond_ptr = context.builder.template get_builder<ConjunctiveCondition>();
@@ -365,7 +385,17 @@ TYR_INLINE_IMPL std::pair<RuleView, bool> merge_d2d(RuleView element, MergeConte
     for (const auto variable : element.get_variables())
         rule.variables.push_back(merge_d2d(variable, context).first.get_index());
     rule.body = merge_d2d(element.get_body(), context).first.get_index();
-    rule.head = merge_d2d(element.get_head(), context).first.get_index();
+    rule.head = visit(
+        [&](auto&& head) -> decltype(rule.head)
+        {
+            using Head = std::decay_t<decltype(head)>;
+
+            if constexpr (std::is_same_v<Head, AtomView<FluentTag>>)
+                return merge_d2d(head, context).first.get_index();
+            else
+                return merge_d2d(head, context);
+        },
+        element.get_head());
 
     canonicalize(rule);
     return context.destination.get_or_create(rule);

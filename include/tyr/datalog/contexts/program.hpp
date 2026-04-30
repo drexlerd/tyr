@@ -91,7 +91,8 @@ struct ProgramExecutionContext
 
         // Clear the rules
         for (auto& rule : out.rules())
-            rule->clear();
+            if (rule)
+                rule->clear();
 
         // Clear the annotation policy.
         for (auto& vec : out.or_annot())

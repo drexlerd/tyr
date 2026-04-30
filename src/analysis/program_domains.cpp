@@ -423,6 +423,13 @@ void apply_policy(fd::FunctionTermView<T> element, Policy& policy)
         element.get_terms());
 }
 
+template<fd::NumericEffectOpKind Op, f::FactKind T, typename Policy>
+void apply_policy(fd::NumericEffectView<Op, T> element, Policy& policy)
+{
+    apply_policy(element.get_fterm(), policy);
+    apply_policy(element.get_fexpr(), policy);
+}
+
 template<typename Policy>
 void apply_policy(fd::LiftedArithmeticOperatorView element, Policy& policy)
 {
@@ -437,6 +444,12 @@ void apply_policy(fd::FunctionExpressionView element, Policy& policy)
 
 template<typename Policy>
 void apply_policy(fd::LiftedBooleanOperatorView element, Policy& policy)
+{
+    visit([&](auto&& arg) { apply_policy(arg, policy); }, element.get_variant());
+}
+
+template<f::FactKind T, typename Policy>
+void apply_policy(fd::NumericEffectOperatorView<T> element, Policy& policy)
 {
     visit([&](auto&& arg) { apply_policy(arg, policy); }, element.get_variant());
 }
@@ -480,6 +493,8 @@ ProgramVariableDomains compute_variable_domains(fd::ProgramView program)
 
             for (const auto op : rule.get_body().get_numeric_constraints())
                 apply_policy(op, insert_policy);
+
+            visit([&](auto&& head) { apply_policy(head, insert_policy); }, rule.get_head());
         }
     }
 
@@ -528,7 +543,7 @@ ProgramVariableDomains compute_variable_domains(fd::ProgramView program)
         for (const auto op : rule.get_body().get_numeric_constraints())
             apply_policy(op, lift_policy);
 
-        apply_policy(rule.get_head(), lift_policy);
+        visit([&](auto&& head) { apply_policy(head, lift_policy); }, rule.get_head());
     }
 
     ///--- Step 5: Convert internal sets to public domain wrapper types.

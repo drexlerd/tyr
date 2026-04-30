@@ -54,9 +54,11 @@
 #include <memory>  // for __sha...
 #include <oneapi/tbb/parallel_for_each.h>
 #include <oneapi/tbb/parallel_invoke.h>
-#include <tuple>    // for opera...
-#include <utility>  // for pair
-#include <vector>   // for vector
+#include <tuple>       // for opera...
+#include <type_traits>
+#include <utility>     // for pair
+#include <variant>
+#include <vector>      // for vector
 
 namespace f = tyr::formalism;
 namespace fd = tyr::formalism::datalog;
@@ -97,20 +99,34 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
     if (is_applicable(in.cws_rule().get_nullary_condition(), in.fact_sets())
         && is_valid_binding(in.cws_rule().get_rule().get_body(), in.fact_sets(), out.ground_context_iteration()))
     {
-        const auto program_head = fd::ground_binding(in.cws_rule().get_rule().get_head(), out.ground_context_iteration()).first;
-        const auto worker_head = fd::ground_binding(in.cws_rule().get_rule().get_head(), out.ground_context_solve()).first;
+        visit(
+            [&](auto&& head)
+            {
+                using Head = std::decay_t<decltype(head)>;
 
-        out.heads_rows().insert(worker_head.get_index().row);
+                if constexpr (std::is_same_v<Head, fd::AtomView<f::FluentTag>>)
+                {
+                    const auto program_head = fd::ground_binding(head, out.ground_context_iteration()).first;
+                    const auto worker_head = fd::ground_binding(head, out.ground_context_solve()).first;
 
-        in.and_ap().update_annotation(program_head,
-                                      worker_head,
-                                      in.cost_buckets().current_cost(),
-                                      in.cws_rule().get_rule(),
-                                      in.cws_rule().get_witness_rule().get_body(),
-                                      in.or_annot(),
-                                      out.and_annot(),
-                                      out.ground_context_solve(),
-                                      out.ground_context_iteration());
+                    std::get<PredicateHeadIteration>(out.head()).rows.insert(worker_head.get_index().row);
+
+                    in.and_ap().update_annotation(program_head,
+                                                  worker_head,
+                                                  in.cost_buckets().current_cost(),
+                                                  in.cws_rule().get_rule(),
+                                                  in.cws_rule().get_witness_rule().get_body(),
+                                                  in.or_annot(),
+                                                  out.and_annot(),
+                                                  out.ground_context_solve(),
+                                                  out.ground_context_iteration());
+                }
+                else
+                {
+                    // Numeric effect heads are intentionally not propagated by the propositional bottom-up engine yet.
+                }
+            },
+            in.cws_rule().get_rule().get_head());
     }
 }
 
@@ -154,52 +170,67 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
 
     ++out.statistics().num_generated_rules;
 
-    const auto program_head = fd::ground_binding(in.cws_rule().get_rule().get_head(), out.ground_context_iteration()).first;
-    if (in.fact_sets().template get<f::FluentTag>().predicate.contains(program_head))
-        return;  ///< optimal cost proven
+    visit(
+        [&](auto&& head)
+        {
+            using Head = std::decay_t<decltype(head)>;
 
-    auto applicability_check = out.applicability_check_pool().get_or_allocate(in.cws_rule().get_nullary_condition(),
-                                                                              in.cws_rule().get_conflicting_overapproximation_rule().get_body(),
-                                                                              in.fact_sets(),
-                                                                              out.ground_context_iteration());
+            if constexpr (std::is_same_v<Head, fd::AtomView<f::FluentTag>>)
+            {
+                const auto program_head = fd::ground_binding(head, out.ground_context_iteration()).first;
+                if (in.fact_sets().template get<f::FluentTag>().predicate.contains(program_head))
+                    return;  ///< optimal cost proven
 
-    if (!applicability_check->is_statically_applicable())
-        return;
+                auto applicability_check = out.applicability_check_pool().get_or_allocate(in.cws_rule().get_nullary_condition(),
+                                                                                          in.cws_rule().get_conflicting_overapproximation_rule().get_body(),
+                                                                                          in.fact_sets(),
+                                                                                          out.ground_context_iteration());
 
-    // IMPORTANT: A binding can fail the nullary part (e.g., arm-empty) even though the clique already exists.
-    // Later, nullary may become true without any new kPKC edges/vertices, so delta-kPKC will NOT re-enumerate this binding.
-    // Therefore we must store it as pending (keyed by binding) and recheck in the next fact envelope.
-    if (applicability_check->is_dynamically_applicable(in.fact_sets(), out.ground_context_iteration()))
-    {
-        assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets()));
+                if (!applicability_check->is_statically_applicable())
+                    return;
 
-        // std::cout << in.cws_rule().get_rule() << " " << out.ground_context_solve().binding << std::endl;
+                // IMPORTANT: A binding can fail the nullary part (e.g., arm-empty) even though the clique already exists.
+                // Later, nullary may become true without any new kPKC edges/vertices, so delta-kPKC will NOT re-enumerate this binding.
+                // Therefore we must store it as pending (keyed by binding) and recheck in the next fact envelope.
+                if (applicability_check->is_dynamically_applicable(in.fact_sets(), out.ground_context_iteration()))
+                {
+                    assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets()));
 
-        const auto worker_head = fd::ground_binding(in.cws_rule().get_rule().get_head(), out.ground_context_solve()).first;
+                    // std::cout << in.cws_rule().get_rule() << " " << out.ground_context_solve().binding << std::endl;
 
-        // std::cout << make_view(ground(in.cws_rule().get_rule(), out.ground_context_iteration()).first, out.ground_context_iteration().destination)
-        //           << std::endl;
+                    const auto worker_head = fd::ground_binding(head, out.ground_context_solve()).first;
 
-        out.heads_rows().insert(worker_head.get_index().row);
+                    // std::cout << make_view(ground(in.cws_rule().get_rule(), out.ground_context_iteration()).first, out.ground_context_iteration().destination)
+                    //           << std::endl;
 
-        in.and_ap().update_annotation(program_head,
-                                      worker_head,
-                                      in.cost_buckets().current_cost(),
-                                      in.cws_rule().get_rule(),
-                                      in.cws_rule().get_witness_rule().get_body(),
-                                      in.or_annot(),
-                                      out.and_annot(),
-                                      out.ground_context_solve(),
-                                      out.ground_context_iteration());
-    }
-    else
-    {
-        ++out.statistics().num_pending_rules;
+                    std::get<PredicateHeadIteration>(out.head()).rows.insert(worker_head.get_index().row);
 
-        const auto overapproximation_worker_head = fd::ground_binding(in.cws_rule().get_conflicting_overapproximation_rule(), out.ground_context_solve()).first;
+                    in.and_ap().update_annotation(program_head,
+                                                  worker_head,
+                                                  in.cost_buckets().current_cost(),
+                                                  in.cws_rule().get_rule(),
+                                                  in.cws_rule().get_witness_rule().get_body(),
+                                                  in.or_annot(),
+                                                  out.and_annot(),
+                                                  out.ground_context_solve(),
+                                                  out.ground_context_iteration());
+                }
+                else
+                {
+                    ++out.statistics().num_pending_rules;
 
-        out.pending_rules().emplace(overapproximation_worker_head, std::move(applicability_check));
-    }
+                    const auto overapproximation_worker_head =
+                        fd::ground_binding(in.cws_rule().get_conflicting_overapproximation_rule(), out.ground_context_solve()).first;
+
+                    out.pending_rules().emplace(overapproximation_worker_head, std::move(applicability_check));
+                }
+            }
+            else
+            {
+                // Numeric effect heads are intentionally not propagated by the propositional bottom-up engine yet.
+            }
+        },
+        in.cws_rule().get_rule().get_head());
 }
 
 template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
@@ -298,36 +329,52 @@ void process_pending(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                 out.ground_context_solve().binding.push_back(object.get_index());
 
             assert(out.ground_context_solve().binding == out.ground_context_iteration().binding);
-            const auto program_head = fd::ground_binding(in.cws_rule().get_rule().get_head(), out.ground_context_iteration()).first;
 
-            if (in.fact_sets().template get<f::FluentTag>().predicate.contains(program_head))  ///< optimal cost proven
-            {
-                it = out.pending_rules().erase(it);
-            }
-            else if (it->second->is_dynamically_applicable(in.fact_sets(), out.ground_context_iteration()))
-            {
-                assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets()));
+            visit(
+                [&](auto&& head)
+                {
+                    using Head = std::decay_t<decltype(head)>;
 
-                const auto worker_head = fd::ground_binding(in.cws_rule().get_rule().get_head(), out.ground_context_solve()).first;
+                    if constexpr (std::is_same_v<Head, fd::AtomView<f::FluentTag>>)
+                    {
+                        const auto program_head = fd::ground_binding(head, out.ground_context_iteration()).first;
 
-                out.heads_rows().insert(worker_head.get_index().row);
+                        if (in.fact_sets().template get<f::FluentTag>().predicate.contains(program_head))  ///< optimal cost proven
+                        {
+                            it = out.pending_rules().erase(it);
+                        }
+                        else if (it->second->is_dynamically_applicable(in.fact_sets(), out.ground_context_iteration()))
+                        {
+                            assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets()));
 
-                in.and_ap().update_annotation(program_head,
-                                              worker_head,
-                                              in.cost_buckets().current_cost(),
-                                              in.cws_rule().get_rule(),
-                                              in.cws_rule().get_witness_rule().get_body(),
-                                              in.or_annot(),
-                                              out.and_annot(),
-                                              out.ground_context_solve(),
-                                              out.ground_context_iteration());
+                            const auto worker_head = fd::ground_binding(head, out.ground_context_solve()).first;
 
-                it = out.pending_rules().erase(it);
-            }
-            else
-            {
-                ++it;
-            }
+                            std::get<PredicateHeadIteration>(out.head()).rows.insert(worker_head.get_index().row);
+
+                            in.and_ap().update_annotation(program_head,
+                                                          worker_head,
+                                                          in.cost_buckets().current_cost(),
+                                                          in.cws_rule().get_rule(),
+                                                          in.cws_rule().get_witness_rule().get_body(),
+                                                          in.or_annot(),
+                                                          out.and_annot(),
+                                                          out.ground_context_solve(),
+                                                          out.ground_context_iteration());
+
+                            it = out.pending_rules().erase(it);
+                        }
+                        else
+                        {
+                            ++it;
+                        }
+                    }
+                    else
+                    {
+                        // Numeric effect heads are intentionally not propagated by the propositional bottom-up engine yet.
+                        ++it;
+                    }
+                },
+                in.cws_rule().get_rule().get_head());
         }
     }
 }
@@ -427,24 +474,38 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
 
                 for (const auto& worker : ws_rule->worker)
                 {
-                    for (const auto worker_head_index : worker.iteration.head_rows)
-                    {
-                        const auto worker_head =
-                            make_view(Index<f::RelationBinding<f::Predicate<f::FluentTag>>> { worker.iteration.head_predicate, worker_head_index },
-                                      worker.solve.program_overlay_repository);
+                    std::visit(
+                        [&](const auto& head_iteration)
+                        {
+                            using HeadIteration = std::decay_t<decltype(head_iteration)>;
 
-                        // Merge head from delta into the program
-                        const auto program_head = fd::merge_d2d(worker_head, merge_context).first;
+                            if constexpr (std::is_same_v<HeadIteration, PredicateHeadIteration>)
+                            {
+                                for (const auto worker_head_index : head_iteration.rows)
+                                {
+                                    const auto worker_head =
+                                        make_view(Index<f::RelationBinding<f::Predicate<f::FluentTag>>> { head_iteration.relation, worker_head_index },
+                                                  worker.solve.program_overlay_repository);
 
-                        // Update annotation
-                        const auto cost_update = program_out.or_ap().update_annotation(program_head,
-                                                                                       worker_head,
-                                                                                       program_out.or_annot(),
-                                                                                       worker.iteration.and_annot,
-                                                                                       program_out.and_annot());
+                                    // Merge head from delta into the program
+                                    const auto program_head = fd::merge_d2d(worker_head, merge_context).first;
 
-                        cost_buckets.update(cost_update, program_head);
-                    }
+                                    // Update annotation
+                                    const auto cost_update = program_out.or_ap().update_annotation(program_head,
+                                                                                                   worker_head,
+                                                                                                   program_out.or_annot(),
+                                                                                                   worker.iteration.and_annot,
+                                                                                                   program_out.and_annot());
+
+                                    cost_buckets.update(cost_update, program_head);
+                                }
+                            }
+                            else
+                            {
+                                // Numeric effect head rows are not merged into numeric fact sets yet.
+                            }
+                        },
+                        worker.iteration.head);
                 }
             }
 
