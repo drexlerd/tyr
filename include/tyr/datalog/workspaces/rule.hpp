@@ -173,11 +173,11 @@ struct PredicateHeadIteration
 struct FunctionHeadUpdate
 {
     Index<formalism::Row> row;
-    float_t value;
+    ClosedInterval<float_t> interval;
 
-    FunctionHeadUpdate(Index<formalism::Row> row, float_t value) : row(row), value(value) {}
+    FunctionHeadUpdate(Index<formalism::Row> row, ClosedInterval<float_t> interval) : row(row), interval(interval) {}
 
-    auto identifying_members() const noexcept { return std::tie(row, value); }
+    auto identifying_members() const noexcept { return std::tie(row, interval); }
 };
 
 struct FunctionHeadIteration

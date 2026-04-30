@@ -18,6 +18,7 @@
 #ifndef TYR_DATALOG_FACT_SETS_HPP_
 #define TYR_DATALOG_FACT_SETS_HPP_
 
+#include "tyr/common/closed_interval.hpp"
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
 #include "tyr/formalism/datalog/repository.hpp"
@@ -89,27 +90,31 @@ private:
     Index<formalism::Function<T>> m_function_index;
     std::vector<uint_t> m_remap;
     std::vector<Index<formalism::Row>> m_bindings;
-    std::vector<float_t> m_values;
+    std::vector<ClosedInterval<float_t>> m_values;
 
 public:
     explicit FunctionFactSet(formalism::datalog::FunctionView<T> function, const formalism::datalog::Repository& repository);
 
     void reset() noexcept;
 
-    void insert(const FunctionFactSet& other);
-    void insert(formalism::datalog::FunctionBindingView<T> binding, float_t value);
-    void insert(formalism::datalog::FunctionBindingRandomAccessRangeView<T> bindings, const std::vector<float_t>& values);
-    void insert(const std::vector<formalism::datalog::FunctionBindingView<T>>& bindings, const std::vector<float_t>& values);
-    void insert(formalism::datalog::GroundFunctionTermView<T> fterm, float_t value);
-    void insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value);
-    void insert(formalism::datalog::GroundFunctionTermValueListView<T> fterm_values);
+    bool insert(const FunctionFactSet& other);
+    bool insert(formalism::datalog::FunctionBindingView<T> binding, ClosedInterval<float_t> interval);
+    bool insert(formalism::datalog::FunctionBindingView<T> binding, float_t value);
+    bool insert(formalism::datalog::FunctionBindingRandomAccessRangeView<T> bindings, const std::vector<ClosedInterval<float_t>>& intervals);
+    bool insert(formalism::datalog::FunctionBindingRandomAccessRangeView<T> bindings, const std::vector<float_t>& values);
+    bool insert(const std::vector<formalism::datalog::FunctionBindingView<T>>& bindings, const std::vector<ClosedInterval<float_t>>& intervals);
+    bool insert(const std::vector<formalism::datalog::FunctionBindingView<T>>& bindings, const std::vector<float_t>& values);
+    bool insert(formalism::datalog::GroundFunctionTermView<T> fterm, ClosedInterval<float_t> interval);
+    bool insert(formalism::datalog::GroundFunctionTermView<T> fterm, float_t value);
+    bool insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value);
+    bool insert(formalism::datalog::GroundFunctionTermValueListView<T> fterm_values);
 
-    float_t operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept;
-    float_t operator[](formalism::datalog::GroundFunctionTermView<T> fterm) const noexcept;
+    ClosedInterval<float_t> operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept;
+    ClosedInterval<float_t> operator[](formalism::datalog::GroundFunctionTermView<T> fterm) const noexcept;
 
     const std::vector<uint_t>& get_remap() const noexcept;
     formalism::datalog::FunctionBindingRandomAccessRangeView<T> get_bindings() const noexcept;
-    const std::vector<float_t>& get_values() const noexcept;
+    const std::vector<ClosedInterval<float_t>>& get_values() const noexcept;
 };
 
 template<formalism::FactKind T>
@@ -123,14 +128,17 @@ public:
 
     void reset() noexcept;
 
-    void insert(const FunctionFactSets& other);
-    void insert(formalism::datalog::GroundFunctionTermView<T> function_term, float_t value);
-    void insert(formalism::datalog::GroundFunctionTermListView<T> function_terms, const std::vector<float_t>& values);
-    void insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value);
-    void insert(formalism::datalog::GroundFunctionTermValueListView<T> fterm_values);
+    bool insert(const FunctionFactSets& other);
+    bool insert(formalism::datalog::FunctionBindingView<T> binding, ClosedInterval<float_t> interval);
+    bool insert(formalism::datalog::FunctionBindingView<T> binding, float_t value);
+    bool insert(formalism::datalog::GroundFunctionTermView<T> function_term, ClosedInterval<float_t> interval);
+    bool insert(formalism::datalog::GroundFunctionTermView<T> function_term, float_t value);
+    bool insert(formalism::datalog::GroundFunctionTermListView<T> function_terms, const std::vector<float_t>& values);
+    bool insert(formalism::datalog::GroundFunctionTermValueView<T> fterm_value);
+    bool insert(formalism::datalog::GroundFunctionTermValueListView<T> fterm_values);
 
-    float_t operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept;
-    float_t operator[](formalism::datalog::GroundFunctionTermView<T> fterm) const noexcept;
+    ClosedInterval<float_t> operator[](formalism::datalog::FunctionBindingView<T> binding) const noexcept;
+    ClosedInterval<float_t> operator[](formalism::datalog::GroundFunctionTermView<T> fterm) const noexcept;
 
     const std::vector<FunctionFactSet<T>>& get_sets() const noexcept;
 };

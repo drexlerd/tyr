@@ -24,6 +24,7 @@
 #include <cmath>
 #include <limits>
 #include <ostream>
+#include <tuple>
 #include <type_traits>
 
 namespace tyr
@@ -108,6 +109,12 @@ public:
 
     friend A lower(const ClosedInterval& el) noexcept { return lower(el.get_interval()); }
     friend A upper(const ClosedInterval& el) noexcept { return upper(el.get_interval()); }
+
+    auto identifying_members() const noexcept
+    {
+        const auto is_empty = empty(*this);
+        return std::make_tuple(is_empty, is_empty ? A(0) : lower(*this), is_empty ? A(0) : upper(*this));
+    }
 
 private:
     Interval m_interval;

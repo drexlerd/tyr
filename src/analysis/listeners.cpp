@@ -101,6 +101,9 @@ void add_function_listeners(fd::LiftedBooleanOperatorView expression, Index<fd::
 template<fd::NumericEffectOpKind Op>
 void add_numeric_effect_head_listeners(fd::NumericEffectView<Op, f::FluentTag> effect, Index<fd::Rule> rule, ListenerStratum& listeners)
 {
+    if constexpr (!std::is_same_v<Op, fd::OpAssign>)
+        add_function_listeners(effect.get_fterm(), rule, listeners);
+
     add_function_listeners(effect.get_fexpr(), rule, listeners);
 }
 }
