@@ -33,7 +33,7 @@ Before running a validation target, check whether the existing `build/` director
 
 ## Validation
 
-- Build core with `cmake --build build --target core -j24` when C++ core code changes.
+- Build core with `cmake --build build --target core -j8` when C++ core code changes.
 - Run targeted C++ unit tests for touched areas.
 - Build Python bindings with `source .venv/bin/activate && uv pip install .` only when Python bindings or exported C++ APIs change.
 - Run Python tests with `.venv/bin/python -m pytest python/tests -q` when Python bindings, parser behavior, or exposed APIs change.
@@ -42,6 +42,7 @@ Before running a validation target, check whether the existing `build/` director
 
 ## Coding Conventions
 
+- Compile on 8 cores only.
 - Prefer existing type-list declarations as the source of truth.
 - Keep explicit template instantiations when they are used for compile-time or memory control.
 - Do not replace explicit instantiations with macro/codegen approaches unless explicitly requested.

@@ -306,6 +306,94 @@ struct formatter<tyr::formalism::datalog::GroundFunctionTermValueView<T>, char>
     }
 };
 
+template<tyr::formalism::datalog::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::NumericEffect<Op, T>>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::NumericEffect<Op, T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {} {})", Op::kind, value.fterm, value.fexpr);
+    }
+};
+
+template<tyr::formalism::datalog::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::NumericEffectView<Op, T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::NumericEffectView<Op, T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {} {})", Op::kind, value.get_fterm(), value.get_fexpr());
+    }
+};
+
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::NumericEffectOperator<T>>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::NumericEffectOperator<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.value);
+    }
+};
+
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::NumericEffectOperatorView<T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::NumericEffectOperatorView<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.get_variant());
+    }
+};
+
+template<tyr::formalism::datalog::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::GroundNumericEffect<Op, T>>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::GroundNumericEffect<Op, T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {} {})", Op::kind, value.fterm, value.fexpr);
+    }
+};
+
+template<tyr::formalism::datalog::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::GroundNumericEffectView<Op, T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::GroundNumericEffectView<Op, T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({} {} {})", Op::kind, value.get_fterm(), value.get_fexpr());
+    }
+};
+
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::Data<tyr::formalism::datalog::GroundNumericEffectOperator<T>>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::Data<tyr::formalism::datalog::GroundNumericEffectOperator<T>>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.value);
+    }
+};
+
+template<tyr::formalism::FactKind T>
+struct formatter<tyr::formalism::datalog::GroundNumericEffectOperatorView<T>, char>
+{
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const tyr::formalism::datalog::GroundNumericEffectOperatorView<T>& value, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", value.get_variant());
+    }
+};
+
 template<>
 struct formatter<tyr::formalism::datalog::VariableDependencyGraph, char>
 {

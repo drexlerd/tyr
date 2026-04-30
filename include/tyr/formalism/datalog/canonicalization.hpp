@@ -134,6 +134,18 @@ bool is_canonical(const Data<GroundFunctionTermValue<T>>& data)
     return true;
 }
 
+template<NumericEffectOpKind Op, FactKind T>
+bool is_canonical(const Data<NumericEffect<Op, T>>& data)
+{
+    return true;
+}
+
+template<NumericEffectOpKind Op, FactKind T>
+bool is_canonical(const Data<GroundNumericEffect<Op, T>>& data)
+{
+    return true;
+}
+
 inline bool is_canonical(const Data<ConjunctiveCondition>& data)
 {
     return is_canonical(data.static_literals) && is_canonical(data.fluent_literals) && is_canonical(data.numeric_constraints);
@@ -263,6 +275,18 @@ inline void canonicalize(Data<GroundFunctionExpression>& data)
 
 template<FactKind T>
 void canonicalize(Data<GroundFunctionTermValue<T>>& data)
+{
+    // Trivially canonical
+}
+
+template<NumericEffectOpKind Op, FactKind T>
+void canonicalize(Data<NumericEffect<Op, T>>& data)
+{
+    // Trivially canonical
+}
+
+template<NumericEffectOpKind Op, FactKind T>
+void canonicalize(Data<GroundNumericEffect<Op, T>>& data)
 {
     // Trivially canonical
 }

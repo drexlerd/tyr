@@ -113,6 +113,13 @@ template std::pair<MultiOperatorView<OpMul, Data<GroundFunctionExpression>>, boo
 template Data<ArithmeticOperator<Data<FunctionExpression>>> merge_d2d(ArithmeticOperatorView<Data<FunctionExpression>> element, MergeContext& context);
 template Data<ArithmeticOperator<Data<GroundFunctionExpression>>> merge_d2d(ArithmeticOperatorView<Data<GroundFunctionExpression>> element,
                                                                             MergeContext& context);
+
+template std::pair<NumericEffectView<OpAssign, FluentTag>, bool> merge_d2d(NumericEffectView<OpAssign, FluentTag> element, MergeContext& context);
+template std::pair<NumericEffectView<OpIncrease, FluentTag>, bool> merge_d2d(NumericEffectView<OpIncrease, FluentTag> element, MergeContext& context);
+template std::pair<NumericEffectView<OpDecrease, FluentTag>, bool> merge_d2d(NumericEffectView<OpDecrease, FluentTag> element, MergeContext& context);
+template std::pair<NumericEffectView<OpScaleUp, FluentTag>, bool> merge_d2d(NumericEffectView<OpScaleUp, FluentTag> element, MergeContext& context);
+template std::pair<NumericEffectView<OpScaleDown, FluentTag>, bool> merge_d2d(NumericEffectView<OpScaleDown, FluentTag> element, MergeContext& context);
+template Data<NumericEffectOperator<FluentTag>> merge_d2d(NumericEffectOperatorView<FluentTag> element, MergeContext& context);
 }
 
 #endif

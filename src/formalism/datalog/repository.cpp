@@ -75,6 +75,16 @@ template class BasicSymbolRepository<datalog::BinaryOperator<OpLe, Data<datalog:
 template class BasicSymbolRepository<datalog::BinaryOperator<OpLt, Data<datalog::GroundFunctionExpression>>>;
 template class BasicSymbolRepository<datalog::BinaryOperator<OpGe, Data<datalog::GroundFunctionExpression>>>;
 template class BasicSymbolRepository<datalog::BinaryOperator<OpGt, Data<datalog::GroundFunctionExpression>>>;
+template class BasicSymbolRepository<datalog::NumericEffect<datalog::OpAssign, FluentTag>>;
+template class BasicSymbolRepository<datalog::NumericEffect<datalog::OpIncrease, FluentTag>>;
+template class BasicSymbolRepository<datalog::NumericEffect<datalog::OpDecrease, FluentTag>>;
+template class BasicSymbolRepository<datalog::NumericEffect<datalog::OpScaleUp, FluentTag>>;
+template class BasicSymbolRepository<datalog::NumericEffect<datalog::OpScaleDown, FluentTag>>;
+template class BasicSymbolRepository<datalog::GroundNumericEffect<datalog::OpAssign, FluentTag>>;
+template class BasicSymbolRepository<datalog::GroundNumericEffect<datalog::OpIncrease, FluentTag>>;
+template class BasicSymbolRepository<datalog::GroundNumericEffect<datalog::OpDecrease, FluentTag>>;
+template class BasicSymbolRepository<datalog::GroundNumericEffect<datalog::OpScaleUp, FluentTag>>;
+template class BasicSymbolRepository<datalog::GroundNumericEffect<datalog::OpScaleDown, FluentTag>>;
 template class BasicSymbolRepository<datalog::ConjunctiveCondition>;
 template class BasicSymbolRepository<datalog::Rule>;
 template class BasicSymbolRepository<datalog::GroundConjunctiveCondition>;

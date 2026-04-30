@@ -27,6 +27,7 @@
 #include "tyr/formalism/datalog/rule_view.hpp"
 
 #include <chrono>
+#include <type_traits>
 #include <vector>
 
 namespace f = tyr::formalism;
@@ -67,7 +68,17 @@ auto create_witness_rule(fd::RuleView element, fd::Repository& context)
 
     rule.variables = element.get_variables().get_data();
     rule.body = create_witness_conjunctive_condition(element.get_body(), context).first.get_index();
-    rule.head = merge_d2d(element.get_head(), merge_context).first.get_index();
+    rule.head = visit(
+        [&](auto&& head) -> decltype(rule.head)
+        {
+            using Head = std::decay_t<decltype(head)>;
+
+            if constexpr (std::is_same_v<Head, fd::AtomView<f::FluentTag>>)
+                return merge_d2d(head, merge_context).first.get_index();
+            else
+                return merge_d2d(head, merge_context);
+        },
+        element.get_head());
 
     canonicalize(rule);
     return context.get_or_create(rule);

@@ -33,6 +33,6 @@ The agent should work on the highest unchecked task in this list. The agent must
   - Likely modification areas:
     - `path/to/other_file.cpp`
   - Validation:
-    - `cmake --build build --target core -j24`
+    - `cmake --build build --target core -j8`
   - Notes:
     - Any relevant context.

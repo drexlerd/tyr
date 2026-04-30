@@ -224,6 +224,26 @@ std::pair<GroundLiteralView<T>, bool> ground(LiteralView<T> element, GrounderCon
     return context.destination.get_or_create(ground_literal);
 }
 
+template<NumericEffectOpKind Op, FactKind T>
+std::pair<GroundNumericEffectView<Op, T>, bool> ground(NumericEffectView<Op, T> element, GrounderContext& context)
+{
+    auto numeric_effect_ptr = context.builder.template get_builder<GroundNumericEffect<Op, T>>();
+    auto& numeric_effect = *numeric_effect_ptr;
+    numeric_effect.clear();
+
+    numeric_effect.fterm = ground(element.get_fterm(), context).first.get_index();
+    numeric_effect.fexpr = ground(element.get_fexpr(), context);
+
+    canonicalize(numeric_effect);
+    return context.destination.get_or_create(numeric_effect);
+}
+
+template<FactKind T>
+Data<GroundNumericEffectOperator<T>> ground(NumericEffectOperatorView<T> element, GrounderContext& context)
+{
+    return visit([&](auto&& arg) { return Data<GroundNumericEffectOperator<T>>(ground(arg, context).first.get_index()); }, element.get_variant());
+}
+
 TYR_INLINE_IMPL std::pair<GroundConjunctiveConditionView, bool> ground(ConjunctiveConditionView element, GrounderContext& context)
 {
     // Fetch and clear
@@ -254,7 +274,19 @@ TYR_INLINE_IMPL std::pair<GroundRuleView, bool> ground(RuleView element, Grounde
     // Fill data
     rule.binding = ground_binding(element, context).first.get_index();
     rule.body = ground(element.get_body(), context).first.get_index();
-    rule.head = ground(element.get_head(), context).first.get_index();
+    rule.head = visit(
+        [&](auto&& arg) -> decltype(rule.head)
+        {
+            using Alternative = std::decay_t<decltype(arg)>;
+
+            if constexpr (std::is_same_v<Alternative, AtomView<FluentTag>>)
+                return ground(arg, context).first.get_index();
+            else if constexpr (std::is_same_v<Alternative, NumericEffectOperatorView<FluentTag>>)
+                return ground(arg, context);
+            else
+                static_assert(dependent_false<Alternative>::value, "Missing case");
+        },
+        element.get_head());
 
     // Canonicalize and Serialize
     canonicalize(rule);

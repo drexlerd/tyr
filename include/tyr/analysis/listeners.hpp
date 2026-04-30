@@ -25,6 +25,7 @@
 #include "tyr/common/types.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"  // for FluentTag, Predicate, Rule
 #include "tyr/formalism/datalog/repository.hpp"
+#include "tyr/formalism/function_index.hpp"
 #include "tyr/formalism/predicate_index.hpp"  // for Index
 
 #include <vector>  // for vector
@@ -32,7 +33,11 @@
 namespace tyr::analysis
 {
 
-using ListenerStratum = UnorderedMap<Index<formalism::Predicate<formalism::FluentTag>>, UnorderedSet<Index<formalism::datalog::Rule>>>;
+struct ListenerStratum
+{
+    UnorderedMap<Index<formalism::Predicate<formalism::FluentTag>>, UnorderedSet<Index<formalism::datalog::Rule>>> predicates;
+    UnorderedMap<Index<formalism::Function<formalism::FluentTag>>, UnorderedSet<Index<formalism::datalog::Rule>>> functions;
+};
 
 struct ListenerStrata
 {

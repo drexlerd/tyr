@@ -20,9 +20,11 @@
 
 #include "tyr/common/types.hpp"
 #include "tyr/common/types_utils.hpp"
+#include "tyr/common/variant.hpp"
 #include "tyr/formalism/datalog/atom_index.hpp"
 #include "tyr/formalism/datalog/conjunctive_condition_index.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
+#include "tyr/formalism/datalog/numeric_effect_operator_data.hpp"
 #include "tyr/formalism/datalog/rule_index.hpp"
 #include "tyr/formalism/variable_index.hpp"
 
@@ -31,17 +33,20 @@ namespace tyr
 template<>
 struct Data<formalism::datalog::Rule>
 {
+    using Head = ::cista::offset::variant<Index<formalism::datalog::Atom<formalism::FluentTag>>,
+                                         Data<formalism::datalog::NumericEffectOperator<formalism::FluentTag>>>;
+
     Index<formalism::datalog::Rule> index;
     IndexList<formalism::Variable> variables;
     Index<formalism::datalog::ConjunctiveCondition> body;
-    Index<formalism::datalog::Atom<formalism::FluentTag>> head;
+    Head head;
     uint_t cost;
 
     Data() = default;
     Data(Index<formalism::datalog::Rule> index,
          IndexList<formalism::Variable> variables,
          Index<formalism::datalog::ConjunctiveCondition> body,
-         Index<formalism::datalog::Atom<formalism::FluentTag>> head,
+         Head head,
          uint_t cost) :
         index(index),
         variables(std::move(variables)),

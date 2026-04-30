@@ -68,6 +68,12 @@ std::pair<GroundAtomView<T>, bool> ground(AtomView<T> element, GrounderContext& 
 template<FactKind T>
 std::pair<GroundLiteralView<T>, bool> ground(LiteralView<T> element, GrounderContext& context);
 
+template<NumericEffectOpKind Op, FactKind T>
+std::pair<GroundNumericEffectView<Op, T>, bool> ground(NumericEffectView<Op, T> element, GrounderContext& context);
+
+template<FactKind T>
+Data<GroundNumericEffectOperator<T>> ground(NumericEffectOperatorView<T> element, GrounderContext& context);
+
 std::pair<GroundConjunctiveConditionView, bool> ground(ConjunctiveConditionView element, GrounderContext& context);
 
 std::pair<GroundRuleView, bool> ground(RuleView element, GrounderContext& context);

@@ -18,12 +18,12 @@
 #include "tyr/datalog/rule_scheduler.hpp"
 
 #include "tyr/common/config.hpp"  // for uint_t
-#include "tyr/datalog/rule_scheduler.hpp"
 #include "tyr/formalism/datalog/formatter.hpp"
 #include "tyr/formalism/datalog/views.hpp"  // for View
 
 #include <assert.h>       // for assert
 #include <gtl/phmap.hpp>  // for operator!=, flat_hash_set
+#include <type_traits>
 #include <utility>        // for pair
 
 namespace f = tyr::formalism;
@@ -31,20 +31,43 @@ namespace fd = tyr::formalism::datalog;
 
 namespace tyr::datalog
 {
+namespace
+{
+template<typename Relation>
+void activate_relation(boost::dynamic_bitset<>& bitset, Index<Relation> relation)
+{
+    assert(uint_t(relation) < bitset.size());
+    bitset.set(uint_t(relation));
+}
 
-RuleSchedulerStratum::RuleSchedulerStratum(const analysis::RuleStratum& rules, const analysis::ListenerStratum& listeners, const fd::Repository& context) :
+template<typename Relation>
+void collect_active_rules(const boost::dynamic_bitset<>& bitset,
+                          const UnorderedMap<Index<Relation>, UnorderedSet<Index<fd::Rule>>>& listeners,
+                          UnorderedSet<Index<fd::Rule>>& active_rules)
+{
+    for (auto i = bitset.find_first(); i != boost::dynamic_bitset<>::npos; i = bitset.find_next(i))
+        if (const auto it = listeners.find(Index<Relation>(i)); it != listeners.end())
+            for (const auto rule : it->second)
+                active_rules.insert(rule);
+}
+}
+
+RuleSchedulerStratum::RuleSchedulerStratum(const analysis::RuleStratum& rules,
+                                           const analysis::ListenerStratum& listeners,
+                                           const fd::Repository& context,
+                                           size_t num_fluent_predicates,
+                                           size_t num_fluent_functions) :
     m_rules(rules),
     m_listeners(listeners),
     m_context(context),
-    m_active_predicates(),
+    m_active_predicates(num_fluent_predicates),
+    m_active_functions(num_fluent_functions),
     m_active_rules()
 {
-    for (const auto rule : rules)
-    {
-        const auto predicate = uint_t(make_view(rule, context).get_head().get_predicate().get_index());
-        if (predicate >= m_active_predicates.size())
-            m_active_predicates.resize(predicate + 1, false);
-    }
+    for (const auto& [predicate, _] : listeners.predicates)
+        assert(uint_t(predicate) < m_active_predicates.size());
+    for (const auto& [function, _] : listeners.functions)
+        assert(uint_t(function) < m_active_functions.size());
 }
 
 void RuleSchedulerStratum::activate_all()
@@ -54,31 +77,40 @@ void RuleSchedulerStratum::activate_all()
         m_active_rules.insert(rule);
 }
 
-void RuleSchedulerStratum::on_start_iteration() noexcept { m_active_predicates.reset(); }
+void RuleSchedulerStratum::on_start_iteration() noexcept
+{
+    m_active_predicates.reset();
+    m_active_functions.reset();
+}
 
 void RuleSchedulerStratum::on_generate(Index<f::Predicate<f::FluentTag>> predicate)
 {
-    assert(uint_t(predicate) < m_active_predicates.size());
+    activate_relation(m_active_predicates, predicate);
+}
 
-    m_active_predicates.set(uint_t(predicate));
+void RuleSchedulerStratum::on_generate(Index<f::Function<f::FluentTag>> function)
+{
+    activate_relation(m_active_functions, function);
 }
 
 void RuleSchedulerStratum::on_finish_iteration()
 {
     m_active_rules.clear();
-    for (auto i = m_active_predicates.find_first(); i != boost::dynamic_bitset<>::npos; i = m_active_predicates.find_next(i))
-        if (const auto it = m_listeners.find(Index<f::Predicate<f::FluentTag>>(i)); it != m_listeners.end())
-            for (const auto rule : it->second)
-                m_active_rules.insert(rule);
+    collect_active_rules(m_active_predicates, m_listeners.predicates, m_active_rules);
+    collect_active_rules(m_active_functions, m_listeners.functions, m_active_rules);
 }
 
-RuleSchedulerStrata create_schedulers(const analysis::RuleStrata& rules, const analysis::ListenerStrata& listeners, const fd::Repository& context)
+RuleSchedulerStrata create_schedulers(const analysis::RuleStrata& rules,
+                                      const analysis::ListenerStrata& listeners,
+                                      const fd::Repository& context,
+                                      size_t num_fluent_predicates,
+                                      size_t num_fluent_functions)
 {
     assert(rules.data.size() == listeners.data.size());
 
     auto result = RuleSchedulerStrata {};
     for (uint_t i = 0; i < rules.data.size(); ++i)
-        result.data.emplace_back(rules.data[i], listeners.data[i], context);
+        result.data.emplace_back(rules.data[i], listeners.data[i], context, num_fluent_predicates, num_fluent_functions);
 
     return result;
 }

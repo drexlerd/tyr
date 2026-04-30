@@ -97,6 +97,54 @@ struct GroundFunctionTermValue
 {
 };
 
+struct OpAssign
+{
+    static constexpr int kind = 0;
+    auto identifying_members() const noexcept { return std::tie(kind); }
+};
+struct OpIncrease
+{
+    static constexpr int kind = 1;
+    auto identifying_members() const noexcept { return std::tie(kind); }
+};
+struct OpDecrease
+{
+    static constexpr int kind = 2;
+    auto identifying_members() const noexcept { return std::tie(kind); }
+};
+struct OpScaleUp
+{
+    static constexpr int kind = 3;
+    auto identifying_members() const noexcept { return std::tie(kind); }
+};
+struct OpScaleDown
+{
+    static constexpr int kind = 4;
+    auto identifying_members() const noexcept { return std::tie(kind); }
+};
+
+template<typename T>
+concept NumericEffectOpKind =
+    std::same_as<T, OpAssign> || std::same_as<T, OpIncrease> || std::same_as<T, OpDecrease> || std::same_as<T, OpScaleUp> || std::same_as<T, OpScaleDown>;
+
+template<NumericEffectOpKind Op, FactKind T>
+struct NumericEffect
+{
+};
+template<NumericEffectOpKind Op, FactKind T>
+struct GroundNumericEffect
+{
+};
+
+template<FactKind T>
+struct NumericEffectOperator
+{
+};
+template<FactKind T>
+struct GroundNumericEffectOperator
+{
+};
+
 struct ConjunctiveCondition
 {
 };
@@ -127,6 +175,14 @@ using FunctionTypes = MapTypeListT<Function, StaticFluentTags>;
 using FunctionTermTypes = MapTypeListT<FunctionTerm, StaticFluentTags>;
 using GroundFunctionTermTypes = MapTypeListT<GroundFunctionTerm, StaticFluentTags>;
 using GroundFunctionTermValueTypes = MapTypeListT<GroundFunctionTermValue, StaticFluentTags>;
+template<typename Op>
+using FluentNumericEffectType = NumericEffect<Op, FluentTag>;
+template<typename Op>
+using GroundFluentNumericEffectType = GroundNumericEffect<Op, FluentTag>;
+using NumericEffectTypes = MapTypeListT<FluentNumericEffectType, TypeList<OpAssign, OpIncrease, OpDecrease, OpScaleUp, OpScaleDown>>;
+using GroundNumericEffectTypes = MapTypeListT<GroundFluentNumericEffectType, TypeList<OpAssign, OpIncrease, OpDecrease, OpScaleUp, OpScaleDown>>;
+using NumericEffectOperatorTypes = TypeList<NumericEffectOperator<FluentTag>>;
+using GroundNumericEffectOperatorTypes = TypeList<GroundNumericEffectOperator<FluentTag>>;
 
 template<typename Op>
 using LiftedUnaryOperatorType = UnaryOperator<Op, Data<FunctionExpression>>;
@@ -159,6 +215,7 @@ using GroundArithmeticExpressionTypes = ConcatTypeListsT<MapTypeListT<GroundUnar
 using GroundBooleanExpressionTypes = MapTypeListT<GroundBinaryOperatorType, BooleanOpKinds>;
 
 using ExpressionTypes = ConcatTypeListsT<LiftedArithmeticExpressionTypes, LiftedBooleanExpressionTypes, GroundArithmeticExpressionTypes, GroundBooleanExpressionTypes>;
+using EffectTypes = ConcatTypeListsT<NumericEffectTypes, GroundNumericEffectTypes>;
 using CompoundTypes = TypeList<ConjunctiveCondition, Rule, GroundConjunctiveCondition, GroundRule, Program>;
 
 using SymbolRepositoryTypes = ConcatTypeListsT<CoreTypes,
@@ -172,6 +229,7 @@ using SymbolRepositoryTypes = ConcatTypeListsT<CoreTypes,
                                                GroundFunctionTermTypes,
                                                GroundFunctionTermValueTypes,
                                                ExpressionTypes,
+                                               EffectTypes,
                                                CompoundTypes>;
 
 using RelationRepositoryTypes = ConcatTypeListsT<PredicateTypes, FunctionTypes, TypeList<Rule>>;

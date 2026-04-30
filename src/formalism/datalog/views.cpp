@@ -100,6 +100,19 @@ template struct View<Index<formalism::datalog::MultiOperator<formalism::OpAdd, D
 template struct View<Index<formalism::datalog::MultiOperator<formalism::OpMul, Data<formalism::datalog::GroundFunctionExpression>>>,
                      formalism::datalog::Repository>;
 
+template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpAssign, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpIncrease, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpDecrease, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpScaleUp, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpScaleDown, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpAssign, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpIncrease, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpDecrease, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpScaleUp, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpScaleDown, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Data<formalism::datalog::NumericEffectOperator<formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Data<formalism::datalog::GroundNumericEffectOperator<formalism::FluentTag>>, formalism::datalog::Repository>;
+
 template struct View<Data<formalism::datalog::ArithmeticOperator<Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
 template struct View<Data<formalism::datalog::ArithmeticOperator<Data<formalism::datalog::GroundFunctionExpression>>>, formalism::datalog::Repository>;
 

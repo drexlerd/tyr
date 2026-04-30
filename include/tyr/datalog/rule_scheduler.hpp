@@ -39,13 +39,18 @@ namespace tyr::datalog
 class RuleSchedulerStratum
 {
 public:
-    RuleSchedulerStratum(const analysis::RuleStratum& rules, const analysis::ListenerStratum& listeners, const formalism::datalog::Repository& context);
+    RuleSchedulerStratum(const analysis::RuleStratum& rules,
+                         const analysis::ListenerStratum& listeners,
+                         const formalism::datalog::Repository& context,
+                         size_t num_fluent_predicates,
+                         size_t num_fluent_functions);
 
     void activate_all();
 
     void on_start_iteration() noexcept;
 
     void on_generate(Index<formalism::Predicate<formalism::FluentTag>> predicate);
+    void on_generate(Index<formalism::Function<formalism::FluentTag>> function);
 
     void on_finish_iteration();
 
@@ -59,6 +64,7 @@ private:
     const formalism::datalog::Repository& m_context;
 
     boost::dynamic_bitset<> m_active_predicates;
+    boost::dynamic_bitset<> m_active_functions;
     UnorderedSet<Index<formalism::datalog::Rule>> m_active_rules;
 };
 
@@ -68,7 +74,11 @@ struct RuleSchedulerStrata
 };
 
 extern RuleSchedulerStrata
-create_schedulers(const analysis::RuleStrata& rules, const analysis::ListenerStrata& listeners, const formalism::datalog::Repository& context);
+create_schedulers(const analysis::RuleStrata& rules,
+                  const analysis::ListenerStrata& listeners,
+                  const formalism::datalog::Repository& context,
+                  size_t num_fluent_predicates,
+                  size_t num_fluent_functions);
 
 }
 
