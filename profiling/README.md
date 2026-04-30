@@ -17,6 +17,7 @@ data/profiling/<suite>/<domain>/
   profiling-2.pddl
 ```
 
+
 ## Suite JSON
 
 Example:
