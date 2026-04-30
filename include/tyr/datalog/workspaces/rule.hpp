@@ -21,8 +21,6 @@
 #include "tyr/common/declarations.hpp"
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
-#include "tyr/common/unique_object_pool.hpp"
-#include "tyr/datalog/applicability.hpp"
 #include "tyr/datalog/consistency_graph.hpp"
 #include "tyr/datalog/delta_kpkc.hpp"
 #include "tyr/datalog/policies/annotation_concept.hpp"
@@ -46,118 +44,6 @@
 
 namespace tyr::datalog
 {
-
-struct NullaryApplicabilityCheck
-{
-private:
-    std::optional<formalism::datalog::GroundConjunctiveConditionView> m_condition;
-
-    boost::dynamic_bitset<> m_unsat_fluent_literals;
-    boost::dynamic_bitset<> m_unsat_numeric_constraints;
-
-    bool m_statically_applicable;
-
-public:
-    NullaryApplicabilityCheck() : m_condition(std::nullopt), m_unsat_fluent_literals(), m_unsat_numeric_constraints(), m_statically_applicable(false) {}
-
-    void initialize(formalism::datalog::GroundConjunctiveConditionView condition, const FactSets& fact_sets)
-    {
-        m_condition = condition;
-        m_unsat_fluent_literals.clear();
-        m_unsat_fluent_literals.resize(condition.get_literals<formalism::FluentTag>().size(), true);
-        m_unsat_numeric_constraints.clear();
-        m_unsat_numeric_constraints.resize(condition.get_numeric_constraints().size(), true);
-        m_statically_applicable = true;
-
-        for (const auto literal : condition.get_literals<formalism::StaticTag>())
-            if (!tyr::datalog::is_applicable(literal, fact_sets))
-                m_statically_applicable = false;
-    }
-
-    bool is_statically_applicable() const noexcept { return m_statically_applicable; }
-
-    bool is_dynamically_applicable(const FactSets& fact_sets)
-    {
-        for (auto i = m_unsat_fluent_literals.find_first(); i != boost::dynamic_bitset<>::npos; i = m_unsat_fluent_literals.find_next(i))
-            if (is_applicable(m_condition->get_literals<formalism::FluentTag>()[i], fact_sets))
-                m_unsat_fluent_literals.reset(i);
-
-        for (auto i = m_unsat_numeric_constraints.find_first(); i != boost::dynamic_bitset<>::npos; i = m_unsat_numeric_constraints.find_next(i))
-            if (evaluate(m_condition->get_numeric_constraints()[i], fact_sets))
-                m_unsat_numeric_constraints.reset(i);
-
-        return m_unsat_fluent_literals.none() && m_unsat_numeric_constraints.none();
-    }
-};
-
-class ConflictingApplicabilityCheck
-{
-private:
-    std::optional<formalism::datalog::ConjunctiveConditionView> m_condition;
-
-    boost::dynamic_bitset<> m_unsat_fluent_literals;
-    boost::dynamic_bitset<> m_unsat_numeric_constraints;
-
-    bool m_statically_applicable;
-
-public:
-    ConflictingApplicabilityCheck() : m_condition(std::nullopt), m_unsat_fluent_literals(), m_unsat_numeric_constraints(), m_statically_applicable(false) {}
-
-    void initialize(formalism::datalog::ConjunctiveConditionView condition, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
-    {
-        m_condition = condition;
-        m_unsat_fluent_literals.clear();
-        m_unsat_fluent_literals.resize(condition.get_literals<formalism::FluentTag>().size(), true);
-        m_unsat_numeric_constraints.clear();
-        m_unsat_numeric_constraints.resize(condition.get_numeric_constraints().size(), true);
-        m_statically_applicable = true;
-
-        for (const auto literal : condition.get_literals<formalism::StaticTag>())
-            if (!is_valid_binding(literal, fact_sets, context))
-                m_statically_applicable = false;
-    }
-
-    bool is_statically_applicable() const noexcept { return m_statically_applicable; }
-
-    bool is_dynamically_applicable(const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
-    {
-        for (auto i = m_unsat_fluent_literals.find_first(); i != boost::dynamic_bitset<>::npos; i = m_unsat_fluent_literals.find_next(i))
-            if (is_valid_binding(m_condition->get_literals<formalism::FluentTag>()[i], fact_sets, context))
-                m_unsat_fluent_literals.reset(i);
-
-        for (auto i = m_unsat_numeric_constraints.find_first(); i != boost::dynamic_bitset<>::npos; i = m_unsat_numeric_constraints.find_next(i))
-            if (is_valid_binding(m_condition->get_numeric_constraints()[i], fact_sets, context))
-                m_unsat_numeric_constraints.reset(i);
-
-        return m_unsat_fluent_literals.none() && m_unsat_numeric_constraints.none();
-    }
-};
-
-struct ApplicabilityCheck
-{
-private:
-    NullaryApplicabilityCheck m_nullary;
-    ConflictingApplicabilityCheck m_conflicting;
-
-public:
-    ApplicabilityCheck() : m_nullary(), m_conflicting() {}
-
-    void initialize(formalism::datalog::GroundConjunctiveConditionView nullary,
-                    formalism::datalog::ConjunctiveConditionView conflicting,
-                    const FactSets& fact_sets,
-                    formalism::datalog::GrounderContext& context)
-    {
-        m_nullary.initialize(nullary, fact_sets);
-        m_conflicting.initialize(conflicting, fact_sets, context);
-    }
-
-    bool is_statically_applicable() const noexcept { return m_nullary.is_statically_applicable() && m_conflicting.is_statically_applicable(); }
-
-    bool is_dynamically_applicable(const FactSets& fact_sets, formalism::datalog::GrounderContext& context) noexcept
-    {
-        return m_nullary.is_dynamically_applicable(fact_sets) && m_conflicting.is_dynamically_applicable(fact_sets, context);
-    }
-};
 
 struct PredicateHeadIteration
 {
@@ -258,9 +144,7 @@ struct RuleWorkspace
         /// In debug mode, we accumulate all bindings to verify the correctness of delta-kpkc
         UnorderedSet<IndexList<formalism::Object>> seen_bindings_dbg;
 
-        /// Pool applicability checks since we dont know how many are needed.
-        UniqueObjectPool<ApplicabilityCheck> applicability_check_pool;
-        UnorderedMap<formalism::datalog::RuleBindingView, UniqueObjectPoolPtr<ApplicabilityCheck>> pending_rules;
+        UnorderedSet<formalism::datalog::RuleBindingView> pending_rule_bindings;
 
         /// Statistics
         RuleWorkerStatistics statistics;
@@ -405,8 +289,7 @@ RuleWorkspace<AndAP>::Solve::Solve(formalism::datalog::RepositoryFactory& factor
     and_ap(and_ap),
     program_overlay_repository(factory.create(&program_repository)),
     seen_bindings_dbg(),
-    applicability_check_pool(),
-    pending_rules(),
+    pending_rule_bindings(),
     statistics()
 {
 }
@@ -416,7 +299,7 @@ void RuleWorkspace<AndAP>::Solve::clear() noexcept
 {
     program_overlay_repository.clear();
     seen_bindings_dbg.clear();
-    pending_rules.clear();
+    pending_rule_bindings.clear();
 }
 
 template<typename AndAP>

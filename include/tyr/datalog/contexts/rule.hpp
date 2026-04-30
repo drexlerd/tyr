@@ -24,6 +24,7 @@
 #include "tyr/datalog/policies/annotation_concept.hpp"
 #include "tyr/datalog/policies/termination_concept.hpp"
 #include "tyr/datalog/workspaces/rule.hpp"
+#include "tyr/formalism/datalog/grounder.hpp"
 #include "tyr/formalism/datalog/rule_index.hpp"
 
 #include <tbb/global_control.h>
@@ -94,9 +95,8 @@ public:
         auto& numeric_and_annot() noexcept { return m_ws_worker.iteration.numeric_and_annot; }
         auto& head() noexcept { return m_ws_worker.iteration.head; }
 
-        auto& applicability_check_pool() noexcept { return m_ws_worker.solve.applicability_check_pool; }
         auto& seen_bindings_dbg() noexcept { return m_ws_worker.solve.seen_bindings_dbg; }
-        auto& pending_rules() noexcept { return m_ws_worker.solve.pending_rules; }
+        auto& pending_rule_bindings() noexcept { return m_ws_worker.solve.pending_rule_bindings; }
         auto& statistics() noexcept { return m_ws_worker.solve.statistics; }
 
         auto& ground_context_solve() noexcept { return m_ground_context_solve; }
