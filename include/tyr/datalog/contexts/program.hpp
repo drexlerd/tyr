@@ -123,7 +123,7 @@ struct ProgramExecutionContext
             const auto& values = set.get_values();
 
             for (uint_t i = 0; i < bindings.size(); ++i)
-                out.facts().assignment_sets.function.insert(bindings[i], ClosedInterval<float_t>(values[i], values[i]));
+                out.facts().assignment_sets.function.insert(bindings[i], values[i]);
         }
 
         // Reset cost buckets.

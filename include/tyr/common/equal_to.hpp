@@ -59,6 +59,18 @@ struct EqualTo<void>
     }
 };
 
+template<std::floating_point T>
+struct EqualTo<T>
+{
+    bool operator()(const T& lhs, const T& rhs) const noexcept
+    {
+        if (std::isnan(lhs) || std::isnan(rhs))
+            return std::isnan(lhs) && std::isnan(rhs);
+
+        return std::equal_to<T> {}(lhs, rhs);
+    }
+};
+
 template<>
 struct EqualTo<::cista::offset::string>
 {

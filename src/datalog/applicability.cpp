@@ -27,12 +27,12 @@ namespace tyr::datalog
  * evaluate
  */
 
-template float_t evaluate(formalism::datalog::GroundUnaryOperatorView<formalism::OpSub> element, const FactSets& fact_sets);
+template ClosedInterval<float_t> evaluate(formalism::datalog::GroundUnaryOperatorView<formalism::OpSub> element, const FactSets& fact_sets);
 
-template float_t evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpAdd> element, const FactSets& fact_sets);
-template float_t evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpSub> element, const FactSets& fact_sets);
-template float_t evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpMul> element, const FactSets& fact_sets);
-template float_t evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpDiv> element, const FactSets& fact_sets);
+template ClosedInterval<float_t> evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpAdd> element, const FactSets& fact_sets);
+template ClosedInterval<float_t> evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpSub> element, const FactSets& fact_sets);
+template ClosedInterval<float_t> evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpMul> element, const FactSets& fact_sets);
+template ClosedInterval<float_t> evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpDiv> element, const FactSets& fact_sets);
 
 template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpEq> element, const FactSets& fact_sets);
 template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpNe> element, const FactSets& fact_sets);
@@ -41,11 +41,11 @@ template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::O
 template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpLe> element, const FactSets& fact_sets);
 template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::OpLt> element, const FactSets& fact_sets);
 
-template float_t evaluate(formalism::datalog::GroundMultiOperatorView<formalism::OpAdd> element, const FactSets& fact_sets);
-template float_t evaluate(formalism::datalog::GroundMultiOperatorView<formalism::OpMul> element, const FactSets& fact_sets);
+template ClosedInterval<float_t> evaluate(formalism::datalog::GroundMultiOperatorView<formalism::OpAdd> element, const FactSets& fact_sets);
+template ClosedInterval<float_t> evaluate(formalism::datalog::GroundMultiOperatorView<formalism::OpMul> element, const FactSets& fact_sets);
 
-template float_t evaluate(formalism::datalog::GroundFunctionTermView<formalism::StaticTag> element, const FactSets& fact_sets);
-template float_t evaluate(formalism::datalog::GroundFunctionTermView<formalism::FluentTag> element, const FactSets& fact_sets);
+template ClosedInterval<float_t> evaluate(formalism::datalog::GroundFunctionTermView<formalism::StaticTag> element, const FactSets& fact_sets);
+template ClosedInterval<float_t> evaluate(formalism::datalog::GroundFunctionTermView<formalism::FluentTag> element, const FactSets& fact_sets);
 
 /**
  * is_applicable
@@ -75,24 +75,24 @@ is_valid_binding(formalism::datalog::LiteralListView<formalism::StaticTag> eleme
 template bool
 is_valid_binding(formalism::datalog::LiteralListView<formalism::FluentTag> elements, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
 
-template float_t is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpAssign, formalism::FluentTag> element,
-                                  const FactSets& fact_sets,
-                                  formalism::datalog::GrounderContext& context);
-template float_t is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpIncrease, formalism::FluentTag> element,
-                                  const FactSets& fact_sets,
-                                  formalism::datalog::GrounderContext& context);
-template float_t is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpDecrease, formalism::FluentTag> element,
-                                  const FactSets& fact_sets,
-                                  formalism::datalog::GrounderContext& context);
-template float_t is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpScaleUp, formalism::FluentTag> element,
-                                  const FactSets& fact_sets,
-                                  formalism::datalog::GrounderContext& context);
-template float_t is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpScaleDown, formalism::FluentTag> element,
-                                  const FactSets& fact_sets,
-                                  formalism::datalog::GrounderContext& context);
-template float_t is_valid_binding(formalism::datalog::NumericEffectOperatorView<formalism::FluentTag> element,
-                                  const FactSets& fact_sets,
-                                  formalism::datalog::GrounderContext& context);
+template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpAssign, formalism::FluentTag> element,
+                                                  const FactSets& fact_sets,
+                                                  formalism::datalog::GrounderContext& context);
+template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpIncrease, formalism::FluentTag> element,
+                                                  const FactSets& fact_sets,
+                                                  formalism::datalog::GrounderContext& context);
+template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpDecrease, formalism::FluentTag> element,
+                                                  const FactSets& fact_sets,
+                                                  formalism::datalog::GrounderContext& context);
+template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpScaleUp, formalism::FluentTag> element,
+                                                  const FactSets& fact_sets,
+                                                  formalism::datalog::GrounderContext& context);
+template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<formalism::datalog::OpScaleDown, formalism::FluentTag> element,
+                                                  const FactSets& fact_sets,
+                                                  formalism::datalog::GrounderContext& context);
+template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectOperatorView<formalism::FluentTag> element,
+                                                  const FactSets& fact_sets,
+                                                  formalism::datalog::GrounderContext& context);
 
 }
 

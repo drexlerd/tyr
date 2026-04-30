@@ -105,6 +105,9 @@ void add_numeric_effect_head_dependencies(fd::NumericEffectView<Op, f::FluentTag
                                           const RelationVertexMap& vertices,
                                           stratification::DepGraph& graph)
 {
+    if constexpr (!std::is_same_v<Op, fd::OpAssign>)
+        add_function_dependencies(effect.get_fterm(), head_vertex, vertices, graph);
+
     add_function_dependencies(effect.get_fexpr(), head_vertex, vertices, graph);
 }
 
