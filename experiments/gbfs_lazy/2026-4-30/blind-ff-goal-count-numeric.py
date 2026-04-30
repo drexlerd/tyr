@@ -124,6 +124,44 @@ for prefix, SUITE in SUITES:
             # multiple algorithms.
             run.set_property("id", [f"gbfs-lazy-lifted-{heuristic}-{NUM_THREADS}", task.domain, task.problem])
 
+    for heuristic in ["blind", "goal_count"]:
+        base_cmd = [
+            "{run_planner}",
+            "{planner_exe}",
+            "{domain}",
+            "{problem}",
+            "plan.out",
+            heuristic,
+            str(NUM_THREADS),
+            str(RANDOM_SEED),
+        ]
+        
+        for task in suites.build_suite(BENCHMARKS_DIR / prefix, SUITE):
+            run = exp.add_run()
+            run.add_resource("domain", task.domain_file, symlink=True)
+            run.add_resource("problem", task.problem_file, symlink=True)
+
+            run.add_command(
+                f"gbfs-lazy-ground-{heuristic}-{NUM_THREADS}",
+                base_cmd + ["-S", "-G"],
+                time_limit=None,
+                wall_time_limit=WALL_TIME_LIMIT,
+                memory_limit=MEMORY_LIMIT,
+            )
+            # AbsoluteReport needs the following properties:
+            # 'domain', 'problem', 'algorithm', 'coverage'.
+            run.set_property("domain", task.domain)
+            run.set_property("problem", task.problem)
+            run.set_property("algorithm", f"gbfs-lazy-ground-{heuristic}-{NUM_THREADS}")
+            # BaseReport needs the following properties:
+            # 'time_limit', 'memory_limit'.
+            run.set_property("wall_time_limit", WALL_TIME_LIMIT)
+            run.set_property("memory_limit", MEMORY_LIMIT)
+            # Every run has to have a unique id in the form of a list.
+            # The algorithm name is only really needed when there are
+            # multiple algorithms.
+            run.set_property("id", [f"gbfs-lazy-ground-{heuristic}-{NUM_THREADS}", task.domain, task.problem])
+
 
 
 # Add step that writes experiment files to disk.
