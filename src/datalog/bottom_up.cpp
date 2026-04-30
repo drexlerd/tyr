@@ -49,13 +49,11 @@
 
 #include <algorithm>  // for all_of
 #include <assert.h>   // for assert
-#include <boost/dynamic_bitset.hpp>
 #include <cmath>
 #include <fmt/ostream.h>
 #include <memory>  // for __sha...
 #include <oneapi/tbb/parallel_for_each.h>
 #include <oneapi/tbb/parallel_invoke.h>
-#include <optional>
 #include <tuple>  // for opera...
 #include <type_traits>
 #include <utility>  // for pair
@@ -127,7 +125,9 @@ static void insert_numeric_update(fd::NumericEffectOperatorView<f::FluentTag> he
         {
             const auto program_head = fd::ground(effect.get_fterm(), iteration_context).first.get_row();
             const auto worker_head = fd::ground(effect.get_fterm(), solve_context).first;
+
             std::get<FunctionHeadIteration>(head_iteration).updates.emplace(worker_head.get_row().get_index().row, interval);
+
             and_ap.update_annotation(program_head,
                                      worker_head.get_row(),
                                      current_cost,
@@ -224,6 +224,23 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
     return inserted;
 }
 
+static bool is_statically_applicable(fd::GroundConjunctiveConditionView nullary_condition,
+                                     fd::ConjunctiveConditionView conflicting_condition,
+                                     const FactSets& fact_sets,
+                                     fd::GrounderContext& context)
+{
+    return is_applicable(nullary_condition.get_literals<f::StaticTag>(), fact_sets)
+           && is_valid_binding(conflicting_condition.get_literals<f::StaticTag>(), fact_sets, context);
+}
+
+static bool is_dynamically_applicable(fd::GroundConjunctiveConditionView nullary_condition,
+                                      fd::ConjunctiveConditionView conflicting_condition,
+                                      const FactSets& fact_sets,
+                                      fd::GrounderContext& context)
+{
+    return is_applicable(nullary_condition, fact_sets) && is_valid_binding(conflicting_condition, fact_sets, context);
+}
+
 template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
 void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::span<const kpkc::Vertex> clique, bool require_novel_binding)
 {
@@ -236,15 +253,13 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
 
     ++out.statistics().num_generated_rules;
 
-    auto applicability_check = out.applicability_check_pool().get_or_allocate(in.cws_rule().get_nullary_condition(),
-                                                                              in.cws_rule().get_conflicting_overapproximation_rule().get_body(),
-                                                                              in.fact_sets(),
-                                                                              out.ground_context_iteration());
+    const auto nullary_condition = in.cws_rule().get_nullary_condition();
+    const auto conflicting_condition = in.cws_rule().get_conflicting_overapproximation_rule().get_body();
 
-    if (!applicability_check->is_statically_applicable())
+    if (!is_statically_applicable(nullary_condition, conflicting_condition, in.fact_sets(), out.ground_context_iteration()))
         return;
 
-    const auto dynamically_applicable = applicability_check->is_dynamically_applicable(in.fact_sets(), out.ground_context_iteration());
+    const auto dynamically_applicable = is_dynamically_applicable(nullary_condition, conflicting_condition, in.fact_sets(), out.ground_context_iteration());
 
     visit(
         [&](auto&& head)
@@ -264,10 +279,9 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
                 {
                     ++out.statistics().num_pending_rules;
 
-                    const auto overapproximation_worker_head =
-                        fd::ground_binding(in.cws_rule().get_conflicting_overapproximation_rule(), out.ground_context_solve()).first;
+                    const auto rule_binding = fd::ground_binding(in.cws_rule().get_conflicting_overapproximation_rule(), out.ground_context_solve()).first;
 
-                    out.pending_rules().emplace(overapproximation_worker_head, std::move(applicability_check));
+                    out.pending_rule_bindings().emplace(rule_binding);
                     return;
                 }
 
@@ -414,7 +428,7 @@ void generate(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
 }
 
 template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
-void process_pending(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
+void process_pending_rule_bindings(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
 {
     for (auto& worker : rctx.out().workers())
     {
@@ -423,10 +437,10 @@ void process_pending(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
         const auto& in = wrctx.in();
         auto& out = wrctx.out();
 
-        for (auto it = out.pending_rules().begin(); it != out.pending_rules().end();)
+        for (auto it = out.pending_rule_bindings().begin(); it != out.pending_rule_bindings().end();)
         {
             out.ground_context_solve().binding.clear();
-            for (const auto object : it->first.get_objects())
+            for (const auto object : it->get_objects())
                 out.ground_context_solve().binding.push_back(object.get_index());
 
             assert(out.ground_context_solve().binding == out.ground_context_iteration().binding);
@@ -442,9 +456,12 @@ void process_pending(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
 
                         if (in.fact_sets().template get<f::FluentTag>().predicate.contains(program_head))  ///< optimal cost proven
                         {
-                            it = out.pending_rules().erase(it);
+                            it = out.pending_rule_bindings().erase(it);
                         }
-                        else if (it->second->is_dynamically_applicable(in.fact_sets(), out.ground_context_iteration()))
+                        else if (is_dynamically_applicable(in.cws_rule().get_nullary_condition(),
+                                                           in.cws_rule().get_conflicting_overapproximation_rule().get_body(),
+                                                           in.fact_sets(),
+                                                           out.ground_context_iteration()))
                         {
                             assert(ensure_applicability(in.cws_rule().get_rule(), out.ground_context_iteration(), in.fact_sets()));
 
@@ -459,7 +476,7 @@ void process_pending(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                                                         out.head(),
                                                         out.and_annot());
 
-                            it = out.pending_rules().erase(it);
+                            it = out.pending_rule_bindings().erase(it);
                         }
                         else
                         {
@@ -469,7 +486,7 @@ void process_pending(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                     else
                     {
                         assert(false && "Numeric-head rules should not be stored as pending.");
-                        it = out.pending_rules().erase(it);
+                        it = out.pending_rule_bindings().erase(it);
                     }
                 },
                 in.cws_rule().get_rule().get_head());
@@ -534,18 +551,18 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                                                const auto total_time = StopwatchScope(rule_out.statistics().total_time);
                                                ++rule_out.statistics().num_executions;
 
-                                               rctx.clear_iteration();  ///< Clear iteration before process_pending/generate
+                                               rctx.clear_iteration();  ///< Clear iteration before process_pending_rule_bindings/generate
 
                                                {
                                                    const auto initialize_time = StopwatchScope(rule_out.statistics().initialize_time);
 
-                                                   rctx.initialize();  ///< Initialize before process_pending/generate
+                                                   rctx.initialize();  ///< Initialize before process_pending_rule_bindings/generate
                                                }
 
                                                {
                                                    const auto process_pending_time = StopwatchScope(rule_out.statistics().process_pending_time);
 
-                                                   process_pending(rctx);
+                                                   process_pending_rule_bindings(rctx);
                                                }
 
                                                {
