@@ -626,7 +626,9 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
             // Insert next bucket heads into fact and assignment sets + trigger scheduler.
             for (const auto head : cost_buckets.get_current_bucket())
             {
-                if (!facts.fact_sets.predicate.contains(head))
+                // Update fact sets
+                const auto changed = facts.fact_sets.predicate.insert(head);
+                if (changed)
                 {
                     // Notify scheduler
                     scheduler.on_generate(head.get_index().relation);
@@ -634,8 +636,7 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                     // Notify termination policy
                     tp.achieve(head);
 
-                    // Update facts
-                    facts.fact_sets.predicate.insert(head);
+                    // Update assignment sets
                     facts.assignment_sets.predicate.insert(head);
                 }
             }

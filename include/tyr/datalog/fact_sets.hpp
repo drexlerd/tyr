@@ -48,11 +48,11 @@ public:
 
     void reset() noexcept;
 
-    void insert(const PredicateFactSet<T>& other);
-    void insert(formalism::datalog::GroundAtomView<T> ground_atom);
-    void insert(formalism::datalog::PredicateBindingView<T> binding);
-    void insert(formalism::datalog::PredicateBindingForwardRangeView<T> bindings);
-    void insert(const std::vector<formalism::datalog::PredicateBindingView<T>>& bindings);
+    bool insert(const PredicateFactSet<T>& other);
+    bool insert(formalism::datalog::GroundAtomView<T> ground_atom);
+    bool insert(formalism::datalog::PredicateBindingView<T> binding);
+    bool insert(formalism::datalog::PredicateBindingForwardRangeView<T> bindings);
+    bool insert(const std::vector<formalism::datalog::PredicateBindingView<T>>& bindings);
 
     bool contains(formalism::datalog::PredicateBindingView<T> binding) const noexcept;
 
@@ -70,10 +70,10 @@ public:
 
     void reset() noexcept;
 
-    void insert(const PredicateFactSets<T>& other);
-    void insert(formalism::datalog::GroundAtomView<T> ground_atom);
-    void insert(formalism::datalog::PredicateBindingView<T> binding);
-    void insert(formalism::datalog::PredicateBindingForwardRangeView<T> bindings);
+    bool insert(const PredicateFactSets<T>& other);
+    bool insert(formalism::datalog::GroundAtomView<T> ground_atom);
+    bool insert(formalism::datalog::PredicateBindingView<T> binding);
+    bool insert(formalism::datalog::PredicateBindingForwardRangeView<T> bindings);
 
     bool contains(formalism::datalog::PredicateBindingView<T> binding) const noexcept;
 
