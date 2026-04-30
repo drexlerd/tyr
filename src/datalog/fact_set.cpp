@@ -50,19 +50,19 @@ void PredicateFactSet<T>::reset() noexcept
 }
 
 template<f::FactKind T>
-void PredicateFactSet<T>::insert(const PredicateFactSet<T>& other)
+bool PredicateFactSet<T>::insert(const PredicateFactSet<T>& other)
 {
-    insert(other.get_bindings());
+    return insert(other.get_bindings());
 }
 
 template<f::FactKind T>
-void PredicateFactSet<T>::insert(fd::GroundAtomView<T> ground_atom)
+bool PredicateFactSet<T>::insert(fd::GroundAtomView<T> ground_atom)
 {
-    insert(ground_atom.get_row());
+    return insert(ground_atom.get_row());
 }
 
 template<f::FactKind T>
-void PredicateFactSet<T>::insert(fd::PredicateBindingView<T> binding)
+bool PredicateFactSet<T>::insert(fd::PredicateBindingView<T> binding)
 {
     const auto i = uint_t(binding.get_index().row);
 
@@ -70,21 +70,28 @@ void PredicateFactSet<T>::insert(fd::PredicateBindingView<T> binding)
     {
         tyr::set(i, true, m_bitset);
         m_bindings.push_back(binding.get_index().row);
+        return true;
     }
+
+    return false;
 }
 
 template<f::FactKind T>
-void PredicateFactSet<T>::insert(fd::PredicateBindingForwardRangeView<T> bindings)
+bool PredicateFactSet<T>::insert(fd::PredicateBindingForwardRangeView<T> bindings)
 {
+    auto changed = false;
     for (const auto binding : bindings)
-        insert(binding);
+        changed |= insert(binding);
+    return changed;
 }
 
 template<f::FactKind T>
-void PredicateFactSet<T>::insert(const std::vector<fd::PredicateBindingView<T>>& bindings)
+bool PredicateFactSet<T>::insert(const std::vector<fd::PredicateBindingView<T>>& bindings)
 {
+    auto changed = false;
     for (const auto binding : bindings)
-        insert(binding);
+        changed |= insert(binding);
+    return changed;
 }
 
 template<f::FactKind T>
@@ -126,31 +133,35 @@ void PredicateFactSets<T>::reset() noexcept
 }
 
 template<f::FactKind T>
-void PredicateFactSets<T>::insert(const PredicateFactSets<T>& other)
+bool PredicateFactSets<T>::insert(const PredicateFactSets<T>& other)
 {
     assert(m_sets.size() == other.m_sets.size());
 
+    auto changed = false;
     for (uint_t i = 0; i < m_sets.size(); ++i)
-        m_sets[i].insert(other.m_sets[i]);
+        changed |= m_sets[i].insert(other.m_sets[i]);
+    return changed;
 }
 
 template<f::FactKind T>
-void PredicateFactSets<T>::insert(fd::GroundAtomView<T> ground_atom)
+bool PredicateFactSets<T>::insert(fd::GroundAtomView<T> ground_atom)
 {
-    insert(ground_atom.get_row());
+    return insert(ground_atom.get_row());
 }
 
 template<f::FactKind T>
-void PredicateFactSets<T>::insert(fd::PredicateBindingView<T> binding)
+bool PredicateFactSets<T>::insert(fd::PredicateBindingView<T> binding)
 {
-    m_sets[uint_t(binding.get_index().relation)].insert(binding);
+    return m_sets[uint_t(binding.get_index().relation)].insert(binding);
 }
 
 template<f::FactKind T>
-void PredicateFactSets<T>::insert(fd::PredicateBindingForwardRangeView<T> bindings)
+bool PredicateFactSets<T>::insert(fd::PredicateBindingForwardRangeView<T> bindings)
 {
+    auto changed = false;
     for (const auto binding : bindings)
-        insert(binding);
+        changed |= insert(binding);
+    return changed;
 }
 
 template<f::FactKind T>
