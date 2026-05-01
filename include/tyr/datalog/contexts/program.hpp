@@ -61,8 +61,6 @@ struct ProgramExecutionContext
         const auto& and_annot() const noexcept { return m_ws.and_annot; }
         auto& numeric_and_annot() noexcept { return m_ws.numeric_and_annot; }
         const auto& numeric_and_annot() const noexcept { return m_ws.numeric_and_annot; }
-        auto& numeric_interval_annot() noexcept { return m_ws.numeric_interval_annot; }
-        const auto& numeric_interval_annot() const noexcept { return m_ws.numeric_interval_annot; }
         const auto& numeric_support_selector() const noexcept
         {
             assert(m_ws.numeric_support_selector.has_value());
@@ -71,7 +69,7 @@ struct ProgramExecutionContext
         void rebuild_numeric_support_selector(const TaggedFactSets<formalism::StaticTag>& static_fact_sets)
         {
             m_ws.numeric_support_selector.emplace(FactSets { static_fact_sets, m_ws.facts.fact_sets },
-                                                  m_ws.numeric_interval_annot,
+                                                  m_ws.numeric_and_annot,
                                                   m_ws.numeric_initial_values);
         }
         auto& tp() noexcept { return m_ws.tp; }
@@ -111,7 +109,6 @@ struct ProgramExecutionContext
         // Clear the annotation policy.
         out.and_annot().clear();
         out.numeric_and_annot().clear();
-        out.numeric_interval_annot().clear();
 
         // Initialize the termination policy.
         out.tp().reset();
@@ -134,8 +131,7 @@ struct ProgramExecutionContext
 
             for (uint_t i = 0; i < bindings.size(); ++i)
             {
-                out.or_ap().initialize_annotation(bindings[i], out.numeric_and_annot());
-                out.numeric_interval_annot().insert(bindings[i], values[i], BaseAnnotation(Cost(0)));
+                out.or_ap().initialize_annotation(bindings[i], values[i], out.numeric_and_annot());
                 out.facts().assignment_sets.function.insert(bindings[i], values[i]);
             }
         }

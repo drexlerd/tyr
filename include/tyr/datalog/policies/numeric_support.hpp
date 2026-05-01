@@ -43,6 +43,26 @@ private:
     UnorderedMap<Binding, float_t> m_entries;
 };
 
+class NumericSupportSelectorWorkspace
+{
+public:
+    using Binding = formalism::datalog::FunctionBindingView<formalism::FluentTag>;
+
+    struct SelectionEntry
+    {
+        Binding binding;
+        ClosedInterval<float_t> interval;
+        const NumericIntervalAnnotation* annotation;
+        Cost cost;
+    };
+
+    using Selection = std::vector<SelectionEntry>;
+
+    void clear() noexcept { selection.clear(); }
+
+    Selection selection;
+};
+
 class NumericSupportSelector
 {
 public:
@@ -54,27 +74,50 @@ public:
     }
 
     template<typename AggregationFunction>
-    Cost get_constraint_cost(formalism::datalog::GroundBooleanOperatorView constraint, AggregationFunction agg) const
+    Cost get_constraint_cost(formalism::datalog::GroundBooleanOperatorView constraint, NumericSupportSelectorWorkspace& workspace, AggregationFunction agg) const
     {
-        return get_greedy_support_cost(agg, [&](auto& selection) { return evaluate(constraint, selection); });
+        return get_greedy_support_cost(workspace.selection, agg, [&](auto& selection) { return evaluate(constraint, selection); });
+    }
+
+    template<typename AggregationFunction, typename Callback>
+    Cost for_each_constraint_support(formalism::datalog::GroundBooleanOperatorView constraint,
+                                     NumericSupportSelectorWorkspace& workspace,
+                                     AggregationFunction agg,
+                                     Callback callback) const
+    {
+        const auto cost = get_constraint_cost(constraint, workspace, agg);
+        if (cost == std::numeric_limits<Cost>::max())
+            return cost;
+
+        for (const auto& entry : workspace.selection)
+        {
+            if (entry.annotation)
+            {
+                callback(entry.binding, entry.interval, entry.annotation->annotation);
+                continue;
+            }
+
+            const auto* entries = find_entries(entry.binding);
+            if (!entries)
+                continue;
+
+            for (const auto& candidate : *entries)
+                if (is_available(entry.binding, candidate.interval) && get_cost(candidate.annotation) <= entry.cost && subset(candidate.interval, entry.interval))
+                    callback(entry.binding, candidate.interval, candidate.annotation);
+        }
+
+        return cost;
     }
 
 private:
     using Binding = formalism::datalog::FunctionBindingView<formalism::FluentTag>;
-
-    struct SelectionEntry
-    {
-        Binding binding;
-        ClosedInterval<float_t> interval;
-        Cost cost;
-    };
-
-    using Selection = std::vector<SelectionEntry>;
+    using SelectionEntry = NumericSupportSelectorWorkspace::SelectionEntry;
+    using Selection = NumericSupportSelectorWorkspace::Selection;
 
     template<typename AggregationFunction, typename IsSupported>
-    Cost get_greedy_support_cost(AggregationFunction agg, IsSupported is_supported) const
+    Cost get_greedy_support_cost(Selection& selection, AggregationFunction agg, IsSupported is_supported) const
     {
-        auto selection = Selection {};
+        selection.clear();
 
         if (!is_supported(selection))
             return std::numeric_limits<Cost>::max();
@@ -87,19 +130,26 @@ private:
 
             for (const auto& candidate : *entries)
             {
-                if (candidate.row != binding.get_index().row)
+                if (!is_available(binding, candidate.interval))
+                    continue;
+
+                const auto candidate_cost = get_cost(candidate.annotation);
+                if (candidate_cost > selection[pos].cost)
                     continue;
 
                 const auto old_interval = selection[pos].interval;
+                const auto* old_annotation = selection[pos].annotation;
                 const auto old_cost = selection[pos].cost;
 
                 selection[pos].interval = candidate.interval;
-                selection[pos].cost = get_cost(candidate.annotation);
+                selection[pos].annotation = &candidate;
+                selection[pos].cost = candidate_cost;
 
                 if (is_supported(selection))
                     break;
 
                 selection[pos].interval = old_interval;
+                selection[pos].annotation = old_annotation;
                 selection[pos].cost = old_cost;
             }
         }
@@ -123,16 +173,16 @@ private:
         if (const auto* entry = find_selection_entry(element.get_row(), selection))
             return entry->interval;
 
-        const auto* entries = find_entries(element.get_row());
-        if (!entries)
+        const auto current = current_interval(element.get_row());
+        if (empty(current))
             return ClosedInterval<float_t>();
 
-        const auto* entry = select_initial_entry(element.get_row(), *entries);
-        if (!entry)
+        const auto cost = get_current_interval_cost(element.get_row(), current);
+        if (cost == std::numeric_limits<Cost>::max())
             return ClosedInterval<float_t>();
 
-        selection.push_back(SelectionEntry { element.get_row(), entry->interval, get_cost(entry->annotation) });
-        return entry->interval;
+        selection.push_back(SelectionEntry { element.get_row(), current, nullptr, cost });
+        return current;
     }
 
     ClosedInterval<float_t> evaluate(formalism::datalog::GroundFunctionExpressionView element, Selection& selection) const
@@ -181,40 +231,49 @@ private:
 
     const NumericIntervalAnnotations::Entries* find_entries(Binding binding) const
     {
-        const auto it = m_annotations.partitions().find(binding.get_relation());
-        return it == m_annotations.partitions().end() ? nullptr : &it->second;
+        const auto relation_it = m_annotations.partitions().find(binding.get_relation());
+        if (relation_it == m_annotations.partitions().end())
+            return nullptr;
+
+        const auto row_it = relation_it->second.find(binding.get_index().row);
+        return row_it == relation_it->second.end() ? nullptr : &row_it->second;
     }
 
-    const NumericIntervalAnnotation* select_initial_entry(Binding binding, const NumericIntervalAnnotations::Entries& entries) const
+    ClosedInterval<float_t> current_interval(Binding binding) const
     {
-        const auto* best = static_cast<const NumericIntervalAnnotation*>(nullptr);
-        const auto initial_value = m_initial_values.get(binding);
-        const auto row = binding.get_index().row;
+        return m_fact_sets.get<formalism::FluentTag>().function[binding];
+    }
 
-        for (const auto& entry : entries)
+    Cost get_current_interval_cost(Binding binding, ClosedInterval<float_t> current) const
+    {
+        const auto* entries = find_entries(binding);
+        if (!entries)
+            return std::numeric_limits<Cost>::max();
+
+        auto best_cost = std::numeric_limits<Cost>::max();
+
+        for (const auto& entry : *entries)
         {
-            if (entry.row != row)
+            const auto candidate_cost = get_cost(entry.annotation);
+            if (candidate_cost >= best_cost || !is_available(binding, entry.interval))
                 continue;
 
-            if (!best)
-            {
-                best = &entry;
-                continue;
-            }
+            auto covered = ClosedInterval<float_t>();
+            for (const auto& covering_entry : *entries)
+                if (get_cost(covering_entry.annotation) <= candidate_cost && is_available(binding, covering_entry.interval))
+                    covered = empty(covered) ? covering_entry.interval : hull(covered, covering_entry.interval);
 
-            const auto entry_width = width(entry.interval);
-            const auto best_width = width(best->interval);
-            if (entry_width > best_width)
-            {
-                best = &entry;
-                continue;
-            }
-
-            if (entry_width == best_width && is_closer_to_initial(entry.interval, best->interval, initial_value))
-                best = &entry;
+            if (!empty(covered) && subset(current, covered))
+                best_cost = candidate_cost;
         }
 
-        return best;
+        return best_cost;
+    }
+
+    bool is_available(Binding binding, ClosedInterval<float_t> interval) const
+    {
+        const auto current = current_interval(binding);
+        return !empty(current) && subset(interval, current);
     }
 
     SelectionEntry* find_selection_entry(Binding binding, Selection& selection) const
@@ -223,11 +282,6 @@ private:
             if (m_binding_equal(entry.binding, binding))
                 return &entry;
         return nullptr;
-    }
-
-    static bool is_closer_to_initial(ClosedInterval<float_t> lhs, ClosedInterval<float_t> rhs, float_t initial_value)
-    {
-        return !std::isnan(initial_value) && distance_to_value(lhs, initial_value) < distance_to_value(rhs, initial_value);
     }
 
     FactSets m_fact_sets;

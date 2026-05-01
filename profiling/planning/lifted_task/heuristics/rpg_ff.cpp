@@ -3,7 +3,7 @@
 #include "tyr/planning/algorithms/gbfs_lazy.hpp"
 #include "tyr/planning/algorithms/gbfs_lazy/event_handler.hpp"
 #include "tyr/planning/lifted_task.hpp"
-#include "tyr/planning/lifted_task/heuristics/rpg_add.hpp"
+#include "tyr/planning/lifted_task/heuristics/rpg_ff.hpp"
 #include "tyr/planning/lifted_task/node.hpp"
 #include "tyr/planning/lifted_task/successor_generator.hpp"
 
@@ -75,7 +75,7 @@ p::LiftedTaskPtr create_task(const BenchmarkCase& benchmark_case)
     return p::LiftedTask::create(fp::Parser(benchmark_case.domain).parse_task(benchmark_case.task));
 }
 
-void benchmark_gbfs_lazy_rpg_add(benchmark::State& state, const BenchmarkCase& benchmark_case)
+void benchmark_gbfs_lazy_rpg_ff(benchmark::State& state, const BenchmarkCase& benchmark_case)
 {
     auto task = create_task(benchmark_case);
     auto execution_context = tyr::ExecutionContext::create(1);
@@ -89,7 +89,7 @@ void benchmark_gbfs_lazy_rpg_add(benchmark::State& state, const BenchmarkCase& b
     for (auto _ : state)
     {
         auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(task, execution_context);
-        auto heuristic = p::AddRPGHeuristic<p::LiftedTag>::create(task, execution_context);
+        auto heuristic = p::FFRPGHeuristic<p::LiftedTag>::create(task, execution_context);
         auto event_handler = p::gbfs_lazy::DefaultEventHandler<p::LiftedTag>::create(0);
 
         auto options = p::gbfs_lazy::Options<p::LiftedTag>();
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
     for (const auto& benchmark_case : load_cases())
     {
         benchmark::RegisterBenchmark((benchmark_case.name + "/gbfs_lazy").c_str(),
-                                     [benchmark_case](benchmark::State& state) { benchmark_gbfs_lazy_rpg_add(state, benchmark_case); });
+                                     [benchmark_case](benchmark::State& state) { benchmark_gbfs_lazy_rpg_ff(state, benchmark_case); });
     }
 
     benchmark::RunSpecifiedBenchmarks();

@@ -42,7 +42,6 @@ ProgramWorkspace<OrAP, AndAP, TP>::ProgramWorkspace(ProgramContext& context, con
     or_ap(or_ap),
     and_annot(),
     numeric_and_annot(),
-    numeric_interval_annot(),
     numeric_initial_values(context.get_program()),
     numeric_support_selector(),
     tp(tp),

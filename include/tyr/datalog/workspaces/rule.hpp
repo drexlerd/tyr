@@ -24,6 +24,7 @@
 #include "tyr/datalog/consistency_graph.hpp"
 #include "tyr/datalog/delta_kpkc.hpp"
 #include "tyr/datalog/policies/annotation_concept.hpp"
+#include "tyr/datalog/policies/numeric_support.hpp"
 #include "tyr/datalog/statistics/rule.hpp"
 #include "tyr/formalism/binding_index.hpp"
 #include "tyr/formalism/datalog/builder.hpp"
@@ -146,6 +147,8 @@ struct RuleWorkspace
         UnorderedSet<IndexList<formalism::Object>> seen_bindings_dbg;
 
         UnorderedSet<formalism::datalog::RuleBindingView> pending_rule_bindings;
+
+        NumericSupportSelectorWorkspace numeric_support_selector_workspace;
 
         /// Statistics
         RuleWorkerStatistics statistics;
@@ -291,6 +294,7 @@ RuleWorkspace<AndAP>::Solve::Solve(formalism::datalog::RepositoryFactory& factor
     program_overlay_repository(factory.create(&program_repository)),
     seen_bindings_dbg(),
     pending_rule_bindings(),
+    numeric_support_selector_workspace(),
     statistics()
 {
 }
@@ -301,6 +305,7 @@ void RuleWorkspace<AndAP>::Solve::clear() noexcept
     program_overlay_repository.clear();
     seen_bindings_dbg.clear();
     pending_rule_bindings.clear();
+    numeric_support_selector_workspace.clear();
 }
 
 template<typename AndAP>

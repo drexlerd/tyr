@@ -17,51 +17,51 @@
 
 #include "tyr/datalog/bottom_up.hpp"
 
-#include "tyr/common/chrono.hpp"       // for StopwatchScope
-#include "tyr/common/comparators.hpp"  // for operator!=, opera...
-#include "tyr/common/config.hpp"       // for uint_t
-#include "tyr/common/equal_to.hpp"     // for EqualTo
+#include "tyr/common/chrono.hpp"
+#include "tyr/common/comparators.hpp"
+#include "tyr/common/config.hpp"
+#include "tyr/common/equal_to.hpp"
 #include "tyr/common/formatter.hpp"
-#include "tyr/common/hash.hpp"                // for Hash
-#include "tyr/common/types.hpp"               // for View
-#include "tyr/common/vector.hpp"              // for View
-#include "tyr/datalog/applicability.hpp"      // for is_ap...
-#include "tyr/datalog/assignment_sets.hpp"    // for AssignmentSets
-#include "tyr/datalog/consistency_graph.hpp"  // for Vertex
+#include "tyr/common/hash.hpp"
+#include "tyr/common/types.hpp"
+#include "tyr/common/vector.hpp"
+#include "tyr/datalog/applicability.hpp"
+#include "tyr/datalog/assignment_sets.hpp"
+#include "tyr/datalog/consistency_graph.hpp"
 #include "tyr/datalog/declarations.hpp"
-#include "tyr/datalog/delta_kpkc.hpp"  // for Works...
+#include "tyr/datalog/delta_kpkc.hpp"
 #include "tyr/datalog/fact_sets.hpp"
 #include "tyr/datalog/formatter.hpp"
 #include "tyr/datalog/policies/aggregation.hpp"
 #include "tyr/datalog/policies/annotation.hpp"
 #include "tyr/datalog/policies/numeric_support.hpp"
 #include "tyr/datalog/policies/termination.hpp"
-#include "tyr/datalog/rule_scheduler.hpp"  // for RuleSchedulerStratum
+#include "tyr/datalog/rule_scheduler.hpp"
 #include "tyr/datalog/workspaces/facts.hpp"
 #include "tyr/datalog/workspaces/program.hpp"
 #include "tyr/datalog/workspaces/rule.hpp"
-#include "tyr/formalism/datalog/conjunctive_condition_view.hpp"  // for View
-#include "tyr/formalism/datalog/declarations.hpp"                // for Context
-#include "tyr/formalism/datalog/formatter.hpp"                   // for opera...
-#include "tyr/formalism/datalog/grounder.hpp"                    // for Groun...
-#include "tyr/formalism/datalog/merge.hpp"                       // for merge, MergeContext
-#include "tyr/formalism/datalog/repository.hpp"                  // for Repos...
+#include "tyr/formalism/datalog/conjunctive_condition_view.hpp"
+#include "tyr/formalism/datalog/declarations.hpp"
+#include "tyr/formalism/datalog/formatter.hpp"
+#include "tyr/formalism/datalog/grounder.hpp"
+#include "tyr/formalism/datalog/merge.hpp"
+#include "tyr/formalism/datalog/repository.hpp"
 #include "tyr/formalism/datalog/views.hpp"
 
-#include <algorithm>  // for all_of
-#include <assert.h>   // for assert
-#include <cstdlib>
+#include <algorithm>
+#include <assert.h>
 #include <cmath>
 #include <fmt/ostream.h>
 #include <iostream>
-#include <memory>  // for __sha...
+#include <memory>
 #include <oneapi/tbb/parallel_for_each.h>
 #include <oneapi/tbb/parallel_invoke.h>
-#include <tuple>  // for opera...
+#include <stdexcept>
+#include <tuple>
 #include <type_traits>
-#include <utility>  // for pair
+#include <utility>
 #include <variant>
-#include <vector>  // for vector
+#include <vector>
 
 namespace f = tyr::formalism;
 namespace fd = tyr::formalism::datalog;
@@ -70,12 +70,6 @@ namespace tyr::datalog
 {
 
 static void create_nullary_binding(IndexList<f::Object>& binding) { binding.clear(); }
-
-static bool trace_numeric_intervals() noexcept
-{
-    static const auto enabled = std::getenv("TYR_TRACE_NUMERIC_INTERVALS") != nullptr;
-    return enabled;
-}
 
 static void create_general_binding(std::span<const kpkc::Vertex> clique, const StaticConsistencyGraph& consistency_graph, IndexList<f::Object>& binding)
 {
@@ -97,6 +91,7 @@ static void insert_propositional_update(fd::AtomView<f::FluentTag> head,
                                         fd::RuleView rule,
                                         fd::ConjunctiveConditionView witness_condition,
                                         const NumericSupportSelector& numeric_support_selector,
+                                        NumericSupportSelectorWorkspace& numeric_support_selector_workspace,
                                         Cost current_cost,
                                         const SelectedPredicateAnnotations& program_and_annot,
                                         const SelectedFunctionAnnotations& program_numeric_and_annot,
@@ -117,6 +112,7 @@ static void insert_propositional_update(fd::AtomView<f::FluentTag> head,
                              rule,
                              witness_condition,
                              numeric_support_selector,
+                             numeric_support_selector_workspace,
                              program_and_annot,
                              program_numeric_and_annot,
                              and_annot,
@@ -130,6 +126,7 @@ static void insert_numeric_update(fd::NumericEffectOperatorView<f::FluentTag> he
                                   fd::ConjunctiveConditionView witness_condition,
                                   const FactSets& fact_sets,
                                   const NumericSupportSelector& numeric_support_selector,
+                                  NumericSupportSelectorWorkspace& numeric_support_selector_workspace,
                                   Cost current_cost,
                                   const SelectedPredicateAnnotations& program_and_annot,
                                   const SelectedFunctionAnnotations& program_numeric_and_annot,
@@ -149,19 +146,21 @@ static void insert_numeric_update(fd::NumericEffectOperatorView<f::FluentTag> he
             const auto program_head = fd::ground(effect.get_fterm(), iteration_context).first.get_row();
             const auto worker_head = fd::ground(effect.get_fterm(), solve_context).first;
 
-            std::get<FunctionHeadIteration>(head_iteration).updates.emplace(worker_head.get_row().get_index().row, interval, current_cost + rule.get_cost());
-
             and_ap.update_annotation(program_head,
                                      worker_head.get_row(),
+                                     interval,
                                      current_cost,
                                      rule,
                                      witness_condition,
                                      numeric_support_selector,
+                                     numeric_support_selector_workspace,
                                      program_and_annot,
                                      program_numeric_and_annot,
                                      numeric_and_annot,
                                      solve_context,
                                      iteration_context);
+
+            std::get<FunctionHeadIteration>(head_iteration).updates.emplace(worker_head.get_row().get_index().row, interval, current_cost + rule.get_cost());
         },
         head.get_variant());
 }
@@ -194,6 +193,7 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                                                 in.cws_rule().get_rule(),
                                                 in.cws_rule().get_witness_rule().get_body(),
                                                 numeric_support_selector,
+                                                out.numeric_support_selector_workspace(),
                                                 in.cost_buckets().current_cost(),
                                                 in.and_annot(),
                                                 in.numeric_and_annot(),
@@ -212,6 +212,7 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                                           in.cws_rule().get_witness_rule().get_body(),
                                           in.fact_sets(),
                                           numeric_support_selector,
+                                          out.numeric_support_selector_workspace(),
                                           in.cost_buckets().current_cost(),
                                           in.and_annot(),
                                           in.numeric_and_annot(),
@@ -324,6 +325,7 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx,
                                             in.cws_rule().get_rule(),
                                             in.cws_rule().get_witness_rule().get_body(),
                                             numeric_support_selector,
+                                            out.numeric_support_selector_workspace(),
                                             in.cost_buckets().current_cost(),
                                             in.and_annot(),
                                             in.numeric_and_annot(),
@@ -345,6 +347,7 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx,
                                       in.cws_rule().get_witness_rule().get_body(),
                                       in.fact_sets(),
                                       numeric_support_selector,
+                                      out.numeric_support_selector_workspace(),
                                       in.cost_buckets().current_cost(),
                                       in.and_annot(),
                                       in.numeric_and_annot(),
@@ -408,7 +411,9 @@ void generate_general_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                 if (!kpkc_algorithm.seed_from_anchor(edge, ws))
                     continue;
 
-                kpkc_algorithm.template complete_from_seed<kpkc::Edge>([&](auto&& clique) { process_clique(wrctx, numeric_support_selector, clique, true); }, 0, ws);
+                kpkc_algorithm.template complete_from_seed<kpkc::Edge>([&](auto&& clique) { process_clique(wrctx, numeric_support_selector, clique, true); },
+                                                                       0,
+                                                                       ws);
             }
         };
 
@@ -512,6 +517,7 @@ void process_pending_rule_bindings(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                                                         in.cws_rule().get_rule(),
                                                         in.cws_rule().get_witness_rule().get_body(),
                                                         numeric_support_selector,
+                                                        out.numeric_support_selector_workspace(),
                                                         in.cost_buckets().current_cost(),
                                                         in.and_annot(),
                                                         in.numeric_and_annot(),
@@ -530,8 +536,7 @@ void process_pending_rule_bindings(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                     }
                     else
                     {
-                        assert(false && "Numeric-head rules should not be stored as pending.");
-                        it = out.pending_rule_bindings().erase(it);
+                        throw std::logic_error("Numeric-head rules should not be stored as pending.");
                     }
                 },
                 in.cws_rule().get_rule().get_head());
@@ -560,16 +565,6 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
         {
             return;
         }
-
-        // std::cout << std::endl;
-        // std::cout << "=======================================================================" << std::endl;
-        // std::cout << "Facts: " << std::endl;
-        // for (const auto& set : facts.fact_sets.predicate.get_sets())
-        // {
-        //     for (const auto binding : set.get_bindings())
-        //         std::cout << binding << std::endl;
-        // }
-        // std::cout << std::endl;
 
         scheduler.on_start_iteration();
 
@@ -649,10 +644,8 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                                     const auto program_head = fd::merge_d2d(worker_head, merge_context).first;
 
                                     // Update annotation
-                                    const auto cost_update = program_out.or_ap().update_annotation(program_head,
-                                                                                                   worker_head,
-                                                                                                   worker.iteration.and_annot,
-                                                                                                   program_out.and_annot());
+                                    const auto cost_update =
+                                        program_out.or_ap().update_annotation(program_head, worker_head, worker.iteration.and_annot, program_out.and_annot());
 
                                     cost_buckets.update(cost_update, program_head);
                                 }
@@ -666,14 +659,9 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                                                   worker.solve.program_overlay_repository);
 
                                     const auto program_head = fd::merge_d2d(worker_head, merge_context).first;
-                                    const auto* worker_annotation = worker.iteration.numeric_and_annot.find(worker_head);
+                                    const auto* worker_annotation = worker.iteration.numeric_and_annot.find(worker_head, update.interval);
                                     if (worker_annotation)
-                                    {
-                                        auto& numeric_and_annot = program_out.numeric_and_annot();
-                                        const auto* program_annotation = numeric_and_annot.find(program_head);
-                                        if (!program_annotation || get_cost(*worker_annotation) < get_cost(*program_annotation))
-                                            numeric_and_annot.insert_or_assign(program_head, *worker_annotation);
-                                    }
+                                        program_out.numeric_and_annot().insert(program_head, update.interval, *worker_annotation);
 
                                     cost_buckets.insert(update.cost, program_head, update.interval);
                                 }
@@ -707,12 +695,6 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                 const auto changed = facts.fact_sets.function.insert(head, interval);
                 if (changed)
                 {
-                    program_out.numeric_interval_annot().insert(head, interval, BaseAnnotation(cost_buckets.current_cost()));
-                    if (trace_numeric_intervals())
-                        std::cerr << "[numeric-rpg] cost=" << cost_buckets.current_cost() << " relation=" << uint_t(head.get_index().relation)
-                                  << " row=" << uint_t(head.get_index().row) << " interval=" << interval
-                                  << " annotations=" << program_out.numeric_interval_annot().size() << '\n';
-
                     // Notify scheduler
                     scheduler.on_generate(head.get_index().relation);
 

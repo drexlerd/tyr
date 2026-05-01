@@ -18,3 +18,13 @@ target_link_libraries(rpg_add
         benchmark::benchmark
         Boost::json
 )
+
+add_executable(rpg_ff
+    "heuristics/rpg_ff.cpp"
+)
+target_link_libraries(rpg_ff
+    PRIVATE
+        tyr::core
+        benchmark::benchmark
+        Boost::json
+)

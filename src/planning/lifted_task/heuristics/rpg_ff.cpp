@@ -50,6 +50,7 @@ FFRPGHeuristic<LiftedTag>::FFRPGHeuristic(std::shared_ptr<Task<LiftedTag>> task,
     m_binding(),
     m_iter_workspace(),
     m_effect_families(),
+    m_numeric_support_selector_workspace(),
     m_relaxed_plan(),
     m_preferred_actions(),
     m_preferred_action_views(),
@@ -67,6 +68,7 @@ float_t FFRPGHeuristic<LiftedTag>::extract_cost_and_set_preferred_actions_impl(c
     m_preferred_action_views_dirty = true;
     m_relaxed_plan.clear();
     m_preferred_actions.clear();
+    m_numeric_support_selector_workspace.clear();
     for (auto& bitset : m_markings)
         bitset.reset();
     for (auto& bitset : m_function_markings)
@@ -75,11 +77,18 @@ float_t FFRPGHeuristic<LiftedTag>::extract_cost_and_set_preferred_actions_impl(c
     auto state_context = StateContext<LiftedTag>(*this->m_task, state.get_unpacked_state(), float_t(0));
     auto grounder_context = formalism::planning::GrounderContext { this->m_workspace.planning_builder, *this->m_task->get_repository(), m_binding };
 
-    for (const auto atom : m_workspace.tp.get_predicate_bindings())
-        extract_relaxed_plan_and_preferred_actions(atom, state_context, grounder_context);
+    if (const auto& goal = m_workspace.tp.get_goal())
+    {
+        for (const auto literal : goal->get_literals<formalism::FluentTag>())
+        {
+            assert(literal.get_polarity());
 
-    for (const auto function : m_workspace.tp.get_function_bindings())
-        extract_relaxed_plan_and_preferred_actions(function, state_context, grounder_context);
+            extract_relaxed_plan_and_preferred_actions(literal.get_atom().get_row(), state_context, grounder_context);
+        }
+
+        for (const auto constraint : goal->get_numeric_constraints())
+            extract_numeric_constraint_support(constraint, state_context, grounder_context);
+    }
 
     return m_relaxed_plan.size();
 }
@@ -148,20 +157,40 @@ void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(forma
                                                                            const StateContext<LiftedTag>& state_context,
                                                                            formalism::planning::GrounderContext& grounder_context)
 {
+    const auto* annotation = m_workspace.numeric_and_annot.find(binding);
+    if (!annotation)
+        return;
+
+    extract_relaxed_plan_and_preferred_actions(binding, *annotation, state_context, grounder_context);
+}
+
+void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(formalism::datalog::FunctionBindingView<formalism::FluentTag> binding,
+                                                                           const datalog::Annotation& annotation,
+                                                                           const StateContext<LiftedTag>& state_context,
+                                                                           formalism::planning::GrounderContext& grounder_context)
+{
     // Base case 1: function binding is already marked => do not recurse again
     if (mark_function(binding))
         return;
 
     // Base case 2: function binding is initially assigned, i.e., has no witness => do not recurse again
-    const auto* annotation = m_workspace.numeric_and_annot.find(binding);
-    if (!annotation)
-        return;
-
-    const auto* witness = std::get_if<datalog::WitnessAnnotation>(annotation);
+    const auto* witness = std::get_if<datalog::WitnessAnnotation>(&annotation);
     if (!witness)
         return;
 
     extract_relaxed_plan_and_preferred_actions(*witness, state_context, grounder_context);
+}
+
+void FFRPGHeuristic<LiftedTag>::extract_numeric_constraint_support(formalism::datalog::GroundBooleanOperatorView constraint,
+                                                                   const StateContext<LiftedTag>& state_context,
+                                                                   formalism::planning::GrounderContext& grounder_context)
+{
+    m_workspace.numeric_support_selector->for_each_constraint_support(
+        constraint,
+        m_numeric_support_selector_workspace,
+        datalog::SumAggregation {},
+        [&](const auto binding, const auto, const auto& annotation)
+        { extract_relaxed_plan_and_preferred_actions(binding, annotation, state_context, grounder_context); });
 }
 
 void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(const datalog::WitnessAnnotation& witness,
@@ -224,12 +253,9 @@ void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(const
         for (const auto object : row)
             datalog_grounder_context.binding.push_back(object.get_index());
 
-        for (const auto fterm : formalism::datalog::collect_fterms<formalism::FluentTag>(constraint))
-        {
-            const auto witness_function = formalism::datalog::ground(fterm, datalog_grounder_context).first;
-
-            extract_relaxed_plan_and_preferred_actions(witness_function.get_row(), state_context, grounder_context);
-        }
+        const auto ground_constraint_data = formalism::datalog::ground(constraint, datalog_grounder_context);
+        const auto ground_constraint = make_view(ground_constraint_data, datalog_grounder_context.destination);
+        extract_numeric_constraint_support(ground_constraint, state_context, grounder_context);
     }
 }
 

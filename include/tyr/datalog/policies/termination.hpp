@@ -19,9 +19,9 @@
 #define TYR_SOLVER_POLICIES_TERMINATION_HPP_
 
 #include "tyr/common/config.hpp"
-#include "tyr/datalog/fact_sets.hpp"
 #include "tyr/datalog/policies/aggregation.hpp"
 #include "tyr/datalog/policies/annotation_types.hpp"
+#include "tyr/datalog/policies/numeric_support.hpp"
 #include "tyr/datalog/policies/termination_concept.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
 #include "tyr/formalism/datalog/ground_atom_index.hpp"
@@ -33,8 +33,6 @@
 
 namespace tyr::datalog
 {
-
-class NumericSupportSelector;
 
 class NoTerminationPolicy
 {
@@ -70,19 +68,16 @@ public:
                         const SelectedFunctionAnnotations& numeric_and_annot,
                         const NumericSupportSelector& numeric_support_selector) const noexcept;
 
+    const auto& get_goal() const noexcept { return goal; }
+
     void reset() noexcept;
 
     void clear() noexcept;
 
-    const std::vector<formalism::datalog::PredicateBindingView<formalism::FluentTag>>& get_predicate_bindings() const noexcept { return predicate_bindings; }
-    const std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>>& get_function_bindings() const noexcept { return function_bindings; }
-
 private:
-    PredicateFactSets<formalism::FluentTag> goal_fact_sets;
     std::optional<formalism::datalog::GroundConjunctiveConditionView> goal;
-    std::vector<formalism::datalog::PredicateBindingView<formalism::FluentTag>> predicate_bindings;
-    std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>> function_bindings;
 
+    mutable NumericSupportSelectorWorkspace numeric_support_selector_workspace;
     AggregationFunction agg;
 };
 }

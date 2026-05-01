@@ -65,8 +65,6 @@ public:
         const auto& and_annot() const noexcept { return m_rctx.stratum_out().program().and_annot(); }
         const auto& numeric_and_annot() noexcept { return m_rctx.stratum_out().program().numeric_and_annot(); }
         const auto& numeric_and_annot() const noexcept { return m_rctx.stratum_out().program().numeric_and_annot(); }
-        const auto& numeric_interval_annot() noexcept { return m_rctx.stratum_out().program().numeric_interval_annot(); }
-        const auto& numeric_interval_annot() const noexcept { return m_rctx.stratum_out().program().numeric_interval_annot(); }
         const auto& numeric_support_selector() noexcept { return m_rctx.stratum_out().program().numeric_support_selector(); }
         const auto& numeric_support_selector() const noexcept { return m_rctx.stratum_out().program().numeric_support_selector(); }
         const auto& cost_buckets() noexcept { return m_rctx.stratum_out().program().cost_buckets(); }
@@ -103,6 +101,7 @@ public:
 
         auto& seen_bindings_dbg() noexcept { return m_ws_worker.solve.seen_bindings_dbg; }
         auto& pending_rule_bindings() noexcept { return m_ws_worker.solve.pending_rule_bindings; }
+        auto& numeric_support_selector_workspace() noexcept { return m_ws_worker.solve.numeric_support_selector_workspace; }
         auto& statistics() noexcept { return m_ws_worker.solve.statistics; }
 
         auto& ground_context_solve() noexcept { return m_ground_context_solve; }
