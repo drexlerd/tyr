@@ -178,7 +178,6 @@ struct ProgramWorkspace
     OrAP or_ap;
     SelectedPredicateAnnotations and_annot;
     SelectedFunctionAnnotations numeric_and_annot;
-    NumericIntervalAnnotations numeric_interval_annot;
     NumericInitialValues numeric_initial_values;
     std::optional<NumericSupportSelector> numeric_support_selector;
 

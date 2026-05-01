@@ -203,7 +203,7 @@
     },
     "attributes": {
         "initial_h_value": {
-            "description": "The h_add estimate of the initial state.",
+            "description": "The RPG heuristic estimate of the initial state.",
             "type": "float",
             "compare": "undefined"
         },

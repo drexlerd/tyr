@@ -78,12 +78,11 @@ inline Cost get_cost(const Annotation& annotation) noexcept
     return std::visit([](const auto& value) { return value.get_cost(); }, annotation);
 }
 
-template<typename Tag>
 class AnnotationMap
 {
 public:
-    using Binding = View<Index<formalism::RelationBinding<Tag>>, formalism::datalog::Repository>;
-    using Relation = View<Index<Tag>, formalism::datalog::Repository>;
+    using Binding = formalism::datalog::PredicateBindingView<formalism::FluentTag>;
+    using Relation = formalism::datalog::PredicateView<formalism::FluentTag>;
     using Row = Index<formalism::Row>;
     using Inner = UnorderedMap<Row, Annotation>;
     using Outer = UnorderedMap<Relation, Inner>;
@@ -123,12 +122,10 @@ private:
     Outer m_annotations;
 };
 
-using SelectedPredicateAnnotations = AnnotationMap<formalism::Predicate<formalism::FluentTag>>;
-using SelectedFunctionAnnotations = AnnotationMap<formalism::Function<formalism::FluentTag>>;
+using SelectedPredicateAnnotations = AnnotationMap;
 
 struct NumericIntervalAnnotation
 {
-    Index<formalism::Row> row;
     ClosedInterval<float_t> interval;
     Annotation annotation;
 };
@@ -138,37 +135,87 @@ class NumericIntervalAnnotations
 public:
     using Binding = formalism::datalog::FunctionBindingView<formalism::FluentTag>;
     using Relation = formalism::datalog::FunctionView<formalism::FluentTag>;
+    using Row = Index<formalism::Row>;
     using Entry = NumericIntervalAnnotation;
     using Entries = std::vector<Entry>;
-    using Partitions = UnorderedMap<Relation, Entries>;
+    using RowPartitions = UnorderedMap<Row, Entries>;
+    using Partitions = UnorderedMap<Relation, RowPartitions>;
 
     void clear() noexcept
     {
         m_size = 0;
-        for (auto& [_, entries] : m_partitions)
-            entries.clear();
+        for (auto& [_, row_partitions] : m_partitions)
+            for (auto& [_, entries] : row_partitions)
+                entries.clear();
     }
 
     size_t size() const noexcept { return m_size; }
 
     const Partitions& partitions() const noexcept { return m_partitions; }
 
+    const Annotation* find(Binding binding) const noexcept
+    {
+        const auto* entries = find_entries(binding);
+        return (!entries || entries->empty()) ? nullptr : &entries->back().annotation;
+    }
+
+    Annotation* find(Binding binding) noexcept
+    {
+        auto* entries = find_entries(binding);
+        return (!entries || entries->empty()) ? nullptr : &entries->back().annotation;
+    }
+
+    const Annotation* find(Binding binding, ClosedInterval<float_t> interval) const noexcept
+    {
+        const auto* entries = find_entries(binding);
+        if (!entries)
+            return nullptr;
+
+        for (const auto& entry : *entries)
+            if (entry.interval == interval)
+                return &entry.annotation;
+
+        return nullptr;
+    }
+
     void insert(Binding binding, ClosedInterval<float_t> interval, Annotation annotation)
     {
         if (empty(interval))
             return;
 
-        auto& entries = m_partitions[binding.get_relation()];
-        assert(entries.empty() || entries.back().row != binding.get_index().row || subset(entries.back().interval, interval));
-
-        entries.push_back(Entry { binding.get_index().row, interval, annotation });
+        auto& entries = m_partitions[binding.get_relation()][binding.get_index().row];
+        assert(entries.empty() || (subset(entries.back().interval, interval) && "Expected monotonically increasing intervals for the same binding!"));
+        // Note: costs do not monotonically increase with increasing intervals.
+        entries.push_back(Entry { interval, std::move(annotation) });
         ++m_size;
     }
 
 private:
+    const Entries* find_entries(Binding binding) const noexcept
+    {
+        const auto relation_it = m_partitions.find(binding.get_relation());
+        if (relation_it == m_partitions.end())
+            return nullptr;
+
+        const auto row_it = relation_it->second.find(binding.get_index().row);
+        return row_it == relation_it->second.end() ? nullptr : &row_it->second;
+    }
+
+    Entries* find_entries(Binding binding) noexcept
+    {
+        const auto relation_it = m_partitions.find(binding.get_relation());
+        if (relation_it == m_partitions.end())
+            return nullptr;
+
+        const auto row_it = relation_it->second.find(binding.get_index().row);
+        return row_it == relation_it->second.end() ? nullptr : &row_it->second;
+    }
+
     Partitions m_partitions;
     size_t m_size = 0;
 };
+
+using SelectedFunctionAnnotations = NumericIntervalAnnotations;
 
 struct CostUpdate
 {

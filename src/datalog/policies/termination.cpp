@@ -23,7 +23,6 @@
 #include "tyr/datalog/policies/aggregation.hpp"
 #include "tyr/datalog/policies/numeric_support.hpp"
 #include "tyr/formalism/datalog/declarations.hpp"
-#include "tyr/formalism/datalog/expression_properties.hpp"
 #include "tyr/formalism/datalog/ground_atom_index.hpp"
 #include "tyr/formalism/datalog/repository.hpp"
 #include "tyr/formalism/datalog/views.hpp"
@@ -36,10 +35,9 @@ namespace tyr::datalog
 template<typename AggregationFunction>
 TerminationPolicy<AggregationFunction>::TerminationPolicy(formalism::datalog::PredicateListView<formalism::FluentTag> fluent_predicates,
                                                           const formalism::datalog::Repository& repository) :
-    goal_fact_sets(fluent_predicates, repository),
     goal(std::nullopt),
-    predicate_bindings(),
-    function_bindings()
+    numeric_support_selector_workspace(),
+    agg()
 {
 }
 
@@ -48,24 +46,6 @@ void TerminationPolicy<AggregationFunction>::set_goals(formalism::datalog::Groun
 {
     clear();
     goal = goals;
-
-    for (const auto literal : goals.get_literals<formalism::FluentTag>())
-    {
-        if (!literal.get_polarity())
-            continue;
-
-        goal_fact_sets.insert(literal.get_atom());
-    }
-
-    for (const auto& set : goal_fact_sets.get_sets())
-    {
-        for (const auto& binding : set.get_bindings())
-            predicate_bindings.push_back(binding);
-    }
-
-    for (const auto constraint : goals.get_numeric_constraints())
-        for (const auto fterm : formalism::datalog::collect_fterms<formalism::FluentTag>(constraint))
-            function_bindings.push_back(fterm.get_row());
 }
 
 template<typename AggregationFunction>
@@ -85,9 +65,14 @@ Cost TerminationPolicy<AggregationFunction>::get_total_cost(const FactSets& fact
 {
     auto cost = AggregationFunction::identity();
 
-    for (const auto binding : predicate_bindings)
+    if (!goal)
+        return cost;
+
+    for (const auto literal : goal->get_literals<formalism::FluentTag>())
     {
-        const auto* annotation = and_annot.find(binding);
+        assert(literal.get_polarity());
+
+        const auto* annotation = and_annot.find(literal.get_atom().get_row());
         assert(annotation);
         const auto binding_cost = get_cost(*annotation);
         if (binding_cost == std::numeric_limits<Cost>::max())
@@ -95,14 +80,13 @@ Cost TerminationPolicy<AggregationFunction>::get_total_cost(const FactSets& fact
         cost = agg(cost, binding_cost);
     }
 
-    if (goal)
-        for (const auto constraint : goal->get_numeric_constraints())
-        {
-            const auto constraint_cost = numeric_support_selector.get_constraint_cost(constraint, agg);
-            if (constraint_cost == std::numeric_limits<Cost>::max())
-                return std::numeric_limits<Cost>::max();
-            cost = agg(cost, constraint_cost);
-        }
+    for (const auto constraint : goal->get_numeric_constraints())
+    {
+        const auto constraint_cost = numeric_support_selector.get_constraint_cost(constraint, numeric_support_selector_workspace, agg);
+        if (constraint_cost == std::numeric_limits<Cost>::max())
+            return std::numeric_limits<Cost>::max();
+        cost = agg(cost, constraint_cost);
+    }
 
     return cost;
 }
@@ -115,10 +99,8 @@ void TerminationPolicy<AggregationFunction>::reset() noexcept
 template<typename AggregationFunction>
 void TerminationPolicy<AggregationFunction>::clear() noexcept
 {
-    goal_fact_sets.reset();
     goal = std::nullopt;
-    predicate_bindings.clear();
-    function_bindings.clear();
+    numeric_support_selector_workspace.clear();
 }
 
 template class TerminationPolicy<SumAggregation>;

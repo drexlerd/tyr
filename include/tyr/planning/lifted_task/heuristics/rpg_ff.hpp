@@ -19,6 +19,7 @@
 #define TYR_PLANNING_LIFTED_TASK_HEURISTICS_FF_HPP_
 
 #include "tyr/datalog/policies/annotation.hpp"
+#include "tyr/datalog/policies/numeric_support.hpp"
 #include "tyr/datalog/policies/termination.hpp"
 #include "tyr/formalism/datalog/formatter.hpp"
 #include "tyr/formalism/datalog/grounder.hpp"
@@ -63,6 +64,13 @@ private:
     void extract_relaxed_plan_and_preferred_actions(formalism::datalog::FunctionBindingView<formalism::FluentTag> function,
                                                     const StateContext<LiftedTag>& state_context,
                                                     formalism::planning::GrounderContext& grounder_context);
+    void extract_relaxed_plan_and_preferred_actions(formalism::datalog::FunctionBindingView<formalism::FluentTag> function,
+                                                    const datalog::Annotation& annotation,
+                                                    const StateContext<LiftedTag>& state_context,
+                                                    formalism::planning::GrounderContext& grounder_context);
+    void extract_numeric_constraint_support(formalism::datalog::GroundBooleanOperatorView constraint,
+                                            const StateContext<LiftedTag>& state_context,
+                                            formalism::planning::GrounderContext& grounder_context);
     void extract_relaxed_plan_and_preferred_actions(const datalog::WitnessAnnotation& witness,
                                                     const StateContext<LiftedTag>& state_context,
                                                     formalism::planning::GrounderContext& grounder_context);
@@ -75,6 +83,7 @@ private:
     IndexList<formalism::Object> m_binding;
     itertools::cartesian_set::Workspace<Index<formalism::Object>> m_iter_workspace;
     formalism::planning::EffectFamilyList m_effect_families;
+    datalog::NumericSupportSelectorWorkspace m_numeric_support_selector_workspace;
 
     UnorderedSet<Index<formalism::planning::GroundAction>> m_relaxed_plan;
     UnorderedSet<Index<formalism::planning::GroundAction>> m_preferred_actions;

@@ -37,12 +37,14 @@ namespace tyr::datalog
 {
 
 class NumericSupportSelector;
+class NumericSupportSelectorWorkspace;
 
 // circle "or"-node
 template<typename T>
 concept OrAnnotationPolicyConcept = requires(const T& p,
                                              formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head,
                                              formalism::datalog::FunctionBindingView<formalism::FluentTag> program_function_head,
+                                             ClosedInterval<float_t> interval,
                                              formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head,
                                              const SelectedPredicateAnnotations& delta_and_annot,
                                              SelectedPredicateAnnotations& program_and_annot,
@@ -50,7 +52,7 @@ concept OrAnnotationPolicyConcept = requires(const T& p,
     /// Annotate the initial cost of the atom.
     { p.initialize_annotation(program_head, program_and_annot) } -> std::same_as<void>;
     /// Annotate the initial cost of a numeric binding.
-    { p.initialize_annotation(program_function_head, program_numeric_and_annot) } -> std::same_as<void>;
+    { p.initialize_annotation(program_function_head, interval, program_numeric_and_annot) } -> std::same_as<void>;
     /// Annotate the cost of the atom from the given witness and annotations.
     /// `delta_head` indexes into the rule-local delta repository; `head` indexes into the global program repository.
     { p.update_annotation(program_head, delta_head, delta_and_annot, program_and_annot) } -> std::same_as<CostUpdate>;
@@ -65,6 +67,7 @@ concept AndAnnotationPolicyConcept = requires(const T& p,
                                               formalism::datalog::RuleView rule,
                                               formalism::datalog::ConjunctiveConditionView witness_condition,
                                               const NumericSupportSelector& numeric_support_selector,
+                                              NumericSupportSelectorWorkspace& numeric_support_selector_workspace,
                                               const SelectedPredicateAnnotations& program_and_annot,
                                               const SelectedFunctionAnnotations& program_numeric_and_annot,
                                               SelectedPredicateAnnotations& delta_and_annot,
@@ -78,6 +81,7 @@ concept AndAnnotationPolicyConcept = requires(const T& p,
                             rule,
                             witness_condition,
                             numeric_support_selector,
+                            numeric_support_selector_workspace,
                             program_and_annot,
                             program_numeric_and_annot,
                             delta_and_annot,
