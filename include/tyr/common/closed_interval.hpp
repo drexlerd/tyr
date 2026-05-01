@@ -21,6 +21,7 @@
 #include "tyr/common/declarations.hpp"
 
 #include <boost/numeric/interval.hpp>
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <ostream>
@@ -114,6 +115,44 @@ public:
 
     friend A lower(const ClosedInterval& el) noexcept { return lower(el.get_interval()); }
     friend A upper(const ClosedInterval& el) noexcept { return upper(el.get_interval()); }
+
+    friend A representative_value(const ClosedInterval& el) noexcept
+    {
+        if (empty(el))
+            return A(0);
+
+        const auto lo = lower(el);
+        const auto hi = upper(el);
+
+        if (std::isfinite(lo) && std::isfinite(hi))
+            return (lo + hi) / 2;
+        if (std::isfinite(lo))
+            return lo;
+        if (std::isfinite(hi))
+            return hi;
+        return A(0);
+    }
+
+    friend A distance_to_value(const ClosedInterval& el, A value) noexcept
+    {
+        if (empty(el))
+            return std::numeric_limits<A>::infinity();
+        if (lower(el) <= value && value <= upper(el))
+            return A(0);
+        return std::min(std::abs(value - lower(el)), std::abs(value - upper(el)));
+    }
+
+    friend A width(const ClosedInterval& el) noexcept
+    {
+        if (empty(el))
+            return A(-1);
+
+        const auto lo = lower(el);
+        const auto hi = upper(el);
+        if (!std::isfinite(lo) || !std::isfinite(hi))
+            return std::numeric_limits<A>::infinity();
+        return hi - lo;
+    }
 
     auto identifying_members() const noexcept
     {

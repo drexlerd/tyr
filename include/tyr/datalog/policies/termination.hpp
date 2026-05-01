@@ -34,6 +34,8 @@
 namespace tyr::datalog
 {
 
+class NumericSupportSelector;
+
 class NoTerminationPolicy
 {
 public:
@@ -42,9 +44,9 @@ public:
     void set_goals(formalism::datalog::GroundConjunctiveConditionView goals) {}
     bool check(const FactSets& fact_sets) const noexcept { return false; }
     Cost get_total_cost(const FactSets& fact_sets,
-                        const AndAnnotationsMap& and_annot,
-                        const NumericAndAnnotationsMap& numeric_and_annot,
-                        const NumericIntervalAnnotations& numeric_interval_annot) const noexcept
+                        const SelectedPredicateAnnotations& and_annot,
+                        const SelectedFunctionAnnotations& numeric_and_annot,
+                        const NumericSupportSelector& numeric_support_selector) const noexcept
     {
         return Cost(0);
     }
@@ -64,9 +66,9 @@ public:
     bool check(const FactSets& fact_sets) const noexcept;
 
     Cost get_total_cost(const FactSets& fact_sets,
-                        const AndAnnotationsMap& and_annot,
-                        const NumericAndAnnotationsMap& numeric_and_annot,
-                        const NumericIntervalAnnotations& numeric_interval_annot) const noexcept;
+                        const SelectedPredicateAnnotations& and_annot,
+                        const SelectedFunctionAnnotations& numeric_and_annot,
+                        const NumericSupportSelector& numeric_support_selector) const noexcept;
 
     void reset() noexcept;
 

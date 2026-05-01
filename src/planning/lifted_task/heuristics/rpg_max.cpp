@@ -50,7 +50,7 @@ float_t MaxRPGHeuristic<LiftedTag>::extract_cost_and_set_preferred_actions_impl(
     return m_workspace.tp.get_total_cost(datalog::FactSets { m_task->get_rpg_program().get_const_program_workspace().facts.fact_sets, m_workspace.facts.fact_sets },
                                          this->m_workspace.and_annot,
                                          this->m_workspace.numeric_and_annot,
-                                         this->m_workspace.numeric_interval_annot);
+                                         *this->m_workspace.numeric_support_selector);
 }
 
 }

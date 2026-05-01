@@ -20,6 +20,7 @@
 #include "tyr/common/config.hpp"
 #include "tyr/common/vector.hpp"
 #include "tyr/datalog/policies/aggregation.hpp"
+#include "tyr/datalog/policies/numeric_support.hpp"
 #include "tyr/formalism/binding_index.hpp"
 #include "tyr/formalism/datalog/builder.hpp"
 #include "tyr/formalism/datalog/canonicalization.hpp"
@@ -58,41 +59,41 @@ CostUpdate update_min_cost(Cost& cost, Cost candidate)
     return CostUpdate(old_cost, cost);
 }
 
-std::optional<Witness> fetch_best_head_witness_cost(formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head,
-                                                    const AndAnnotationsMap& delta_and_annot)
+std::optional<WitnessAnnotation> fetch_best_head_witness_cost(formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head,
+                                                    const SelectedPredicateAnnotations& delta_and_annot)
 {
-    if (auto it = delta_and_annot.find(delta_head); it != delta_and_annot.end())
-        if (const auto* witness = std::get_if<Witness>(&it->second))
+    if (const auto* annotation = delta_and_annot.find(delta_head))
+        if (const auto* witness = std::get_if<WitnessAnnotation>(annotation))
             return *witness;
 
     return std::nullopt;  // No witness available (not derived yet / skipped / not tracked) -> no update from AND side
 }
 
-uint_t fetch_annotation_cost(formalism::datalog::PredicateBindingView<formalism::FluentTag> binding, const AndAnnotationsMap& annotations)
+uint_t fetch_annotation_cost(formalism::datalog::PredicateBindingView<formalism::FluentTag> binding, const SelectedPredicateAnnotations& annotations)
 {
-    if (const auto it = annotations.find(binding); it != annotations.end())
-        return get_cost(it->second);
+    if (const auto* annotation = annotations.find(binding))
+        return get_cost(*annotation);
     return std::numeric_limits<uint_t>::max();
 }
 
 }
 
 void OrAnnotationPolicy::initialize_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head,
-                                               AndAnnotationsMap& program_and_annot) const
+                                               SelectedPredicateAnnotations& program_and_annot) const
 {
-    program_and_annot.insert_or_assign(program_head, BaseCase(Cost(0)));
+    program_and_annot.insert_or_assign(program_head, BaseAnnotation(Cost(0)));
 }
 
 void OrAnnotationPolicy::initialize_annotation(formalism::datalog::FunctionBindingView<formalism::FluentTag> program_head,
-                                               NumericAndAnnotationsMap& program_numeric_and_annot) const
+                                               SelectedFunctionAnnotations& program_numeric_and_annot) const
 {
-    program_numeric_and_annot.insert_or_assign(program_head, BaseCase(Cost(0)));
+    program_numeric_and_annot.insert_or_assign(program_head, BaseAnnotation(Cost(0)));
 }
 
 CostUpdate OrAnnotationPolicy::update_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head,
                                                  formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head,
-                                                 const AndAnnotationsMap& delta_and_annot,
-                                                 AndAnnotationsMap& program_and_annot) const
+                                                 const SelectedPredicateAnnotations& delta_and_annot,
+                                                 SelectedPredicateAnnotations& program_and_annot) const
 {
     // Fast path 1: already optimal
     auto old_cost = fetch_annotation_cost(program_head, program_and_annot);
@@ -123,20 +124,21 @@ CostUpdate OrAnnotationPolicy::update_annotation(formalism::datalog::PredicateBi
 namespace
 {
 
-uint_t fetch_current_best_cost(formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head, const AndAnnotationsMap& delta_and_annot)
+uint_t fetch_current_best_cost(formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head, const SelectedPredicateAnnotations& delta_and_annot)
 {
     return fetch_annotation_cost(delta_head, delta_and_annot);
 }
 
 template<typename AggregationFunction>
-std::optional<Witness> try_ground_better_witness(uint_t best_cost,
+std::optional<WitnessAnnotation> try_ground_better_witness(uint_t best_cost,
                                                  uint_t current_cost,
                                                  formalism::datalog::RuleView rule,
                                                  formalism::datalog::ConjunctiveConditionView witness_condition,
+                                                 const NumericSupportSelector& numeric_support_selector,
                                                  formalism::datalog::GrounderContext& delta_context,
                                                  formalism::datalog::GrounderContext& iteration_context,
-                                                 const AndAnnotationsMap& program_and_annot,
-                                                 const NumericAndAnnotationsMap& program_numeric_and_annot)
+                                                 const SelectedPredicateAnnotations& program_and_annot,
+                                                 const SelectedFunctionAnnotations& program_numeric_and_annot)
 {
     auto body_cost = AggregationFunction::identity();
     const auto rule_cost = rule.get_cost();
@@ -160,6 +162,21 @@ std::optional<Witness> try_ground_better_witness(uint_t best_cost,
             return std::nullopt;  ///< No local or global improvement
     }
 
+    for (const auto numeric_constraint : witness_condition.get_numeric_constraints())
+    {
+        const auto ground_constraint_data = formalism::datalog::ground(numeric_constraint, iteration_context);
+        const auto ground_constraint = make_view(ground_constraint_data, iteration_context.destination);
+        const auto constraint_cost = numeric_support_selector.get_constraint_cost(ground_constraint, AggregationFunction {});
+
+        if (constraint_cost == std::numeric_limits<Cost>::max())
+            return std::nullopt;
+
+        body_cost = AggregationFunction()(body_cost, constraint_cost);
+
+        if (best_cost <= body_cost + rule_cost)
+            return std::nullopt;  ///< No local or global improvement
+    }
+
     body_cost = std::max(body_cost, current_cost);
 
     if (best_cost <= body_cost + rule_cost)
@@ -169,7 +186,7 @@ std::optional<Witness> try_ground_better_witness(uint_t best_cost,
 
     const auto delta_binding = formalism::datalog::ground_binding(rule, delta_context).first;
 
-    return Witness(delta_binding, witness_cost);
+    return WitnessAnnotation(delta_binding, witness_cost);
 }
 }
 
@@ -179,9 +196,10 @@ void AndAnnotationPolicy<AggregationFunction>::update_annotation(formalism::data
                                                                  uint_t current_cost,
                                                                  formalism::datalog::RuleView rule,
                                                                  formalism::datalog::ConjunctiveConditionView witness_condition,
-                                                                 const AndAnnotationsMap& program_and_annot,
-                                                                 const NumericAndAnnotationsMap& program_numeric_and_annot,
-                                                                 AndAnnotationsMap& delta_and_annot,
+                                                                 const NumericSupportSelector& numeric_support_selector,
+                                                                 const SelectedPredicateAnnotations& program_and_annot,
+                                                                 const SelectedFunctionAnnotations& program_numeric_and_annot,
+                                                                 SelectedPredicateAnnotations& delta_and_annot,
                                                                  formalism::datalog::GrounderContext& delta_context,
                                                                  formalism::datalog::GrounderContext& iteration_context) const
 {
@@ -198,6 +216,7 @@ void AndAnnotationPolicy<AggregationFunction>::update_annotation(formalism::data
                                                                         current_cost,
                                                                         rule,
                                                                         witness_condition,
+                                                                        numeric_support_selector,
                                                                         delta_context,
                                                                         iteration_context,
                                                                         program_and_annot,
@@ -215,9 +234,10 @@ void AndAnnotationPolicy<AggregationFunction>::update_annotation(formalism::data
                                                                  uint_t current_cost,
                                                                  formalism::datalog::RuleView rule,
                                                                  formalism::datalog::ConjunctiveConditionView witness_condition,
-                                                                 const AndAnnotationsMap& program_and_annot,
-                                                                 const NumericAndAnnotationsMap& program_numeric_and_annot,
-                                                                 NumericAndAnnotationsMap& delta_numeric_and_annot,
+                                                                 const NumericSupportSelector& numeric_support_selector,
+                                                                 const SelectedPredicateAnnotations& program_and_annot,
+                                                                 const SelectedFunctionAnnotations& program_numeric_and_annot,
+                                                                 SelectedFunctionAnnotations& delta_numeric_and_annot,
                                                                  formalism::datalog::GrounderContext& delta_context,
                                                                  formalism::datalog::GrounderContext& iteration_context) const
 {
@@ -231,6 +251,7 @@ void AndAnnotationPolicy<AggregationFunction>::update_annotation(formalism::data
                                                                         current_cost,
                                                                         rule,
                                                                         witness_condition,
+                                                                        numeric_support_selector,
                                                                         delta_context,
                                                                         iteration_context,
                                                                         program_and_annot,

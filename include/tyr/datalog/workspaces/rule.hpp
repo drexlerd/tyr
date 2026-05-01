@@ -121,8 +121,8 @@ struct RuleWorkspace
         RuleHeadIteration head;
 
         // Annotations stored in program_overlay_repository
-        AndAnnotationsMap and_annot;
-        NumericAndAnnotationsMap numeric_and_annot;
+        SelectedPredicateAnnotations and_annot;
+        SelectedFunctionAnnotations numeric_and_annot;
 
         /// KPKC
         kpkc::Workspace kpkc_workspace;

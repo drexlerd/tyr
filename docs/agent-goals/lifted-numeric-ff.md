@@ -53,18 +53,18 @@ The agent should work on the highest unchecked task in this list. The agent must
     - We want Rule and GroundRule to have `cista::offset::variant` head.
     - We want the RPGProgram in `planning/programs/rpg.hpp` to also translate numeric effects into respective datalog rules
 
-- [] Patch semi-naive evaluation to support two head types: Atom and NumericEffectOperator.
+- [x] Patch semi-naive evaluation to support two head types: Atom and NumericEffectOperator.
   - Interesting files:
     - `docs/agent-goals/lifted-numeric-ff.md`
     - `include/tyr/planning/programs/`
     - `include/tyr/formalism/datalog/`
-    - `include/tyr/datalog/bottomup.hpp`
-    - `src/datalog/bottomup.cpp`
+    - `include/tyr/datalog/bottom_up.hpp`
+    - `src/datalog/bottom_up.cpp`
     - `include/tyr/datalog/workspaces/program.hpp`
     - `src/datalog/workspaces/program.cpp`
   - Likely modification areas:
-    - `include/tyr/datalog/bottomup.hpp`
-    - `src/datalog/bottomup.cpp`
+    - `include/tyr/datalog/bottom_up.hpp`
+    - `src/datalog/bottom_up.cpp`
     - `include/tyr/datalog/workspaces/program.hpp`
     - `src/datalog/workspaces/program.cpp`
   - Validation:
@@ -72,5 +72,38 @@ The agent should work on the highest unchecked task in this list. The agent must
   - Notes:
     - Patch CostBuckets to also store ClosedInterval<float_t> for ground function terms
     - Add is_valid_binding for numeric effects. If the function expression yields NaN the rule is inapplicable.
- 
+
+- [] Implement greedy local support selector/cost aggregation for witness rules with numeric effect head and numeric constraint goals.
+  - Interesting files:
+    - `docs/agent-goals/lifted-numeric-ff.md`
+    - `include/tyr/planning/programs/`
+    - `include/tyr/formalism/datalog/`
+    - `include/tyr/datalog/bottom_up.hpp`
+    - `src/datalog/bottom_up.cpp`
+    - `include/tyr/datalog/policies/annotation_types.hpp`
+    - `include/tyr/datalog/policies/annotation.hpp`
+    - `src/datalog/policies/annotation.cpp`
+    - `include/tyr/datalog/policies/termination.hpp`
+    - `src/datalog/policies/termination.cpp`
+  - Likely modification areas:
+    - `include/tyr/datalog/policies/annotation_types.hpp`
+    - `include/tyr/datalog/policies/annotation.hpp`
+    - `src/datalog/policies/annotation.cpp`
+    - `include/tyr/datalog/policies/termination.hpp`
+    - `src/datalog/policies/termination.cpp`
+  - Validation:
+      - Build and test suite passes
+      - `rpg_add` profiling suite still runs and reports `initial_h_value`, `cost`, `length`, `num_expanded`, `num_generated`, and `solved`.
+    - Notes:
+      - Replace the raw `using NumericIntervalAnnotations = std::vector<NumericIntervalAnnotation>` with a reusable flat class for storing RPG numeric nodes as `(function binding, interval,
+  annotation/cost)` triples.
+      - Keep all internal data structures flat and reusable across heuristic evaluations; avoid nested heap-allocated containers.
+      - Add a shared numeric support selector used by both witness annotation and termination/goal-cost computation.
+      - The selector should use the input state's numeric values as closest-to-initial reference values.
+      - Numeric constraint support should use greedy local target/value selection rather than the current Cartesian-product search over all interval annotation combinations.
+      - Numeric effect-head witness annotation must backchain from the produced output interval/target and only accept selected supports that still justify the required output.
+      - The same selector/cost aggregation should be used for:
+        - witness rules with numeric constraints in the body,
+        - witness rules with numeric effect heads,
+        - numeric constraints in goal termination cost.
 

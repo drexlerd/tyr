@@ -36,15 +36,17 @@
 namespace tyr::datalog
 {
 
+class NumericSupportSelector;
+
 // circle "or"-node
 template<typename T>
 concept OrAnnotationPolicyConcept = requires(const T& p,
                                              formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head,
                                              formalism::datalog::FunctionBindingView<formalism::FluentTag> program_function_head,
                                              formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head,
-                                             const AndAnnotationsMap& delta_and_annot,
-                                             AndAnnotationsMap& program_and_annot,
-                                             NumericAndAnnotationsMap& program_numeric_and_annot) {
+                                             const SelectedPredicateAnnotations& delta_and_annot,
+                                             SelectedPredicateAnnotations& program_and_annot,
+                                             SelectedFunctionAnnotations& program_numeric_and_annot) {
     /// Annotate the initial cost of the atom.
     { p.initialize_annotation(program_head, program_and_annot) } -> std::same_as<void>;
     /// Annotate the initial cost of a numeric binding.
@@ -62,9 +64,10 @@ concept AndAnnotationPolicyConcept = requires(const T& p,
                                               uint_t current_cost,
                                               formalism::datalog::RuleView rule,
                                               formalism::datalog::ConjunctiveConditionView witness_condition,
-                                              const AndAnnotationsMap& program_and_annot,
-                                              const NumericAndAnnotationsMap& program_numeric_and_annot,
-                                              AndAnnotationsMap& delta_and_annot,
+                                              const NumericSupportSelector& numeric_support_selector,
+                                              const SelectedPredicateAnnotations& program_and_annot,
+                                              const SelectedFunctionAnnotations& program_numeric_and_annot,
+                                              SelectedPredicateAnnotations& delta_and_annot,
                                               formalism::datalog::GrounderContext& delta_context,
                                               formalism::datalog::GrounderContext& iteration_context) {
     /// Ground the witness and annotate the cost of it from the given annotations.
@@ -74,6 +77,7 @@ concept AndAnnotationPolicyConcept = requires(const T& p,
                             current_cost,
                             rule,
                             witness_condition,
+                            numeric_support_selector,
                             program_and_annot,
                             program_numeric_and_annot,
                             delta_and_annot,
