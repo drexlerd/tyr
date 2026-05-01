@@ -42,6 +42,7 @@ ProgramWorkspace<OrAP, AndAP, TP>::ProgramWorkspace(ProgramContext& context, con
     or_ap(or_ap),
     and_annot(),
     numeric_and_annot(),
+    numeric_interval_annot(),
     tp(tp),
     rules(),
     planning_builder(),

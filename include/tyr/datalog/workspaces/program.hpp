@@ -177,6 +177,7 @@ struct ProgramWorkspace
     OrAP or_ap;
     AndAnnotationsMap and_annot;
     NumericAndAnnotationsMap numeric_and_annot;
+    NumericIntervalAnnotationsMap numeric_interval_annot;
 
     TP tp;
 

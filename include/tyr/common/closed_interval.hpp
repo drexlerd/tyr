@@ -95,6 +95,11 @@ public:
         return ClosedInterval(boost::numeric::hull(lhs.m_interval, rhs.m_interval));
     }
 
+    friend bool subset(const ClosedInterval& lhs, const ClosedInterval& rhs) noexcept
+    {
+        return boost::numeric::subset(lhs.m_interval, rhs.m_interval);
+    }
+
     /**
      * Accessors
      */

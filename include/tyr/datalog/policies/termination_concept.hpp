@@ -37,10 +37,11 @@ concept TerminationPolicyConcept = requires(T& p,
                                             formalism::datalog::GroundConjunctiveConditionView goals,
                                             const FactSets& fact_sets,
                                             const AndAnnotationsMap& and_annot,
-                                            const NumericAndAnnotationsMap& numeric_and_annot) {
+                                            const NumericAndAnnotationsMap& numeric_and_annot,
+                                            const NumericIntervalAnnotationsMap& numeric_interval_annot) {
     { p.set_goals(goals) } -> std::same_as<void>;
     { cp.check(fact_sets) } -> std::same_as<bool>;
-    { cp.get_total_cost(and_annot, numeric_and_annot) } -> std::same_as<Cost>;
+    { cp.get_total_cost(fact_sets, and_annot, numeric_and_annot, numeric_interval_annot) } -> std::same_as<Cost>;
     { p.reset() } -> std::same_as<void>;
     { p.clear() } -> std::same_as<void>;
 };
