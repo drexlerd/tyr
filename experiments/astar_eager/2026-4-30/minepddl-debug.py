@@ -77,7 +77,7 @@ MEMORY_LIMIT = 2500
 exp = Experiment(environment=ENV)
 exp.add_parser(SearchParser())
 
-PLANNER_DIR = REPO / "build" / "exe" / "astar_eager"
+PLANNER_DIR = REPO / "build-debug" / "exe" / "astar_eager"
 
 exp.add_resource("planner_exe", PLANNER_DIR)
 exp.add_resource("run_planner", DIR.parent / "astar_eager.sh")

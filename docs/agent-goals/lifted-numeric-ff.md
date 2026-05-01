@@ -8,6 +8,8 @@ Implement lifted numeric relaxed planning support for a metric-FF-style heuristi
   - Relevance: Lifted FF for classical planning.
 - [The Metric-FF Planning System: Translating "Ignoring Delete Lists" to Numeric State Variables](https://www.jair.org/index.php/jair/article/view/10360/24783)
   - Relevance: Ground FF for numeric planning.
+- [Interval Based Relaxation Heuristics for Numeric Planning with Action Costs](https://gki.informatik.uni-freiburg.de/papers/aldinger-nebel-ki2017.pdf)
+  - Relevance: The main idea that we want to implement but in the lifted setting
 
 ## Scope
 - In scope:
