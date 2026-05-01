@@ -60,6 +60,8 @@ struct ProgramExecutionContext
         const auto& and_annot() const noexcept { return m_ws.and_annot; }
         auto& numeric_and_annot() noexcept { return m_ws.numeric_and_annot; }
         const auto& numeric_and_annot() const noexcept { return m_ws.numeric_and_annot; }
+        auto& numeric_interval_annot() noexcept { return m_ws.numeric_interval_annot; }
+        const auto& numeric_interval_annot() const noexcept { return m_ws.numeric_interval_annot; }
         auto& tp() noexcept { return m_ws.tp; }
         const auto& tp() const noexcept { return m_ws.tp; }
         auto& rules() noexcept { return m_ws.rules; }
@@ -97,6 +99,7 @@ struct ProgramExecutionContext
         // Clear the annotation policy.
         out.and_annot().clear();
         out.numeric_and_annot().clear();
+        out.numeric_interval_annot().clear();
 
         // Initialize the termination policy.
         out.tp().reset();
@@ -120,6 +123,7 @@ struct ProgramExecutionContext
             for (uint_t i = 0; i < bindings.size(); ++i)
             {
                 out.or_ap().initialize_annotation(bindings[i], out.numeric_and_annot());
+                insert_numeric_interval_annotation(out.numeric_interval_annot(), bindings[i], values[i], BaseCase(Cost(0)));
                 out.facts().assignment_sets.function.insert(bindings[i], values[i]);
             }
         }

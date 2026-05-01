@@ -18,6 +18,7 @@
 #ifndef TYR_SOLVER_POLICIES_ANNOTATION_TYPES_HPP_
 #define TYR_SOLVER_POLICIES_ANNOTATION_TYPES_HPP_
 
+#include "tyr/common/closed_interval.hpp"
 #include "tyr/common/config.hpp"
 #include "tyr/common/vector.hpp"
 #include "tyr/datalog/policies/aggregation.hpp"
@@ -79,6 +80,38 @@ using NumericAndAnnotationsMap = UnorderedMap<formalism::datalog::FunctionBindin
 
 static_assert(sizeof(AndAnnotationsMap::value_type) == 48);
 static_assert(sizeof(NumericAndAnnotationsMap::value_type) == 48);
+
+struct NumericIntervalAnnotation
+{
+    ClosedInterval<float_t> interval;
+    Annotation annotation;
+};
+
+using NumericIntervalAnnotationsMap =
+    UnorderedMap<formalism::datalog::FunctionBindingView<formalism::FluentTag>, std::vector<NumericIntervalAnnotation>>;
+
+inline void insert_numeric_interval_annotation(NumericIntervalAnnotationsMap& annotations,
+                                               formalism::datalog::FunctionBindingView<formalism::FluentTag> binding,
+                                               ClosedInterval<float_t> interval,
+                                               Annotation annotation)
+{
+    if (empty(interval))
+        return;
+
+    auto& entries = annotations[binding];
+    const auto cost = get_cost(annotation);
+
+    for (const auto& entry : entries)
+        if (get_cost(entry.annotation) <= cost && subset(interval, entry.interval))
+            return;
+
+    entries.erase(std::remove_if(entries.begin(),
+                                 entries.end(),
+                                 [&](const auto& entry) { return cost <= get_cost(entry.annotation) && subset(entry.interval, interval); }),
+                  entries.end());
+
+    entries.push_back(NumericIntervalAnnotation { interval, annotation });
+}
 
 struct CostUpdate
 {

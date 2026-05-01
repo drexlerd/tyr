@@ -646,6 +646,7 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                                         const auto program_it = numeric_and_annot.find(program_head);
                                         if (program_it == numeric_and_annot.end() || get_cost(it->second) < get_cost(program_it->second))
                                             numeric_and_annot.insert_or_assign(program_head, it->second);
+                                        insert_numeric_interval_annotation(program_out.numeric_interval_annot(), program_head, update.interval, it->second);
                                     }
 
                                     cost_buckets.insert(cost_buckets.current_cost() + rule_cost, program_head, update.interval);
