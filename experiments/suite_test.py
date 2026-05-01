@@ -355,7 +355,8 @@ SUITE_IPC2023_NUMERIC_TEST = [
     "sailing:pfile1.pddl",
     "settlersnumeric:pfile1.pddl",
     "sugar:pfile1.pddl",
-    "tpp:pfile1.pddl"
+    "tpp:pfile1.pddl",
+    "zenotravel:pfile1.pddl",
 ]
 
 SUITE_PUSHWORLD_TEST = [
