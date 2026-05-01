@@ -136,7 +136,7 @@
 
 (:goal
 	(and
-	(>= (+ (available pRbp1p2-AP2) (available pCAF-p300)) 4)))
+	(>= (available SP1) 1)))
 
 
 

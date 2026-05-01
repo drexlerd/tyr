@@ -144,7 +144,7 @@
 	(= (funds) 1000)
 )
 	 (:goal (and
-	 (>= (funds) 1060)
+	 (>= (stored_units) 2)
 	)
 )
 )

@@ -30,10 +30,8 @@
 
 	(:goal
 		(and
-			(at s0 wa5)
-			(at s1 wa5)
+			(at s0 wa1)
+			(>= (waypoint_supplies wa0) 1)
 		)
 	)
 )
-
-

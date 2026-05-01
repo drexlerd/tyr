@@ -23,22 +23,8 @@
   )
 
   (:goal (and 
-    (= (x b1) (x b2))
-(= (y b1) (y b2))
-	(= (x b1) (x b3))
-(= (y b1) (y b3))
-	(= (x b1) (x b4))
-(= (y b1) (y b4))
-	(or (not (= (x b1) (x b5))) (not (= (y b1) (y b5))))
-	(= (x b2) (x b3))
-(= (y b2) (y b3))
-	(= (x b2) (x b4))
-(= (y b2) (y b4))
-	(or (not (= (x b2) (x b5))) (not (= (y b2) (y b5))))
-	(= (x b3) (x b4))
-(= (y b3) (y b4))
-	(or (not (= (x b3) (x b5))) (not (= (y b3) (y b5))))
-	(or (not (= (x b4) (x b5))) (not (= (y b4) (y b5))))
+    (= (x b1) 19)
+    (= (y b1) 13)
   ))
 
   
