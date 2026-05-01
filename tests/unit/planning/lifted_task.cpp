@@ -15,6 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "tyr/common/json_loader.hpp"
+
 #include <gtest/gtest.h>
 #include <tyr/formalism/formalism.hpp>
 #include <tyr/planning/planning.hpp>
@@ -30,28 +32,34 @@ namespace tyr::tests
 {
 namespace
 {
-p::LiftedTaskPtr compute_lifted_task(const fs::path& domain_filepath, const fs::path& problem_filepath)
-{
-    return p::LiftedTask::create(fp::Parser(domain_filepath).parse_task(problem_filepath));
-}
-
-p::SuccessorGenerator<p::LiftedTag> create_successor_generator(std::shared_ptr<p::Task<p::LiftedTag>> task)
-{
-    return p::SuccessorGenerator<p::LiftedTag>(task, ExecutionContext::create(1));
-}
-
-fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_DIR)) / "data" / "tests" / subdir; }
-
 struct LiftedSuccessorCountCase
 {
     std::string name;
-    std::string subdir;
+    std::string domain_file;
+    std::string task_file;
     size_t expected_successors;
 };
 
-std::string test_name(const testing::TestParamInfo<LiftedSuccessorCountCase>& info)
+LiftedSuccessorCountCase parse_case(const boost::json::object& object)
 {
-    return info.param.name;
+    return LiftedSuccessorCountCase { tyr::common::as_string(object, "name", "case"),
+                                      tyr::common::as_string(object, "domain_file", "case"),
+                                      tyr::common::as_string(object, "task_file", "case"),
+                                      tyr::common::as_size(object, "expected_successors", "case") };
+}
+
+std::vector<LiftedSuccessorCountCase> load_cases()
+{
+    const auto suite = tyr::common::load_json_file(tyr::common::root_path() / "tests/unit/planning/lifted_task.json");
+    const auto& suite_object = tyr::common::as_object(suite, "suite");
+    const auto* cases_value = suite_object.if_contains("cases");
+    if (!cases_value)
+        throw std::runtime_error("suite.cases is required.");
+
+    auto result = std::vector<LiftedSuccessorCountCase> {};
+    for (const auto& case_value : tyr::common::as_array(*cases_value, "suite.cases"))
+        result.push_back(parse_case(tyr::common::as_object(case_value, "case")));
+    return result;
 }
 
 void expect_same_node(const p::Node<p::LiftedTag>& expected, const p::Node<p::LiftedTag>& actual)
@@ -100,10 +108,10 @@ bool are_same_binding(fp::ActionBindingView lhs, const Data<formalism::RelationB
     return std::ranges::equal(lhs.get_data(), rhs.objects);
 }
 
-void expect_action_binding_apis_match_ground_actions(const std::string& subdir)
+void expect_action_binding_apis_match_ground_actions(const LiftedSuccessorCountCase& test_case)
 {
-    auto lifted_task = compute_lifted_task(absolute(subdir + "/domain.pddl"), absolute(subdir + "/test-1.pddl"));
-    auto successor_generator = create_successor_generator(lifted_task);
+    auto lifted_task = p::LiftedTask::create(fp::Parser(tyr::common::root_path() / test_case.domain_file).parse_task(tyr::common::root_path() / test_case.task_file));
+    auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(lifted_task, ExecutionContext::create(1));
     const auto initial_node = successor_generator.get_initial_node();
 
     const auto ground_successors = successor_generator.get_labeled_successor_nodes(initial_node);
@@ -149,54 +157,19 @@ class LiftedTaskSuccessorCountTest : public ::testing::TestWithParam<LiftedSucce
 TEST_P(LiftedTaskSuccessorCountTest, InitialNodeHasExpectedSuccessorCount)
 {
     const auto& param = GetParam();
-    auto lifted_task = compute_lifted_task(absolute(param.subdir + "/domain.pddl"), absolute(param.subdir + "/test-1.pddl"));
-    auto successor_generator = create_successor_generator(lifted_task);
+    auto lifted_task = p::LiftedTask::create(fp::Parser(tyr::common::root_path() / param.domain_file).parse_task(tyr::common::root_path() / param.task_file));
+    auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(lifted_task, ExecutionContext::create(1));
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), param.expected_successors);
 }
 
 TEST_P(LiftedTaskSuccessorCountTest, ActionBindingApisMatchGroundActions)
 {
-    expect_action_binding_apis_match_ground_actions(GetParam().subdir);
+    expect_action_binding_apis_match_ground_actions(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(TyrPlanningLiftedTask,
                          LiftedTaskSuccessorCountTest,
-                         ::testing::Values(LiftedSuccessorCountCase { "Agricola", "classical/agricola", 8 },
-                                           LiftedSuccessorCountCase { "Airport", "classical/airport", 2 },
-                                           LiftedSuccessorCountCase { "Assembly", "classical/assembly", 3 },
-                                           LiftedSuccessorCountCase { "Barman", "classical/barman", 4 },
-                                           LiftedSuccessorCountCase { "Blocks3", "classical/blocks_3", 2 },
-                                           LiftedSuccessorCountCase { "Blocks4", "classical/blocks_4", 2 },
-                                           LiftedSuccessorCountCase { "Childsnack", "classical/childsnack", 3 },
-                                           LiftedSuccessorCountCase { "Delivery", "classical/delivery", 2 },
-                                           LiftedSuccessorCountCase { "Driverlog", "classical/driverlog", 2 },
-                                           LiftedSuccessorCountCase { "Ferry", "classical/ferry", 3 },
-                                           LiftedSuccessorCountCase { "FoCounters", "numeric/fo-counters", 9 },
-                                           LiftedSuccessorCountCase { "Grid", "classical/grid", 1 },
-                                           LiftedSuccessorCountCase { "Gripper", "classical/gripper", 6 },
-                                           LiftedSuccessorCountCase { "Hiking", "classical/hiking", 18 },
-                                           LiftedSuccessorCountCase { "Logistics", "classical/logistics", 6 },
-                                           LiftedSuccessorCountCase { "Miconic", "classical/miconic", 3 },
-                                           LiftedSuccessorCountCase { "MiconicFulladl", "classical/miconic-fulladl", 3 },
-                                           LiftedSuccessorCountCase { "MiconicSimpleadl", "classical/miconic-simpleadl", 2 },
-                                           LiftedSuccessorCountCase { "Parcprinter", "classical/parcprinter", 1 },
-                                           LiftedSuccessorCountCase { "Pathways", "classical/pathways", 16 },
-                                           LiftedSuccessorCountCase { "Philosophers", "classical/philosophers", 2 },
-                                           LiftedSuccessorCountCase { "PsrMiddle", "classical/psr-middle", 1 },
-                                           LiftedSuccessorCountCase { "Pushworld", "classical/pushworld", 4 },
-                                           LiftedSuccessorCountCase { "Refuel", "numeric/refuel", 1 },
-                                           LiftedSuccessorCountCase { "RefuelAdl", "numeric/refuel-adl", 5 },
-                                           LiftedSuccessorCountCase { "Reward", "classical/reward", 1 },
-                                           LiftedSuccessorCountCase { "Rovers", "classical/rovers", 2 },
-                                           LiftedSuccessorCountCase { "Satellite", "classical/satellite", 4 },
-                                           LiftedSuccessorCountCase { "Schedule", "classical/schedule", 44 },
-                                           LiftedSuccessorCountCase { "Sokoban", "classical/sokoban", 3 },
-                                           LiftedSuccessorCountCase { "Spanner", "classical/spanner", 1 },
-                                           LiftedSuccessorCountCase { "Tpp", "numeric/tpp", 5 },
-                                           LiftedSuccessorCountCase { "Transport", "classical/transport", 5 },
-                                           LiftedSuccessorCountCase { "Visitall", "classical/visitall", 2 },
-                                           LiftedSuccessorCountCase { "Woodworking", "classical/woodworking", 8 },
-                                           LiftedSuccessorCountCase { "Zenotravel", "numeric/zenotravel", 7 }),
-                         test_name);
+                         ::testing::ValuesIn(load_cases()),
+                         [](const testing::TestParamInfo<LiftedSuccessorCountCase>& info) { return info.param.name; });
 }

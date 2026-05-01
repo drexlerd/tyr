@@ -33,40 +33,6 @@ namespace tyr::tests
 
 namespace
 {
-auto compute_lifted_task(const fs::path& domain_filepath, const fs::path& problem_filepath) { return fp::Parser(domain_filepath).parse_task(problem_filepath); }
-
-fs::path absolute(const std::string& filepath) { return fs::path(std::string(ROOT_DIR)) / filepath; }
-
-const json::object& as_object(const json::value& value, std::string_view context)
-{
-    if (!value.is_object())
-        throw std::runtime_error(std::string(context) + " must be an object.");
-    return value.as_object();
-}
-
-const json::array& as_array(const json::value& value, std::string_view context)
-{
-    if (!value.is_array())
-        throw std::runtime_error(std::string(context) + " must be an array.");
-    return value.as_array();
-}
-
-std::string as_string(const json::object& object, std::string_view key, std::string_view context)
-{
-    const auto* value = object.if_contains(key);
-    if (!value || !value->is_string())
-        throw std::runtime_error(std::string(context) + "." + std::string(key) + " must be a string.");
-    return std::string(value->as_string());
-}
-
-size_t as_size(const json::object& object, std::string_view key, std::string_view context)
-{
-    const auto* value = object.if_contains(key);
-    if (!value || !value->is_int64() || value->as_int64() < 0)
-        throw std::runtime_error(std::string(context) + "." + std::string(key) + " must be a non-negative integer.");
-    return static_cast<size_t>(value->as_int64());
-}
-
 std::vector<int> parse_parameters(const json::object& atom_object)
 {
     const auto* value = atom_object.if_contains("parameters");
@@ -74,7 +40,7 @@ std::vector<int> parse_parameters(const json::object& atom_object)
         throw std::runtime_error("atom.parameters is required.");
 
     auto result = std::vector<int> {};
-    for (const auto& parameter : as_array(*value, "atom.parameters"))
+    for (const auto& parameter : tyr::common::as_array(*value, "atom.parameters"))
     {
         if (!parameter.is_int64() || parameter.as_int64() < 0)
             throw std::runtime_error("atom.parameters entries must be non-negative integers.");
@@ -102,14 +68,14 @@ fpi::Invariant parse_invariant(fp::Repository& repository, const json::object& i
     if (!atoms_value)
         throw std::runtime_error("invariant.atoms is required.");
 
-    for (const auto& atom_value : as_array(*atoms_value, "invariant.atoms"))
+    for (const auto& atom_value : tyr::common::as_array(*atoms_value, "invariant.atoms"))
     {
-        const auto& atom_object = as_object(atom_value, "atom");
-        atoms.push_back(atom(repository, as_string(atom_object, "predicate", "atom"), parse_parameters(atom_object)));
+        const auto& atom_object = tyr::common::as_object(atom_value, "atom");
+        atoms.push_back(atom(repository, tyr::common::as_string(atom_object, "predicate", "atom"), parse_parameters(atom_object)));
     }
 
-    return fpi::Invariant(as_size(invariant_object, "num_rigid_variables", "invariant"),
-                          as_size(invariant_object, "num_counted_variables", "invariant"),
+    return fpi::Invariant(tyr::common::as_size(invariant_object, "num_rigid_variables", "invariant"),
+                          tyr::common::as_size(invariant_object, "num_counted_variables", "invariant"),
                           std::move(atoms));
 }
 
@@ -120,8 +86,8 @@ std::vector<fpi::Invariant> parse_invariants(fp::Repository& repository, const j
         throw std::runtime_error("case.invariants is required.");
 
     auto result = std::vector<fpi::Invariant> {};
-    for (const auto& invariant_value : as_array(*invariants_value, "case.invariants"))
-        result.push_back(parse_invariant(repository, as_object(invariant_value, "invariant")));
+    for (const auto& invariant_value : tyr::common::as_array(*invariants_value, "case.invariants"))
+        result.push_back(parse_invariant(repository, tyr::common::as_object(invariant_value, "invariant")));
     return result;
 }
 
@@ -134,19 +100,20 @@ void expect_invariant_sets_equal(std::vector<fpi::Invariant> actual, std::vector
 
 TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesis)
 {
-    const auto suite = tyr::common::load_json_file(absolute("tests/unit/formalism/planning/invariants/synthesis.json"));
-    const auto& suite_object = as_object(suite, "suite");
+    const auto suite = tyr::common::load_json_file(tyr::common::root_path() / "tests/unit/formalism/planning/invariants/synthesis.json");
+    const auto& suite_object = tyr::common::as_object(suite, "suite");
     const auto* cases_value = suite_object.if_contains("cases");
     ASSERT_TRUE(cases_value);
 
-    for (const auto& case_value : as_array(*cases_value, "suite.cases"))
+    for (const auto& case_value : tyr::common::as_array(*cases_value, "suite.cases"))
     {
-        const auto& case_object = as_object(case_value, "case");
-        const auto name = as_string(case_object, "name", "case");
+        const auto& case_object = tyr::common::as_object(case_value, "case");
+        const auto name = tyr::common::as_string(case_object, "name", "case");
 
         SCOPED_TRACE(name);
 
-        auto lifted_task = compute_lifted_task(absolute(as_string(case_object, "domain_file", "case")), absolute(as_string(case_object, "task_file", "case")));
+        auto lifted_task = fp::Parser(tyr::common::root_path() / tyr::common::as_string(case_object, "domain_file", "case"))
+                               .parse_task(tyr::common::root_path() / tyr::common::as_string(case_object, "task_file", "case"));
         auto& repository = *lifted_task.get_repository();
 
         auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());

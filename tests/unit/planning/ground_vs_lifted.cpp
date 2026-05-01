@@ -15,7 +15,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "tyr/common/json_loader.hpp"
+
 #include <gtest/gtest.h>
+#include <string>
 #include <tyr/formalism/formalism.hpp>
 #include <tyr/planning/planning.hpp>
 
@@ -27,8 +30,6 @@ namespace tyr::tests
 {
 namespace
 {
-fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_DIR)) / "data" / "tests" / subdir; }
-
 /// @brief Compare statistics that must be the same for both configurations
 /// Notes:
 /// - plan length may differ because two plans of different length may have same optimal cost.
@@ -36,7 +37,6 @@ fs::path absolute(const std::string& subdir) { return fs::path(std::string(ROOT_
 struct SearchSummary
 {
     std::optional<uint64_t> expanded_last_snapshot;
-
     p::SearchStatus status;
     float_t plan_cost;
 
@@ -45,6 +45,34 @@ struct SearchSummary
         return expanded_last_snapshot == other.expanded_last_snapshot && status == other.status && f::apply(f::OpEq {}, plan_cost, other.plan_cost);
     }
 };
+
+struct GroundVsLiftedCase
+{
+    std::string name;
+    std::string domain_file;
+    std::string task_file;
+};
+
+GroundVsLiftedCase parse_case(const boost::json::object& object)
+{
+    return GroundVsLiftedCase { tyr::common::as_string(object, "name", "case"),
+                                tyr::common::as_string(object, "domain_file", "case"),
+                                tyr::common::as_string(object, "task_file", "case") };
+}
+
+std::vector<GroundVsLiftedCase> load_cases()
+{
+    const auto suite = tyr::common::load_json_file(tyr::common::root_path() / "tests/unit/planning/ground_vs_lifted.json");
+    const auto& suite_object = tyr::common::as_object(suite, "suite");
+    const auto* cases_value = suite_object.if_contains("cases");
+    if (!cases_value)
+        throw std::runtime_error("suite.cases is required.");
+
+    auto result = std::vector<GroundVsLiftedCase> {};
+    for (const auto& case_value : tyr::common::as_array(*cases_value, "suite.cases"))
+        result.push_back(parse_case(tyr::common::as_object(case_value, "case")));
+    return result;
+}
 
 template<p::TaskKind Kind>
 SearchSummary run_blind_astar(const fs::path& domain_filepath, const fs::path& problem_filepath)
@@ -87,15 +115,15 @@ SearchSummary run_blind_astar(const fs::path& domain_filepath, const fs::path& p
 }
 }
 
-class GroundVsLiftedTest : public ::testing::TestWithParam<std::string>
+class GroundVsLiftedTest : public ::testing::TestWithParam<GroundVsLiftedCase>
 {
 };
 
 TEST_P(GroundVsLiftedTest, BlindAStarMatches)
 {
-    const auto subdir = GetParam();
-    const auto domain = absolute(subdir + "/domain.pddl");
-    const auto problem = absolute(subdir + "/test-1.pddl");
+    const auto& param = GetParam();
+    const auto domain = tyr::common::root_path() / param.domain_file;
+    const auto problem = tyr::common::root_path() / param.task_file;
 
     const auto lifted = run_blind_astar<p::LiftedTag>(domain, problem);
     const auto grounded = run_blind_astar<p::GroundTag>(domain, problem);
@@ -105,39 +133,6 @@ TEST_P(GroundVsLiftedTest, BlindAStarMatches)
 
 INSTANTIATE_TEST_SUITE_P(TyrTests,
                          GroundVsLiftedTest,
-                         ::testing::Values(  // "classical/agricola",  too much time
-                             "classical/airport",
-                             "classical/assembly",
-                             "classical/blocks_3",
-                             "classical/blocks_4",
-                             "classical/barman",
-                             "classical/childsnack",
-                             "classical/delivery",
-                             "classical/ferry",
-                             "numeric/fo-counters",
-                             "classical/grid",
-                             "classical/gripper",
-                             "classical/hiking",
-                             "classical/logistics",
-                             "classical/miconic",
-                             "classical/miconic-fulladl",
-                             "classical/miconic-simpleadl",
-                             "classical/parcprinter",
-                             "classical/pathways",
-                             "classical/philosophers",
-                             "classical/psr-middle",
-                             // "classical/pushworld",  too much time
-                             "numeric/refuel",
-                             "numeric/refuel-adl",
-                             "classical/reward",
-                             "classical/rovers",
-                             "classical/satellite",
-                             "classical/schedule",
-                             // "classical/sokoban",
-                             "classical/spanner",
-                             "numeric/tpp",
-                             "classical/transport",
-                             "classical/visitall",
-                             "classical/woodworking",
-                             "numeric/zenotravel"));
+                         ::testing::ValuesIn(load_cases()),
+                         [](const testing::TestParamInfo<GroundVsLiftedCase>& info) { return info.param.name; });
 }

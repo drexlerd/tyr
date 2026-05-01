@@ -58,6 +58,36 @@ inline boost::json::value load_json_file(const std::filesystem::path& path)
     return boost::json::parse(read_file(path));
 }
 
+inline const boost::json::object& as_object(const boost::json::value& value, std::string_view context)
+{
+    if (!value.is_object())
+        throw std::runtime_error(std::string(context) + " must be an object.");
+    return value.as_object();
+}
+
+inline const boost::json::array& as_array(const boost::json::value& value, std::string_view context)
+{
+    if (!value.is_array())
+        throw std::runtime_error(std::string(context) + " must be an array.");
+    return value.as_array();
+}
+
+inline std::string as_string(const boost::json::object& object, std::string_view key, std::string_view context)
+{
+    const auto* value = object.if_contains(key);
+    if (!value || !value->is_string())
+        throw std::runtime_error(std::string(context) + "." + std::string(key) + " must be a string.");
+    return std::string(value->as_string());
+}
+
+inline size_t as_size(const boost::json::object& object, std::string_view key, std::string_view context)
+{
+    const auto* value = object.if_contains(key);
+    if (!value || !value->is_int64() || value->as_int64() < 0)
+        throw std::runtime_error(std::string(context) + "." + std::string(key) + " must be a non-negative integer.");
+    return static_cast<size_t>(value->as_int64());
+}
+
 }
 
 #endif
