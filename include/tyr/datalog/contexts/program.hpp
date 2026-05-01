@@ -68,9 +68,7 @@ struct ProgramExecutionContext
         }
         void rebuild_numeric_support_selector(const TaggedFactSets<formalism::StaticTag>& static_fact_sets)
         {
-            m_ws.numeric_support_selector.emplace(FactSets { static_fact_sets, m_ws.facts.fact_sets },
-                                                  m_ws.numeric_and_annot,
-                                                  m_ws.numeric_initial_values);
+            m_ws.numeric_support_selector.emplace(FactSets { static_fact_sets, m_ws.facts.fact_sets }, m_ws.numeric_and_annot);
         }
         auto& tp() noexcept { return m_ws.tp; }
         const auto& tp() const noexcept { return m_ws.tp; }
