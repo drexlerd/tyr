@@ -22,6 +22,7 @@
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/hash.hpp"
 #include "tyr/datalog/policies/annotation_concept.hpp"
+#include "tyr/datalog/policies/numeric_support.hpp"
 #include "tyr/datalog/policies/termination_concept.hpp"
 #include "tyr/datalog/program_context.hpp"
 #include "tyr/datalog/rule_scheduler.hpp"
@@ -175,9 +176,11 @@ struct ProgramWorkspace
     FactsWorkspace facts;
 
     OrAP or_ap;
-    AndAnnotationsMap and_annot;
-    NumericAndAnnotationsMap numeric_and_annot;
+    SelectedPredicateAnnotations and_annot;
+    SelectedFunctionAnnotations numeric_and_annot;
     NumericIntervalAnnotations numeric_interval_annot;
+    NumericInitialValues numeric_initial_values;
+    std::optional<NumericSupportSelector> numeric_support_selector;
 
     TP tp;
 

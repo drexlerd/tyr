@@ -63,7 +63,7 @@ private:
     void extract_relaxed_plan_and_preferred_actions(formalism::datalog::FunctionBindingView<formalism::FluentTag> function,
                                                     const StateContext<LiftedTag>& state_context,
                                                     formalism::planning::GrounderContext& grounder_context);
-    void extract_relaxed_plan_and_preferred_actions(const datalog::Witness& witness,
+    void extract_relaxed_plan_and_preferred_actions(const datalog::WitnessAnnotation& witness,
                                                     const StateContext<LiftedTag>& state_context,
                                                     formalism::planning::GrounderContext& grounder_context);
 

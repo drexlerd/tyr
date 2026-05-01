@@ -133,11 +133,11 @@ void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(forma
         return;
 
     // Base case 2: atom is initially true, i.e., has no witness => do not recurse again
-    const auto it = m_workspace.and_annot.find(binding);
-    if (it == m_workspace.and_annot.end())
+    const auto* annotation = m_workspace.and_annot.find(binding);
+    if (!annotation)
         return;
 
-    const auto* witness = std::get_if<datalog::Witness>(&it->second);
+    const auto* witness = std::get_if<datalog::WitnessAnnotation>(annotation);
     if (!witness)
         return;
 
@@ -153,18 +153,18 @@ void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(forma
         return;
 
     // Base case 2: function binding is initially assigned, i.e., has no witness => do not recurse again
-    const auto it = m_workspace.numeric_and_annot.find(binding);
-    if (it == m_workspace.numeric_and_annot.end())
+    const auto* annotation = m_workspace.numeric_and_annot.find(binding);
+    if (!annotation)
         return;
 
-    const auto* witness = std::get_if<datalog::Witness>(&it->second);
+    const auto* witness = std::get_if<datalog::WitnessAnnotation>(annotation);
     if (!witness)
         return;
 
     extract_relaxed_plan_and_preferred_actions(*witness, state_context, grounder_context);
 }
 
-void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(const datalog::Witness& witness,
+void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(const datalog::WitnessAnnotation& witness,
                                                                            const StateContext<LiftedTag>& state_context,
                                                                            formalism::planning::GrounderContext& grounder_context)
 {

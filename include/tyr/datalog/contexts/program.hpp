@@ -28,6 +28,7 @@
 #include "tyr/datalog/workspaces/rule.hpp"
 
 #include <ranges>
+#include <cassert>
 
 namespace tyr::datalog
 {
@@ -62,6 +63,17 @@ struct ProgramExecutionContext
         const auto& numeric_and_annot() const noexcept { return m_ws.numeric_and_annot; }
         auto& numeric_interval_annot() noexcept { return m_ws.numeric_interval_annot; }
         const auto& numeric_interval_annot() const noexcept { return m_ws.numeric_interval_annot; }
+        const auto& numeric_support_selector() const noexcept
+        {
+            assert(m_ws.numeric_support_selector.has_value());
+            return *m_ws.numeric_support_selector;
+        }
+        void rebuild_numeric_support_selector(const TaggedFactSets<formalism::StaticTag>& static_fact_sets)
+        {
+            m_ws.numeric_support_selector.emplace(FactSets { static_fact_sets, m_ws.facts.fact_sets },
+                                                  m_ws.numeric_interval_annot,
+                                                  m_ws.numeric_initial_values);
+        }
         auto& tp() noexcept { return m_ws.tp; }
         const auto& tp() const noexcept { return m_ws.tp; }
         auto& rules() noexcept { return m_ws.rules; }
@@ -123,13 +135,15 @@ struct ProgramExecutionContext
             for (uint_t i = 0; i < bindings.size(); ++i)
             {
                 out.or_ap().initialize_annotation(bindings[i], out.numeric_and_annot());
-                insert_numeric_interval_annotation(out.numeric_interval_annot(), bindings[i], values[i], BaseCase(Cost(0)));
+                out.numeric_interval_annot().insert(bindings[i], values[i], BaseAnnotation(Cost(0)));
                 out.facts().assignment_sets.function.insert(bindings[i], values[i]);
             }
         }
 
         // Reset cost buckets.
         out.cost_buckets().clear();
+
+        out.rebuild_numeric_support_selector(in().facts().fact_sets);
     }
 
     /**

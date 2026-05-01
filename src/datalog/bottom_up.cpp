@@ -34,6 +34,7 @@
 #include "tyr/datalog/formatter.hpp"
 #include "tyr/datalog/policies/aggregation.hpp"
 #include "tyr/datalog/policies/annotation.hpp"
+#include "tyr/datalog/policies/numeric_support.hpp"
 #include "tyr/datalog/policies/termination.hpp"
 #include "tyr/datalog/rule_scheduler.hpp"  // for RuleSchedulerStratum
 #include "tyr/datalog/workspaces/facts.hpp"
@@ -49,8 +50,10 @@
 
 #include <algorithm>  // for all_of
 #include <assert.h>   // for assert
+#include <cstdlib>
 #include <cmath>
 #include <fmt/ostream.h>
+#include <iostream>
 #include <memory>  // for __sha...
 #include <oneapi/tbb/parallel_for_each.h>
 #include <oneapi/tbb/parallel_invoke.h>
@@ -67,6 +70,12 @@ namespace tyr::datalog
 {
 
 static void create_nullary_binding(IndexList<f::Object>& binding) { binding.clear(); }
+
+static bool trace_numeric_intervals() noexcept
+{
+    static const auto enabled = std::getenv("TYR_TRACE_NUMERIC_INTERVALS") != nullptr;
+    return enabled;
+}
 
 static void create_general_binding(std::span<const kpkc::Vertex> clique, const StaticConsistencyGraph& consistency_graph, IndexList<f::Object>& binding)
 {
@@ -87,14 +96,15 @@ template<AndAnnotationPolicyConcept AndAP>
 static void insert_propositional_update(fd::AtomView<f::FluentTag> head,
                                         fd::RuleView rule,
                                         fd::ConjunctiveConditionView witness_condition,
+                                        const NumericSupportSelector& numeric_support_selector,
                                         Cost current_cost,
-                                        const AndAnnotationsMap& program_and_annot,
-                                        const NumericAndAnnotationsMap& program_numeric_and_annot,
+                                        const SelectedPredicateAnnotations& program_and_annot,
+                                        const SelectedFunctionAnnotations& program_numeric_and_annot,
                                         const AndAP& and_ap,
                                         fd::GrounderContext& solve_context,
                                         fd::GrounderContext& iteration_context,
                                         RuleHeadIteration& head_iteration,
-                                        AndAnnotationsMap& and_annot)
+                                        SelectedPredicateAnnotations& and_annot)
 {
     const auto program_head = fd::ground_binding(head, iteration_context).first;
     const auto worker_head = fd::ground_binding(head, solve_context).first;
@@ -106,6 +116,7 @@ static void insert_propositional_update(fd::AtomView<f::FluentTag> head,
                              current_cost,
                              rule,
                              witness_condition,
+                             numeric_support_selector,
                              program_and_annot,
                              program_numeric_and_annot,
                              and_annot,
@@ -118,14 +129,15 @@ static void insert_numeric_update(fd::NumericEffectOperatorView<f::FluentTag> he
                                   fd::RuleView rule,
                                   fd::ConjunctiveConditionView witness_condition,
                                   const FactSets& fact_sets,
+                                  const NumericSupportSelector& numeric_support_selector,
                                   Cost current_cost,
-                                  const AndAnnotationsMap& program_and_annot,
-                                  const NumericAndAnnotationsMap& program_numeric_and_annot,
+                                  const SelectedPredicateAnnotations& program_and_annot,
+                                  const SelectedFunctionAnnotations& program_numeric_and_annot,
                                   const AndAP& and_ap,
                                   fd::GrounderContext& solve_context,
                                   fd::GrounderContext& iteration_context,
                                   RuleHeadIteration& head_iteration,
-                                  NumericAndAnnotationsMap& numeric_and_annot)
+                                  SelectedFunctionAnnotations& numeric_and_annot)
 {
     const auto interval = is_valid_binding(head, fact_sets, iteration_context);
     if (empty(interval))
@@ -144,6 +156,7 @@ static void insert_numeric_update(fd::NumericEffectOperatorView<f::FluentTag> he
                                      current_cost,
                                      rule,
                                      witness_condition,
+                                     numeric_support_selector,
                                      program_and_annot,
                                      program_numeric_and_annot,
                                      numeric_and_annot,
@@ -160,6 +173,7 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
 
     const auto& in = wrctx.in();
     auto& out = wrctx.out();
+    const auto& numeric_support_selector = in.numeric_support_selector();
     ++out.statistics().num_executions;
     ++out.statistics().num_generated_rules;
 
@@ -179,6 +193,7 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                     insert_propositional_update(head,
                                                 in.cws_rule().get_rule(),
                                                 in.cws_rule().get_witness_rule().get_body(),
+                                                numeric_support_selector,
                                                 in.cost_buckets().current_cost(),
                                                 in.and_annot(),
                                                 in.numeric_and_annot(),
@@ -196,6 +211,7 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                                           in.cws_rule().get_rule(),
                                           in.cws_rule().get_witness_rule().get_body(),
                                           in.fact_sets(),
+                                          numeric_support_selector,
                                           in.cost_buckets().current_cost(),
                                           in.and_annot(),
                                           in.numeric_and_annot(),
@@ -256,7 +272,10 @@ static bool is_dynamically_applicable(fd::GroundConjunctiveConditionView nullary
 }
 
 template<OrAnnotationPolicyConcept OrAP, AndAnnotationPolicyConcept AndAP, TerminationPolicyConcept TP>
-void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::span<const kpkc::Vertex> clique, bool require_novel_binding)
+void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx,
+                    const NumericSupportSelector& numeric_support_selector,
+                    std::span<const kpkc::Vertex> clique,
+                    bool require_novel_binding)
 {
     const auto& in = wrctx.in();
     auto& out = wrctx.out();
@@ -304,6 +323,7 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
                 insert_propositional_update(head,
                                             in.cws_rule().get_rule(),
                                             in.cws_rule().get_witness_rule().get_body(),
+                                            numeric_support_selector,
                                             in.cost_buckets().current_cost(),
                                             in.and_annot(),
                                             in.numeric_and_annot(),
@@ -324,6 +344,7 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
                                       in.cws_rule().get_rule(),
                                       in.cws_rule().get_witness_rule().get_body(),
                                       in.fact_sets(),
+                                      numeric_support_selector,
                                       in.cost_buckets().current_cost(),
                                       in.and_annot(),
                                       in.numeric_and_annot(),
@@ -376,6 +397,7 @@ void generate_general_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
         auto run_stripe = [&](size_t tid, size_t num_stripes)
         {
             auto wrctx = rctx.get_rule_worker_execution_context();
+            const auto& numeric_support_selector = wrctx.in().numeric_support_selector();
             auto& out = wrctx.out();
             auto& ws = out.kpkc_workspace();
             ++out.statistics().num_executions;
@@ -386,7 +408,7 @@ void generate_general_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                 if (!kpkc_algorithm.seed_from_anchor(edge, ws))
                     continue;
 
-                kpkc_algorithm.template complete_from_seed<kpkc::Edge>([&](auto&& clique) { process_clique(wrctx, clique, true); }, 0, ws);
+                kpkc_algorithm.template complete_from_seed<kpkc::Edge>([&](auto&& clique) { process_clique(wrctx, numeric_support_selector, clique, true); }, 0, ws);
             }
         };
 
@@ -395,6 +417,7 @@ void generate_general_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
     else
     {
         auto wrctx = rctx.get_rule_worker_execution_context();
+        const auto& numeric_support_selector = wrctx.in().numeric_support_selector();
         auto& out = wrctx.out();
         auto& kpkc_workspace = out.kpkc_workspace();
         ++out.statistics().num_executions;
@@ -405,7 +428,8 @@ void generate_general_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                 using Head = std::decay_t<decltype(head)>;
                 for_each_relevant_clique(
                     head,
-                    [&](auto&& clique) { process_clique(wrctx, clique, !std::is_same_v<Head, fd::NumericEffectOperatorView<f::FluentTag>>); },
+                    [&](auto&& clique)
+                    { process_clique(wrctx, numeric_support_selector, clique, !std::is_same_v<Head, fd::NumericEffectOperatorView<f::FluentTag>>); },
                     kpkc_workspace);
             },
             rctx.in().cws_rule().get_rule().get_head());
@@ -414,6 +438,7 @@ void generate_general_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
 #else
 
     auto wrctx = rctx.get_rule_worker_execution_context();
+    const auto& numeric_support_selector = wrctx.in().numeric_support_selector();
     auto& out = wrctx.out();
     auto& kpkc_workspace = out.kpkc_workspace();
     ++out.statistics().num_executions;
@@ -424,7 +449,8 @@ void generate_general_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
             using Head = std::decay_t<decltype(head)>;
             for_each_relevant_clique(
                 head,
-                [&](auto&& clique) { process_clique(wrctx, clique, !std::is_same_v<Head, fd::NumericEffectOperatorView<f::FluentTag>>); },
+                [&](auto&& clique)
+                { process_clique(wrctx, numeric_support_selector, clique, !std::is_same_v<Head, fd::NumericEffectOperatorView<f::FluentTag>>); },
                 kpkc_workspace);
         },
         rctx.in().cws_rule().get_rule().get_head());
@@ -452,6 +478,7 @@ void process_pending_rule_bindings(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
 
         const auto& in = wrctx.in();
         auto& out = wrctx.out();
+        const auto& numeric_support_selector = in.numeric_support_selector();
 
         for (auto it = out.pending_rule_bindings().begin(); it != out.pending_rule_bindings().end();)
         {
@@ -484,6 +511,7 @@ void process_pending_rule_bindings(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                             insert_propositional_update(head,
                                                         in.cws_rule().get_rule(),
                                                         in.cws_rule().get_witness_rule().get_body(),
+                                                        numeric_support_selector,
                                                         in.cost_buckets().current_cost(),
                                                         in.and_annot(),
                                                         in.numeric_and_annot(),
@@ -638,14 +666,13 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                                                   worker.solve.program_overlay_repository);
 
                                     const auto program_head = fd::merge_d2d(worker_head, merge_context).first;
-                                    const auto it = worker.iteration.numeric_and_annot.find(worker_head);
-                                    if (it != worker.iteration.numeric_and_annot.end())
+                                    const auto* worker_annotation = worker.iteration.numeric_and_annot.find(worker_head);
+                                    if (worker_annotation)
                                     {
                                         auto& numeric_and_annot = program_out.numeric_and_annot();
-                                        const auto program_it = numeric_and_annot.find(program_head);
-                                        if (program_it == numeric_and_annot.end() || get_cost(it->second) < get_cost(program_it->second))
-                                            numeric_and_annot.insert_or_assign(program_head, it->second);
-                                        insert_numeric_interval_annotation(program_out.numeric_interval_annot(), program_head, update.interval, BaseCase(update.cost));
+                                        const auto* program_annotation = numeric_and_annot.find(program_head);
+                                        if (!program_annotation || get_cost(*worker_annotation) < get_cost(*program_annotation))
+                                            numeric_and_annot.insert_or_assign(program_head, *worker_annotation);
                                     }
 
                                     cost_buckets.insert(update.cost, program_head, update.interval);
@@ -680,6 +707,12 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                 const auto changed = facts.fact_sets.function.insert(head, interval);
                 if (changed)
                 {
+                    program_out.numeric_interval_annot().insert(head, interval, BaseAnnotation(cost_buckets.current_cost()));
+                    if (trace_numeric_intervals())
+                        std::cerr << "[numeric-rpg] cost=" << cost_buckets.current_cost() << " relation=" << uint_t(head.get_index().relation)
+                                  << " row=" << uint_t(head.get_index().row) << " interval=" << interval
+                                  << " annotations=" << program_out.numeric_interval_annot().size() << '\n';
+
                     // Notify scheduler
                     scheduler.on_generate(head.get_index().relation);
 
@@ -687,6 +720,8 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                     facts.assignment_sets.function.insert(head, interval);
                 }
             }
+
+            program_out.rebuild_numeric_support_selector(ctx.in().program().facts().fact_sets);
         }
 
         scheduler.on_finish_iteration();

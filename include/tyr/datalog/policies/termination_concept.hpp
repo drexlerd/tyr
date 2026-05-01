@@ -31,17 +31,19 @@
 namespace tyr::datalog
 {
 
+class NumericSupportSelector;
+
 template<typename T>
 concept TerminationPolicyConcept = requires(T& p,
                                             const T& cp,
                                             formalism::datalog::GroundConjunctiveConditionView goals,
                                             const FactSets& fact_sets,
-                                            const AndAnnotationsMap& and_annot,
-                                            const NumericAndAnnotationsMap& numeric_and_annot,
-                                            const NumericIntervalAnnotations& numeric_interval_annot) {
+                                            const SelectedPredicateAnnotations& and_annot,
+                                            const SelectedFunctionAnnotations& numeric_and_annot,
+                                            const NumericSupportSelector& numeric_support_selector) {
     { p.set_goals(goals) } -> std::same_as<void>;
     { cp.check(fact_sets) } -> std::same_as<bool>;
-    { cp.get_total_cost(fact_sets, and_annot, numeric_and_annot, numeric_interval_annot) } -> std::same_as<Cost>;
+    { cp.get_total_cost(fact_sets, and_annot, numeric_and_annot, numeric_support_selector) } -> std::same_as<Cost>;
     { p.reset() } -> std::same_as<void>;
     { p.clear() } -> std::same_as<void>;
 };

@@ -37,19 +37,21 @@
 namespace tyr::datalog
 {
 
+class NumericSupportSelector;
+
 class NoOrAnnotationPolicy
 {
 public:
-    void initialize_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> head, AndAnnotationsMap& program_and_annot) const noexcept {}
+    void initialize_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> head, SelectedPredicateAnnotations& program_and_annot) const noexcept {}
     void initialize_annotation(formalism::datalog::FunctionBindingView<formalism::FluentTag> head,
-                               NumericAndAnnotationsMap& program_numeric_and_annot) const noexcept
+                               SelectedFunctionAnnotations& program_numeric_and_annot) const noexcept
     {
     }
 
     CostUpdate update_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head,
                                  formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head,
-                                 const AndAnnotationsMap& delta_and_annot,
-                                 AndAnnotationsMap& program_and_annot) const noexcept
+                                 const SelectedPredicateAnnotations& delta_and_annot,
+                                 SelectedPredicateAnnotations& program_and_annot) const noexcept
     {
         return CostUpdate();
     }
@@ -63,9 +65,10 @@ public:
                            uint_t current_cost,
                            formalism::datalog::RuleView rule,
                            formalism::datalog::ConjunctiveConditionView witness_condition,
-                           const AndAnnotationsMap& program_and_annot,
-                           const NumericAndAnnotationsMap& program_numeric_and_annot,
-                           AndAnnotationsMap& delta_and_annot,
+                           const NumericSupportSelector& numeric_support_selector,
+                           const SelectedPredicateAnnotations& program_and_annot,
+                           const SelectedFunctionAnnotations& program_numeric_and_annot,
+                           SelectedPredicateAnnotations& delta_and_annot,
                            formalism::datalog::GrounderContext& delta_context,
                            formalism::datalog::GrounderContext& iteration_context) const noexcept
     {
@@ -76,9 +79,10 @@ public:
                            uint_t current_cost,
                            formalism::datalog::RuleView rule,
                            formalism::datalog::ConjunctiveConditionView witness_condition,
-                           const AndAnnotationsMap& program_and_annot,
-                           const NumericAndAnnotationsMap& program_numeric_and_annot,
-                           NumericAndAnnotationsMap& delta_numeric_and_annot,
+                           const NumericSupportSelector& numeric_support_selector,
+                           const SelectedPredicateAnnotations& program_and_annot,
+                           const SelectedFunctionAnnotations& program_numeric_and_annot,
+                           SelectedFunctionAnnotations& delta_numeric_and_annot,
                            formalism::datalog::GrounderContext& delta_context,
                            formalism::datalog::GrounderContext& iteration_context) const
     {
@@ -88,14 +92,14 @@ public:
 class OrAnnotationPolicy
 {
 public:
-    void initialize_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head, AndAnnotationsMap& program_and_annot) const;
+    void initialize_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head, SelectedPredicateAnnotations& program_and_annot) const;
     void initialize_annotation(formalism::datalog::FunctionBindingView<formalism::FluentTag> program_head,
-                               NumericAndAnnotationsMap& program_numeric_and_annot) const;
+                               SelectedFunctionAnnotations& program_numeric_and_annot) const;
 
     CostUpdate update_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head,
                                  formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head,
-                                 const AndAnnotationsMap& delta_and_annot,
-                                 AndAnnotationsMap& program_and_annot) const;
+                                 const SelectedPredicateAnnotations& delta_and_annot,
+                                 SelectedPredicateAnnotations& program_and_annot) const;
 };
 
 template<typename AggregationFunction>
@@ -109,9 +113,10 @@ public:
                            uint_t current_cost,
                            formalism::datalog::RuleView rule,
                            formalism::datalog::ConjunctiveConditionView witness_condition,
-                           const AndAnnotationsMap& program_and_annot,
-                           const NumericAndAnnotationsMap& program_numeric_and_annot,
-                           AndAnnotationsMap& delta_and_annot,
+                           const NumericSupportSelector& numeric_support_selector,
+                           const SelectedPredicateAnnotations& program_and_annot,
+                           const SelectedFunctionAnnotations& program_numeric_and_annot,
+                           SelectedPredicateAnnotations& delta_and_annot,
                            formalism::datalog::GrounderContext& delta_context,
                            formalism::datalog::GrounderContext& iteration_context) const;
 
@@ -120,9 +125,10 @@ public:
                            uint_t current_cost,
                            formalism::datalog::RuleView rule,
                            formalism::datalog::ConjunctiveConditionView witness_condition,
-                           const AndAnnotationsMap& program_and_annot,
-                           const NumericAndAnnotationsMap& program_numeric_and_annot,
-                           NumericAndAnnotationsMap& delta_numeric_and_annot,
+                           const NumericSupportSelector& numeric_support_selector,
+                           const SelectedPredicateAnnotations& program_and_annot,
+                           const SelectedFunctionAnnotations& program_numeric_and_annot,
+                           SelectedFunctionAnnotations& delta_numeric_and_annot,
                            formalism::datalog::GrounderContext& delta_context,
                            formalism::datalog::GrounderContext& iteration_context) const;
 };
