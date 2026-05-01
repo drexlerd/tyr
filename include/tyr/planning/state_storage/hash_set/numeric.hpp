@@ -44,14 +44,12 @@ public:
 
     explicit NumericStorageBackend(StateStorageContext<Kind, HashSet>& ctx);
 
-    Packed insert(const Unpacked& unpacked);
+    Packed insert(Unpacked& unpacked);
 
     void unpack(const Packed& packed, Unpacked& unpacked);
 
 private:
     RawVectorSet<uint_t, float_t>& m_float_vec_set;
-
-    std::vector<float_t> m_float_vec_buffer;
 };
 
 }

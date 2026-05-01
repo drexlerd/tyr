@@ -175,7 +175,6 @@ struct ProgramWorkspace
     FactsWorkspace facts;
 
     OrAP or_ap;
-    OrAnnotationsList or_annot;
     AndAnnotationsMap and_annot;
     NumericAndAnnotationsMap numeric_and_annot;
 

@@ -88,7 +88,8 @@ static void insert_propositional_update(fd::AtomView<f::FluentTag> head,
                                         fd::RuleView rule,
                                         fd::ConjunctiveConditionView witness_condition,
                                         Cost current_cost,
-                                        const OrAnnotationsList& or_annot,
+                                        const AndAnnotationsMap& program_and_annot,
+                                        const NumericAndAnnotationsMap& program_numeric_and_annot,
                                         const AndAP& and_ap,
                                         fd::GrounderContext& solve_context,
                                         fd::GrounderContext& iteration_context,
@@ -100,7 +101,16 @@ static void insert_propositional_update(fd::AtomView<f::FluentTag> head,
 
     std::get<PredicateHeadIteration>(head_iteration).rows.insert(worker_head.get_index().row);
 
-    and_ap.update_annotation(program_head, worker_head, current_cost, rule, witness_condition, or_annot, and_annot, solve_context, iteration_context);
+    and_ap.update_annotation(program_head,
+                             worker_head,
+                             current_cost,
+                             rule,
+                             witness_condition,
+                             program_and_annot,
+                             program_numeric_and_annot,
+                             and_annot,
+                             solve_context,
+                             iteration_context);
 }
 
 template<AndAnnotationPolicyConcept AndAP>
@@ -109,7 +119,8 @@ static void insert_numeric_update(fd::NumericEffectOperatorView<f::FluentTag> he
                                   fd::ConjunctiveConditionView witness_condition,
                                   const FactSets& fact_sets,
                                   Cost current_cost,
-                                  const OrAnnotationsList& or_annot,
+                                  const AndAnnotationsMap& program_and_annot,
+                                  const NumericAndAnnotationsMap& program_numeric_and_annot,
                                   const AndAP& and_ap,
                                   fd::GrounderContext& solve_context,
                                   fd::GrounderContext& iteration_context,
@@ -133,7 +144,8 @@ static void insert_numeric_update(fd::NumericEffectOperatorView<f::FluentTag> he
                                      current_cost,
                                      rule,
                                      witness_condition,
-                                     or_annot,
+                                     program_and_annot,
+                                     program_numeric_and_annot,
                                      numeric_and_annot,
                                      solve_context,
                                      iteration_context);
@@ -168,7 +180,8 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                                                 in.cws_rule().get_rule(),
                                                 in.cws_rule().get_witness_rule().get_body(),
                                                 in.cost_buckets().current_cost(),
-                                                in.or_annot(),
+                                                in.and_annot(),
+                                                in.numeric_and_annot(),
                                                 in.and_ap(),
                                                 out.ground_context_solve(),
                                                 out.ground_context_iteration(),
@@ -184,7 +197,8 @@ void generate_nullary_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                                           in.cws_rule().get_witness_rule().get_body(),
                                           in.fact_sets(),
                                           in.cost_buckets().current_cost(),
-                                          in.or_annot(),
+                                          in.and_annot(),
+                                          in.numeric_and_annot(),
                                           in.and_ap(),
                                           out.ground_context_solve(),
                                           out.ground_context_iteration(),
@@ -291,7 +305,8 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
                                             in.cws_rule().get_rule(),
                                             in.cws_rule().get_witness_rule().get_body(),
                                             in.cost_buckets().current_cost(),
-                                            in.or_annot(),
+                                            in.and_annot(),
+                                            in.numeric_and_annot(),
                                             in.and_ap(),
                                             out.ground_context_solve(),
                                             out.ground_context_iteration(),
@@ -310,7 +325,8 @@ void process_clique(RuleWorkerExecutionContext<OrAP, AndAP, TP>& wrctx, std::spa
                                       in.cws_rule().get_witness_rule().get_body(),
                                       in.fact_sets(),
                                       in.cost_buckets().current_cost(),
-                                      in.or_annot(),
+                                      in.and_annot(),
+                                      in.numeric_and_annot(),
                                       in.and_ap(),
                                       out.ground_context_solve(),
                                       out.ground_context_iteration(),
@@ -469,7 +485,8 @@ void process_pending_rule_bindings(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
                                                         in.cws_rule().get_rule(),
                                                         in.cws_rule().get_witness_rule().get_body(),
                                                         in.cost_buckets().current_cost(),
-                                                        in.or_annot(),
+                                                        in.and_annot(),
+                                                        in.numeric_and_annot(),
                                                         in.and_ap(),
                                                         out.ground_context_solve(),
                                                         out.ground_context_iteration(),
@@ -510,10 +527,8 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
 
     while (true)
     {
-        // std::cout << "Cost: " << cost_buckets.current_cost() << std::endl;
-
         // Check whether min cost for goal was proven.
-        if (tp.check(AssignmentSets { ctx.in().program().facts().assignment_sets, facts.assignment_sets }))
+        if (tp.check(FactSets { ctx.in().program().facts().fact_sets, facts.fact_sets }))
         {
             return;
         }
@@ -609,7 +624,6 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                                     // Update annotation
                                     const auto cost_update = program_out.or_ap().update_annotation(program_head,
                                                                                                    worker_head,
-                                                                                                   program_out.or_annot(),
                                                                                                    worker.iteration.and_annot,
                                                                                                    program_out.and_annot());
 
@@ -627,7 +641,12 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                                     const auto program_head = fd::merge_d2d(worker_head, merge_context).first;
                                     const auto it = worker.iteration.numeric_and_annot.find(worker_head);
                                     if (it != worker.iteration.numeric_and_annot.end())
-                                        program_out.numeric_and_annot().insert_or_assign(program_head, it->second);
+                                    {
+                                        auto& numeric_and_annot = program_out.numeric_and_annot();
+                                        const auto program_it = numeric_and_annot.find(program_head);
+                                        if (program_it == numeric_and_annot.end() || get_cost(it->second) < get_cost(program_it->second))
+                                            numeric_and_annot.insert_or_assign(program_head, it->second);
+                                    }
 
                                     cost_buckets.insert(cost_buckets.current_cost() + rule_cost, program_head, update.interval);
                                 }
@@ -649,9 +668,6 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                 {
                     // Notify scheduler
                     scheduler.on_generate(head.get_index().relation);
-
-                    // Notify termination policy
-                    tp.achieve(head);
 
                     // Update assignment sets
                     facts.assignment_sets.predicate.insert(head);

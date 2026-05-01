@@ -19,6 +19,7 @@
 
 #include "tyr/datalog/policies/annotation.hpp"
 #include "tyr/datalog/policies/termination.hpp"
+#include "tyr/formalism/datalog/expression_properties.hpp"
 #include "tyr/formalism/datalog/formatter.hpp"
 #include "tyr/formalism/datalog/grounder.hpp"
 #include "tyr/formalism/planning/formatter.hpp"
@@ -32,69 +33,6 @@
 
 namespace tyr::planning
 {
-namespace
-{
-void collect_fluent_functions(formalism::datalog::GroundFunctionExpressionView expression,
-                              std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>>& result);
-
-template<formalism::ArithmeticOpKind Op>
-void collect_fluent_functions(formalism::datalog::GroundUnaryOperatorView<Op> expression,
-                              std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>>& result)
-{
-    collect_fluent_functions(expression.get_arg(), result);
-}
-
-template<formalism::ArithmeticOpKind Op>
-void collect_fluent_functions(formalism::datalog::GroundBinaryOperatorView<Op> expression,
-                              std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>>& result)
-{
-    collect_fluent_functions(expression.get_lhs(), result);
-    collect_fluent_functions(expression.get_rhs(), result);
-}
-
-template<formalism::ArithmeticOpKind Op>
-void collect_fluent_functions(formalism::datalog::GroundMultiOperatorView<Op> expression,
-                              std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>>& result)
-{
-    for (const auto arg : expression.get_args())
-        collect_fluent_functions(arg, result);
-}
-
-void collect_fluent_functions(formalism::datalog::GroundArithmeticOperatorView expression,
-                              std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>>& result)
-{
-    visit([&](auto&& arg) { collect_fluent_functions(arg, result); }, expression.get_variant());
-}
-
-void collect_fluent_functions(formalism::datalog::GroundFunctionExpressionView expression,
-                              std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>>& result)
-{
-    visit(
-        [&](auto&& arg)
-        {
-            using Alternative = std::decay_t<decltype(arg)>;
-
-            if constexpr (std::is_same_v<Alternative, formalism::datalog::GroundFunctionTermView<formalism::FluentTag>>)
-                result.push_back(arg.get_row());
-            else if constexpr (std::is_same_v<Alternative, formalism::datalog::GroundArithmeticOperatorView>)
-                collect_fluent_functions(arg, result);
-        },
-        expression.get_variant());
-}
-
-void collect_fluent_functions(formalism::datalog::GroundBooleanOperatorView constraint,
-                              std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>>& result)
-{
-    visit(
-        [&](auto&& arg)
-        {
-            collect_fluent_functions(arg.get_lhs(), result);
-            collect_fluent_functions(arg.get_rhs(), result);
-        },
-        constraint.get_variant());
-}
-}
-
 FFRPGHeuristic<LiftedTag>::FFRPGHeuristic(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context) :
     RPGBase<FFRPGHeuristic<LiftedTag>,
             datalog::OrAnnotationPolicy,
@@ -137,18 +75,11 @@ float_t FFRPGHeuristic<LiftedTag>::extract_cost_and_set_preferred_actions_impl(c
     auto state_context = StateContext<LiftedTag>(*this->m_task, state.get_unpacked_state(), float_t(0));
     auto grounder_context = formalism::planning::GrounderContext { this->m_workspace.planning_builder, *this->m_task->get_repository(), m_binding };
 
-    for (const auto atom : m_workspace.tp.get_bindings())
+    for (const auto atom : m_workspace.tp.get_predicate_bindings())
         extract_relaxed_plan_and_preferred_actions(atom, state_context, grounder_context);
 
-    auto numeric_goal_functions = std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>> {};
-    for (const auto constraint : m_task->get_rpg_program().get_goal().get_numeric_constraints())
-        collect_fluent_functions(constraint, numeric_goal_functions);
-
-    for (const auto function : numeric_goal_functions)
-    {
-        const auto workspace_function = make_view(function.get_index(), m_workspace.workspace_repository);
-        extract_relaxed_plan_and_preferred_actions(workspace_function, state_context, grounder_context);
-    }
+    for (const auto function : m_workspace.tp.get_function_bindings())
+        extract_relaxed_plan_and_preferred_actions(function, state_context, grounder_context);
 
     return m_relaxed_plan.size();
 }
@@ -201,14 +132,16 @@ void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(forma
     if (mark_atom(binding))
         return;
 
-    // Base case 2: atom has no witness, i.e., was true initially => do not recurse again
+    // Base case 2: atom is initially true, i.e., has no witness => do not recurse again
     const auto it = m_workspace.and_annot.find(binding);
     if (it == m_workspace.and_annot.end())
         return;
 
-    const auto& witness = it->second;
+    const auto* witness = std::get_if<datalog::Witness>(&it->second);
+    if (!witness)
+        return;
 
-    extract_relaxed_plan_and_preferred_actions(witness, state_context, grounder_context);
+    extract_relaxed_plan_and_preferred_actions(*witness, state_context, grounder_context);
 }
 
 void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(formalism::datalog::FunctionBindingView<formalism::FluentTag> binding,
@@ -219,12 +152,16 @@ void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(forma
     if (mark_function(binding))
         return;
 
-    // Base case 2: function binding has no witness, i.e., was initially assigned => do not recurse again
+    // Base case 2: function binding is initially assigned, i.e., has no witness => do not recurse again
     const auto it = m_workspace.numeric_and_annot.find(binding);
     if (it == m_workspace.numeric_and_annot.end())
         return;
 
-    extract_relaxed_plan_and_preferred_actions(it->second, state_context, grounder_context);
+    const auto* witness = std::get_if<datalog::Witness>(&it->second);
+    if (!witness)
+        return;
+
+    extract_relaxed_plan_and_preferred_actions(*witness, state_context, grounder_context);
 }
 
 void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(const datalog::Witness& witness,
@@ -266,7 +203,9 @@ void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(const
     auto datalog_grounder_context = formalism::datalog::GrounderContext { m_workspace.datalog_builder, m_workspace.workspace_repository, m_workspace.binding };
     const auto& const_rule_workspace = *m_task->get_rpg_program().get_const_program_workspace().rules[uint_t(rule.get_index())];
 
-    for (const auto literal : const_rule_workspace.get_witness_rule().get_body().get_literals<formalism::FluentTag>())
+    const auto witness_condition = const_rule_workspace.get_witness_rule().get_body();
+
+    for (const auto literal : witness_condition.get_literals<formalism::FluentTag>())
     {
         // Cannot do this before the loop because of overwrites during recursion; we could binding from a builder and place it into the grounder context.
         datalog_grounder_context.binding.clear();
@@ -276,6 +215,21 @@ void FFRPGHeuristic<LiftedTag>::extract_relaxed_plan_and_preferred_actions(const
         const auto witness_atom = formalism::datalog::ground(literal.get_atom(), datalog_grounder_context).first;
 
         extract_relaxed_plan_and_preferred_actions(witness_atom.get_row(), state_context, grounder_context);
+    }
+
+    for (const auto constraint : witness_condition.get_numeric_constraints())
+    {
+        // Cannot do this before the loop because of overwrites during recursion; we could binding from a builder and place it into the grounder context.
+        datalog_grounder_context.binding.clear();
+        for (const auto object : row)
+            datalog_grounder_context.binding.push_back(object.get_index());
+
+        for (const auto fterm : formalism::datalog::collect_fterms<formalism::FluentTag>(constraint))
+        {
+            const auto witness_function = formalism::datalog::ground(fterm, datalog_grounder_context).first;
+
+            extract_relaxed_plan_and_preferred_actions(witness_function.get_row(), state_context, grounder_context);
+        }
     }
 }
 

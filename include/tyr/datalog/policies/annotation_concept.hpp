@@ -40,15 +40,18 @@ namespace tyr::datalog
 template<typename T>
 concept OrAnnotationPolicyConcept = requires(const T& p,
                                              formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head,
+                                             formalism::datalog::FunctionBindingView<formalism::FluentTag> program_function_head,
                                              formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head,
-                                             OrAnnotationsList& or_annot,
                                              const AndAnnotationsMap& delta_and_annot,
-                                             AndAnnotationsMap& program_and_annot) {
+                                             AndAnnotationsMap& program_and_annot,
+                                             NumericAndAnnotationsMap& program_numeric_and_annot) {
     /// Annotate the initial cost of the atom.
-    { p.initialize_annotation(program_head, or_annot) } -> std::same_as<void>;
+    { p.initialize_annotation(program_head, program_and_annot) } -> std::same_as<void>;
+    /// Annotate the initial cost of a numeric binding.
+    { p.initialize_annotation(program_function_head, program_numeric_and_annot) } -> std::same_as<void>;
     /// Annotate the cost of the atom from the given witness and annotations.
     /// `delta_head` indexes into the rule-local delta repository; `head` indexes into the global program repository.
-    { p.update_annotation(program_head, delta_head, or_annot, delta_and_annot, program_and_annot) } -> std::same_as<CostUpdate>;
+    { p.update_annotation(program_head, delta_head, delta_and_annot, program_and_annot) } -> std::same_as<CostUpdate>;
 };
 
 // rectangular "and"-node
@@ -59,13 +62,23 @@ concept AndAnnotationPolicyConcept = requires(const T& p,
                                               uint_t current_cost,
                                               formalism::datalog::RuleView rule,
                                               formalism::datalog::ConjunctiveConditionView witness_condition,
-                                              const OrAnnotationsList& or_annot,
+                                              const AndAnnotationsMap& program_and_annot,
+                                              const NumericAndAnnotationsMap& program_numeric_and_annot,
                                               AndAnnotationsMap& delta_and_annot,
                                               formalism::datalog::GrounderContext& delta_context,
                                               formalism::datalog::GrounderContext& iteration_context) {
     /// Ground the witness and annotate the cost of it from the given annotations.
     {
-        p.update_annotation(program_head, delta_head, current_cost, rule, witness_condition, or_annot, delta_and_annot, delta_context, iteration_context)
+        p.update_annotation(program_head,
+                            delta_head,
+                            current_cost,
+                            rule,
+                            witness_condition,
+                            program_and_annot,
+                            program_numeric_and_annot,
+                            delta_and_annot,
+                            delta_context,
+                            iteration_context)
     } -> std::same_as<void>;
 };
 

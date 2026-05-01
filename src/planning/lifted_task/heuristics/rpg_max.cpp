@@ -47,7 +47,7 @@ std::shared_ptr<MaxRPGHeuristic<LiftedTag>> MaxRPGHeuristic<LiftedTag>::create(s
 
 float_t MaxRPGHeuristic<LiftedTag>::extract_cost_and_set_preferred_actions_impl(const StateView<LiftedTag>& state)
 {
-    return m_workspace.tp.get_total_cost(this->m_workspace.or_annot);
+    return m_workspace.tp.get_total_cost(this->m_workspace.and_annot, this->m_workspace.numeric_and_annot);
 }
 
 }

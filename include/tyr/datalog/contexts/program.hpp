@@ -56,8 +56,6 @@ struct ProgramExecutionContext
         const auto& facts() const noexcept { return m_ws.facts; }
         auto& or_ap() noexcept { return m_ws.or_ap; }
         const auto& or_ap() const noexcept { return m_ws.or_ap; }
-        auto& or_annot() noexcept { return m_ws.or_annot; }
-        const auto& or_annot() const noexcept { return m_ws.or_annot; }
         auto& and_annot() noexcept { return m_ws.and_annot; }
         const auto& and_annot() const noexcept { return m_ws.and_annot; }
         auto& numeric_and_annot() noexcept { return m_ws.numeric_and_annot; }
@@ -97,8 +95,6 @@ struct ProgramExecutionContext
                 rule->clear();
 
         // Clear the annotation policy.
-        for (auto& vec : out.or_annot())
-            vec.clear();
         out.and_annot().clear();
         out.numeric_and_annot().clear();
 
@@ -110,8 +106,7 @@ struct ProgramExecutionContext
         {
             for (const auto binding : set.get_bindings())
             {
-                out.or_ap().initialize_annotation(binding, out.or_annot());
-                out.tp().achieve(binding);
+                out.or_ap().initialize_annotation(binding, out.and_annot());
                 out.facts().assignment_sets.predicate.insert(binding);
             }
         }
@@ -123,7 +118,10 @@ struct ProgramExecutionContext
             const auto& values = set.get_values();
 
             for (uint_t i = 0; i < bindings.size(); ++i)
+            {
+                out.or_ap().initialize_annotation(bindings[i], out.numeric_and_annot());
                 out.facts().assignment_sets.function.insert(bindings[i], values[i]);
+            }
         }
 
         // Reset cost buckets.

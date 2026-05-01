@@ -30,6 +30,7 @@
 #include <limits>
 #include <optional>
 #include <tuple>
+#include <variant>
 #include <vector>
 
 namespace tyr::datalog
@@ -37,8 +38,6 @@ namespace tyr::datalog
 /**
  * Annotations
  */
-
-using OrAnnotationsList = std::vector<std::vector<Cost>>;
 
 /// @brief `Witness` is the rule and binding in the rule delta repository whose ground rule is the witness for its ground atom in the head.
 /// The witness lives in the rule delta repository.
@@ -57,11 +56,29 @@ private:
     Cost m_cost;
 };
 
-using AndAnnotationsMap = UnorderedMap<formalism::datalog::PredicateBindingView<formalism::FluentTag>, Witness>;
-using NumericAndAnnotationsMap = UnorderedMap<formalism::datalog::FunctionBindingView<formalism::FluentTag>, Witness>;
+struct BaseCase
+{
+public:
+    explicit BaseCase(Cost cost = Cost(0)) : m_cost(cost) {}
 
-static_assert(sizeof(AndAnnotationsMap::value_type) == 40);
-static_assert(sizeof(NumericAndAnnotationsMap::value_type) == 40);
+    auto get_cost() const noexcept { return m_cost; }
+
+private:
+    Cost m_cost;
+};
+
+using Annotation = std::variant<BaseCase, Witness>;
+
+inline Cost get_cost(const Annotation& annotation) noexcept
+{
+    return std::visit([](const auto& value) { return value.get_cost(); }, annotation);
+}
+
+using AndAnnotationsMap = UnorderedMap<formalism::datalog::PredicateBindingView<formalism::FluentTag>, Annotation>;
+using NumericAndAnnotationsMap = UnorderedMap<formalism::datalog::FunctionBindingView<formalism::FluentTag>, Annotation>;
+
+static_assert(sizeof(AndAnnotationsMap::value_type) == 48);
+static_assert(sizeof(NumericAndAnnotationsMap::value_type) == 48);
 
 struct CostUpdate
 {
