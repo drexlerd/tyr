@@ -111,6 +111,9 @@ def compare_attribute_value(old_value, new_value, rule):
     if old_value is None or new_value is None:
         return "missing"
 
+    if rule == AttributeCompare.UNDEFINED.value:
+        return "undefined"
+
     if rule == AttributeCompare.STRICT_EQUALITY.value:
         return "unchanged" if old_value == new_value else "changed"
 

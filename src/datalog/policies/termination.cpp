@@ -37,7 +37,8 @@ namespace tyr::datalog
 {
 namespace
 {
-using FluentIntervalSelection = UnorderedMap<formalism::datalog::FunctionBindingView<formalism::FluentTag>, ClosedInterval<float_t>>;
+using FluentIntervalSelection =
+    std::vector<std::pair<formalism::datalog::FunctionBindingView<formalism::FluentTag>, ClosedInterval<float_t>>>;
 
 ClosedInterval<float_t> evaluate_with_selection(float_t element, const FactSets&, const FluentIntervalSelection&)
 {
@@ -54,8 +55,12 @@ ClosedInterval<float_t> evaluate_with_selection(formalism::datalog::GroundFuncti
                                                 const FactSets&,
                                                 const FluentIntervalSelection& selection)
 {
-    const auto it = selection.find(element.get_row());
-    return it == selection.end() ? ClosedInterval<float_t>() : it->second;
+    const auto binding_equal = EqualTo<formalism::datalog::FunctionBindingView<formalism::FluentTag>> {};
+    for (const auto& [binding, interval] : selection)
+        if (binding_equal(binding, element.get_row()))
+            return interval;
+
+    return ClosedInterval<float_t>();
 }
 
 ClosedInterval<float_t> evaluate_with_selection(formalism::datalog::GroundFunctionExpressionView element,
@@ -126,7 +131,7 @@ bool evaluate_with_selection(formalism::datalog::GroundBooleanOperatorView eleme
 template<typename AggregationFunction>
 Cost get_numeric_constraint_cost(formalism::datalog::GroundBooleanOperatorView constraint,
                                  const FactSets& fact_sets,
-                                 const NumericIntervalAnnotationsMap& numeric_interval_annot,
+                                 const NumericIntervalAnnotations& numeric_interval_annot,
                                  AggregationFunction agg)
 {
     const auto fterms = formalism::datalog::collect_fterms<formalism::FluentTag>(constraint);
@@ -134,18 +139,25 @@ Cost get_numeric_constraint_cost(formalism::datalog::GroundBooleanOperatorView c
     if (fterms.empty())
         return evaluate_with_selection(constraint, fact_sets, FluentIntervalSelection {}) ? Cost(0) : std::numeric_limits<Cost>::max();
 
-    auto entries = std::vector<const std::vector<NumericIntervalAnnotation>*>();
-    entries.reserve(fterms.size());
     for (const auto fterm : fterms)
     {
-        const auto it = numeric_interval_annot.find(fterm.get_row());
-        if (it == numeric_interval_annot.end() || it->second.empty())
+        auto found = false;
+        const auto binding_equal = EqualTo<formalism::datalog::FunctionBindingView<formalism::FluentTag>> {};
+        for (const auto& entry : numeric_interval_annot)
+            if (binding_equal(entry.binding, fterm.get_row()))
+            {
+                found = true;
+                break;
+            }
+
+        if (!found)
             return std::numeric_limits<Cost>::max();
-        entries.push_back(&it->second);
     }
 
     auto selection = FluentIntervalSelection {};
+    selection.reserve(fterms.size());
     auto best_cost = std::numeric_limits<Cost>::max();
+    const auto binding_equal = EqualTo<formalism::datalog::FunctionBindingView<formalism::FluentTag>> {};
 
     auto recurse = [&](auto&& self, size_t pos, Cost cost) -> void
     {
@@ -160,12 +172,15 @@ Cost get_numeric_constraint_cost(formalism::datalog::GroundBooleanOperatorView c
         }
 
         const auto binding = fterms[pos].get_row();
-        for (const auto& entry : *entries[pos])
+        for (const auto& entry : numeric_interval_annot)
         {
-            selection.insert_or_assign(binding, entry.interval);
+            if (!binding_equal(entry.binding, binding))
+                continue;
+
+            selection.emplace_back(binding, entry.interval);
             self(self, pos + 1, agg(cost, get_cost(entry.annotation)));
+            selection.pop_back();
         }
-        selection.erase(binding);
     };
 
     recurse(recurse, 0, AggregationFunction::identity());
@@ -222,7 +237,7 @@ template<typename AggregationFunction>
 Cost TerminationPolicy<AggregationFunction>::get_total_cost(const FactSets& fact_sets,
                                                             const AndAnnotationsMap& and_annot,
                                                             const NumericAndAnnotationsMap& numeric_and_annot,
-                                                            const NumericIntervalAnnotationsMap& numeric_interval_annot) const noexcept
+                                                            const NumericIntervalAnnotations& numeric_interval_annot) const noexcept
 {
     auto cost = AggregationFunction::identity();
 

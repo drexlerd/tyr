@@ -60,10 +60,11 @@ struct FunctionHeadUpdate
 {
     Index<formalism::Row> row;
     ClosedInterval<float_t> interval;
+    Cost cost;
 
-    FunctionHeadUpdate(Index<formalism::Row> row, ClosedInterval<float_t> interval) : row(row), interval(interval) {}
+    FunctionHeadUpdate(Index<formalism::Row> row, ClosedInterval<float_t> interval, Cost cost) : row(row), interval(interval), cost(cost) {}
 
-    auto identifying_members() const noexcept { return std::tie(row, interval); }
+    auto identifying_members() const noexcept { return std::tie(row, interval, cost); }
 };
 
 struct FunctionHeadIteration

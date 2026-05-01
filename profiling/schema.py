@@ -12,6 +12,7 @@ class AttributeCompare(Enum):
     STRICT_EQUALITY = "strict_equality"
     LOWER_IS_BETTER = "lower_is_better"
     HIGHER_IS_BETTER = "higher_is_better"
+    UNDEFINED = "undefined"
 
 
 def require_mapping(value, name):

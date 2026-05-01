@@ -137,7 +137,7 @@ static void insert_numeric_update(fd::NumericEffectOperatorView<f::FluentTag> he
             const auto program_head = fd::ground(effect.get_fterm(), iteration_context).first.get_row();
             const auto worker_head = fd::ground(effect.get_fterm(), solve_context).first;
 
-            std::get<FunctionHeadIteration>(head_iteration).updates.emplace(worker_head.get_row().get_index().row, interval);
+            std::get<FunctionHeadIteration>(head_iteration).updates.emplace(worker_head.get_row().get_index().row, interval, current_cost + rule.get_cost());
 
             and_ap.update_annotation(program_head,
                                      worker_head.get_row(),
@@ -601,7 +601,6 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                 const auto i = uint_t(rule_index);
                 auto merge_context = fd::MergeContext { program_out.datalog_builder(), program_out.workspace_repository() };
                 const auto& ws_rule = program_out.rules()[i];
-                const auto rule_cost = ctx.in().program().rules()[i]->get_rule().get_cost();
 
                 for (const auto& worker : ws_rule->worker)
                 {
@@ -646,10 +645,10 @@ void solve_bottom_up_for_stratum(StratumExecutionContext<OrAP, AndAP, TP>& ctx)
                                         const auto program_it = numeric_and_annot.find(program_head);
                                         if (program_it == numeric_and_annot.end() || get_cost(it->second) < get_cost(program_it->second))
                                             numeric_and_annot.insert_or_assign(program_head, it->second);
-                                        insert_numeric_interval_annotation(program_out.numeric_interval_annot(), program_head, update.interval, it->second);
+                                        insert_numeric_interval_annotation(program_out.numeric_interval_annot(), program_head, update.interval, BaseCase(update.cost));
                                     }
 
-                                    cost_buckets.insert(cost_buckets.current_cost() + rule_cost, program_head, update.interval);
+                                    cost_buckets.insert(update.cost, program_head, update.interval);
                                 }
                             }
                         },

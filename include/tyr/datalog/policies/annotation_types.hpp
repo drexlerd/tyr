@@ -83,14 +83,14 @@ static_assert(sizeof(NumericAndAnnotationsMap::value_type) == 48);
 
 struct NumericIntervalAnnotation
 {
+    formalism::datalog::FunctionBindingView<formalism::FluentTag> binding;
     ClosedInterval<float_t> interval;
     Annotation annotation;
 };
 
-using NumericIntervalAnnotationsMap =
-    UnorderedMap<formalism::datalog::FunctionBindingView<formalism::FluentTag>, std::vector<NumericIntervalAnnotation>>;
+using NumericIntervalAnnotations = std::vector<NumericIntervalAnnotation>;
 
-inline void insert_numeric_interval_annotation(NumericIntervalAnnotationsMap& annotations,
+inline void insert_numeric_interval_annotation(NumericIntervalAnnotations& annotations,
                                                formalism::datalog::FunctionBindingView<formalism::FluentTag> binding,
                                                ClosedInterval<float_t> interval,
                                                Annotation annotation)
@@ -98,19 +98,23 @@ inline void insert_numeric_interval_annotation(NumericIntervalAnnotationsMap& an
     if (empty(interval))
         return;
 
-    auto& entries = annotations[binding];
     const auto cost = get_cost(annotation);
+    const auto binding_equal = EqualTo<formalism::datalog::FunctionBindingView<formalism::FluentTag>> {};
 
-    for (const auto& entry : entries)
-        if (get_cost(entry.annotation) <= cost && subset(interval, entry.interval))
+    for (const auto& entry : annotations)
+        if (binding_equal(entry.binding, binding) && get_cost(entry.annotation) <= cost && subset(interval, entry.interval))
             return;
 
-    entries.erase(std::remove_if(entries.begin(),
-                                 entries.end(),
-                                 [&](const auto& entry) { return cost <= get_cost(entry.annotation) && subset(entry.interval, interval); }),
-                  entries.end());
+    annotations.erase(std::remove_if(annotations.begin(),
+                                     annotations.end(),
+                                     [&](const auto& entry)
+                                     {
+                                         return binding_equal(entry.binding, binding) && cost <= get_cost(entry.annotation)
+                                                && subset(entry.interval, interval);
+                                     }),
+                      annotations.end());
 
-    entries.push_back(NumericIntervalAnnotation { interval, annotation });
+    annotations.push_back(NumericIntervalAnnotation { binding, interval, annotation });
 }
 
 struct CostUpdate

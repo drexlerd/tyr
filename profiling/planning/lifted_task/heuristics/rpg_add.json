@@ -1,0 +1,236 @@
+{
+    "domains": {
+        "block-grouping": {
+            "domain_file": "profiling/ipc2023-numeric/block-grouping/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/block-grouping/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/block-grouping/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/block-grouping/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/block-grouping/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/block-grouping/pfile16.pddl"
+            }
+        },
+        "counters": {
+            "domain_file": "profiling/ipc2023-numeric/counters/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/counters/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/counters/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/counters/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/counters/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/counters/pfile16.pddl"
+            }
+        },
+        "delivery": {
+            "domain_file": "profiling/ipc2023-numeric/delivery/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/delivery/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/delivery/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/delivery/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/delivery/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/delivery/pfile16.pddl"
+            }
+        },
+        "drone": {
+            "domain_file": "profiling/ipc2023-numeric/drone/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/drone/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/drone/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/drone/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/drone/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/drone/pfile16.pddl"
+            }
+        },
+        "expedition": {
+            "domain_file": "profiling/ipc2023-numeric/expedition/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/expedition/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/expedition/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/expedition/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/expedition/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/expedition/pfile16.pddl"
+            }
+        },
+        "ext-plant-watering": {
+            "domain_file": "profiling/ipc2023-numeric/ext-plant-watering/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/ext-plant-watering/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/ext-plant-watering/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/ext-plant-watering/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/ext-plant-watering/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/ext-plant-watering/pfile16.pddl"
+            }
+        },
+        "farmland": {
+            "domain_file": "profiling/ipc2023-numeric/farmland/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/farmland/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/farmland/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/farmland/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/farmland/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/farmland/pfile16.pddl"
+            }
+        },
+        "fo-counters": {
+            "domain_file": "profiling/ipc2023-numeric/fo-counters/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/fo-counters/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/fo-counters/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/fo-counters/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/fo-counters/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/fo-counters/pfile16.pddl"
+            }
+        },
+        "fo-farmland": {
+            "domain_file": "profiling/ipc2023-numeric/fo-farmland/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/fo-farmland/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/fo-farmland/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/fo-farmland/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/fo-farmland/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/fo-farmland/pfile16.pddl"
+            }
+        },
+        "fo-sailing": {
+            "domain_file": "profiling/ipc2023-numeric/fo-sailing/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/fo-sailing/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/fo-sailing/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/fo-sailing/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/fo-sailing/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/fo-sailing/pfile16.pddl"
+            }
+        },
+        "hydropower": {
+            "domain_file": "profiling/ipc2023-numeric/hydropower/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/hydropower/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/hydropower/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/hydropower/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/hydropower/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/hydropower/pfile16.pddl"
+            }
+        },
+        "markettrader": {
+            "domain_file": "profiling/ipc2023-numeric/markettrader/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/markettrader/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/markettrader/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/markettrader/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/markettrader/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/markettrader/pfile16.pddl"
+            }
+        },
+        "mprime": {
+            "domain_file": "profiling/ipc2023-numeric/mprime/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/mprime/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/mprime/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/mprime/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/mprime/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/mprime/pfile16.pddl"
+            }
+        },
+        "pathwaysmetric": {
+            "domain_file": "profiling/ipc2023-numeric/pathwaysmetric/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/pathwaysmetric/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/pathwaysmetric/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/pathwaysmetric/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/pathwaysmetric/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/pathwaysmetric/pfile16.pddl"
+            }
+        },
+        "rover": {
+            "domain_file": "profiling/ipc2023-numeric/rover/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/rover/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/rover/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/rover/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/rover/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/rover/pfile16.pddl"
+            }
+        },
+        "sailing": {
+            "domain_file": "profiling/ipc2023-numeric/sailing/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/sailing/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/sailing/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/sailing/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/sailing/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/sailing/pfile16.pddl"
+            }
+        },
+        "settlersnumeric": {
+            "domain_file": "profiling/ipc2023-numeric/settlersnumeric/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/settlersnumeric/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/settlersnumeric/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/settlersnumeric/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/settlersnumeric/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/settlersnumeric/pfile16.pddl"
+            }
+        },
+        "sugar": {
+            "domain_file": "profiling/ipc2023-numeric/sugar/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/sugar/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/sugar/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/sugar/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/sugar/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/sugar/pfile16.pddl"
+            }
+        },
+        "tpp": {
+            "domain_file": "profiling/ipc2023-numeric/tpp/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/tpp/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/tpp/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/tpp/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/tpp/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/tpp/pfile16.pddl"
+            }
+        },
+        "zenotravel": {
+            "domain_file": "profiling/ipc2023-numeric/zenotravel/domain.pddl",
+            "tasks": {
+                "pfile1": "profiling/ipc2023-numeric/zenotravel/pfile1.pddl",
+                "pfile2": "profiling/ipc2023-numeric/zenotravel/pfile2.pddl",
+                "pfile4": "profiling/ipc2023-numeric/zenotravel/pfile4.pddl",
+                "pfile8": "profiling/ipc2023-numeric/zenotravel/pfile8.pddl",
+                "pfile16": "profiling/ipc2023-numeric/zenotravel/pfile16.pddl"
+            }
+        }
+    },
+    "attributes": {
+        "initial_h_value": {
+            "description": "The h_add estimate of the initial state.",
+            "type": "float",
+            "compare": "undefined"
+        },
+        "cost": {
+            "description": "The cost of the solution found by the search.",
+            "type": "float",
+            "compare": "lower_is_better"
+        },
+        "length": {
+            "description": "The length of the solution found by the search.",
+            "type": "int",
+            "compare": "lower_is_better"
+        },
+        "num_expanded": {
+            "description": "The number of states expanded during search.",
+            "type": "int",
+            "compare": "lower_is_better"
+        },
+        "num_generated": {
+            "description": "The number of states generated during search.",
+            "type": "int",
+            "compare": "lower_is_better"
+        },
+        "solved": {
+            "description": "Whether the search solved the task.",
+            "type": "int",
+            "compare": "higher_is_better"
+        }
+    }
+}

@@ -44,7 +44,7 @@ public:
     Cost get_total_cost(const FactSets& fact_sets,
                         const AndAnnotationsMap& and_annot,
                         const NumericAndAnnotationsMap& numeric_and_annot,
-                        const NumericIntervalAnnotationsMap& numeric_interval_annot) const noexcept
+                        const NumericIntervalAnnotations& numeric_interval_annot) const noexcept
     {
         return Cost(0);
     }
@@ -66,7 +66,7 @@ public:
     Cost get_total_cost(const FactSets& fact_sets,
                         const AndAnnotationsMap& and_annot,
                         const NumericAndAnnotationsMap& numeric_and_annot,
-                        const NumericIntervalAnnotationsMap& numeric_interval_annot) const noexcept;
+                        const NumericIntervalAnnotations& numeric_interval_annot) const noexcept;
 
     void reset() noexcept;
 
