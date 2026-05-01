@@ -45,7 +45,7 @@ public:
 
     explicit NumericStorageBackend(StateStorageContext<Kind, TreeCompression>& ctx);
 
-    Packed insert(const Unpacked& unpacked);
+    Packed insert(Unpacked& unpacked);
 
     void unpack(const Packed& packed, Unpacked& unpacked);
 
@@ -53,7 +53,6 @@ private:
     valla::IndexedHashSet<valla::Slot<uint_t>, uint_t>& m_uint_nodes;
     valla::IndexedHashSet<float_t, uint_t>& m_float_nodes;
 
-    std::vector<float_t> m_float_node_buffer;
     std::vector<uint_t> m_uint_node_buffer;
 };
 

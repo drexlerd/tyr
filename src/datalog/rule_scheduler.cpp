@@ -24,7 +24,7 @@
 #include <assert.h>       // for assert
 #include <gtl/phmap.hpp>  // for operator!=, flat_hash_set
 #include <type_traits>
-#include <utility>        // for pair
+#include <utility>  // for pair
 
 namespace f = tyr::formalism;
 namespace fd = tyr::formalism::datalog;
@@ -64,10 +64,6 @@ RuleSchedulerStratum::RuleSchedulerStratum(const analysis::RuleStratum& rules,
     m_active_functions(num_fluent_functions),
     m_active_rules()
 {
-    for (const auto& [predicate, _] : listeners.predicates)
-        assert(uint_t(predicate) < m_active_predicates.size());
-    for (const auto& [function, _] : listeners.functions)
-        assert(uint_t(function) < m_active_functions.size());
 }
 
 void RuleSchedulerStratum::activate_all()
@@ -83,15 +79,9 @@ void RuleSchedulerStratum::on_start_iteration() noexcept
     m_active_functions.reset();
 }
 
-void RuleSchedulerStratum::on_generate(Index<f::Predicate<f::FluentTag>> predicate)
-{
-    activate_relation(m_active_predicates, predicate);
-}
+void RuleSchedulerStratum::on_generate(Index<f::Predicate<f::FluentTag>> predicate) { activate_relation(m_active_predicates, predicate); }
 
-void RuleSchedulerStratum::on_generate(Index<f::Function<f::FluentTag>> function)
-{
-    activate_relation(m_active_functions, function);
-}
+void RuleSchedulerStratum::on_generate(Index<f::Function<f::FluentTag>> function) { activate_relation(m_active_functions, function); }
 
 void RuleSchedulerStratum::on_finish_iteration()
 {

@@ -40,7 +40,6 @@ ProgramWorkspace<OrAP, AndAP, TP>::ProgramWorkspace(ProgramContext& context, con
           context.get_program().get_fterm_values<formalism::FluentTag>(),
           context.get_workspace_repository()),
     or_ap(or_ap),
-    or_annot(context.get_program().get_predicates<formalism::FluentTag>().size()),
     and_annot(),
     numeric_and_annot(),
     tp(tp),

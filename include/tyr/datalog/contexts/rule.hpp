@@ -61,8 +61,10 @@ public:
 
         const auto& and_ap() noexcept { return m_and_ap; }
         const auto& and_ap() const noexcept { return m_and_ap; }
-        const auto& or_annot() noexcept { return m_rctx.stratum_out().program().or_annot(); }
-        const auto& or_annot() const noexcept { return m_rctx.stratum_out().program().or_annot(); }
+        const auto& and_annot() noexcept { return m_rctx.stratum_out().program().and_annot(); }
+        const auto& and_annot() const noexcept { return m_rctx.stratum_out().program().and_annot(); }
+        const auto& numeric_and_annot() noexcept { return m_rctx.stratum_out().program().numeric_and_annot(); }
+        const auto& numeric_and_annot() const noexcept { return m_rctx.stratum_out().program().numeric_and_annot(); }
         const auto& cost_buckets() noexcept { return m_rctx.stratum_out().program().cost_buckets(); }
         const auto& cost_buckets() const noexcept { return m_rctx.stratum_out().program().cost_buckets(); }
         const auto& program_repository() noexcept { return m_rctx.out().common().program_repository; }

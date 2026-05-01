@@ -78,8 +78,7 @@ public:
 
         m_execution_context->arena().execute([&] { datalog::solve_bottom_up(ctx); });
 
-        return (m_workspace.tp.check(datalog::AssignmentSets { m_task->get_rpg_program().get_const_program_workspace().facts.assignment_sets,
-                                                               m_workspace.facts.assignment_sets })) ?
+        return (m_workspace.tp.check(datalog::FactSets { m_task->get_rpg_program().get_const_program_workspace().facts.fact_sets, m_workspace.facts.fact_sets })) ?
                    self().extract_cost_and_set_preferred_actions_impl(state) :
                    std::numeric_limits<float_t>::infinity();
     }

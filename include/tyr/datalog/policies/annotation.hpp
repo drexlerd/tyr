@@ -40,11 +40,14 @@ namespace tyr::datalog
 class NoOrAnnotationPolicy
 {
 public:
-    void initialize_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> head, OrAnnotationsList& or_annot) const noexcept {}
+    void initialize_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> head, AndAnnotationsMap& program_and_annot) const noexcept {}
+    void initialize_annotation(formalism::datalog::FunctionBindingView<formalism::FluentTag> head,
+                               NumericAndAnnotationsMap& program_numeric_and_annot) const noexcept
+    {
+    }
 
     CostUpdate update_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head,
                                  formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head,
-                                 OrAnnotationsList& or_annot,
                                  const AndAnnotationsMap& delta_and_annot,
                                  AndAnnotationsMap& program_and_annot) const noexcept
     {
@@ -60,7 +63,8 @@ public:
                            uint_t current_cost,
                            formalism::datalog::RuleView rule,
                            formalism::datalog::ConjunctiveConditionView witness_condition,
-                           const OrAnnotationsList& or_annot,
+                           const AndAnnotationsMap& program_and_annot,
+                           const NumericAndAnnotationsMap& program_numeric_and_annot,
                            AndAnnotationsMap& delta_and_annot,
                            formalism::datalog::GrounderContext& delta_context,
                            formalism::datalog::GrounderContext& iteration_context) const noexcept
@@ -72,7 +76,8 @@ public:
                            uint_t current_cost,
                            formalism::datalog::RuleView rule,
                            formalism::datalog::ConjunctiveConditionView witness_condition,
-                           const OrAnnotationsList& or_annot,
+                           const AndAnnotationsMap& program_and_annot,
+                           const NumericAndAnnotationsMap& program_numeric_and_annot,
                            NumericAndAnnotationsMap& delta_numeric_and_annot,
                            formalism::datalog::GrounderContext& delta_context,
                            formalism::datalog::GrounderContext& iteration_context) const
@@ -83,11 +88,12 @@ public:
 class OrAnnotationPolicy
 {
 public:
-    void initialize_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head, OrAnnotationsList& or_annot) const;
+    void initialize_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head, AndAnnotationsMap& program_and_annot) const;
+    void initialize_annotation(formalism::datalog::FunctionBindingView<formalism::FluentTag> program_head,
+                               NumericAndAnnotationsMap& program_numeric_and_annot) const;
 
     CostUpdate update_annotation(formalism::datalog::PredicateBindingView<formalism::FluentTag> program_head,
                                  formalism::datalog::PredicateBindingView<formalism::FluentTag> delta_head,
-                                 OrAnnotationsList& or_annot,
                                  const AndAnnotationsMap& delta_and_annot,
                                  AndAnnotationsMap& program_and_annot) const;
 };
@@ -103,7 +109,8 @@ public:
                            uint_t current_cost,
                            formalism::datalog::RuleView rule,
                            formalism::datalog::ConjunctiveConditionView witness_condition,
-                           const OrAnnotationsList& or_annot,
+                           const AndAnnotationsMap& program_and_annot,
+                           const NumericAndAnnotationsMap& program_numeric_and_annot,
                            AndAnnotationsMap& delta_and_annot,
                            formalism::datalog::GrounderContext& delta_context,
                            formalism::datalog::GrounderContext& iteration_context) const;
@@ -113,7 +120,8 @@ public:
                            uint_t current_cost,
                            formalism::datalog::RuleView rule,
                            formalism::datalog::ConjunctiveConditionView witness_condition,
-                           const OrAnnotationsList& or_annot,
+                           const AndAnnotationsMap& program_and_annot,
+                           const NumericAndAnnotationsMap& program_numeric_and_annot,
                            NumericAndAnnotationsMap& delta_numeric_and_annot,
                            formalism::datalog::GrounderContext& delta_context,
                            formalism::datalog::GrounderContext& iteration_context) const;

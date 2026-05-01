@@ -53,6 +53,7 @@ auto create_witness_conjunctive_condition(fd::ConjunctiveConditionView element, 
     for (const auto& literal : element.get_literals<f::FluentTag>())
         if (literal.get_polarity())
             conj_cond.fluent_literals.push_back(literal.get_index());
+    conj_cond.numeric_constraints = element.get_numeric_constraints().get_data();
 
     canonicalize(conj_cond);
     return context.get_or_create(conj_cond);

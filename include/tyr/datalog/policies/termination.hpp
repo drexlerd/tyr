@@ -19,8 +19,6 @@
 #define TYR_SOLVER_POLICIES_TERMINATION_HPP_
 
 #include "tyr/common/config.hpp"
-#include "tyr/common/dynamic_bitset.hpp"
-#include "tyr/datalog/assignment_sets.hpp"
 #include "tyr/datalog/fact_sets.hpp"
 #include "tyr/datalog/policies/aggregation.hpp"
 #include "tyr/datalog/policies/annotation_types.hpp"
@@ -30,7 +28,6 @@
 #include "tyr/formalism/datalog/repository.hpp"
 #include "tyr/formalism/datalog/views.hpp"
 
-#include <boost/dynamic_bitset.hpp>
 #include <concepts>
 #include <optional>
 
@@ -43,9 +40,8 @@ public:
     NoTerminationPolicy() = default;
 
     void set_goals(formalism::datalog::GroundConjunctiveConditionView goals) {}
-    void achieve(formalism::datalog::PredicateBindingView<formalism::FluentTag> binding) noexcept {}
-    bool check(const AssignmentSets& assignment_sets) const noexcept { return false; }
-    Cost get_total_cost(const OrAnnotationsList& or_annot) const noexcept { return Cost(0); }
+    bool check(const FactSets& fact_sets) const noexcept { return false; }
+    Cost get_total_cost(const AndAnnotationsMap& and_annot, const NumericAndAnnotationsMap& numeric_and_annot) const noexcept { return Cost(0); }
     void reset() noexcept {}
     void clear() noexcept {}
 };
@@ -59,25 +55,22 @@ public:
 
     void set_goals(formalism::datalog::GroundConjunctiveConditionView goals);
 
-    void achieve(formalism::datalog::PredicateBindingView<formalism::FluentTag> binding) noexcept;
+    bool check(const FactSets& fact_sets) const noexcept;
 
-    bool check(const AssignmentSets& assignment_sets) const noexcept;
-
-    Cost get_total_cost(const OrAnnotationsList& or_annot) const noexcept;
+    Cost get_total_cost(const AndAnnotationsMap& and_annot, const NumericAndAnnotationsMap& numeric_and_annot) const noexcept;
 
     void reset() noexcept;
 
     void clear() noexcept;
 
-    const std::vector<formalism::datalog::PredicateBindingView<formalism::FluentTag>>& get_bindings() const noexcept { return bindings; }
+    const std::vector<formalism::datalog::PredicateBindingView<formalism::FluentTag>>& get_predicate_bindings() const noexcept { return predicate_bindings; }
+    const std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>>& get_function_bindings() const noexcept { return function_bindings; }
 
 private:
-    std::vector<boost::dynamic_bitset<>> unsat_goals;
-    size_t num_unsat_goals;
-
     PredicateFactSets<formalism::FluentTag> goal_fact_sets;
     std::optional<formalism::datalog::GroundConjunctiveConditionView> goal;
-    std::vector<formalism::datalog::PredicateBindingView<formalism::FluentTag>> bindings;
+    std::vector<formalism::datalog::PredicateBindingView<formalism::FluentTag>> predicate_bindings;
+    std::vector<formalism::datalog::FunctionBindingView<formalism::FluentTag>> function_bindings;
 
     AggregationFunction agg;
 };
