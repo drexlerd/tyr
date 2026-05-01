@@ -75,7 +75,7 @@ The agent should work on the highest unchecked task in this list. The agent must
     - Patch CostBuckets to also store ClosedInterval<float_t> for ground function terms
     - Add is_valid_binding for numeric effects. If the function expression yields NaN the rule is inapplicable.
 
-- [] Implement greedy local support selector/cost aggregation for witness rules with numeric effect head and numeric constraint goals.
+- [x] Implement greedy local support selector/cost aggregation for witness rules with numeric effect head and numeric constraint goals.
   - Interesting files:
     - `docs/agent-goals/lifted-numeric-ff.md`
     - `include/tyr/planning/programs/`
@@ -109,3 +109,27 @@ The agent should work on the highest unchecked task in this list. The agent must
         - witness rules with numeric effect heads,
         - numeric constraints in goal termination cost.
 
+- [ ] Add semantic regression tests and documentation for lifted numeric support selection.
+  - Interesting files:
+    - `docs/agent-goals/lifted-numeric-ff.md`
+    - `include/tyr/datalog/policies/numeric_support.hpp`
+    - `include/tyr/datalog/policies/annotation.hpp`
+    - `src/datalog/policies/annotation.cpp`
+    - `include/tyr/datalog/policies/termination.hpp`
+    - `src/datalog/policies/termination.cpp`
+    - `src/planning/heuristics/rpg_ff.cpp`
+    - `tests/unit/`
+  - Likely modification areas:
+    - Add focused tests for greedy local support selection on numeric constraints with multiple candidate intervals/costs.
+    - Add focused tests for numeric effect-head backchaining that keeps the produced output interval fixed while selecting body supports.
+    - Add tests covering cases where a cheaper smaller interval is valid and cases where shrinking a support would invalidate the witness.
+    - Document where the lifted implementation follows Aldinger's interval relaxation and where it intentionally differs because targets are not always explicit during semi-naive forward propagation.
+  - Validation:
+    - Build core with `cmake --build build --target core -j8`.
+    - Run targeted lifted planning unit tests.
+    - Build `rpg_add` and `rpg_ff` profiling targets.
+    - Run the RPG profiling suite only if explicitly requested.
+  - Notes:
+    - This task is about correctness, explainability, and heuristic behavior rather than constant-factor optimization.
+    - Prefer small synthetic planning tasks from the `data/tests/numeric` directory.
+    - Keep implementation changes minimal unless the tests expose an actual semantic issue.
