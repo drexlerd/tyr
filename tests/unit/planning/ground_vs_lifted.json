@@ -1,0 +1,164 @@
+{
+    "cases": [
+        {
+            "name": "Airport",
+            "domain_file": "data/tests/classical/airport/domain.pddl",
+            "task_file": "data/tests/classical/airport/test-1.pddl"
+        },
+        {
+            "name": "Assembly",
+            "domain_file": "data/tests/classical/assembly/domain.pddl",
+            "task_file": "data/tests/classical/assembly/test-1.pddl"
+        },
+        {
+            "name": "Blocks3",
+            "domain_file": "data/tests/classical/blocks_3/domain.pddl",
+            "task_file": "data/tests/classical/blocks_3/test-1.pddl"
+        },
+        {
+            "name": "Blocks4",
+            "domain_file": "data/tests/classical/blocks_4/domain.pddl",
+            "task_file": "data/tests/classical/blocks_4/test-1.pddl"
+        },
+        {
+            "name": "Barman",
+            "domain_file": "data/tests/classical/barman/domain.pddl",
+            "task_file": "data/tests/classical/barman/test-1.pddl"
+        },
+        {
+            "name": "Childsnack",
+            "domain_file": "data/tests/classical/childsnack/domain.pddl",
+            "task_file": "data/tests/classical/childsnack/test-1.pddl"
+        },
+        {
+            "name": "Delivery",
+            "domain_file": "data/tests/classical/delivery/domain.pddl",
+            "task_file": "data/tests/classical/delivery/test-1.pddl"
+        },
+        {
+            "name": "Ferry",
+            "domain_file": "data/tests/classical/ferry/domain.pddl",
+            "task_file": "data/tests/classical/ferry/test-1.pddl"
+        },
+        {
+            "name": "Grid",
+            "domain_file": "data/tests/classical/grid/domain.pddl",
+            "task_file": "data/tests/classical/grid/test-1.pddl"
+        },
+        {
+            "name": "Gripper",
+            "domain_file": "data/tests/classical/gripper/domain.pddl",
+            "task_file": "data/tests/classical/gripper/test-1.pddl"
+        },
+        {
+            "name": "Hiking",
+            "domain_file": "data/tests/classical/hiking/domain.pddl",
+            "task_file": "data/tests/classical/hiking/test-1.pddl"
+        },
+        {
+            "name": "Logistics",
+            "domain_file": "data/tests/classical/logistics/domain.pddl",
+            "task_file": "data/tests/classical/logistics/test-1.pddl"
+        },
+        {
+            "name": "Miconic",
+            "domain_file": "data/tests/classical/miconic/domain.pddl",
+            "task_file": "data/tests/classical/miconic/test-1.pddl"
+        },
+        {
+            "name": "MiconicFulladl",
+            "domain_file": "data/tests/classical/miconic-fulladl/domain.pddl",
+            "task_file": "data/tests/classical/miconic-fulladl/test-1.pddl"
+        },
+        {
+            "name": "MiconicSimpleadl",
+            "domain_file": "data/tests/classical/miconic-simpleadl/domain.pddl",
+            "task_file": "data/tests/classical/miconic-simpleadl/test-1.pddl"
+        },
+        {
+            "name": "Parcprinter",
+            "domain_file": "data/tests/classical/parcprinter/domain.pddl",
+            "task_file": "data/tests/classical/parcprinter/test-1.pddl"
+        },
+        {
+            "name": "Pathways",
+            "domain_file": "data/tests/classical/pathways/domain.pddl",
+            "task_file": "data/tests/classical/pathways/test-1.pddl"
+        },
+        {
+            "name": "Philosophers",
+            "domain_file": "data/tests/classical/philosophers/domain.pddl",
+            "task_file": "data/tests/classical/philosophers/test-1.pddl"
+        },
+        {
+            "name": "PsrMiddle",
+            "domain_file": "data/tests/classical/psr-middle/domain.pddl",
+            "task_file": "data/tests/classical/psr-middle/test-1.pddl"
+        },
+        {
+            "name": "Reward",
+            "domain_file": "data/tests/classical/reward/domain.pddl",
+            "task_file": "data/tests/classical/reward/test-1.pddl"
+        },
+        {
+            "name": "Rovers",
+            "domain_file": "data/tests/classical/rovers/domain.pddl",
+            "task_file": "data/tests/classical/rovers/test-1.pddl"
+        },
+        {
+            "name": "Satellite",
+            "domain_file": "data/tests/classical/satellite/domain.pddl",
+            "task_file": "data/tests/classical/satellite/test-1.pddl"
+        },
+        {
+            "name": "Schedule",
+            "domain_file": "data/tests/classical/schedule/domain.pddl",
+            "task_file": "data/tests/classical/schedule/test-1.pddl"
+        },
+        {
+            "name": "Spanner",
+            "domain_file": "data/tests/classical/spanner/domain.pddl",
+            "task_file": "data/tests/classical/spanner/test-1.pddl"
+        },
+        {
+            "name": "Transport",
+            "domain_file": "data/tests/classical/transport/domain.pddl",
+            "task_file": "data/tests/classical/transport/test-1.pddl"
+        },
+        {
+            "name": "Visitall",
+            "domain_file": "data/tests/classical/visitall/domain.pddl",
+            "task_file": "data/tests/classical/visitall/test-1.pddl"
+        },
+        {
+            "name": "Woodworking",
+            "domain_file": "data/tests/classical/woodworking/domain.pddl",
+            "task_file": "data/tests/classical/woodworking/test-1.pddl"
+        },
+        {
+            "name": "FoCounters",
+            "domain_file": "data/tests/numeric/fo-counters/domain.pddl",
+            "task_file": "data/tests/numeric/fo-counters/test-1.pddl"
+        },
+        {
+            "name": "Refuel",
+            "domain_file": "data/tests/numeric/refuel/domain.pddl",
+            "task_file": "data/tests/numeric/refuel/test-1.pddl"
+        },
+        {
+            "name": "RefuelAdl",
+            "domain_file": "data/tests/numeric/refuel-adl/domain.pddl",
+            "task_file": "data/tests/numeric/refuel-adl/test-1.pddl"
+        },
+        {
+            "name": "Tpp",
+            "domain_file": "data/tests/numeric/tpp/domain.pddl",
+            "task_file": "data/tests/numeric/tpp/test-1.pddl"
+        },
+        {
+            "name": "Zenotravel",
+            "domain_file": "data/tests/numeric/zenotravel/domain.pddl",
+            "task_file": "data/tests/numeric/zenotravel/test-1.pddl"
+        }
+    ]
+}

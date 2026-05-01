@@ -1,0 +1,364 @@
+{
+    "cases": [
+        {
+            "name": "Agricola",
+            "domain_file": "data/tests/classical/agricola/domain.pddl",
+            "task_file": "data/tests/classical/agricola/test-1.pddl",
+            "expected_fluent_atoms": 141,
+            "expected_derived_atoms": 0,
+            "expected_actions": 12443,
+            "expected_axioms": 0,
+            "expected_successors": 8
+        },
+        {
+            "name": "Airport",
+            "domain_file": "data/tests/classical/airport/domain.pddl",
+            "task_file": "data/tests/classical/airport/test-1.pddl",
+            "expected_fluent_atoms": 58,
+            "expected_derived_atoms": 355,
+            "expected_actions": 43,
+            "expected_axioms": 420,
+            "expected_successors": 2
+        },
+        {
+            "name": "Assembly",
+            "domain_file": "data/tests/classical/assembly/domain.pddl",
+            "task_file": "data/tests/classical/assembly/test-1.pddl",
+            "expected_fluent_atoms": 7,
+            "expected_derived_atoms": 2,
+            "expected_actions": 6,
+            "expected_axioms": 2,
+            "expected_successors": 3
+        },
+        {
+            "name": "Barman",
+            "domain_file": "data/tests/classical/barman/domain.pddl",
+            "task_file": "data/tests/classical/barman/test-1.pddl",
+            "expected_fluent_atoms": 26,
+            "expected_derived_atoms": 0,
+            "expected_actions": 66,
+            "expected_axioms": 0,
+            "expected_successors": 4
+        },
+        {
+            "name": "Blocks3",
+            "domain_file": "data/tests/classical/blocks_3/domain.pddl",
+            "task_file": "data/tests/classical/blocks_3/test-1.pddl",
+            "expected_fluent_atoms": 15,
+            "expected_derived_atoms": 0,
+            "expected_actions": 45,
+            "expected_axioms": 0,
+            "expected_successors": 2
+        },
+        {
+            "name": "Blocks4",
+            "domain_file": "data/tests/classical/blocks_4/domain.pddl",
+            "task_file": "data/tests/classical/blocks_4/test-1.pddl",
+            "expected_fluent_atoms": 19,
+            "expected_derived_atoms": 0,
+            "expected_actions": 24,
+            "expected_axioms": 0,
+            "expected_successors": 2
+        },
+        {
+            "name": "Childsnack",
+            "domain_file": "data/tests/classical/childsnack/domain.pddl",
+            "task_file": "data/tests/classical/childsnack/test-1.pddl",
+            "expected_fluent_atoms": 8,
+            "expected_derived_atoms": 0,
+            "expected_actions": 7,
+            "expected_axioms": 0,
+            "expected_successors": 3
+        },
+        {
+            "name": "Delivery",
+            "domain_file": "data/tests/classical/delivery/domain.pddl",
+            "task_file": "data/tests/classical/delivery/test-1.pddl",
+            "expected_fluent_atoms": 10,
+            "expected_derived_atoms": 0,
+            "expected_actions": 16,
+            "expected_axioms": 0,
+            "expected_successors": 2
+        },
+        {
+            "name": "Driverlog",
+            "domain_file": "data/tests/classical/driverlog/domain.pddl",
+            "task_file": "data/tests/classical/driverlog/test-1.pddl",
+            "expected_fluent_atoms": 10,
+            "expected_derived_atoms": 0,
+            "expected_actions": 14,
+            "expected_axioms": 0,
+            "expected_successors": 2
+        },
+        {
+            "name": "Ferry",
+            "domain_file": "data/tests/classical/ferry/domain.pddl",
+            "task_file": "data/tests/classical/ferry/test-1.pddl",
+            "expected_fluent_atoms": 9,
+            "expected_derived_atoms": 0,
+            "expected_actions": 10,
+            "expected_axioms": 0,
+            "expected_successors": 3
+        },
+        {
+            "name": "Grid",
+            "domain_file": "data/tests/classical/grid/domain.pddl",
+            "task_file": "data/tests/classical/grid/test-1.pddl",
+            "expected_fluent_atoms": 21,
+            "expected_derived_atoms": 0,
+            "expected_actions": 29,
+            "expected_axioms": 0,
+            "expected_successors": 1
+        },
+        {
+            "name": "Gripper",
+            "domain_file": "data/tests/classical/gripper/domain.pddl",
+            "task_file": "data/tests/classical/gripper/test-1.pddl",
+            "expected_fluent_atoms": 12,
+            "expected_derived_atoms": 0,
+            "expected_actions": 20,
+            "expected_axioms": 0,
+            "expected_successors": 6
+        },
+        {
+            "name": "Hiking",
+            "domain_file": "data/tests/classical/hiking/domain.pddl",
+            "task_file": "data/tests/classical/hiking/test-1.pddl",
+            "expected_fluent_atoms": 12,
+            "expected_derived_atoms": 0,
+            "expected_actions": 41,
+            "expected_axioms": 0,
+            "expected_successors": 18
+        },
+        {
+            "name": "Logistics",
+            "domain_file": "data/tests/classical/logistics/domain.pddl",
+            "task_file": "data/tests/classical/logistics/test-1.pddl",
+            "expected_fluent_atoms": 9,
+            "expected_derived_atoms": 0,
+            "expected_actions": 14,
+            "expected_axioms": 0,
+            "expected_successors": 6
+        },
+        {
+            "name": "Miconic",
+            "domain_file": "data/tests/classical/miconic/domain.pddl",
+            "task_file": "data/tests/classical/miconic/test-1.pddl",
+            "expected_fluent_atoms": 8,
+            "expected_derived_atoms": 0,
+            "expected_actions": 6,
+            "expected_axioms": 0,
+            "expected_successors": 3
+        },
+        {
+            "name": "MiconicFulladl",
+            "domain_file": "data/tests/classical/miconic-fulladl/domain.pddl",
+            "task_file": "data/tests/classical/miconic-fulladl/test-1.pddl",
+            "expected_fluent_atoms": 9,
+            "expected_derived_atoms": 7,
+            "expected_actions": 10,
+            "expected_axioms": 15,
+            "expected_successors": 3
+        },
+        {
+            "name": "MiconicSimpleadl",
+            "domain_file": "data/tests/classical/miconic-simpleadl/domain.pddl",
+            "task_file": "data/tests/classical/miconic-simpleadl/test-1.pddl",
+            "expected_fluent_atoms": 4,
+            "expected_derived_atoms": 0,
+            "expected_actions": 4,
+            "expected_axioms": 0,
+            "expected_successors": 2
+        },
+        {
+            "name": "Parcprinter",
+            "domain_file": "data/tests/classical/parcprinter/domain.pddl",
+            "task_file": "data/tests/classical/parcprinter/test-1.pddl",
+            "expected_fluent_atoms": 43,
+            "expected_derived_atoms": 0,
+            "expected_actions": 25,
+            "expected_axioms": 0,
+            "expected_successors": 1
+        },
+        {
+            "name": "Pathways",
+            "domain_file": "data/tests/classical/pathways/domain.pddl",
+            "task_file": "data/tests/classical/pathways/test-1.pddl",
+            "expected_fluent_atoms": 47,
+            "expected_derived_atoms": 0,
+            "expected_actions": 78,
+            "expected_axioms": 0,
+            "expected_successors": 16
+        },
+        {
+            "name": "Philosophers",
+            "domain_file": "data/tests/classical/philosophers/domain.pddl",
+            "task_file": "data/tests/classical/philosophers/test-1.pddl",
+            "expected_fluent_atoms": 50,
+            "expected_derived_atoms": 21,
+            "expected_actions": 34,
+            "expected_axioms": 34,
+            "expected_successors": 2
+        },
+        {
+            "name": "PsrMiddle",
+            "domain_file": "data/tests/classical/psr-middle/domain.pddl",
+            "task_file": "data/tests/classical/psr-middle/test-1.pddl",
+            "expected_fluent_atoms": 13,
+            "expected_derived_atoms": 351,
+            "expected_actions": 28,
+            "expected_axioms": 467,
+            "expected_successors": 1
+        },
+        {
+            "name": "Pushworld",
+            "domain_file": "data/tests/classical/pushworld/domain.pddl",
+            "task_file": "data/tests/classical/pushworld/test-1.pddl",
+            "expected_fluent_atoms": 327,
+            "expected_derived_atoms": 0,
+            "expected_actions": 1126,
+            "expected_axioms": 0,
+            "expected_successors": 4
+        },
+        {
+            "name": "Reward",
+            "domain_file": "data/tests/classical/reward/domain.pddl",
+            "task_file": "data/tests/classical/reward/test-1.pddl",
+            "expected_fluent_atoms": 7,
+            "expected_derived_atoms": 0,
+            "expected_actions": 6,
+            "expected_axioms": 0,
+            "expected_successors": 1
+        },
+        {
+            "name": "Rovers",
+            "domain_file": "data/tests/classical/rovers/domain.pddl",
+            "task_file": "data/tests/classical/rovers/test-1.pddl",
+            "expected_fluent_atoms": 12,
+            "expected_derived_atoms": 0,
+            "expected_actions": 7,
+            "expected_axioms": 0,
+            "expected_successors": 2
+        },
+        {
+            "name": "Satellite",
+            "domain_file": "data/tests/classical/satellite/domain.pddl",
+            "task_file": "data/tests/classical/satellite/test-1.pddl",
+            "expected_fluent_atoms": 12,
+            "expected_derived_atoms": 0,
+            "expected_actions": 18,
+            "expected_axioms": 0,
+            "expected_successors": 4
+        },
+        {
+            "name": "Schedule",
+            "domain_file": "data/tests/classical/schedule/domain.pddl",
+            "task_file": "data/tests/classical/schedule/test-1.pddl",
+            "expected_fluent_atoms": 45,
+            "expected_derived_atoms": 0,
+            "expected_actions": 49,
+            "expected_axioms": 0,
+            "expected_successors": 44
+        },
+        {
+            "name": "Sokoban",
+            "domain_file": "data/tests/classical/sokoban/domain.pddl",
+            "task_file": "data/tests/classical/sokoban/test-1.pddl",
+            "expected_fluent_atoms": 260,
+            "expected_derived_atoms": 0,
+            "expected_actions": 526,
+            "expected_axioms": 0,
+            "expected_successors": 3
+        },
+        {
+            "name": "Spanner",
+            "domain_file": "data/tests/classical/spanner/domain.pddl",
+            "task_file": "data/tests/classical/spanner/test-1.pddl",
+            "expected_fluent_atoms": 9,
+            "expected_derived_atoms": 0,
+            "expected_actions": 4,
+            "expected_axioms": 0,
+            "expected_successors": 1
+        },
+        {
+            "name": "Transport",
+            "domain_file": "data/tests/classical/transport/domain.pddl",
+            "task_file": "data/tests/classical/transport/test-1.pddl",
+            "expected_fluent_atoms": 26,
+            "expected_derived_atoms": 0,
+            "expected_actions": 104,
+            "expected_axioms": 0,
+            "expected_successors": 5
+        },
+        {
+            "name": "Visitall",
+            "domain_file": "data/tests/classical/visitall/domain.pddl",
+            "task_file": "data/tests/classical/visitall/test-1.pddl",
+            "expected_fluent_atoms": 14,
+            "expected_derived_atoms": 0,
+            "expected_actions": 12,
+            "expected_axioms": 0,
+            "expected_successors": 2
+        },
+        {
+            "name": "Woodworking",
+            "domain_file": "data/tests/classical/woodworking/domain.pddl",
+            "task_file": "data/tests/classical/woodworking/test-1.pddl",
+            "expected_fluent_atoms": 52,
+            "expected_derived_atoms": 0,
+            "expected_actions": 198,
+            "expected_axioms": 0,
+            "expected_successors": 8
+        },
+        {
+            "name": "FoCounters",
+            "domain_file": "data/tests/numeric/fo-counters/domain.pddl",
+            "task_file": "data/tests/numeric/fo-counters/test-1.pddl",
+            "expected_fluent_atoms": 0,
+            "expected_derived_atoms": 0,
+            "expected_actions": 12,
+            "expected_axioms": 0,
+            "expected_successors": 9
+        },
+        {
+            "name": "Refuel",
+            "domain_file": "data/tests/numeric/refuel/domain.pddl",
+            "task_file": "data/tests/numeric/refuel/test-1.pddl",
+            "expected_fluent_atoms": 0,
+            "expected_derived_atoms": 0,
+            "expected_actions": 1,
+            "expected_axioms": 0,
+            "expected_successors": 1
+        },
+        {
+            "name": "RefuelAdl",
+            "domain_file": "data/tests/numeric/refuel-adl/domain.pddl",
+            "task_file": "data/tests/numeric/refuel-adl/test-1.pddl",
+            "expected_fluent_atoms": 6,
+            "expected_derived_atoms": 1,
+            "expected_actions": 15,
+            "expected_axioms": 3,
+            "expected_successors": 5
+        },
+        {
+            "name": "Tpp",
+            "domain_file": "data/tests/numeric/tpp/domain.pddl",
+            "task_file": "data/tests/numeric/tpp/test-1.pddl",
+            "expected_fluent_atoms": 6,
+            "expected_derived_atoms": 0,
+            "expected_actions": 56,
+            "expected_axioms": 0,
+            "expected_successors": 5
+        },
+        {
+            "name": "Zenotravel",
+            "domain_file": "data/tests/numeric/zenotravel/domain.pddl",
+            "task_file": "data/tests/numeric/zenotravel/test-1.pddl",
+            "expected_fluent_atoms": 15,
+            "expected_derived_atoms": 0,
+            "expected_actions": 37,
+            "expected_axioms": 0,
+            "expected_successors": 7
+        }
+    ]
+}

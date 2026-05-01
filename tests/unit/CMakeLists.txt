@@ -29,5 +29,8 @@ add_gtest(formalism_index                                "formalism/index.cpp")
 add_gtest(formalism_unification                          "formalism/unification.cpp")
 
 add_gtest(planning_lifted_task                           "planning/lifted_task.cpp")
+target_link_libraries(planning_lifted_task PRIVATE Boost::json)
 add_gtest(planning_ground_task                           "planning/ground_task.cpp")
+target_link_libraries(planning_ground_task PRIVATE Boost::json)
 add_gtest(planning_ground_vs_lifted                      "planning/ground_vs_lifted.cpp")
+target_link_libraries(planning_ground_vs_lifted PRIVATE Boost::json)
