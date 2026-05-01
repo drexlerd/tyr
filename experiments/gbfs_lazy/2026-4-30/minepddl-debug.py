@@ -77,7 +77,7 @@ MEMORY_LIMIT = 2500
 exp = Experiment(environment=ENV)
 exp.add_parser(SearchParser())
 
-PLANNER_DIR = REPO / "build" / "exe" / "gbfs_lazy"
+PLANNER_DIR = REPO / "build-debug" / "exe" / "gbfs_lazy"
 
 exp.add_resource("planner_exe", PLANNER_DIR)
 exp.add_resource("run_planner", DIR.parent / "gbfs_lazy.sh")
