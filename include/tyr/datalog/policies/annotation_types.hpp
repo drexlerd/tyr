@@ -184,9 +184,16 @@ public:
             return;
 
         auto& entries = m_partitions[binding.get_relation()][binding.get_index().row];
-        assert(entries.empty() || (subset(entries.back().interval, interval) && "Expected monotonically increasing intervals for the same binding!"));
-        // Note: costs do not monotonically increase with increasing intervals.
-        entries.push_back(Entry { interval, std::move(annotation) });
+        // Numeric effects can expand a function's relaxed envelope in either direction, so intervals for the same binding need not be nested.
+        // Keep individual interval witnesses and insert them sorted by cost. The support selector relies on this order to compute the
+        // cheapest cost threshold that covers the current relaxed envelope with a single linear running-hull scan. Use upper_bound so
+        // equal-cost witnesses keep insertion order and are not deduplicated.
+        const auto cost = get_cost(annotation);
+        entries.insert(std::upper_bound(entries.begin(),
+                                        entries.end(),
+                                        cost,
+                                        [](Cost lhs, const Entry& rhs) { return lhs < get_cost(rhs.annotation); }),
+                       Entry { interval, std::move(annotation) });
         ++m_size;
     }
 

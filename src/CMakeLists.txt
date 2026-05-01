@@ -75,6 +75,7 @@ add_library(core STATIC ${TYR_PRIVATE_HEADER_FILES} ${TYR_PUBLIC_HEADER_FILES}
     formalism/planning/planning_task.cpp
 
     datalog/policies/annotation.cpp
+    datalog/policies/numeric_support.cpp
     datalog/policies/termination.cpp
     datalog/workspaces/facts.cpp
     datalog/workspaces/program.cpp
