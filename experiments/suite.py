@@ -355,7 +355,8 @@ SUITE_IPC2023_NUMERIC = [
     "sailing",
     "settlersnumeric",
     "sugar",
-    "tpp"
+    "tpp",
+    "zenotravel",
 ]
 
 SUITE_PUSHWORLD = [
