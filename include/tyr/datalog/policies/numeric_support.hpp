@@ -123,8 +123,6 @@ private:
             const auto* entries = find_entries(binding);
             assert(entries);
 
-            candidates.clear();
-
             for (const auto& candidate : *entries)
             {
                 if (!is_available(binding, candidate.interval))
@@ -134,21 +132,14 @@ private:
                 if (candidate_cost > selection[pos].cost)
                     continue;
 
-                candidates.push_back(NumericSupportSelectorWorkspace::SelectionEntry {
+                const auto old_entry = selection[pos];
+
+                selection[pos] = NumericSupportSelectorWorkspace::SelectionEntry {
                     binding,
                     candidate.interval,
                     &candidate,
                     candidate_cost,
-                    support_score(binding, candidate.interval, candidate_cost) });
-            }
-
-            std::sort(candidates.begin(), candidates.end());
-
-            for (const auto& candidate : candidates)
-            {
-                const auto old_entry = selection[pos];
-
-                selection[pos] = candidate;
+                    support_score(binding, candidate.interval, candidate_cost) };
 
                 if (is_supported(selection))
                     break;
