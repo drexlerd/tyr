@@ -158,7 +158,10 @@ public:
         if (empty(interval))
             return;
 
-        m_partitions[binding.get_relation()].push_back(Entry { binding.get_index().row, interval, annotation });
+        auto& entries = m_partitions[binding.get_relation()];
+        assert(entries.empty() || entries.back().row != binding.get_index().row || subset(entries.back().interval, interval));
+
+        entries.push_back(Entry { binding.get_index().row, interval, annotation });
         ++m_size;
     }
 
