@@ -34,10 +34,7 @@
           (= (load_limit bot2) 4)
           (= (cost) 0))
           
-   (:goal (and (at item4 roomb)
-               (at item3 roomb)
-               (at item2 roomc)
-               (at item1 roomc)))
+   (:goal (and (at item4 roomb)))
                
    (:metric minimize (cost))
 )

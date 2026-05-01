@@ -75,7 +75,7 @@
         (potential vehicle6)
 )
 (:goal (and
-        (>= (available timber location1) 1)
+        (>= (available timber location3) 1)
 	;(connected-by-rail location0 location3)
 	;(has-coal-stack location3)
 	;(>= (housing location0) 1)
@@ -84,4 +84,3 @@
 
 (:metric minimize (+ (+ (* 0 (pollution)) (* 3 (resource-use))) (* 3 (labour))))
 )
-

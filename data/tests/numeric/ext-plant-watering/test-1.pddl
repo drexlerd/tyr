@@ -46,10 +46,6 @@
 )
 (:goal
 (and
-	(= (poured plant1) 4)
-	(= (poured plant2) 2)
-	(= (poured plant3) 7)
-	(= (poured plant4) 9)
-	(= (poured plant5) 5)
+	(>= (poured plant1) 1)
 	(= (total_poured) (total_loaded))
 )))

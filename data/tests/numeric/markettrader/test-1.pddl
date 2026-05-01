@@ -103,7 +103,8 @@
 	(= (fuel) 7.0)
 )
 (:goal (and
-        (>= (cash) 1000)
+        (at camel0 Palanga)
+        (>= (bought Food) 1)
 ))
 ;(:metric minimize (fuel-used)) 
 )

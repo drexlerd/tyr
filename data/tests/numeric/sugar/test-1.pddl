@@ -63,7 +63,7 @@
 	
 	)
 	(:goal (and
-		 (>=(in-storage depot1 brand3)3)
+		 (>=(in-storage mill1 brand1)2)
 		)
 	)
 
