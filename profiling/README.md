@@ -60,6 +60,7 @@ Attribute comparison rules:
 strict_equality
 lower_is_better
 higher_is_better
+undefined
 ```
 
 ## Build

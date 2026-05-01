@@ -8,3 +8,13 @@ target_link_libraries(successor_generator
         benchmark::benchmark 
         Boost::json
 )
+
+add_executable(rpg_add
+    "heuristics/rpg_add.cpp"
+)
+target_link_libraries(rpg_add
+    PRIVATE
+        tyr::core
+        benchmark::benchmark
+        Boost::json
+)

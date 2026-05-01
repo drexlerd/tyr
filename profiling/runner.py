@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import argparse
-import datetime as dt
 import json
 import os
 import pathlib
@@ -10,6 +9,7 @@ import subprocess
 import sys
 import time
 
+from report import build_summary, print_summary
 from schema import validate_suite
 
 
@@ -138,13 +138,6 @@ def load_cases(suite):
             )
 
     return cases
-
-
-def group_cases(cases):
-    groups = {"passed": [], "timed_out": [], "failed": [], "not_run": []}
-    for case in cases:
-        groups[case["status"]].append(case)
-    return groups
 
 
 def build_benchmark_command(
@@ -331,35 +324,13 @@ def main():
         args.benchmark_report_aggregates_only,
         args.benchmark_timeout,
     )
-    groups = group_cases(cases)
-    exit_code = 1 if groups["failed"] else 0
-
-    summary = {
-        "generated": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
-        "metadata": metadata,
-        "attributes": suite.get("attributes", {}),
-        "exit_code": exit_code,
-        "cases": cases,
-        "passed": groups["passed"],
-        "timed_out": groups["timed_out"],
-        "failed": groups["failed"],
-        "not_run": groups["not_run"],
-        "benchmark_results": benchmark_results,
-        "benchmark_failures": benchmark_failures,
-        "counts": {
-            "passed": len(groups["passed"]),
-            "timed_out": len(groups["timed_out"]),
-            "failed": len(groups["failed"]),
-            "not_run": len(groups["not_run"]),
-            "total": len(cases),
-        },
-    }
+    summary = build_summary(suite, cases, metadata, benchmark_results, benchmark_failures)
 
     rendered_summary = json.dumps(summary, indent=2)
     summary_file.write_text(rendered_summary + "\n")
-    print(rendered_summary)
+    print_summary(summary)
 
-    return exit_code
+    return summary["exit_code"]
 
 
 if __name__ == "__main__":
