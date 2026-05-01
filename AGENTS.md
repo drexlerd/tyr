@@ -38,17 +38,15 @@ Before running a validation target, check whether the existing `build/` director
 - Build Python bindings with `source .venv/bin/activate && uv pip install .` only when Python bindings or exported C++ APIs change.
 - Run Python tests with `.venv/bin/python -m pytest python/tests -q` when Python bindings, parser behavior, or exposed APIs change.
 - Run documented Python examples when Python bindings or example-facing behavior changes.
-- Report any validation that was skipped and why.
+- Run profiling suite if available for the coding task, compare with previous results, and print the summary table.
 
 ## Coding Conventions
 
 - Compile on 8 cores only.
-- Prefer existing type-list declarations as the source of truth.
-- Keep explicit template instantiations when they are used for compile-time or memory control.
-- Do not replace explicit instantiations with macro/codegen approaches unless explicitly requested.
+- Explicitly instantiate templates when the set of types is small
 - Use JSON fixtures for large repetitive test data.
 - Keep changes scoped to the active task.
-- Preserve unrelated local changes.
+- Document only what is not directly inferrable from the code itself
 
 ## Literature Policy
 

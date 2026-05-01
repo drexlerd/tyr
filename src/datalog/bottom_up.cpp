@@ -371,6 +371,7 @@ void generate_general_case(RuleExecutionContext<OrAP, AndAP, TP>& rctx)
     {
         using Head = std::decay_t<decltype(head)>;
 
+        // Note: rules with numeric effects are non-idempotent, so we must consider all k-cliques, not just new ones.
         if constexpr (std::is_same_v<Head, fd::NumericEffectOperatorView<f::FluentTag>>)
             kpkc_algorithm.for_each_k_clique(std::forward<decltype(callback)>(callback), workspace);
         else
