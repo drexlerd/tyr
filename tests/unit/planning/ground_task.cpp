@@ -79,7 +79,7 @@ TEST_P(GroundTaskTest, HasExpectedGroundTaskAndSuccessorCounts)
 {
     const auto& param = GetParam();
     auto execution_context = ExecutionContext(1);
-    auto ground_task = p::LiftedTask(fp::Parser(tyr::common::root_path() / param.domain_file).parse_task(tyr::common::root_path() / param.task_file))
+    auto ground_task = p::Task<p::LiftedTag>(fp::Parser(tyr::common::root_path() / param.domain_file).parse_task(tyr::common::root_path() / param.task_file))
                            .instantiate_ground_task(execution_context)
                            .task;
 

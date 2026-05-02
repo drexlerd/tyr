@@ -33,27 +33,34 @@ class GoalStrategy
 public:
     virtual ~GoalStrategy() = default;
 
-    virtual bool is_static_goal_satisfied() = 0;
+    virtual bool is_static_goal_satisfied(const Task<Kind>& task) = 0;
     virtual bool is_dynamic_goal_satisfied(const StateView<Kind>& state) = 0;
 };
 
 template<TaskKind Kind>
-class TaskGoalStrategy : public GoalStrategy<Kind>
+class ConjunctiveGoalStrategy : public GoalStrategy<Kind>
 {
 public:
-    TaskGoalStrategy(const Task<Kind>& task) : m_task(task) {}
+    ConjunctiveGoalStrategy(const Task<Kind>& task) : m_goal(task.get_task().get_goal()) {}
+    ConjunctiveGoalStrategy(formalism::planning::GroundConjunctiveConditionView goal) : m_goal(goal) {}
 
-    static std::shared_ptr<TaskGoalStrategy<Kind>> create(const Task<Kind>& task) { return std::make_shared<TaskGoalStrategy<Kind>>(task); }
+    void set_goal(formalism::planning::GroundConjunctiveConditionView goal) { m_goal = goal; }
 
-    bool is_static_goal_satisfied() override { return is_statically_applicable(m_task.get_task().get_goal(), m_task.get_static_atoms_bitset()); }
+    static std::shared_ptr<ConjunctiveGoalStrategy<Kind>> create(const Task<Kind>& task) { return std::make_shared<ConjunctiveGoalStrategy<Kind>>(task); }
+    static std::shared_ptr<ConjunctiveGoalStrategy<Kind>> create(formalism::planning::GroundConjunctiveConditionView goal)
+    {
+        return std::make_shared<ConjunctiveGoalStrategy<Kind>>(goal);
+    }
+
+    bool is_static_goal_satisfied(const Task<Kind>& task) override { return is_statically_applicable(m_goal, task.get_static_atoms_bitset()); }
     bool is_dynamic_goal_satisfied(const StateView<Kind>& state) override
     {
-        const auto state_context = StateContext { m_task, state.get_unpacked_state(), float_t { 0 } };
-        return is_dynamically_applicable(m_task.get_task().get_goal(), state_context);
+        const auto state_context = StateContext { *state.get_state_repository()->get_task(), state.get_unpacked_state(), float_t { 0 } };
+        return is_dynamically_applicable(m_goal, state_context);
     }
 
 private:
-    const Task<Kind>& m_task;
+    formalism::planning::GroundConjunctiveConditionView m_goal;
 };
 }
 

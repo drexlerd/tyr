@@ -44,9 +44,9 @@ template<>
 class SuccessorGenerator<LiftedTag>
 {
 public:
-    explicit SuccessorGenerator(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context);
+    explicit SuccessorGenerator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<SuccessorGenerator<LiftedTag>> create(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context);
+    static SuccessorGeneratorPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
     Node<LiftedTag> get_initial_node();
 
@@ -95,14 +95,14 @@ private:
                                                  void* callback_data);
 
 private:
-    std::shared_ptr<Task<LiftedTag>> m_task;
+    TaskPtr<LiftedTag> m_task;
     ExecutionContextPtr m_execution_context;
     itertools::cartesian_set::Workspace<Index<formalism::Object>> m_cartesian_workspace;
     Data<formalism::RelationBinding<formalism::planning::Action>> m_scratch_action_binding;
 
     datalog::ProgramWorkspace<datalog::NoOrAnnotationPolicy, datalog::NoAndAnnotationPolicy, datalog::NoTerminationPolicy> m_workspace;
 
-    std::shared_ptr<StateRepository<LiftedTag>> m_state_repository;
+    StateRepositoryPtr<LiftedTag> m_state_repository;
 
     ActionExecutor m_executor;
 };

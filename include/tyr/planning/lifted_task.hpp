@@ -48,7 +48,7 @@ class Task<LiftedTag>
 public:
     explicit Task(formalism::planning::PlanningTask task);
 
-    static std::shared_ptr<Task<LiftedTag>> create(formalism::planning::PlanningTask task);
+    static TaskPtr<LiftedTag> create(formalism::planning::PlanningTask task);
 
     GroundTaskInstantiationResult instantiate_ground_task(ExecutionContext& execution_context,
                                                           const GroundTaskInstantiationOptions& options = GroundTaskInstantiationOptions());

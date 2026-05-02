@@ -30,12 +30,11 @@ template<TaskKind Kind>
 class AxiomEvaluator;
 
 template<typename T, typename Kind>
-concept AxiomEvaluatorConcept =
-    requires(T& r, std::shared_ptr<Task<Kind>> task, std::shared_ptr<ExecutionContext> execution_context, UnpackedState<Kind>& unpacked_state) {
-        requires TaskKind<Kind>;
-        { T(task, execution_context) };
-        { r.compute_extended_state(unpacked_state) } -> std::same_as<void>;
-    };
+concept AxiomEvaluatorConcept = requires(T& r, TaskPtr<Kind> task, ExecutionContextPtr execution_context, UnpackedState<Kind>& unpacked_state) {
+    requires TaskKind<Kind>;
+    { T(task, execution_context) };
+    { r.compute_extended_state(unpacked_state) } -> std::same_as<void>;
+};
 
 }
 

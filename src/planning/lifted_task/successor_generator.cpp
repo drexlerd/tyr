@@ -73,7 +73,7 @@ void for_each_action_binding(const d::ProgramWorkspace<d::NoOrAnnotationPolicy, 
 }
 }
 
-SuccessorGenerator<LiftedTag>::SuccessorGenerator(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context) :
+SuccessorGenerator<LiftedTag>::SuccessorGenerator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
     m_task(std::move(task)),
     m_execution_context(std::move(execution_context)),
     m_workspace(m_task->get_action_program().get_program_context(),
@@ -86,8 +86,7 @@ SuccessorGenerator<LiftedTag>::SuccessorGenerator(std::shared_ptr<Task<LiftedTag
 {
 }
 
-std::shared_ptr<SuccessorGenerator<LiftedTag>> SuccessorGenerator<LiftedTag>::create(std::shared_ptr<Task<LiftedTag>> task,
-                                                                                     ExecutionContextPtr execution_context)
+SuccessorGeneratorPtr<LiftedTag> SuccessorGenerator<LiftedTag>::create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context)
 {
     return std::make_shared<SuccessorGenerator<LiftedTag>>(std::move(task), std::move(execution_context));
 }

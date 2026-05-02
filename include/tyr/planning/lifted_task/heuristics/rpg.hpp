@@ -45,7 +45,7 @@ private:
     constexpr auto& self() { return static_cast<Derived&>(*this); }
 
 public:
-    explicit RPGBase(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context, const OrAP& or_ap, const AndAP& and_ap, const TP& tp) :
+    explicit RPGBase(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context, const OrAP& or_ap, const AndAP& and_ap, const TP& tp) :
         m_task(std::move(task)),
         m_execution_context(std::move(execution_context)),
         m_workspace(m_task->get_rpg_program().get_program_context(), m_task->get_rpg_program().get_const_program_workspace(), or_ap, and_ap, tp)
@@ -78,7 +78,8 @@ public:
 
         m_execution_context->arena().execute([&] { datalog::solve_bottom_up(ctx); });
 
-        return (m_workspace.tp.check(datalog::FactSets { m_task->get_rpg_program().get_const_program_workspace().facts.fact_sets, m_workspace.facts.fact_sets })) ?
+        return (m_workspace.tp.check(
+                   datalog::FactSets { m_task->get_rpg_program().get_const_program_workspace().facts.fact_sets, m_workspace.facts.fact_sets })) ?
                    self().extract_cost_and_set_preferred_actions_impl(state) :
                    std::numeric_limits<float_t>::infinity();
     }
@@ -104,7 +105,7 @@ public:
     }
 
 protected:
-    std::shared_ptr<Task<LiftedTag>> m_task;
+    TaskPtr<LiftedTag> m_task;
     ExecutionContextPtr m_execution_context;
 
     datalog::ProgramWorkspace<OrAP, AndAP, TP> m_workspace;

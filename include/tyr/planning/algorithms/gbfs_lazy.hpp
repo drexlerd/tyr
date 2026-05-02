@@ -47,6 +47,18 @@ struct Options
 template<TaskKind Kind>
 SearchResult<Kind>
 find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& successor_generator, Heuristic<Kind>& heuristic, const Options<Kind>& options = Options<Kind>());
+
+/// @brief Adapter that exposes A* eager search through the generic solver interface.
+template<TaskKind Kind>
+struct Solver
+{
+    TaskPtr<Kind> task;
+    SuccessorGeneratorPtr<Kind> successor_generator;
+    HeuristicPtr<Kind> heuristic;
+    Options<Kind> options;
+
+    SearchResult<Kind> solve() { return find_solution(*task, *successor_generator, *heuristic, options); }
+};
 }
 
 #endif

@@ -35,9 +35,9 @@ class AddRPGHeuristic<LiftedTag> :
                    datalog::TerminationPolicy<datalog::SumAggregation>>
 {
 public:
-    AddRPGHeuristic(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context);
+    AddRPGHeuristic(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<AddRPGHeuristic<LiftedTag>> create(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context);
+    static AddRPGHeuristicPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
     float_t extract_cost_and_set_preferred_actions_impl(const StateView<LiftedTag>& state);
 };

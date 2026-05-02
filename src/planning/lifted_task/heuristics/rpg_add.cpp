@@ -19,7 +19,7 @@
 
 namespace tyr::planning
 {
-AddRPGHeuristic<LiftedTag>::AddRPGHeuristic(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context) :
+AddRPGHeuristic<LiftedTag>::AddRPGHeuristic(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
     RPGBase<AddRPGHeuristic<LiftedTag>,
             datalog::OrAnnotationPolicy,
             datalog::AndAnnotationPolicy<datalog::SumAggregation>,
@@ -28,23 +28,23 @@ AddRPGHeuristic<LiftedTag>::AddRPGHeuristic(std::shared_ptr<Task<LiftedTag>> tas
         std::move(execution_context),
         datalog::OrAnnotationPolicy(),
         datalog::AndAnnotationPolicy<datalog::SumAggregation>(),
-        datalog::TerminationPolicy<datalog::SumAggregation>(
-            task->get_rpg_program().get_program_context().get_program().get_predicates<formalism::FluentTag>(),
-            task->get_rpg_program().get_program_context().get_workspace_repository()))
+        datalog::TerminationPolicy<datalog::SumAggregation>(task->get_rpg_program().get_program_context().get_program().get_predicates<formalism::FluentTag>(),
+                                                            task->get_rpg_program().get_program_context().get_workspace_repository()))
 {
 }
 
-std::shared_ptr<AddRPGHeuristic<LiftedTag>> AddRPGHeuristic<LiftedTag>::create(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context)
+AddRPGHeuristicPtr<LiftedTag> AddRPGHeuristic<LiftedTag>::create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context)
 {
     return std::make_shared<AddRPGHeuristic<LiftedTag>>(std::move(task), std::move(execution_context));
 }
 
 float_t AddRPGHeuristic<LiftedTag>::extract_cost_and_set_preferred_actions_impl(const StateView<LiftedTag>& state)
 {
-    return m_workspace.tp.get_total_cost(datalog::FactSets { m_task->get_rpg_program().get_const_program_workspace().facts.fact_sets, m_workspace.facts.fact_sets },
-                                         this->m_workspace.and_annot,
-                                         this->m_workspace.numeric_and_annot,
-                                         *this->m_workspace.numeric_support_selector);
+    return m_workspace.tp.get_total_cost(
+        datalog::FactSets { m_task->get_rpg_program().get_const_program_workspace().facts.fact_sets, m_workspace.facts.fact_sets },
+        this->m_workspace.and_annot,
+        this->m_workspace.numeric_and_annot,
+        *this->m_workspace.numeric_support_selector);
 }
 
 }

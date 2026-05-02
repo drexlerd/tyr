@@ -36,9 +36,9 @@ template<>
 class AxiomEvaluator<LiftedTag>
 {
 public:
-    explicit AxiomEvaluator(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context);
+    explicit AxiomEvaluator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<AxiomEvaluator<LiftedTag>> create(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context);
+    static AxiomEvaluatorPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
     void compute_extended_state(UnpackedState<LiftedTag>& unpacked_state);
 
@@ -47,7 +47,7 @@ public:
     void print_summary(size_t verbosity) const;
 
 private:
-    std::shared_ptr<Task<LiftedTag>> m_task;
+    TaskPtr<LiftedTag> m_task;
     ExecutionContextPtr m_execution_context;
 
     datalog::ProgramWorkspace<datalog::NoOrAnnotationPolicy, datalog::NoAndAnnotationPolicy, datalog::NoTerminationPolicy> m_workspace;

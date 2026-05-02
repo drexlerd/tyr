@@ -32,14 +32,14 @@ template<>
 class AxiomEvaluator<GroundTag>
 {
 public:
-    explicit AxiomEvaluator(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr execution_context);
+    explicit AxiomEvaluator(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<AxiomEvaluator<GroundTag>> create(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr execution_context);
+    static AxiomEvaluatorPtr<GroundTag> create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
     void compute_extended_state(UnpackedState<GroundTag>& unpacked_state);
 
 private:
-    std::shared_ptr<Task<GroundTag>> m_task;
+    TaskPtr<GroundTag> m_task;
 
     IndexList<formalism::planning::GroundAxiom> m_applicable_axioms;
 };

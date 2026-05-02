@@ -135,7 +135,7 @@ void bind_axiom_evaluator(nb::module_& m, const std::string& name)
     using T = AxiomEvaluator<Kind>;
 
     nb::class_<T>(m, name.c_str())  //
-        .def(nb::new_([](std::shared_ptr<Task<Kind>> task, std::shared_ptr<ExecutionContext> execution_context)
+        .def(nb::new_([](TaskPtr<Kind> task, std::shared_ptr<ExecutionContext> execution_context)
                       { return T::create(std::move(task), std::move(execution_context)); }),
              "task"_a,
              "execution_context"_a);
@@ -147,7 +147,7 @@ void bind_state_repository(nb::module_& m, const std::string& name)
     using T = StateRepository<Kind>;
 
     nb::class_<T>(m, name.c_str())  //
-        .def(nb::new_([](std::shared_ptr<Task<Kind>> task, std::shared_ptr<ExecutionContext> execution_context)
+        .def(nb::new_([](TaskPtr<Kind> task, std::shared_ptr<ExecutionContext> execution_context)
                       { return T::create(std::move(task), std::move(execution_context)); }),
              "task"_a,
              "execution_context"_a)
@@ -168,7 +168,7 @@ void bind_successor_generator(nb::module_& m, const std::string& name)
     using T = SuccessorGenerator<Kind>;
 
     nb::class_<T>(m, name.c_str())
-        .def(nb::new_([](std::shared_ptr<Task<Kind>> task, std::shared_ptr<ExecutionContext> execution_context)
+        .def(nb::new_([](TaskPtr<Kind> task, std::shared_ptr<ExecutionContext> execution_context)
                       { return T::create(std::move(task), std::move(execution_context)); }),
              "task"_a,
              "execution_context"_a)
@@ -200,7 +200,7 @@ public:
     NB_TRAMPOLINE(Base, 2);
 
     /* Trampoline (need one for each virtual function) */
-    bool is_static_goal_satisfied() override { NB_OVERRIDE_PURE(is_static_goal_satisfied); }
+    bool is_static_goal_satisfied(const Task<Kind>& task) override { NB_OVERRIDE_PURE(is_static_goal_satisfied, task); }
 
     bool is_dynamic_goal_satisfied(const StateView<Kind>& state) override { NB_OVERRIDE_PURE(is_dynamic_goal_satisfied, state); }
 };
@@ -211,17 +211,19 @@ void bind_goal_strategy(nb::module_& m, const std::string& name)
     using T = GoalStrategy<Kind>;
 
     nb::class_<T, PyGoalStrategy<Kind>>(m, name.c_str())  //
-        .def("is_static_goal_satisfied", &T::is_static_goal_satisfied)
+        .def("is_static_goal_satisfied", &T::is_static_goal_satisfied, "task"_a)
         .def("is_dynamic_goal_satisfied", &T::is_dynamic_goal_satisfied, "state"_a);
 }
 
 template<TaskKind Kind>
-void bind_task_goal_strategy(nb::module_& m, const std::string& name)
+void bind_conjunctive_goal_strategy(nb::module_& m, const std::string& name)
 {
-    using T = TaskGoalStrategy<Kind>;
+    using T = ConjunctiveGoalStrategy<Kind>;
 
     nb::class_<T, GoalStrategy<Kind>>(m, name.c_str())  //
-        .def(nb::init<const Task<Kind>&>(), "task"_a);
+        .def(nb::init<const Task<Kind>&>(), "task"_a)
+        .def(nb::init<fp::GroundConjunctiveConditionView>(), "goal"_a)
+        .def("set_goal", &T::set_goal, "goal"_a);
 }
 
 template<TaskKind Kind>
@@ -307,7 +309,7 @@ void bind_rpg_max_heuristic(nb::module_& m, const std::string& name)
     using T = MaxRPGHeuristic<Kind>;
 
     nb::class_<T, Heuristic<Kind>>(m, name.c_str())  //
-        .def(nb::new_([](std::shared_ptr<Task<Kind>> task, std::shared_ptr<ExecutionContext> execution_context)
+        .def(nb::new_([](TaskPtr<Kind> task, std::shared_ptr<ExecutionContext> execution_context)
                       { return T::create(std::move(task), std::move(execution_context)); }),
              "task"_a,
              "execution_context"_a);
@@ -319,7 +321,7 @@ void bind_rpg_add_heuristic(nb::module_& m, const std::string& name)
     using T = AddRPGHeuristic<Kind>;
 
     nb::class_<T, Heuristic<Kind>>(m, name.c_str())  //
-        .def(nb::new_([](std::shared_ptr<Task<Kind>> task, std::shared_ptr<ExecutionContext> execution_context)
+        .def(nb::new_([](TaskPtr<Kind> task, std::shared_ptr<ExecutionContext> execution_context)
                       { return T::create(std::move(task), std::move(execution_context)); }),
              "task"_a,
              "execution_context"_a);
@@ -331,7 +333,7 @@ void bind_rpg_ff_heuristic(nb::module_& m, const std::string& name)
     using T = FFRPGHeuristic<Kind>;
 
     nb::class_<T, Heuristic<Kind>>(m, name.c_str())  //
-        .def(nb::new_([](std::shared_ptr<Task<Kind>> task, std::shared_ptr<ExecutionContext> execution_context)
+        .def(nb::new_([](TaskPtr<Kind> task, std::shared_ptr<ExecutionContext> execution_context)
                       { return T::create(std::move(task), std::move(execution_context)); }),
              "task"_a,
              "execution_context"_a);
@@ -385,7 +387,7 @@ void bind_ground_module_definitions(nb::module_& m)
     bind_successor_generator<GroundTag>(m, "SuccessorGenerator");
     bind_search_result<GroundTag>(m, "SearchResult");
     bind_goal_strategy<GroundTag>(m, "GoalStrategy");
-    bind_task_goal_strategy<GroundTag>(m, "TaskGoalStrategy");
+    bind_conjunctive_goal_strategy<GroundTag>(m, "ConjunctiveGoalStrategy");
     bind_pruning_strategy<GroundTag>(m, "PruningStrategy");
     bind_heuristic<GroundTag>(m, "Heuristic");
     bind_blind_heuristic<GroundTag>(m, "BlindHeuristic");
@@ -400,7 +402,7 @@ void bind_lifted_module_definitions(nb::module_& m)
 
     nb::class_<GroundTaskInstantiationResult>(m, "GroundTaskInstantiationResult")
         .def(nb::init<>())
-        .def(nb::init<GroundTaskPtr, GroundTaskInstantiationStatus>(), "task"_a, "status"_a)
+        .def(nb::init<TaskPtr<GroundTag>, GroundTaskInstantiationStatus>(), "task"_a, "status"_a)
         .def_rw("task", &GroundTaskInstantiationResult::task)
         .def_rw("status", &GroundTaskInstantiationResult::status);
 
@@ -442,7 +444,7 @@ should not be used further.
     bind_successor_generator<LiftedTag>(m, "SuccessorGenerator");
     bind_search_result<LiftedTag>(m, "SearchResult");
     bind_goal_strategy<LiftedTag>(m, "GoalStrategy");
-    bind_task_goal_strategy<LiftedTag>(m, "TaskGoalStrategy");
+    bind_conjunctive_goal_strategy<LiftedTag>(m, "ConjunctiveGoalStrategy");
     bind_pruning_strategy<LiftedTag>(m, "PruningStrategy");
     bind_heuristic<LiftedTag>(m, "Heuristic");
     bind_blind_heuristic<LiftedTag>(m, "BlindHeuristic");

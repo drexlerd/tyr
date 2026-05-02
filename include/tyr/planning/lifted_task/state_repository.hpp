@@ -49,9 +49,9 @@ template<>
 class StateRepository<LiftedTag> : public std::enable_shared_from_this<StateRepository<LiftedTag>>
 {
 public:
-    explicit StateRepository(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context);
+    explicit StateRepository(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<StateRepository<LiftedTag>> create(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context);
+    static StateRepositoryPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
     StateView<LiftedTag> get_initial_state();
 
@@ -76,7 +76,7 @@ public:
     size_t num_states() const noexcept { return m_packed_states.size(); }
 
 private:
-    std::shared_ptr<Task<LiftedTag>> m_task;
+    TaskPtr<LiftedTag> m_task;
 
     StateStorageContext<LiftedTag, StateStoragePolicyTag> m_context;
     FactStorageBackend<LiftedTag, StateStoragePolicyTag> m_fluent_backend;
@@ -86,7 +86,7 @@ private:
     IndexedHashSet<State<LiftedTag>> m_packed_states;
     SharedObjectPool<UnpackedState<LiftedTag>> m_unpacked_state_pool;
 
-    std::shared_ptr<AxiomEvaluator<LiftedTag>> m_axiom_evaluator;
+    AxiomEvaluatorPtr<LiftedTag> m_axiom_evaluator;
 };
 
 }

@@ -33,7 +33,7 @@
 
 namespace tyr::planning
 {
-FFRPGHeuristic<LiftedTag>::FFRPGHeuristic(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context) :
+FFRPGHeuristic<LiftedTag>::FFRPGHeuristic(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
     RPGBase<FFRPGHeuristic<LiftedTag>,
             datalog::OrAnnotationPolicy,
             datalog::AndAnnotationPolicy<datalog::SumAggregation>,
@@ -42,9 +42,8 @@ FFRPGHeuristic<LiftedTag>::FFRPGHeuristic(std::shared_ptr<Task<LiftedTag>> task,
         std::move(execution_context),
         datalog::OrAnnotationPolicy(),
         datalog::AndAnnotationPolicy<datalog::SumAggregation>(),
-        datalog::TerminationPolicy<datalog::SumAggregation>(
-            task->get_rpg_program().get_program_context().get_program().get_predicates<formalism::FluentTag>(),
-            task->get_rpg_program().get_program_context().get_workspace_repository())),
+        datalog::TerminationPolicy<datalog::SumAggregation>(task->get_rpg_program().get_program_context().get_program().get_predicates<formalism::FluentTag>(),
+                                                            task->get_rpg_program().get_program_context().get_workspace_repository())),
     m_markings(task->get_rpg_program().get_program_context().get_program().get_predicates<formalism::FluentTag>().size()),
     m_function_markings(task->get_rpg_program().get_program_context().get_program().get_functions<formalism::FluentTag>().size()),
     m_binding(),
@@ -58,7 +57,7 @@ FFRPGHeuristic<LiftedTag>::FFRPGHeuristic(std::shared_ptr<Task<LiftedTag>> task,
 {
 }
 
-std::shared_ptr<FFRPGHeuristic<LiftedTag>> FFRPGHeuristic<LiftedTag>::create(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context)
+FFRPGHeuristicPtr<LiftedTag> FFRPGHeuristic<LiftedTag>::create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context)
 {
     return std::make_shared<FFRPGHeuristic<LiftedTag>>(std::move(task), std::move(execution_context));
 }

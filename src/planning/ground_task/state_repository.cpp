@@ -40,7 +40,7 @@ namespace fp = tyr::formalism::planning;
 namespace tyr::planning
 {
 
-StateRepository<GroundTag>::StateRepository(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr execution_context) :
+StateRepository<GroundTag>::StateRepository(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context) :
     m_task(task),
     m_context(*m_task),
     m_fluent_backend(m_context),
@@ -52,7 +52,7 @@ StateRepository<GroundTag>::StateRepository(std::shared_ptr<Task<GroundTag>> tas
 {
 }
 
-std::shared_ptr<StateRepository<GroundTag>> StateRepository<GroundTag>::create(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr execution_context)
+StateRepositoryPtr<GroundTag> StateRepository<GroundTag>::create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context)
 {
     return std::make_shared<StateRepository<GroundTag>>(std::move(task), std::move(execution_context));
 }

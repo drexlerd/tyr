@@ -51,9 +51,9 @@ template<>
 class StateRepository<GroundTag> : public std::enable_shared_from_this<StateRepository<GroundTag>>
 {
 public:
-    explicit StateRepository(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr execution_context);
+    explicit StateRepository(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<StateRepository<GroundTag>> create(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr execution_context);
+    static StateRepositoryPtr<GroundTag> create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
     StateView<GroundTag> get_initial_state();
 
@@ -78,7 +78,7 @@ public:
     size_t num_states() const noexcept { return m_packed_states.size(); }
 
 private:
-    std::shared_ptr<Task<GroundTag>> m_task;
+    TaskPtr<GroundTag> m_task;
 
     StateStorageContext<GroundTag, StateStoragePolicyTag> m_context;
     FactStorageBackend<GroundTag, StateStoragePolicyTag> m_fluent_backend;
@@ -88,7 +88,7 @@ private:
     IndexedHashSet<State<GroundTag>> m_packed_states;
     SharedObjectPool<UnpackedState<GroundTag>> m_unpacked_state_pool;
 
-    std::shared_ptr<AxiomEvaluator<GroundTag>> m_axiom_evaluator;
+    AxiomEvaluatorPtr<GroundTag> m_axiom_evaluator;
 };
 
 }

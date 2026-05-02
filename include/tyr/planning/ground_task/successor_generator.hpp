@@ -34,9 +34,9 @@ template<>
 class SuccessorGenerator<GroundTag>
 {
 public:
-    explicit SuccessorGenerator(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr execution_context);
+    explicit SuccessorGenerator(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<SuccessorGenerator<GroundTag>> create(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr execution_context);
+    static SuccessorGeneratorPtr<GroundTag> create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
     Node<GroundTag> get_initial_node();
 
@@ -50,11 +50,11 @@ public:
     const auto& get_state_repository() const noexcept { return m_state_repository; }
 
 private:
-    std::shared_ptr<Task<GroundTag>> m_task;
+    TaskPtr<GroundTag> m_task;
 
     IndexList<formalism::planning::GroundAction> m_applicable_actions;
 
-    std::shared_ptr<StateRepository<GroundTag>> m_state_repository;
+    StateRepositoryPtr<GroundTag> m_state_repository;
 
     ActionExecutor m_executor;
 };

@@ -48,9 +48,9 @@ Task<LiftedTag>::Task(formalism::planning::PlanningTask task) :
         set(uint_t(fterm_value.get_fterm().get_index()), fterm_value.get_value(), m_static_numeric_variables, std::numeric_limits<float_t>::quiet_NaN());
 }
 
-std::shared_ptr<LiftedTask> LiftedTask::create(formalism::planning::PlanningTask task) { return std::make_shared<LiftedTask>(std::move(task)); }
+TaskPtr<LiftedTag> Task<LiftedTag>::create(formalism::planning::PlanningTask task) { return std::make_shared<Task<LiftedTag>>(std::move(task)); }
 
-GroundTaskInstantiationResult LiftedTask::instantiate_ground_task(ExecutionContext& execution_context, const GroundTaskInstantiationOptions& options)
+GroundTaskInstantiationResult Task<LiftedTag>::instantiate_ground_task(ExecutionContext& execution_context, const GroundTaskInstantiationOptions& options)
 {
     return tyr::planning::instantiate_ground_task(*this, execution_context, options);
 }

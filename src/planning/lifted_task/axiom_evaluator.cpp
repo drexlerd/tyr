@@ -20,9 +20,9 @@
 #include "tyr/common/comparators.hpp"  // for operator!=
 #include "tyr/common/equal_to.hpp"     // for EqualTo
 #include "tyr/common/formatter.hpp"
-#include "tyr/common/hash.hpp"         // for Hash
-#include "tyr/common/vector.hpp"       // for View
-#include "tyr/datalog/bottom_up.hpp"   // for solve_bottom_up
+#include "tyr/common/hash.hpp"        // for Hash
+#include "tyr/common/vector.hpp"      // for View
+#include "tyr/datalog/bottom_up.hpp"  // for solve_bottom_up
 #include "tyr/datalog/contexts/program.hpp"
 #include "tyr/datalog/fact_sets.hpp"  // for FactSets, Pre...
 #include "tyr/datalog/formatter.hpp"
@@ -38,8 +38,8 @@
 
 #include <cista/containers/hash_storage.h>  // for operator!=
 #include <fmt/ostream.h>
-#include <gtl/phmap.hpp>                    // for operator!=
-#include <utility>                          // for pair
+#include <gtl/phmap.hpp>  // for operator!=
+#include <utility>        // for pair
 
 namespace d = tyr::datalog;
 namespace f = tyr::formalism;
@@ -74,7 +74,7 @@ void read_derived_atoms_from_program_context(const AxiomEvaluatorProgram& axiom_
 }
 }
 
-AxiomEvaluator<LiftedTag>::AxiomEvaluator(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context) :
+AxiomEvaluator<LiftedTag>::AxiomEvaluator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
     m_task(std::move(task)),
     m_execution_context(std::move(execution_context)),
     m_workspace(m_task->get_axiom_program().get_program_context(),
@@ -85,7 +85,7 @@ AxiomEvaluator<LiftedTag>::AxiomEvaluator(std::shared_ptr<Task<LiftedTag>> task,
 {
 }
 
-std::shared_ptr<AxiomEvaluator<LiftedTag>> AxiomEvaluator<LiftedTag>::create(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context)
+AxiomEvaluatorPtr<LiftedTag> AxiomEvaluator<LiftedTag>::create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context)
 {
     return std::make_shared<AxiomEvaluator<LiftedTag>>(std::move(task), std::move(execution_context));
 }

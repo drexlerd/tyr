@@ -36,7 +36,7 @@ namespace fp = tyr::formalism::planning;
 namespace tyr::planning
 {
 
-SuccessorGenerator<GroundTag>::SuccessorGenerator(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr execution_context) :
+SuccessorGenerator<GroundTag>::SuccessorGenerator(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context) :
     m_task(task),
     m_applicable_actions(),
     m_state_repository(std::make_shared<StateRepository<GroundTag>>(task, execution_context)),
@@ -44,8 +44,7 @@ SuccessorGenerator<GroundTag>::SuccessorGenerator(std::shared_ptr<Task<GroundTag
 {
 }
 
-std::shared_ptr<SuccessorGenerator<GroundTag>> SuccessorGenerator<GroundTag>::create(std::shared_ptr<Task<GroundTag>> task,
-                                                                                     ExecutionContextPtr execution_context)
+SuccessorGeneratorPtr<GroundTag> SuccessorGenerator<GroundTag>::create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context)
 {
     return std::make_shared<SuccessorGenerator<GroundTag>>(std::move(task), std::move(execution_context));
 }

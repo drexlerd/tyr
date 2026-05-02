@@ -54,15 +54,15 @@ Task<GroundTag>::Task(formalism::planning::PlanningFDRTask task) :
 }
 
 template<f::FactKind T>
-size_t GroundTask::get_num_atoms() const noexcept
+size_t Task<GroundTag>::get_num_atoms() const noexcept
 {
     return get_task().template get_atoms<T>().size();
 }
 
-template size_t GroundTask::get_num_atoms<f::FluentTag>() const noexcept;
-template size_t GroundTask::get_num_atoms<f::DerivedTag>() const noexcept;
+template size_t Task<GroundTag>::get_num_atoms<f::FluentTag>() const noexcept;
+template size_t Task<GroundTag>::get_num_atoms<f::DerivedTag>() const noexcept;
 
-size_t GroundTask::get_num_actions() const noexcept { return get_task().get_ground_actions().size(); }
+size_t Task<GroundTag>::get_num_actions() const noexcept { return get_task().get_ground_actions().size(); }
 
-size_t GroundTask::get_num_axioms() const noexcept { return get_task().get_ground_axioms().size(); }
+size_t Task<GroundTag>::get_num_axioms() const noexcept { return get_task().get_ground_axioms().size(); }
 }

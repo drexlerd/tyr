@@ -44,9 +44,9 @@ class FFRPGHeuristic<LiftedTag> :
                    datalog::TerminationPolicy<datalog::SumAggregation>>
 {
 public:
-    FFRPGHeuristic(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context);
+    FFRPGHeuristic(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
-    static std::shared_ptr<FFRPGHeuristic<LiftedTag>> create(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context);
+    static FFRPGHeuristicPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
     float_t extract_cost_and_set_preferred_actions_impl(const StateView<LiftedTag>& state);
 

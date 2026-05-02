@@ -393,7 +393,7 @@ std::optional<fp::GroundAxiomView> ground_pruned(fp::AxiomView element,
 }
 }
 
-GroundTaskInstantiationResult instantiate_ground_task(LiftedTask& lifted_task,  //
+GroundTaskInstantiationResult instantiate_ground_task(Task<LiftedTag>& lifted_task,  //
                                                       ExecutionContext& execution_context,
                                                       const GroundTaskInstantiationOptions& options)
 {
@@ -641,7 +641,7 @@ GroundTaskInstantiationResult instantiate_ground_task(LiftedTask& lifted_task,  
     canonicalize(fdr_task);
 
     return GroundTaskInstantiationResult {
-        std::make_shared<GroundTask>(
+        std::make_shared<Task<GroundTag>>(
             fp::PlanningFDRTask(repository->get_or_create(fdr_task).first, std::move(fdr_context), repository, planning_task.get_domain())),
         GroundTaskInstantiationStatus::SUCCESS
     };

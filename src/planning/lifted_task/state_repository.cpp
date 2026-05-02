@@ -37,7 +37,7 @@ namespace fp = tyr::formalism::planning;
 namespace tyr::planning
 {
 
-StateRepository<LiftedTag>::StateRepository(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context) :
+StateRepository<LiftedTag>::StateRepository(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
     m_task(task),
     m_context(),
     m_fluent_backend(m_context),
@@ -48,7 +48,7 @@ StateRepository<LiftedTag>::StateRepository(std::shared_ptr<Task<LiftedTag>> tas
 {
 }
 
-std::shared_ptr<StateRepository<LiftedTag>> StateRepository<LiftedTag>::create(std::shared_ptr<Task<LiftedTag>> task, ExecutionContextPtr execution_context)
+StateRepositoryPtr<LiftedTag> StateRepository<LiftedTag>::create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context)
 {
     return std::make_shared<StateRepository<LiftedTag>>(std::move(task), std::move(execution_context));
 }

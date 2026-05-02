@@ -12,7 +12,7 @@ from pytyr.pytyr.planning.ground import (
     SuccessorGenerator,
     SearchResult,
     GoalStrategy,
-    TaskGoalStrategy,
+    ConjunctiveGoalStrategy,
     PruningStrategy,
     Heuristic,
     BlindHeuristic,

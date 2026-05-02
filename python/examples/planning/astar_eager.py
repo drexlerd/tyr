@@ -38,7 +38,7 @@ from pytyr.planning.lifted import (
     GoalCountHeuristic, 
     PruningStrategy, 
     GoalStrategy, 
-    TaskGoalStrategy, 
+    ConjunctiveGoalStrategy, 
     State, 
     Node, 
     LabeledNode, 
@@ -99,7 +99,7 @@ class CustomGoalStrategy(GoalStrategy):
 
     A prominent example is Serialized Iterative Width (SIW) that repeateadly calls IW to greedily achieve one goal atom at a time.
     """
-    def is_static_goal_satisfied(self) -> bool: 
+    def is_static_goal_satisfied(self, task: Task) -> bool: 
         """ Is checked before running a search. """
         pass
 
@@ -174,7 +174,7 @@ def main():
 
     options = Options()                               # Lifted search is parallelized but only useful on large tasks.
     options.event_handler = DefaultEventHandler(0)         # Collects and prints statistics. If verbosity >= 2, then also prints labeled nodes.
-    options.goal_strategy = TaskGoalStrategy(lifted_task)  # Terminates the search when reaching a state that satisfies the task's goal.
+    options.goal_strategy = ConjunctiveGoalStrategy(lifted_task)  # Terminates the search when reaching a state that satisfies the task's goal.
     options.pruning_strategy = PruningStrategy()           # Never prunes
 
     search_result = find_solution(lifted_task, successor_generator, heuristic, options)

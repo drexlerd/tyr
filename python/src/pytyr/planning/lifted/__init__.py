@@ -18,7 +18,7 @@ from pytyr.pytyr.planning.lifted import (
     SuccessorGenerator,
     SearchResult,
     GoalStrategy,
-    TaskGoalStrategy,
+    ConjunctiveGoalStrategy,
     PruningStrategy,
     Heuristic,
     BlindHeuristic,
@@ -35,4 +35,3 @@ from . import (
 from . import (
     gbfs_lazy as gbfs_lazy,
 )
-

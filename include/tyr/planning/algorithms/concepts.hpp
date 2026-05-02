@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025-2026 Dominik Drexler
+ * Copyright (C) 2023 Dominik Drexler and Simon Stahlberg
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,20 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_PLANNING_LIFTED_TASK_TASK_GROUNDER_HPP_
-#define TYR_PLANNING_LIFTED_TASK_TASK_GROUNDER_HPP_
+#ifndef TYR_PLANNING_ALGORITHMS_CONCEPTS_HPP_
+#define TYR_PLANNING_ALGORITHMS_CONCEPTS_HPP_
 
-#include "tyr/common/onetbb.hpp"
+#include "tyr/planning/algorithms/utils.hpp"
 #include "tyr/planning/declarations.hpp"
-#include "tyr/planning/lifted_task/task_grounder_decl.hpp"
+
+#include <concepts>
 
 namespace tyr::planning
 {
-
-GroundTaskInstantiationResult instantiate_ground_task(Task<LiftedTag>& lifted_task,
-                                                      ExecutionContext& execution_context,
-                                                      const GroundTaskInstantiationOptions& options = GroundTaskInstantiationOptions());
+template<typename T, typename Kind>
+concept SolverConcept = requires(T solver) {
+    { solver.solve() } -> std::same_as<SearchResult<Kind>>;
+};
 
 }
 

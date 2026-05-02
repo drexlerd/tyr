@@ -110,7 +110,8 @@ bool are_same_binding(fp::ActionBindingView lhs, const Data<formalism::RelationB
 
 void expect_action_binding_apis_match_ground_actions(const LiftedSuccessorCountCase& test_case)
 {
-    auto lifted_task = p::LiftedTask::create(fp::Parser(tyr::common::root_path() / test_case.domain_file).parse_task(tyr::common::root_path() / test_case.task_file));
+    auto lifted_task =
+        p::Task<p::LiftedTag>::create(fp::Parser(tyr::common::root_path() / test_case.domain_file).parse_task(tyr::common::root_path() / test_case.task_file));
     auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(lifted_task, ExecutionContext::create(1));
     const auto initial_node = successor_generator.get_initial_node();
 
@@ -157,7 +158,8 @@ class LiftedTaskSuccessorCountTest : public ::testing::TestWithParam<LiftedSucce
 TEST_P(LiftedTaskSuccessorCountTest, InitialNodeHasExpectedSuccessorCount)
 {
     const auto& param = GetParam();
-    auto lifted_task = p::LiftedTask::create(fp::Parser(tyr::common::root_path() / param.domain_file).parse_task(tyr::common::root_path() / param.task_file));
+    auto lifted_task =
+        p::Task<p::LiftedTag>::create(fp::Parser(tyr::common::root_path() / param.domain_file).parse_task(tyr::common::root_path() / param.task_file));
     auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(lifted_task, ExecutionContext::create(1));
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), param.expected_successors);

@@ -32,7 +32,7 @@ enum class GroundTaskInstantiationStatus
 
 struct GroundTaskInstantiationResult
 {
-    GroundTaskPtr task;
+    TaskPtr<GroundTag> task;
     GroundTaskInstantiationStatus status;
 };
 

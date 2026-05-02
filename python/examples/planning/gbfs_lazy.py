@@ -42,7 +42,7 @@ from pytyr.planning.lifted import (
     FFRPGHeuristic, 
     PruningStrategy, 
     GoalStrategy,
-    TaskGoalStrategy, 
+    ConjunctiveGoalStrategy, 
     State, 
     Node, 
     LabeledNode, 
@@ -103,11 +103,11 @@ def find_solution(task : Task, successor_generator : SuccessorGenerator, heurist
     
     state_repository = successor_generator.get_state_repository()
 
-    goal_strategy = TaskGoalStrategy(task)
+    goal_strategy = ConjunctiveGoalStrategy(task)
 
     search_result = SearchResult()
 
-    if not goal_strategy.is_static_goal_satisfied():
+    if not goal_strategy.is_static_goal_satisfied(task):
         search_result.goal_node = None
         search_result.plan = None
         search_result.status = SearchStatus.UNSOLVABLE

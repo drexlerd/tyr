@@ -29,9 +29,9 @@
 namespace tyr::planning
 {
 
-AxiomEvaluator<GroundTag>::AxiomEvaluator(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr) : m_task(task), m_applicable_axioms() {}
+AxiomEvaluator<GroundTag>::AxiomEvaluator(TaskPtr<GroundTag> task, ExecutionContextPtr) : m_task(task), m_applicable_axioms() {}
 
-std::shared_ptr<AxiomEvaluator<GroundTag>> AxiomEvaluator<GroundTag>::create(std::shared_ptr<Task<GroundTag>> task, ExecutionContextPtr execution_context)
+AxiomEvaluatorPtr<GroundTag> AxiomEvaluator<GroundTag>::create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context)
 {
     return std::make_shared<AxiomEvaluator<GroundTag>>(std::move(task), std::move(execution_context));
 }

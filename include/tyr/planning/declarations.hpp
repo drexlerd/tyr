@@ -36,11 +36,8 @@ concept TaskKind = std::same_as<Tag, GroundTag> || std::same_as<Tag, LiftedTag>;
 
 template<TaskKind Kind>
 class Task;
-
-using LiftedTask = Task<LiftedTag>;
-using LiftedTaskPtr = std::shared_ptr<LiftedTask>;
-using GroundTask = Task<GroundTag>;
-using GroundTaskPtr = std::shared_ptr<GroundTask>;
+template<TaskKind Kind>
+using TaskPtr = std::shared_ptr<Task<Kind>>;
 
 template<TaskKind Kind>
 class Node;
@@ -58,14 +55,40 @@ struct StateContext;
 template<TaskKind Kind>
 class SuccessorGenerator;
 template<TaskKind Kind>
+using SuccessorGeneratorPtr = std::shared_ptr<SuccessorGenerator<Kind>>;
+template<TaskKind Kind>
 class StateRepository;
 template<TaskKind Kind>
+using StateRepositoryPtr = std::shared_ptr<StateRepository<Kind>>;
+template<TaskKind Kind>
 class AxiomEvaluator;
+template<TaskKind Kind>
+using AxiomEvaluatorPtr = std::shared_ptr<AxiomEvaluator<Kind>>;
 
 template<TaskKind Kind>
 class Heuristic;
 template<TaskKind Kind>
 using HeuristicPtr = std::shared_ptr<Heuristic<Kind>>;
+template<TaskKind Kind>
+class BlindHeuristic;
+template<TaskKind Kind>
+using BlindHeuristicPtr = std::shared_ptr<BlindHeuristic<Kind>>;
+template<TaskKind Kind>
+class GoalCountHeuristic;
+template<TaskKind Kind>
+using GoalCountHeuristicPtr = std::shared_ptr<GoalCountHeuristic<Kind>>;
+template<TaskKind Kind>
+class AddRPGHeuristic;
+template<TaskKind Kind>
+using AddRPGHeuristicPtr = std::shared_ptr<AddRPGHeuristic<Kind>>;
+template<TaskKind Kind>
+class FFRPGHeuristic;
+template<TaskKind Kind>
+using FFRPGHeuristicPtr = std::shared_ptr<FFRPGHeuristic<Kind>>;
+template<TaskKind Kind>
+class MaxRPGHeuristic;
+template<TaskKind Kind>
+using MaxRPGHeuristicPtr = std::shared_ptr<MaxRPGHeuristic<Kind>>;
 
 template<TaskKind Kind>
 class PruningStrategy;

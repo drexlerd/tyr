@@ -22,6 +22,7 @@
 #include "tyr/formalism/planning/repository.hpp"
 #include "tyr/formalism/planning/views.hpp"
 #include "tyr/planning/algorithms/astar_eager/event_handler.hpp"
+#include "tyr/planning/algorithms/concepts.hpp"
 #include "tyr/planning/algorithms/openlists/alternating.hpp"
 #include "tyr/planning/algorithms/strategies/goal.hpp"
 #include "tyr/planning/algorithms/strategies/pruning.hpp"
@@ -112,7 +113,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
     const auto start_state_index = start_state.get_index();
     const auto event_handler = (options.event_handler) ? options.event_handler : DefaultEventHandler<Kind>::create(0);
     const auto pruning_strategy = (options.pruning_strategy) ? options.pruning_strategy : PruningStrategy<Kind>::create();
-    const auto goal_strategy = (options.goal_strategy) ? options.goal_strategy : TaskGoalStrategy<Kind>::create(task);
+    const auto goal_strategy = (options.goal_strategy) ? options.goal_strategy : ConjunctiveGoalStrategy<Kind>::create(task);
     auto rng = std::mt19937_64(options.random_seed);
     auto& state_repository = *successor_generator.get_state_repository();
 
@@ -129,7 +130,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
     /* Test static goal. */
 
-    if (!goal_strategy->is_static_goal_satisfied())
+    if (!goal_strategy->is_static_goal_satisfied(task))
     {
         event_handler->on_end_search();
         event_handler->on_unsolvable();
@@ -327,5 +328,8 @@ template SearchResult<GroundTag> find_solution<GroundTag>(Task<GroundTag>& task,
                                                           SuccessorGenerator<GroundTag>& successor_generator,
                                                           Heuristic<GroundTag>& heuristic,
                                                           const Options<GroundTag>& options);
+
+static_assert(SolverConcept<Solver<LiftedTag>, LiftedTag>);
+static_assert(SolverConcept<Solver<GroundTag>, GroundTag>);
 
 }

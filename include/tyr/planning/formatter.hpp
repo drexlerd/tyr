@@ -37,22 +37,22 @@ namespace fmt
 {
 
 template<>
-struct formatter<tyr::planning::LiftedTask, char>
+struct formatter<tyr::planning::Task<tyr::planning::LiftedTag>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
-    auto format(const tyr::planning::LiftedTask& value, FormatContext& ctx) const
+    auto format(const tyr::planning::Task<tyr::planning::LiftedTag>& value, FormatContext& ctx) const
     {
         return fmt::format_to(ctx.out(), "{}", value.get_task());
     }
 };
 
 template<>
-struct formatter<tyr::planning::GroundTask, char>
+struct formatter<tyr::planning::Task<tyr::planning::GroundTag>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
     template<typename FormatContext>
-    auto format(const tyr::planning::GroundTask& value, FormatContext& ctx) const
+    auto format(const tyr::planning::Task<tyr::planning::GroundTag>& value, FormatContext& ctx) const
     {
         return fmt::format_to(ctx.out(), "{}", value.get_task());
     }

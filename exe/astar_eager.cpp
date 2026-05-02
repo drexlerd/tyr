@@ -82,7 +82,7 @@ int main(int argc, char** argv)
         auto parser = formalism::planning::Parser(domain_filepath, parser_options);
         auto domain = parser.get_domain();
 
-        auto lifted_task = planning::LiftedTask::create(parser.parse_task(problem_filepath));
+        auto lifted_task = planning::Task<planning::LiftedTag>::create(parser.parse_task(problem_filepath));
 
         if (verbosity > 0)
             fmt::print(std::cout, "{}\n", domain);

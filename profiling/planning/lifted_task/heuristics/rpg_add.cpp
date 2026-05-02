@@ -70,9 +70,9 @@ std::vector<BenchmarkCase> load_cases()
     return result;
 }
 
-p::LiftedTaskPtr create_task(const BenchmarkCase& benchmark_case)
+p::TaskPtr<p::LiftedTag> create_task(const BenchmarkCase& benchmark_case)
 {
-    return p::LiftedTask::create(fp::Parser(benchmark_case.domain).parse_task(benchmark_case.task));
+    return p::Task<p::LiftedTag>::create(fp::Parser(benchmark_case.domain).parse_task(benchmark_case.task));
 }
 
 void benchmark_gbfs_lazy_rpg_add(benchmark::State& state, const BenchmarkCase& benchmark_case)
