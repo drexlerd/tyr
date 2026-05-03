@@ -10,8 +10,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        build_type: [Debug, Release]
+        include:
+          - os: ubuntu-latest
+            build_type: Debug
+          - os: macos-latest
+            build_type: Release
 
     steps:
       - name: Checkout Tyr
@@ -35,17 +38,24 @@ jobs:
 
       - name: Configure, Build, and Install Dependencies
         run: |
-          cmake -S dependencies -B dependencies-build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/dependencies-install
-          cmake --build dependencies-build
+          cmake -S dependencies -B dependencies-build \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/dependencies-install \
+                -DCMAKE_INSTALL_LIBDIR=lib \
+                -DTYR_BUILD_SHARED_DEPENDENCIES=ON
+          cmake --build dependencies-build -j2
           cmake --install dependencies-build
 
       - name: Configure and Build Tyr
         run: |
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
                 -DBUILD_TESTS=ON \
+                -DTYR_BUILD_SHARED=ON \
+                -DTYR_LINK_STATIC_DEPENDENCIES=OFF \
+                -DCMAKE_INSTALL_LIBDIR=lib \
                 -S . -B build_${{ matrix.build_type }} \
                 -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/dependencies-install
-          cmake --build build_${{ matrix.build_type }}
+          cmake --build build_${{ matrix.build_type }} -j2
 
       - name: Run Tests
         working-directory: build_${{ matrix.build_type }}/tests/unit

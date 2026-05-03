@@ -18,8 +18,7 @@ def test_downstream_python_binding_imports_public_pytyr_api_and_links_tyr_core(t
     if cmake is None:
         pytest.skip("cmake is required for the downstream binding smoke test")
 
-    pytyr_package_dir = Path(pytyr.__file__).resolve().parent
-    pytyr_prefix = pytyr_package_dir.parent
+    pytyr_prefix = Path(pytyr.native_prefix())
     tyr_library_dir = pytyr_prefix / "lib"
     tyr_core_libraries = list(tyr_library_dir.glob("libtyr_core.*"))
     if not tyr_core_libraries:
@@ -46,6 +45,7 @@ def test_downstream_python_binding_imports_public_pytyr_api_and_links_tyr_core(t
             f"-DCMAKE_PREFIX_PATH={pytyr_prefix}",
             f"-Dtyr_DIR={tyr_cmake_dir}",
             f"-DPython_EXECUTABLE={sys.executable}",
+            f"-DDOWNSTREAM_TYR_RUNTIME_LIBRARY_DIR={tyr_library_dir}",
             env.get("CMAKE_ARGS", ""),
         ]
     ).strip()
@@ -61,6 +61,7 @@ def test_downstream_python_binding_imports_public_pytyr_api_and_links_tyr_core(t
             f"-DCMAKE_PREFIX_PATH={pytyr_prefix}",
             f"-Dtyr_DIR={tyr_cmake_dir}",
             f"-DPython_EXECUTABLE={sys.executable}",
+            f"-DDOWNSTREAM_TYR_RUNTIME_LIBRARY_DIR={tyr_library_dir}",
         ],
         check=True,
         env=env,

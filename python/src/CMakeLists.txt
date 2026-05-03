@@ -7,6 +7,12 @@ include(CMakePackageConfigHelpers)
 find_package(nanobind CONFIG REQUIRED PATHS ${CMAKE_PREFIX_PATH})
 message(STATUS "Found nanobind: ${nanobind_DIR} (found version ${nanobind_VERSION})")
 
+set(PYTYR_NATIVE_DIR "yggdrasil")
+set(PYTYR_NATIVE_INCLUDEDIR "${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_INCLUDEDIR}")
+set(PYTYR_NATIVE_LIBDIR "${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_LIBDIR}")
+set(PYTYR_NATIVE_BINDIR "${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_BINDIR}")
+set(PYTYR_NATIVE_CMAKEDIR "${PYTYR_NATIVE_LIBDIR}/cmake")
+
 nanobind_add_module(pytyr
     pytyr.cpp
     pytyr/common.cpp
@@ -25,9 +31,9 @@ target_link_libraries(pytyr PRIVATE tyr::core)
 
 if(TYR_BUILD_SHARED)
     if(APPLE)
-        set(PYTYR_LIBRARY_ORIGIN "@loader_path/../lib")
+        set(PYTYR_LIBRARY_ORIGIN "@loader_path/../${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_LIBDIR}")
     elseif(UNIX)
-        set(PYTYR_LIBRARY_ORIGIN "$ORIGIN/../lib")
+        set(PYTYR_LIBRARY_ORIGIN "$ORIGIN/../${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_LIBDIR}")
     endif()
 
     if(PYTYR_LIBRARY_ORIGIN)
@@ -39,34 +45,36 @@ endif()
 
 install(TARGETS pytyr DESTINATION "pytyr" COMPONENT pytyr)
 if(TYR_BUILD_SHARED)
+    set_property(TARGET core PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+        "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>")
     install(TARGETS core
             EXPORT pytyrTyrcoreTargets
-            LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT pytyr
-            ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT pytyr
-            RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT pytyr
-            INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+            LIBRARY DESTINATION "${PYTYR_NATIVE_LIBDIR}" COMPONENT pytyr
+            ARCHIVE DESTINATION "${PYTYR_NATIVE_LIBDIR}" COMPONENT pytyr
+            RUNTIME DESTINATION "${PYTYR_NATIVE_BINDIR}" COMPONENT pytyr
+            INCLUDES DESTINATION "${PYTYR_NATIVE_INCLUDEDIR}")
 endif()
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/tyr"
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+        DESTINATION "${PYTYR_NATIVE_INCLUDEDIR}"
         COMPONENT pytyr)
 configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/tyrConfig.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/tyrConfig.cmake"
-        INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr"
+        INSTALL_DESTINATION "${PYTYR_NATIVE_CMAKEDIR}/tyr"
         NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 install(FILES
             "${CMAKE_CURRENT_BINARY_DIR}/tyrConfig.cmake"
             "${CMAKE_BINARY_DIR}/tyrConfigVersion.cmake"
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr"
+        DESTINATION "${PYTYR_NATIVE_CMAKEDIR}/tyr"
         COMPONENT pytyr)
 if(TYR_BUILD_SHARED)
     install(EXPORT pytyrTyrcoreTargets
             NAMESPACE tyr::
             FILE "tyrcoreTargets.cmake"
-            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr"
+            DESTINATION "${PYTYR_NATIVE_CMAKEDIR}/tyr"
             COMPONENT pytyr)
 endif()
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/cmake/"
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr/cmake"
+        DESTINATION "${PYTYR_NATIVE_CMAKEDIR}/tyr/cmake"
         COMPONENT pytyr)
 
 set(PYTYR_DEPENDENCY_HEADER_DIRS
@@ -92,7 +100,7 @@ foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
         foreach(header_dir IN LISTS PYTYR_DEPENDENCY_HEADER_DIRS)
             if(EXISTS "${prefix}/include/${header_dir}")
                 install(DIRECTORY "${prefix}/include/${header_dir}"
-                        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+                        DESTINATION "${PYTYR_NATIVE_INCLUDEDIR}"
                         COMPONENT pytyr)
             endif()
         endforeach()
@@ -109,7 +117,7 @@ foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
             )
             if(PYTYR_DEPENDENCY_RUNTIME_LIBRARIES)
                 install(FILES ${PYTYR_DEPENDENCY_RUNTIME_LIBRARIES}
-                        DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+                        DESTINATION "${PYTYR_NATIVE_LIBDIR}"
                         COMPONENT pytyr)
             endif()
         endif()
@@ -119,7 +127,7 @@ foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
                 foreach(cmake_dir IN LISTS PYTYR_DEPENDENCY_CMAKE_DIRS)
                     if(IS_DIRECTORY "${cmake_dir}")
                         install(DIRECTORY "${cmake_dir}"
-                                DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake"
+                                DESTINATION "${PYTYR_NATIVE_CMAKEDIR}"
                                 COMPONENT pytyr)
                     endif()
                 endforeach()
@@ -128,7 +136,7 @@ foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
     endforeach()
     if(EXISTS "${prefix}/nanobind")
         install(DIRECTORY "${prefix}/nanobind"
-                DESTINATION "."
+                DESTINATION "${PYTYR_NATIVE_DIR}"
                 COMPONENT pytyr)
     endif()
 endforeach()
