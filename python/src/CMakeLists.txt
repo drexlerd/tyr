@@ -22,17 +22,49 @@ nanobind_add_module(pytyr
 target_link_libraries(pytyr PRIVATE tyr::core)
 
 if(TYR_BUILD_SHARED)
-    set_target_properties(pytyr PROPERTIES
-        BUILD_RPATH "$ORIGIN"
-        INSTALL_RPATH "$ORIGIN")
+    if(APPLE)
+        set(PYTYR_LIBRARY_ORIGIN "@loader_path/../lib")
+    elseif(UNIX)
+        set(PYTYR_LIBRARY_ORIGIN "$ORIGIN/../lib")
+    endif()
+
+    if(PYTYR_LIBRARY_ORIGIN)
+        set_target_properties(pytyr PROPERTIES
+            BUILD_RPATH "${PYTYR_LIBRARY_ORIGIN}"
+            INSTALL_RPATH "${PYTYR_LIBRARY_ORIGIN}")
+    endif()
 endif()
 
 install(TARGETS pytyr DESTINATION "pytyr" COMPONENT pytyr)
 if(TYR_BUILD_SHARED)
+    install(TARGETS core
+            EXPORT pytyrTyrcoreTargets
+            LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT pytyr
+            ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT pytyr
+            RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT pytyr
+            INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
     install(FILES "$<TARGET_FILE:core>"
-            DESTINATION "pytyr"
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}"
             COMPONENT pytyr)
 endif()
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/tyr"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+        COMPONENT pytyr)
+install(FILES
+            "${CMAKE_BINARY_DIR}/tyrConfig.cmake"
+            "${CMAKE_BINARY_DIR}/tyrConfigVersion.cmake"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr"
+        COMPONENT pytyr)
+if(TYR_BUILD_SHARED)
+    install(EXPORT pytyrTyrcoreTargets
+            NAMESPACE tyr::
+            FILE "tyrcoreTargets.cmake"
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr"
+            COMPONENT pytyr)
+endif()
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/cmake/"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr/cmake"
+        COMPONENT pytyr)
 
 set(PYTYR_PYTHON_FILES
     pytyr/__init__.py
