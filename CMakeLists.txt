@@ -81,7 +81,7 @@ else()
 
     # add_compile_options(-ftime-report)
 
-    if(TYR_USE_LLD)
+    if(TYR_USE_LLD AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
         find_program(LLD_LINKER NAMES ld.lld)
         if(LLD_LINKER)
             message(STATUS "Using lld: ${LLD_LINKER}")
@@ -89,6 +89,8 @@ else()
         else()
             message(STATUS "lld not found, falling back to default linker")
         endif()
+    elseif(TYR_USE_LLD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        message(STATUS "Skipping lld with GNU because GCC LTO requires the GCC linker plugin")
     endif()
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

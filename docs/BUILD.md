@@ -23,58 +23,54 @@ Tyr depends on the following set of libraries:
 - [nanobind](https://github.com/wjakob/nanobind.git) for Python bindings.
 
 
-Run the following sequence of commands to download, configure, build, and install all dependencies:
+Dependencies that are owned by Loki, such as Boost, fmt, argparse, and gtl, are installed through Loki's dependency superbuild and are reused by Tyr through the same install prefix.
 
-1. Configure the dependencies CMake project with the desired installation path:
-```console
-cmake -S dependencies -B dependencies-build -DCMAKE_INSTALL_PREFIX=$PWD/dependencies-install -DCMAKE_PREFIX_PATH=$PWD/dependencies-install
-```
+Keep `dependencies/` source-only. Do not place dependency build or install artifacts inside it; use `dependencies-build/` and `dependencies-install/` instead.
 
-For Python wheels and downstream Python/C++ packages, build the runtime dependencies as shared libraries so all extension modules can link to the same installed libraries:
+Choose one of the following complete recipes.
+
+### Static Dependency Build
+
+This is the default standalone C++ build. Dependencies are built and consumed statically where supported.
 
 ```console
 cmake -S dependencies -B dependencies-build \
-  -DCMAKE_INSTALL_PREFIX=$PWD/dependencies-install \
-  -DCMAKE_PREFIX_PATH=$PWD/dependencies-install \
-  -DTYR_BUILD_SHARED_DEPENDENCIES=ON
+  -DCMAKE_INSTALL_PREFIX=${PWD}/dependencies-install \
+  -DCMAKE_PREFIX_PATH=${PWD}/dependencies-install
+
+cmake --build dependencies-build -j$(nproc)
+
+cmake -S . -B build \
+  -DCMAKE_PREFIX_PATH=${PWD}/dependencies-install
+
+cmake --build build -j$(nproc)
 ```
 
-Leave `TYR_BUILD_SHARED_DEPENDENCIES` off for standalone static dependency builds.
-Dependencies that are owned by Loki, such as Boost, fmt, argparse, and gtl, are installed through Loki's dependency superbuild and are reused by Tyr through the same install prefix.
+### Shared Dependency Build
 
-When configuring Tyr against a shared dependency prefix, also disable static dependency lookup:
+Use this for Python wheels, downstream Python/C++ packages, and local builds where multiple extension modules should link to the same native libraries. The dependency build and the Tyr configure step must agree: shared dependencies require `TYR_LINK_STATIC_DEPENDENCIES=OFF`.
 
 ```console
+cmake -S dependencies -B dependencies-build \
+  -DCMAKE_INSTALL_PREFIX=${PWD}/dependencies-install \
+  -DCMAKE_PREFIX_PATH=${PWD}/dependencies-install \
+  -DTYR_BUILD_SHARED_DEPENDENCIES=ON \
+  -DCMAKE_INSTALL_LIBDIR=lib
+
+cmake --build dependencies-build -j$(nproc)
+
 cmake -S . -B build \
   -DCMAKE_PREFIX_PATH=${PWD}/dependencies-install \
   -DTYR_BUILD_SHARED=ON \
   -DTYR_LINK_STATIC_DEPENDENCIES=OFF
-```
 
-2. Download, build dependencies:
-```console
-cmake --build dependencies-build -j$(nproc)
+cmake --build build -j$(nproc)
 ```
-3. Install dependencies
-```console
-cmake --install dependencies-build
-```
-
-Keep `dependencies/` source-only. Do not place dependency build or install artifacts inside it; use `dependencies-build/` and `dependencies-install/` instead.
 
 ## Building Tyr
 
-Run the following sequence of commands to configure, build, and install Tyr:
+The recipes above build Tyr in `build/`. To install Tyr from that build directory to a chosen installation prefix:
 
-1. Configure Tyr in the build directory `build/` with the `CMakePrefixPath` pointing to the installation directory of the dependencies:
-```console
-cmake -S . -B build -DCMAKE_PREFIX_PATH=${PWD}/dependencies-install
-```
-2. Build Tyr in the build directory:
-```console
-cmake --build build -j$(nproc)
-```
-3. (Optional) Install Tyr from the build directory to the desired installation `prefix` directory:
 ```console
 cmake --install build --prefix=<path/to/installation-directory>
 ```
