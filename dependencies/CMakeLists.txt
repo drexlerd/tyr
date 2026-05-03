@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.21)
 
 project(dependencies)
 
+include(GNUInstallDirs)
+
 ##############################################################
 # Common Settings
 ##############################################################
@@ -15,6 +17,15 @@ endif()
 # Pass the build type to subdirectories
 set(BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
+option(TYR_BUILD_SHARED_DEPENDENCIES "Build bundled dependencies as shared libraries." OFF)
+message(STATUS "Build shared dependencies: ${TYR_BUILD_SHARED_DEPENDENCIES}")
+
+if(APPLE)
+    set(TYR_DEPENDENCY_INSTALL_RPATH "@loader_path")
+else()
+    set(TYR_DEPENDENCY_INSTALL_RPATH "$ORIGIN")
+endif()
+
 if(COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto=auto")
 endif ()
@@ -24,14 +35,10 @@ endif ()
 # Add subprojects
 ##############################################################
 
-add_subdirectory(argparse)
 add_subdirectory(benchmark)
-add_subdirectory(boost)
 add_subdirectory(cista)
-add_subdirectory(fmt)
-add_subdirectory(gtl)
 add_subdirectory(googletest)
+add_subdirectory(loki)
 add_subdirectory(nanobind)
 add_subdirectory(oneTBB)
 add_subdirectory(valla)
-add_subdirectory(loki)

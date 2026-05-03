@@ -68,30 +68,64 @@ endif()
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/cmake/"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr/cmake"
         COMPONENT pytyr)
+
+set(PYTYR_DEPENDENCY_HEADER_DIRS
+    boost
+    cista
+    fmt
+    gtl
+    loki
+    oneapi
+    tbb
+)
+
+set(PYTYR_DEPENDENCY_CMAKE_PACKAGES
+    Boost-*
+    boost_headers-*
+    fmt
+    gtl
+    loki
+)
+
 foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
     if(EXISTS "${prefix}/include")
-        install(DIRECTORY "${prefix}/include/"
-                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-                COMPONENT pytyr)
+        foreach(header_dir IN LISTS PYTYR_DEPENDENCY_HEADER_DIRS)
+            if(EXISTS "${prefix}/include/${header_dir}")
+                install(DIRECTORY "${prefix}/include/${header_dir}"
+                        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+                        COMPONENT pytyr)
+            endif()
+        endforeach()
     endif()
-    if(TYR_BUILD_SHARED AND EXISTS "${prefix}/${CMAKE_INSTALL_LIBDIR}")
-        install(DIRECTORY "${prefix}/${CMAKE_INSTALL_LIBDIR}/"
-                DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-                COMPONENT pytyr
-                FILES_MATCHING
-                    PATTERN "*.so"
-                    PATTERN "*.so.*"
-                    PATTERN "*.dylib"
-                    PATTERN "*.dylib.*"
-                    PATTERN "*.dll"
-                    PATTERN "*.a"
-                    PATTERN "*.lib")
-    endif()
-    if(EXISTS "${prefix}/${CMAKE_INSTALL_LIBDIR}/cmake")
-        install(DIRECTORY "${prefix}/${CMAKE_INSTALL_LIBDIR}/cmake/"
-                DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake"
-                COMPONENT pytyr)
-    endif()
+    foreach(dependency_libdir IN ITEMS "${prefix}/${CMAKE_INSTALL_LIBDIR}" "${prefix}/lib" "${prefix}/lib64")
+        if(TYR_BUILD_SHARED AND EXISTS "${dependency_libdir}")
+            file(GLOB PYTYR_DEPENDENCY_RUNTIME_LIBRARIES
+                "${dependency_libdir}/libfmt${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+                "${dependency_libdir}/libfmt.*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+                "${dependency_libdir}/libloki_parsers${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+                "${dependency_libdir}/libloki_parsers.*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+                "${dependency_libdir}/libtbb${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+                "${dependency_libdir}/libtbb.*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+            )
+            if(PYTYR_DEPENDENCY_RUNTIME_LIBRARIES)
+                install(FILES ${PYTYR_DEPENDENCY_RUNTIME_LIBRARIES}
+                        DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+                        COMPONENT pytyr)
+            endif()
+        endif()
+        if(EXISTS "${dependency_libdir}/cmake")
+            foreach(cmake_package IN LISTS PYTYR_DEPENDENCY_CMAKE_PACKAGES)
+                file(GLOB PYTYR_DEPENDENCY_CMAKE_DIRS LIST_DIRECTORIES true "${dependency_libdir}/cmake/${cmake_package}")
+                foreach(cmake_dir IN LISTS PYTYR_DEPENDENCY_CMAKE_DIRS)
+                    if(IS_DIRECTORY "${cmake_dir}")
+                        install(DIRECTORY "${cmake_dir}"
+                                DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake"
+                                COMPONENT pytyr)
+                    endif()
+                endforeach()
+            endforeach()
+        endif()
+    endforeach()
     if(EXISTS "${prefix}/nanobind")
         install(DIRECTORY "${prefix}/nanobind"
                 DESTINATION "."

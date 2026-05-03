@@ -3,6 +3,8 @@ project(InstallNanobind)
 
 include(ExternalProject)
 
+set(TYR_NANOBIND_GIT_TAG v2.12.0 CACHE STRING "Git tag used to build nanobind.")
+
 message(STATUS "Dependency \"nanobind\"...")
 
 # Attempt to find the installed library
@@ -28,12 +30,13 @@ if (NOT nanobind_FOUND)
     ExternalProject_Add(
             nanobind
             GIT_REPOSITORY https://github.com/wjakob/nanobind.git
-            GIT_TAG v2.12.0
+            GIT_TAG ${TYR_NANOBIND_GIT_TAG}
             PREFIX ${CMAKE_BINARY_DIR}/nanobind
+            STAMP_DIR ${CMAKE_BINARY_DIR}/nanobind/stamp/${TYR_NANOBIND_GIT_TAG}
+            UPDATE_COMMAND ""
             CMAKE_ARGS ${CMAKE_ARGS}
     )
 else()
     message(STATUS "nanobind is already installed.")
 endif()
-
 

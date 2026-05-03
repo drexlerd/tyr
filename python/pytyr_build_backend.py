@@ -35,7 +35,9 @@ def _configure_and_install_dependencies() -> None:
         str(DEPENDENCY_BUILD_DIR),
         f"-DCMAKE_BUILD_TYPE={_build_type()}",
         f"-DCMAKE_INSTALL_PREFIX={DEPENDENCY_INSTALL_DIR}",
+        "-DCMAKE_INSTALL_LIBDIR=lib",
         f"-DCMAKE_PREFIX_PATH={DEPENDENCY_INSTALL_DIR}",
+        "-DTYR_BUILD_SHARED_DEPENDENCIES=ON",
         f"-DPython_EXECUTABLE={sys.executable}",
     ]
 
@@ -58,6 +60,8 @@ def _prepare_native_build() -> None:
         "-DBUILD_EXECUTABLES=OFF",
         "-DBUILD_PROFILING=OFF",
         "-DTYR_USE_LLD=OFF",
+        "-DTYR_LINK_STATIC_DEPENDENCIES=OFF",
+        "-DCMAKE_INSTALL_LIBDIR=lib",
         f"-DTYR_HEADER_INSTANTIATION={os.environ.get('TYR_HEADER_INSTANTIATION', 'OFF')}",
     )
 

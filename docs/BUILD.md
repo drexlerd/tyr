@@ -29,6 +29,28 @@ Run the following sequence of commands to download, configure, build, and instal
 ```console
 cmake -S dependencies -B dependencies-build -DCMAKE_INSTALL_PREFIX=$PWD/dependencies-install -DCMAKE_PREFIX_PATH=$PWD/dependencies-install
 ```
+
+For Python wheels and downstream Python/C++ packages, build the runtime dependencies as shared libraries so all extension modules can link to the same installed libraries:
+
+```console
+cmake -S dependencies -B dependencies-build \
+  -DCMAKE_INSTALL_PREFIX=$PWD/dependencies-install \
+  -DCMAKE_PREFIX_PATH=$PWD/dependencies-install \
+  -DTYR_BUILD_SHARED_DEPENDENCIES=ON
+```
+
+Leave `TYR_BUILD_SHARED_DEPENDENCIES` off for standalone static dependency builds.
+Dependencies that are owned by Loki, such as Boost, fmt, argparse, and gtl, are installed through Loki's dependency superbuild and are reused by Tyr through the same install prefix.
+
+When configuring Tyr against a shared dependency prefix, also disable static dependency lookup:
+
+```console
+cmake -S . -B build \
+  -DCMAKE_PREFIX_PATH=${PWD}/dependencies-install \
+  -DTYR_BUILD_SHARED=ON \
+  -DTYR_LINK_STATIC_DEPENDENCIES=OFF
+```
+
 2. Download, build dependencies:
 ```console
 cmake --build dependencies-build -j$(nproc)
