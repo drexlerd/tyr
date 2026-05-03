@@ -24,7 +24,6 @@ endif ()
 # Add subprojects
 ##############################################################
 
-add_subdirectory(abseil)
 add_subdirectory(argparse)
 add_subdirectory(benchmark)
 add_subdirectory(boost)

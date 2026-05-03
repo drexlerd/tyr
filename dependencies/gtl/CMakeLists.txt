@@ -34,6 +34,16 @@ if (NOT gtl_FOUND)
         PREFIX ${CMAKE_BINARY_DIR}/gtl
         CMAKE_ARGS ${CMAKE_ARGS}
     )
+    ExternalProject_Add_Step(
+        gtl install-cmake-package
+        COMMAND ${CMAKE_COMMAND}
+                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+                -S ${CMAKE_CURRENT_LIST_DIR}/package
+                -B ${CMAKE_BINARY_DIR}/gtl-package
+        COMMAND ${CMAKE_COMMAND}
+                --install ${CMAKE_BINARY_DIR}/gtl-package
+        DEPENDEES install
+    )
 else()
     message(STATUS "gtl is already installed.")
 endif()

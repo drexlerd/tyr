@@ -168,12 +168,6 @@ configure_ccache()
 # set(CMAKE_FIND_DEBUG_MODE TRUE)
 
 
-find_package(absl CONFIG REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
-if(absl_FOUND)
-  message(STATUS "Found absl: ${absl_DIR} (found version ${absl_VERSION})")
-endif()
-
-
 find_package(argparse CONFIG REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 if(argparse_FOUND)
   message(STATUS "Found argparse: ${argparse_DIR} (found version ${argparse_VERSION})")

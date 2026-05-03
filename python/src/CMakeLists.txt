@@ -2,6 +2,8 @@ find_package(Python 3.8 REQUIRED
   COMPONENTS Interpreter Development.Module
   OPTIONAL_COMPONENTS Development.SABIModule)
 
+include(CMakePackageConfigHelpers)
+
 find_package(nanobind CONFIG REQUIRED PATHS ${CMAKE_PREFIX_PATH})
 message(STATUS "Found nanobind: ${nanobind_DIR} (found version ${nanobind_VERSION})")
 
@@ -43,15 +45,16 @@ if(TYR_BUILD_SHARED)
             ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT pytyr
             RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT pytyr
             INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-    install(FILES "$<TARGET_FILE:core>"
-            DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-            COMPONENT pytyr)
 endif()
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/tyr"
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
         COMPONENT pytyr)
+configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/tyrConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/tyrConfig.cmake"
+        INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr"
+        NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 install(FILES
-            "${CMAKE_BINARY_DIR}/tyrConfig.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/tyrConfig.cmake"
             "${CMAKE_BINARY_DIR}/tyrConfigVersion.cmake"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr"
         COMPONENT pytyr)
@@ -65,6 +68,36 @@ endif()
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/cmake/"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr/cmake"
         COMPONENT pytyr)
+foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
+    if(EXISTS "${prefix}/include")
+        install(DIRECTORY "${prefix}/include/"
+                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+                COMPONENT pytyr)
+    endif()
+    if(TYR_BUILD_SHARED AND EXISTS "${prefix}/${CMAKE_INSTALL_LIBDIR}")
+        install(DIRECTORY "${prefix}/${CMAKE_INSTALL_LIBDIR}/"
+                DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+                COMPONENT pytyr
+                FILES_MATCHING
+                    PATTERN "*.so"
+                    PATTERN "*.so.*"
+                    PATTERN "*.dylib"
+                    PATTERN "*.dylib.*"
+                    PATTERN "*.dll"
+                    PATTERN "*.a"
+                    PATTERN "*.lib")
+    endif()
+    if(EXISTS "${prefix}/${CMAKE_INSTALL_LIBDIR}/cmake")
+        install(DIRECTORY "${prefix}/${CMAKE_INSTALL_LIBDIR}/cmake/"
+                DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake"
+                COMPONENT pytyr)
+    endif()
+    if(EXISTS "${prefix}/nanobind")
+        install(DIRECTORY "${prefix}/nanobind"
+                DESTINATION "."
+                COMPONENT pytyr)
+    endif()
+endforeach()
 
 set(PYTYR_PYTHON_FILES
     pytyr/__init__.py

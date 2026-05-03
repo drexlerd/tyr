@@ -138,17 +138,51 @@ add_library(core ${TYR_CORE_LIBRARY_TYPE} ${TYR_PRIVATE_HEADER_FILES} ${TYR_PUBL
 )
 set_target_properties(core PROPERTIES OUTPUT_NAME tyr_core)
 
+if(TYR_BUILD_SHARED)
+    if(APPLE)
+        set(TYR_LIBRARY_ORIGIN "@loader_path")
+    elseif(UNIX)
+        set(TYR_LIBRARY_ORIGIN "$ORIGIN")
+    endif()
+
+    foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
+        if(EXISTS "${prefix}/${CMAKE_INSTALL_LIBDIR}")
+            list(APPEND TYR_CORE_BUILD_RPATHS "${prefix}/${CMAKE_INSTALL_LIBDIR}")
+        endif()
+    endforeach()
+
+    set_target_properties(core PROPERTIES
+        BUILD_RPATH "${TYR_CORE_BUILD_RPATHS}"
+        INSTALL_RPATH "${TYR_LIBRARY_ORIGIN}")
+endif()
+
 # Create an alias for simpler reference
 add_library(tyr::core ALIAS core)
 
+target_compile_features(core PUBLIC cxx_std_20)
+
 target_link_libraries(core
   PUBLIC
+    loki::parsers
+  PRIVATE
     Threads::Threads
     TBB::tbb
     valla::core   
-    loki::parsers  
-    fmt::fmt
+    fmt::fmt-header-only
 )
+
+target_compile_definitions(core
+    PUBLIC
+        FMT_HEADER_ONLY
+        BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+        BOOST_MPL_LIMIT_LIST_SIZE=50
+)
+
+if("${TYR_STATE_STORAGE_POLICY}" STREQUAL "Hashset")
+    target_compile_definitions(core PUBLIC TYR_STATE_STORAGE_HASHSET)
+elseif("${TYR_STATE_STORAGE_POLICY}" STREQUAL "Tree")
+    target_compile_definitions(core PUBLIC TYR_STATE_STORAGE_TREE)
+endif()
 
 # Use include depending on building or using from installed location
 target_include_directories(core
@@ -156,6 +190,12 @@ target_include_directories(core
         "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
+
+foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
+    if(EXISTS "${prefix}/include")
+        target_include_directories(core PUBLIC "$<BUILD_INTERFACE:${prefix}/include>")
+    endif()
+endforeach()
 
 # Install the target and create export-set
 install(
