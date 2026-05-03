@@ -18,8 +18,8 @@
 #ifndef TYR_PYTHON_FORMALISM_PLANNING_INDICES_HPP
 #define TYR_PYTHON_FORMALISM_PLANNING_INDICES_HPP
 
-#include "../../common/bindings.hpp"
-#include "../../init_declarations.hpp"
+#include "../../common.hpp"
+#include "../../../init_declarations.hpp"
 
 namespace tyr::formalism::planning
 {

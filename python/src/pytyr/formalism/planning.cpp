@@ -15,15 +15,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "bindings.hpp"
+#include "planning.hpp"
 
-#include "../../common/bindings.hpp"
-#include "datas.hpp"
-#include "domains.hpp"
-#include "indices.hpp"
-#include "invariants.hpp"
-#include "mutable.hpp"
-#include "views.hpp"
+#include "../common.hpp"
+#include "planning/datas.hpp"
+#include "planning/domains.hpp"
+#include "planning/indices.hpp"
+#include "planning/invariants.hpp"
+#include "planning/mutable.hpp"
+#include "planning/views.hpp"
 
 namespace tyr::formalism::planning
 {

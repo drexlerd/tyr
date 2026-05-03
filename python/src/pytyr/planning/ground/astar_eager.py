@@ -1,6 +1,6 @@
 # Import all classes for better IDE support
 
-from pytyr.pytyr.planning.ground.gbfs_lazy import (
+from ...pytyr.planning.ground.astar_eager import (
     Options,
     find_solution,
     EventHandler,

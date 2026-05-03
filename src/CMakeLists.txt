@@ -39,7 +39,13 @@ elseif("${TYR_STATE_STORAGE_POLICY}" STREQUAL "Tree")
     )
 endif()
 
-add_library(core STATIC ${TYR_PRIVATE_HEADER_FILES} ${TYR_PUBLIC_HEADER_FILES}
+if(TYR_BUILD_SHARED)
+    set(TYR_CORE_LIBRARY_TYPE SHARED)
+else()
+    set(TYR_CORE_LIBRARY_TYPE STATIC)
+endif()
+
+add_library(core ${TYR_CORE_LIBRARY_TYPE} ${TYR_PRIVATE_HEADER_FILES} ${TYR_PUBLIC_HEADER_FILES}
     analysis/listeners.cpp
     analysis/program_domains.cpp
     analysis/stratification.cpp

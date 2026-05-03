@@ -1,6 +1,6 @@
 # Import all classes for better IDE support
 
-from pytyr.pytyr.planning.ground import (
+from ...pytyr.planning.ground import (
     Task,
     State,
     StateIndex,

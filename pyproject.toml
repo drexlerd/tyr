@@ -1,13 +1,44 @@
 [build-system]
 requires = [
-    "setuptools>=42",
-    "nanobind",
-    "wheel",
-    "cmake>=3.21",
-    "ninja",
-    "typing_extensions",
+    "scikit-build-core>=0.10",
 ]
-build-backend = "setuptools.build_meta"
+build-backend = "pytyr_build_backend"
+backend-path = ["python"]
+
+[project]
+name = "pytyr"
+version = "0.0.9"
+description = "Tyr datalog/planning library"
+readme = {text = "", content-type = "text/plain"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Dominik Drexler", email = "dominik.drexler@liu.se"},
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/drexlerd/tyr"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[tool.scikit-build]
+build.targets = ["pytyr_wheel"]
+build.tool-args = ["-j8"]
+cmake.build-type = "Release"
+install.components = ["pytyr"]
+wheel.packages = []
+
+[tool.scikit-build.cmake.define]
+BUILD_PYTYR = true
+BUILD_TESTS = false
+BUILD_EXECUTABLES = false
+BUILD_PROFILING = false
+TYR_USE_LLD = false
+TYR_BUILD_SHARED = true
+TYR_HEADER_INSTANTIATION = {env = "TYR_HEADER_INSTANTIATION", default = "OFF"}
 
 [tool.cibuildwheel]
 container-engine = "docker"

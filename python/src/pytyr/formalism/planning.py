@@ -1,6 +1,6 @@
 # Import all classes for better IDE support
 
-from pytyr.pytyr.formalism.planning import (
+from ..pytyr.formalism.planning import (
     MutableStaticAtom,
     MutableFluentAtom,
     MutableDerivedAtom,
@@ -13,7 +13,7 @@ from pytyr.pytyr.formalism.planning import (
     MutableAction,
 )
 
-from pytyr.pytyr.formalism.planning import (
+from ..pytyr.formalism.planning import (
     Invariant,
     synthesize_invariants,
     ObjectSubstitution,
@@ -25,7 +25,7 @@ from pytyr.pytyr.formalism.planning import (
     InvariantMatcher,
 )
 
-from pytyr.pytyr.formalism.planning import (
+from ..pytyr.formalism.planning import (
     VariableDomain,
     AxiomDomain,
     ConjunctiveConditionDomain,
@@ -35,7 +35,7 @@ from pytyr.pytyr.formalism.planning import (
     TaskVariableDomains,
 )
 
-from pytyr.pytyr.formalism.planning import (
+from ..pytyr.formalism.planning import (
     # Core symbols
     RowIndex,
     Object,

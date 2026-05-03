@@ -15,11 +15,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../init_declarations.hpp"
+#ifndef TYR_PYTHON_PLANNING_BINDINGS_HPP
+#define TYR_PYTHON_PLANNING_BINDINGS_HPP
 
-namespace tyr::formalism
+#include "../../init_declarations.hpp"
+
+#include <nanobind/trampoline.h>
+
+namespace tyr::planning
 {
 
-void bind_module_definitions(nb::module_& m) {}
-
 }
+
+#endif

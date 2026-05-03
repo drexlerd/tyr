@@ -15,9 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "bindings.hpp"
+#include "planning.hpp"
 
-#include "../common/bindings.hpp"
+#include "../common.hpp"
 
 namespace f = tyr::formalism;
 namespace fp = tyr::formalism::planning;

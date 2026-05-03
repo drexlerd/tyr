@@ -15,19 +15,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "bindings.hpp"
+#include "../../init_declarations.hpp"
 
-namespace tyr
+namespace tyr::formalism
 {
-namespace
-{
-void bind_execution_context(nb::module_& m)
-{
-    nb::class_<ExecutionContext>(m, "ExecutionContext")
-        .def(nb::new_([](size_t num_threads) { return ExecutionContext::create(num_threads); }), "num_threads")
-        .def_prop_ro("num_threads", &ExecutionContext::get_num_threads);
-}
-}
 
-void bind_module_definitions(nb::module_& m) { bind_execution_context(m); }
+void bind_module_definitions(nb::module_& m) {}
+
 }

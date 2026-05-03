@@ -23,6 +23,8 @@ endif()
 
 option(TYR_USE_LLD "Use LLVM lld linker when available" ON)
 
+option(TYR_BUILD_SHARED "Build tyr::core as a shared library." OFF)
+
 option(TYR_HEADER_INSTANTIATION "Enable stronger inlining at higher compile time costs." OFF)
 if(TYR_HEADER_INSTANTIATION)
     add_compile_definitions(TYR_HEADER_INSTANTIATION)
@@ -240,7 +242,7 @@ add_subdirectory(src)
 # Target Python Tyr
 # -------------------
 if(BUILD_PYTYR)
-    add_subdirectory(python/src/pytyr)
+    add_subdirectory(python/src)
 endif()
 
 # ----------
