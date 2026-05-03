@@ -6,7 +6,7 @@ include(ExternalProject)
 message(STATUS "Dependency \"loki\"...")
 
 set(LOKI_GIT_REPOSITORY "https://github.com/drexlerd/Loki.git" CACHE STRING "Loki Git repository used by the dependency build.")
-set(LOKI_GIT_TAG "dev" CACHE STRING "Loki Git tag, branch, or commit used by the dependency build.")
+set(LOKI_GIT_TAG "42788c93e5e5faf32fb505cc23d83963edf9f0f8" CACHE STRING "Loki Git tag, branch, or commit used by the dependency build.")
 
 # Attempt to find the installed loki library
 find_package(loki QUIET PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH)
