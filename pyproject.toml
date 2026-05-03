@@ -31,6 +31,17 @@ cmake.build-type = "Release"
 install.components = ["pytyr"]
 wheel.packages = []
 
+[tool.scikit-build.sdist]
+include = ["dependencies/**"]
+exclude = [
+    "build*/**",
+    "dependencies-build/**",
+    "dependencies-install/**",
+    "python/src/pytyr.egg-info/**",
+    "*.egg-info/**",
+    "profiling-results/**",
+]
+
 [tool.scikit-build.cmake.define]
 BUILD_PYTYR = true
 BUILD_TESTS = false

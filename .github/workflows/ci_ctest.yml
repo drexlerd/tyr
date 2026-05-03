@@ -35,17 +35,16 @@ jobs:
 
       - name: Configure, Build, and Install Dependencies
         run: |
-          cd dependencies
-          cmake -S . -B build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/dependencies/installs
-          cmake --build build
-          cmake --install build
+          cmake -S dependencies -B dependencies-build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/dependencies-install
+          cmake --build dependencies-build
+          cmake --install dependencies-build
 
       - name: Configure and Build Tyr
         run: |
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
                 -DBUILD_TESTS=ON \
                 -S . -B build_${{ matrix.build_type }} \
-                -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/dependencies/installs
+                -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/dependencies-install
           cmake --build build_${{ matrix.build_type }}
 
       - name: Run Tests

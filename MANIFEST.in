@@ -1,28 +1,16 @@
-include dependencies/cista/CMakeLists.txt
-include dependencies/abseil/CMakeLists.txt
-include dependencies/nanobind/CMakeLists.txt
-include dependencies/boost/CMakeLists.txt
-include dependencies/fmt/CMakeLists.txt
-include dependencies/gtl/CMakeLists.txt
-include dependencies/loki/CMakeLists.txt
-include dependencies/oneTBB/CMakeLists.txt
-include dependencies/googletest/CMakeLists.txt
-include dependencies/benchmark/CMakeLists.txt
-include dependencies/valla/CMakeLists.txt
-include dependencies/argparse/CMakeLists.txt
-include dependencies/CMakeLists.txt
-
 include CMakeLists.txt
 include LICENSE
 include MANIFEST.in
 include pyproject.toml
 include README.md
-include setup.py
 include Config.cmake.in
 recursive-include cmake/ *
+recursive-include dependencies/ *
 recursive-include exe/ *
 recursive-include include/ *
 recursive-include python/ *
 prune python/src/pytyr.egg-info
+prune dependencies-build
+prune dependencies-install
 recursive-include src/ *
 recursive-include tests/ *

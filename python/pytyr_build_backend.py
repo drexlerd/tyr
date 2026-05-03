@@ -8,8 +8,8 @@ from scikit_build_core import build as scikit_build
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-DEPENDENCY_BUILD_DIR = ROOT_DIR / "build" / "pytyr-dependencies" / "build"
-DEPENDENCY_INSTALL_DIR = ROOT_DIR / "build" / "pytyr-dependencies" / "installs"
+DEPENDENCY_BUILD_DIR = ROOT_DIR / "dependencies-build"
+DEPENDENCY_INSTALL_DIR = ROOT_DIR / "dependencies-install"
 
 
 def _build_type() -> str:

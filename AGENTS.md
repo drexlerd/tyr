@@ -15,12 +15,14 @@ Tyr disables optional targets by default. Enable only the parts needed for the t
 
 ```console
 cmake -S . -B build \
-  -DCMAKE_PREFIX_PATH=${PWD}/dependencies/installs \
+  -DCMAKE_PREFIX_PATH=${PWD}/dependencies-install \
   -DBUILD_TESTS=ON \
   -DBUILD_EXECUTABLES=ON \
   -DBUILD_PROFILING=ON \
   -DBUILD_PYTYR=ON
 ```
+
+Keep dependency build and install artifacts outside `dependencies/`. Use `dependencies-build/` for the dependency build tree and `dependencies-install/` for installed dependency files.
 
 Build options:
 

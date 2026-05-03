@@ -11,11 +11,11 @@ cmake-build-*
 
 # Python build artefacts
 __pycache__
-MANIFEST.in
 _skbuild
 dist
 mimir.egg-info
 pymimir.egg-info
+*.egg-info
 
 # Profiling
 perf*
@@ -32,9 +32,12 @@ libtorch*
 
 # Build artefacts
 build
+build-*
 out
 *.sif
-dependencies/installs
+dependencies-build
+dependencies-install
+profiling-results
 .cache
 
 #CMake

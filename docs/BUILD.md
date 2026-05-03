@@ -27,16 +27,18 @@ Run the following sequence of commands to download, configure, build, and instal
 
 1. Configure the dependencies CMake project with the desired installation path:
 ```console
-cmake -S dependencies -B dependencies/build -DCMAKE_INSTALL_PREFIX=dependencies/installs -DCMAKE_PREFIX_PATH=$PWD/dependencies/installs
+cmake -S dependencies -B dependencies-build -DCMAKE_INSTALL_PREFIX=$PWD/dependencies-install -DCMAKE_PREFIX_PATH=$PWD/dependencies-install
 ```
 2. Download, build dependencies:
 ```console
-cmake --build dependencies/build -j$(nproc)
+cmake --build dependencies-build -j$(nproc)
 ```
 3. Install dependencies
 ```console
-cmake --install dependencies/build
+cmake --install dependencies-build
 ```
+
+Keep `dependencies/` source-only. Do not place dependency build or install artifacts inside it; use `dependencies-build/` and `dependencies-install/` instead.
 
 ## Building Tyr
 
@@ -44,7 +46,7 @@ Run the following sequence of commands to configure, build, and install Tyr:
 
 1. Configure Tyr in the build directory `build/` with the `CMakePrefixPath` pointing to the installation directory of the dependencies:
 ```console
-cmake -S . -B build -DCMAKE_PREFIX_PATH=${PWD}/dependencies/installs
+cmake -S . -B build -DCMAKE_PREFIX_PATH=${PWD}/dependencies-install
 ```
 2. Build Tyr in the build directory:
 ```console
