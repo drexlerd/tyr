@@ -53,6 +53,7 @@ def _prepend_cmake_args(*args: str) -> None:
 
 def _prepare_native_build() -> None:
     _configure_and_install_dependencies()
+    os.environ.setdefault("CMAKE_BUILD_PARALLEL_LEVEL", str(_num_jobs()))
     _prepend_cmake_args(
         f"-DCMAKE_PREFIX_PATH={DEPENDENCY_INSTALL_DIR}",
         "-DBUILD_PYTYR=ON",

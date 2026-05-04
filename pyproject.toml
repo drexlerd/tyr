@@ -26,7 +26,6 @@ test = [
 
 [tool.scikit-build]
 build.targets = ["pytyr_wheel"]
-build.tool-args = ["-j8"]
 cmake.build-type = "Release"
 install.components = ["pytyr"]
 wheel.packages = []

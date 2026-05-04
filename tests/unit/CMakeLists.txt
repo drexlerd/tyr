@@ -7,7 +7,7 @@ find_package(GTest)
 # Helper function to create and register a test executable
 function(add_gtest test_name source_file)
     add_executable(${test_name} ${source_file})
-    target_link_libraries(${test_name} PRIVATE tyr::core GTest::GTest GTest::Main)
+    target_link_libraries(${test_name} PRIVATE tyr::core TBB::tbb GTest::GTest GTest::Main)
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
 

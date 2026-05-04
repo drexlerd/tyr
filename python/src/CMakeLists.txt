@@ -27,7 +27,7 @@ nanobind_add_module(pytyr
     pytyr/planning/planning.cpp
 )
 
-target_link_libraries(pytyr PRIVATE tyr::core)
+target_link_libraries(pytyr PRIVATE tyr::core TBB::tbb)
 
 if(TYR_BUILD_SHARED)
     if(APPLE)
@@ -93,6 +93,7 @@ set(PYTYR_DEPENDENCY_CMAKE_PACKAGES
     fmt
     gtl
     loki
+    TBB
 )
 
 foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
