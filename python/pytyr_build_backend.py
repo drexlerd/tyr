@@ -64,6 +64,7 @@ def _prepare_native_build() -> None:
         "-DTYR_LINK_STATIC_DEPENDENCIES=OFF",
         "-DCMAKE_INSTALL_LIBDIR=lib",
         f"-DTYR_HEADER_INSTANTIATION={os.environ.get('TYR_HEADER_INSTANTIATION', 'OFF')}",
+        f"-DTYR_ENABLE_LTO={os.environ.get('TYR_ENABLE_LTO', 'OFF')}",
     )
 
 

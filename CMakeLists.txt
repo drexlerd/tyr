@@ -27,6 +27,8 @@ option(TYR_BUILD_SHARED "Build tyr::core as a shared library." OFF)
 
 option(TYR_LINK_STATIC_DEPENDENCIES "Prefer static dependency libraries when finding installed dependencies." ON)
 
+option(TYR_ENABLE_LTO "Enable link-time optimization for optimized builds." ON)
+
 option(TYR_HEADER_INSTANTIATION "Enable stronger inlining at higher compile time costs." OFF)
 if(TYR_HEADER_INSTANTIATION)
     add_compile_definitions(TYR_HEADER_INSTANTIATION)
@@ -93,7 +95,7 @@ else()
         message(STATUS "Skipping lld with GNU because GCC LTO requires the GCC linker plugin")
     endif()
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(TYR_ENABLE_LTO AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
         # Release: enable LTO but cap parallelism to reduce RAM spikes
         set(CMAKE_CXX_FLAGS_RELEASE
@@ -112,7 +114,7 @@ else()
         set(CMAKE_CXX_FLAGS_DEBUG
             "${CMAKE_CXX_FLAGS_DEBUG} -Og -g2 -ggdb")
 
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    elseif(TYR_ENABLE_LTO AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
 
         # Release: prefer ThinLTO for much lower compile/link cost than full LTO
         set(CMAKE_CXX_FLAGS_RELEASE

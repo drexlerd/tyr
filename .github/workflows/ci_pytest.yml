@@ -38,6 +38,7 @@ jobs:
         env:
           TYR_JOBS: 2
           TYR_HEADER_INSTANTIATION: OFF
+          TYR_ENABLE_LTO: OFF
 
       - name: Test
         run: pytest python/tests
