@@ -7,7 +7,7 @@ backend-path = ["python"]
 
 [project]
 name = "pytyr"
-version = "0.0.9"
+version = "0.0.10"
 description = "Tyr datalog/planning library"
 readme = {text = "", content-type = "text/plain"}
 requires-python = ">=3.9"

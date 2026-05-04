@@ -8,7 +8,6 @@ Stage: build
     MANIFEST.in /opt/tyr/MANIFEST.in
     pyproject.toml /opt/tyr/pyproject.toml
     README.md /opt/tyr/README.md
-    setup.py /opt/tyr/setup.py
     Config.cmake.in /opt/tyr/Config.cmake.in
 
     cmake /opt/tyr/cmake
@@ -17,20 +16,7 @@ Stage: build
     python /opt/tyr/python
     src /opt/tyr/src
     tests /opt/tyr/tests
-
-    dependencies/CMakeLists.txt /opt/tyr/dependencies/CMakeLists.txt
-    dependencies/cista /opt/tyr/dependencies/cista
-    dependencies/abseil /opt/tyr/dependencies/abseil
-    dependencies/nanobind /opt/tyr/dependencies/nanobind
-    dependencies/boost /opt/tyr/dependencies/boost
-    dependencies/fmt /opt/tyr/dependencies/fmt
-    dependencies/gtl /opt/tyr/dependencies/gtl
-    dependencies/loki /opt/tyr/dependencies/loki
-    dependencies/oneTBB /opt/tyr/dependencies/oneTBB
-    dependencies/googletest /opt/tyr/dependencies/googletest
-    dependencies/benchmark /opt/tyr/dependencies/benchmark
-    dependencies/valla /opt/tyr/dependencies/valla
-    dependencies/argparse /opt/tyr/dependencies/argparse
+    dependencies /opt/tyr/dependencies
 
 %post
     # Set noninteractive mode for apt
@@ -59,23 +45,28 @@ Stage: build
     cd /opt/tyr
 
     # Build and install dependencies
-    cmake -S dependencies -B dependencies/build \
-        -DCMAKE_INSTALL_PREFIX=dependencies/installs \
+    cmake -S dependencies -B dependencies-build \
+        -DCMAKE_INSTALL_PREFIX=/opt/tyr/dependencies-install \
+        -DCMAKE_PREFIX_PATH=/opt/tyr/dependencies-install \
+        -DTYR_BUILD_SHARED_DEPENDENCIES=ON \
+        -DCMAKE_INSTALL_LIBDIR=lib \
         -DPython_EXECUTABLE=/usr/bin/python3.10
-    cmake --build dependencies/build -j$(nproc)
+    cmake --build dependencies-build -j4
 
     # Build Tyr
     cmake -S . -B build \
-        -DCMAKE_PREFIX_PATH=/opt/tyr/dependencies/installs \
+        -DCMAKE_PREFIX_PATH=/opt/tyr/dependencies-install \
         -DCMAKE_BUILD_TYPE=Release \
         -DPython_EXECUTABLE=/usr/bin/python3.10 \
         -DBUILD_TESTS=OFF \
         -DBUILD_PROFILING=OFF \
         -DBUILD_PYTYR=OFF \
         -DBUILD_EXECUTABLES=ON \
+        -DTYR_BUILD_SHARED=ON \
+        -DTYR_LINK_STATIC_DEPENDENCIES=OFF \
         -DTYR_HEADER_INSTANTIATION=OFF \
         -DTYR_STATE_STORAGE_POLICY=Tree
-    cmake --build build -j$(nproc)
+    cmake --build build -j4
 
     # Install Tyr to a staging directory
     cmake --install build --prefix=/opt/tyr/install
@@ -89,7 +80,7 @@ Stage: runtime
 %files from build
     /opt/tyr/install /usr/local
     /opt/tyr/build/exe/gbfs_lazy /usr/local/bin/gbfs_lazy
-    /opt/tyr/dependencies/installs/lib /usr/local/lib
+    /opt/tyr/dependencies-install/lib /usr/local/lib
 
 %post
     # Install only runtime dependencies

@@ -6,7 +6,7 @@ include(ExternalProject)
 message(STATUS "Dependency \"loki\"...")
 
 set(LOKI_GIT_REPOSITORY "https://github.com/drexlerd/Loki.git" CACHE STRING "Loki Git repository used by the dependency build.")
-set(LOKI_GIT_TAG "886498f38addef50c8f692bfa4847686d67093a7" CACHE STRING "Loki Git tag, branch, or commit used by the dependency build.")
+set(LOKI_GIT_TAG "181bd4d0bff8348f2f11ad3c09afeb038cf7c276" CACHE STRING "Loki Git tag, branch, or commit used by the dependency build.")
 
 # Attempt to find the installed loki library
 find_package(loki QUIET PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH)
@@ -50,6 +50,9 @@ if (NOT loki_FOUND)
             -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON
             -DBUILD_SHARED_LIBS=${TYR_BUILD_SHARED_DEPENDENCIES}
+            -DLOKI_BUILD_TESTS=OFF
+            -DLOKI_BUILD_BENCHMARKS=OFF
+            -DLOKI_BUILD_EXECUTABLES=OFF
             -DLOKI_LINK_STATIC_DEPENDENCIES=${LOKI_LINK_STATIC_DEPENDENCIES}
             -DCMAKE_INSTALL_RPATH=${TYR_DEPENDENCY_INSTALL_RPATH}
     )

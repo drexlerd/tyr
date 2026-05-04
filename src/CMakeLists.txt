@@ -164,11 +164,11 @@ target_compile_features(core PUBLIC cxx_std_20)
 target_link_libraries(core
   PUBLIC
     loki::parsers
+    TBB::tbb
+    valla::core
+    fmt::fmt-header-only
   PRIVATE
     Threads::Threads
-    TBB::tbb
-    valla::core   
-    fmt::fmt-header-only
 )
 
 target_compile_definitions(core
