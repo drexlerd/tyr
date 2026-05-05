@@ -15,7 +15,7 @@ permissions:
 jobs:
   build-image:
     name: Build Apptainer image
-    if: github.repository == 'drexlerd/tyr'
+    if: github.repository == 'planning-and-learning/tyr'
     runs-on: ubuntu-24.04
 
     steps:

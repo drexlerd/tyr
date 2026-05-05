@@ -37,7 +37,7 @@ Stage: build
         && rm -rf /var/lib/apt/lists/*
 
     python3.10 -m pip install --no-cache-dir --upgrade pip
-    PYYGGDRASIL_JOBS=2 PYPDDL_JOBS=2 python3.10 -m pip install --no-cache-dir typing_extensions pyyggdrasil==0.0.5 pypddl==1.0.2
+    PYYGGDRASIL_JOBS=2 PYPDDL_JOBS=2 python3.10 -m pip install --no-cache-dir typing_extensions pyyggdrasil==0.0.6 pypddl==1.0.3
 
     # Set working directory
     cd /opt/tyr

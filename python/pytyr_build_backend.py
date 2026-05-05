@@ -14,7 +14,6 @@ from scikit_build_core import build as scikit_build
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-DEPENDENCY_LIB_DIR_FILE = ROOT_DIR / ".pytyr-dependency-lib-dirs"
 
 
 def _num_jobs() -> int:
@@ -29,10 +28,6 @@ def _native_prefixes() -> list[Path]:
         pypddl.native_prefix().resolve(),
         pyyggdrasil.native_prefix().resolve(),
     ]
-
-
-def _native_lib_dirs(prefixes: list[Path]) -> list[Path]:
-    return [path for prefix in prefixes for path in sorted(prefix.glob("lib*")) if path.is_dir()]
 
 
 def _prepend_cmake_args(*args: str) -> None:
@@ -114,10 +109,6 @@ def _strip_wheel_native_libraries(wheel_path: Path) -> None:
 
 def _prepare_native_build() -> None:
     native_prefixes = _native_prefixes()
-    DEPENDENCY_LIB_DIR_FILE.write_text(
-        os.pathsep.join(str(path) for path in _native_lib_dirs(native_prefixes)),
-        encoding="utf-8",
-    )
 
     os.environ.setdefault("CMAKE_BUILD_PARALLEL_LEVEL", str(_num_jobs()))
     _prepend_cmake_args(

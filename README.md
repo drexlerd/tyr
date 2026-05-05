@@ -12,7 +12,7 @@ Tyr is designed to address several challenges in modern planning systems:
 
 ## Technical Overview
 
-- **PDDL frontend**: Tyr uses [Loki](https://github.com/drexlerd/Loki) to parse, normalize, and translate PDDL input. The parser is implemented with [Boost](https://www.boost.org/) and provides informative error messages for syntactically invalid input. The normalization pipeline largely follows the approach described in Section 4 of [*Concise finite-domain representations for PDDL planning tasks*](https://ai.dmi.unibas.ch/papers/helmert-aij2009.pdf).
+- **PDDL frontend**: Tyr uses [Loki](https://github.com/planning-and-learning/loki) to parse, normalize, and translate PDDL input. The parser is implemented with [Boost](https://www.boost.org/) and provides informative error messages for syntactically invalid input. The normalization pipeline largely follows the approach described in Section 4 of [*Concise finite-domain representations for PDDL planning tasks*](https://ai.dmi.unibas.ch/papers/helmert-aij2009.pdf).
 
 - **Datalog engine**: Tyr implements a parallel semi-naive Datalog engine for lifted successor generation, axiom evaluation, relaxed planning graph heuristics, and task grounding. Its execution model is synchronous and supports both rule-level and grounding-level parallelism.
 
@@ -98,7 +98,7 @@ auto labeled_successor_nodes = successor_generator.get_labeled_successor_nodes(i
 Tyr consumes native dependencies from Python packages:
 
 ```console
-uv pip install pyyggdrasil==0.0.5 pypddl==1.0.2
+uv pip install pyyggdrasil==0.0.6 pypddl==1.0.3
 cmake -S . -B build \
   -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')" \
   -DPython3_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')" \
@@ -110,9 +110,9 @@ checkouts first:
 
 ```console
 cd ../yggdrasil
-uv pip install --python ../Tyr/.venv/bin/python .
-cd ../Loki
-uv pip install --python ../Tyr/.venv/bin/python .
+uv pip install --python ../tyr/.venv/bin/python .
+cd ../loki
+uv pip install --python ../tyr/.venv/bin/python .
 ```
 
 ## Build Instructions
