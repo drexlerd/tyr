@@ -9,6 +9,18 @@ Tyr is designed to address several challenges in modern planning systems:
 3. **Support for expressive numeric planning formalisms** across both grounded and lifted reasoning paradigms (see [Supported PDDL Features](docs/PDDL_SUPPORT.md)).
 
 4. **Integration of learning and reasoning** by supporting collections of planning tasks over a shared planning domain.
+
+## Technical Overview
+
+- **PDDL frontend**: Tyr uses [Loki](https://github.com/drexlerd/Loki) to parse, normalize, and translate PDDL input. The parser is implemented with [Boost](https://www.boost.org/) and provides informative error messages for syntactically invalid input. The normalization pipeline largely follows the approach described in Section 4 of [*Concise finite-domain representations for PDDL planning tasks*](https://ai.dmi.unibas.ch/papers/helmert-aij2009.pdf).
+
+- **Datalog engine**: Tyr implements a parallel semi-naive Datalog engine for lifted successor generation, axiom evaluation, relaxed planning graph heuristics, and task grounding. Its execution model is synchronous and supports both rule-level and grounding-level parallelism.
+
+- **Ground planning**: For grounded tasks, Tyr uses data structures inspired by [*The Fast Downward Planning System*](https://jair.org/index.php/jair/article/view/10457) to efficiently identify applicable actions in a given state. Grounding often yields substantial performance improvements, although it is not always feasible for large tasks.
+
+- **State representation**: Tyr statically analyzes domain and problem files and partitions predicates, functions, and related structures into strongly typed categories such as static, fluent, and derived atoms. This design prevents accidental mixing of conceptually different entities. To represent sequences compactly, Tyr uses tree databases of perfectly balanced binary trees, allowing common subsequences to be shared through shared subtrees. As a special case, Tyr synthesizes finite-domain variables for fluent atoms in grounded planning, largely following the method described in Section 5 of [*Concise finite-domain representations for PDDL planning tasks*](https://ai.dmi.unibas.ch/papers/helmert-aij2009.pdf), enabling more compact storage when grounding is feasible.
+
+- **Memory model**: Tyr stores generated data in hierarchically structured, geometrically growing buffers. For variable-sized objects, it uses [Cista](https://github.com/felixguendling/cista) for serialization and zero-copy deserialization. This design allows derived buffers to inherit data from parent buffers without duplication. For example, multiple tasks can share a domain, and multiple workers can share task data.
   
 # Getting Started
 
@@ -53,8 +65,6 @@ labeled_successor_nodes = successor_generator.get_labeled_successor_nodes(initia
 
 ## C++ Interface
 
-Instructions on how to build the library and executables are available [here](docs/BUILD.md).
-
 The C++ interface for implementing search algorithms is:
 
 ```cpp
@@ -83,14 +93,70 @@ auto labeled_successor_nodes = successor_generator.get_labeled_successor_nodes(i
 
 ```
 
-## Technical Overview
+## Dependencies
 
-- **PDDL frontend**: Tyr uses [Loki](https://github.com/drexlerd/Loki) to parse, normalize, and translate PDDL input. The parser is implemented with [Boost](https://www.boost.org/) and provides informative error messages for syntactically invalid input. The normalization pipeline largely follows the approach described in Section 4 of [*Concise finite-domain representations for PDDL planning tasks*](https://ai.dmi.unibas.ch/papers/helmert-aij2009.pdf).
+Tyr consumes native dependencies from Python packages:
 
-- **Datalog engine**: Tyr implements a parallel semi-naive Datalog engine for lifted successor generation, axiom evaluation, relaxed planning graph heuristics, and task grounding. Its execution model is synchronous and supports both rule-level and grounding-level parallelism.
+```console
+uv pip install pyyggdrasil==0.0.5 pypddl==1.0.2
+cmake -S . -B build \
+  -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')" \
+  -DPython3_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')" \
+  -DCMAKE_PREFIX_PATH="$(python -c 'import pypddl, pyyggdrasil; print(f"{pypddl.native_prefix()};{pyyggdrasil.native_prefix()}")')"
+```
 
-- **Ground planning**: For grounded tasks, Tyr uses data structures inspired by [*The Fast Downward Planning System*](https://jair.org/index.php/jair/article/view/10457) to efficiently identify applicable actions in a given state. Grounding often yields substantial performance improvements, although it is not always feasible for large tasks.
+For offline/local development, install the native providers from sibling source
+checkouts first:
 
-- **State representation**: Tyr statically analyzes domain and problem files and partitions predicates, functions, and related structures into strongly typed categories such as static, fluent, and derived atoms. This design prevents accidental mixing of conceptually different entities. To represent sequences compactly, Tyr uses tree databases of perfectly balanced binary trees, allowing common subsequences to be shared through shared subtrees. As a special case, Tyr synthesizes finite-domain variables for fluent atoms in grounded planning, largely following the method described in Section 5 of [*Concise finite-domain representations for PDDL planning tasks*](https://ai.dmi.unibas.ch/papers/helmert-aij2009.pdf), enabling more compact storage when grounding is feasible.
+```console
+cd ../yggdrasil
+uv pip install --python ../Tyr/.venv/bin/python .
+cd ../Loki
+uv pip install --python ../Tyr/.venv/bin/python .
+```
 
-- **Memory model**: Tyr stores generated data in hierarchically structured, geometrically growing buffers. For variable-sized objects, it uses [Cista](https://github.com/felixguendling/cista) for serialization and zero-copy deserialization. This design allows derived buffers to inherit data from parent buffers without duplication. For example, multiple tasks can share a domain, and multiple workers can share task data.
+## Build Instructions
+
+```console
+cmake -S . -B build \
+  -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')" \
+  -DPython3_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')" \
+  -DCMAKE_PREFIX_PATH="$(python -c 'import pypddl, pyyggdrasil; print(f"{pypddl.native_prefix()};{pyyggdrasil.native_prefix()}")')" \
+  -DTYR_BUILD_SHARED=ON \
+  -DTYR_LINK_STATIC_DEPENDENCIES=OFF
+
+cmake --build build -j16
+cmake --install build --prefix=<path/to/installation-directory>
+```
+
+Optional targets are disabled by default and can be enabled during configure:
+
+- `-DBUILD_TESTS=ON`
+- `-DBUILD_EXECUTABLES=ON`
+- `-DBUILD_PROFILING=ON`
+- `-DBUILD_PYTYR=ON`
+
+More detailed build instructions are available [here](docs/BUILD.md).
+
+## Integration Instructions
+
+The Python package `pytyr` installs Tyr's native headers, shared library, and
+CMake package config under `pytyr.native_prefix()`. It depends on `pypddl` for
+Loki and `pyyggdrasil` for third-party native dependencies:
+
+```python
+import pypddl
+import pyyggdrasil
+import pytyr
+
+print(pytyr.native_prefix())
+print(pypddl.native_prefix())
+print(pyyggdrasil.native_prefix())
+```
+
+Downstream CMake projects can then use:
+
+```console
+cmake -S . -B build \
+  -DCMAKE_PREFIX_PATH="$(python -c 'import pytyr, pypddl, pyyggdrasil; print(f"{pytyr.native_prefix()};{pypddl.native_prefix()};{pyyggdrasil.native_prefix()}")')"
+```

@@ -167,6 +167,7 @@ target_link_libraries(core
     TBB::tbb
     valla::core
     fmt::fmt-header-only
+    gtl::gtl
   PRIVATE
     Threads::Threads
 )

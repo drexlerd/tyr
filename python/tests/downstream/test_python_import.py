@@ -6,6 +6,8 @@ import sys
 from pathlib import Path
 
 import pytyr
+import pypddl
+import pyyggdrasil
 import pytest
 
 
@@ -19,7 +21,14 @@ def test_downstream_python_binding_imports_public_pytyr_api_and_links_tyr_core(t
         pytest.skip("cmake is required for the downstream binding smoke test")
 
     pytyr_prefix = Path(pytyr.native_prefix())
+    pypddl_prefix = Path(pypddl.native_prefix())
+    pyyggdrasil_prefix = Path(pyyggdrasil.native_prefix())
     tyr_library_dir = pytyr_prefix / "lib"
+    dependency_library_dirs = [
+        tyr_library_dir,
+        pypddl_prefix / "lib",
+        pyyggdrasil_prefix / "lib",
+    ]
     tyr_core_libraries = list(tyr_library_dir.glob("libtyr_core.*"))
     if not tyr_core_libraries:
         pytest.skip("pytyr was not installed with a shared tyr::core library")
@@ -32,9 +41,9 @@ def test_downstream_python_binding_imports_public_pytyr_api_and_links_tyr_core(t
     if not (tyr_cmake_dir / "tyrConfig.cmake").exists():
         pytest.skip("pytyr was not installed with Tyr CMake package files")
 
-    nanobind_cmake_dir = pytyr_prefix / "nanobind" / "cmake"
+    nanobind_cmake_dir = pyyggdrasil_prefix / "nanobind" / "cmake"
     if not nanobind_cmake_dir.exists():
-        pytest.skip("nanobind CMake package was not found in the pytyr installation prefix")
+        pytest.skip("nanobind CMake package was not found in the pyyggdrasil installation prefix")
 
     project_dir = tmp_path / "minimal_downstream_package"
     shutil.copytree(DOWNSTREAM_PACKAGE_DIR, project_dir)
@@ -42,10 +51,11 @@ def test_downstream_python_binding_imports_public_pytyr_api_and_links_tyr_core(t
     env = os.environ.copy()
     env["CMAKE_ARGS"] = " ".join(
         [
-            f"-DCMAKE_PREFIX_PATH={pytyr_prefix}",
+            f"-DCMAKE_PREFIX_PATH={pytyr_prefix};{pypddl_prefix};{pyyggdrasil_prefix}",
             f"-Dtyr_DIR={tyr_cmake_dir}",
             f"-DPython_EXECUTABLE={sys.executable}",
-            f"-DDOWNSTREAM_TYR_RUNTIME_LIBRARY_DIR={tyr_library_dir}",
+            f"-DPython3_EXECUTABLE={sys.executable}",
+            f"-DDOWNSTREAM_RUNTIME_LIBRARY_DIRS={';'.join(str(path) for path in dependency_library_dirs)}",
             env.get("CMAKE_ARGS", ""),
         ]
     ).strip()
@@ -58,10 +68,11 @@ def test_downstream_python_binding_imports_public_pytyr_api_and_links_tyr_core(t
             str(project_dir),
             "-B",
             str(build_dir),
-            f"-DCMAKE_PREFIX_PATH={pytyr_prefix}",
+            f"-DCMAKE_PREFIX_PATH={pytyr_prefix};{pypddl_prefix};{pyyggdrasil_prefix}",
             f"-Dtyr_DIR={tyr_cmake_dir}",
             f"-DPython_EXECUTABLE={sys.executable}",
-            f"-DDOWNSTREAM_TYR_RUNTIME_LIBRARY_DIR={tyr_library_dir}",
+            f"-DPython3_EXECUTABLE={sys.executable}",
+            f"-DDOWNSTREAM_RUNTIME_LIBRARY_DIRS={';'.join(str(path) for path in dependency_library_dirs)}",
         ],
         check=True,
         env=env,

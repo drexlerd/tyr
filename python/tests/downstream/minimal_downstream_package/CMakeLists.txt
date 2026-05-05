@@ -13,11 +13,11 @@ find_package(tyr CONFIG REQUIRED COMPONENTS core)
 nanobind_add_module(_downstream_tyr src/downstream_tyr_user/_downstream_tyr.cpp)
 target_link_libraries(_downstream_tyr PRIVATE tyr::core)
 
-if(DOWNSTREAM_TYR_RUNTIME_LIBRARY_DIR)
+if(DOWNSTREAM_RUNTIME_LIBRARY_DIRS)
     set_target_properties(_downstream_tyr PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/downstream_tyr_user"
-        BUILD_RPATH "${DOWNSTREAM_TYR_RUNTIME_LIBRARY_DIR}"
-        INSTALL_RPATH "${DOWNSTREAM_TYR_RUNTIME_LIBRARY_DIR}")
+        BUILD_RPATH "${DOWNSTREAM_RUNTIME_LIBRARY_DIRS}"
+        INSTALL_RPATH "${DOWNSTREAM_RUNTIME_LIBRARY_DIRS}")
 else()
     set_target_properties(_downstream_tyr PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/downstream_tyr_user")

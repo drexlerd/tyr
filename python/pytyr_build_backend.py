@@ -1,49 +1,38 @@
+import base64
+import csv
+import hashlib
 import os
+import platform
 import shutil
 import subprocess
 import sys
+import tempfile
+import zipfile
 from pathlib import Path
 
 from scikit_build_core import build as scikit_build
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-DEPENDENCY_BUILD_DIR = ROOT_DIR / "dependencies-build"
-DEPENDENCY_INSTALL_DIR = ROOT_DIR / "dependencies-install"
-
-
-def _build_type() -> str:
-    return os.environ.get("TYR_BUILD_TYPE", "Release")
+DEPENDENCY_LIB_DIR_FILE = ROOT_DIR / ".pytyr-dependency-lib-dirs"
 
 
 def _num_jobs() -> int:
     return int(os.environ.get("TYR_JOBS", "8"))
 
 
-def _configure_and_install_dependencies() -> None:
-    cmake = shutil.which("cmake")
-    if cmake is None:
-        raise RuntimeError("cmake is required to build pytyr dependencies")
+def _native_prefixes() -> list[Path]:
+    import pypddl
+    import pyyggdrasil
 
-    DEPENDENCY_BUILD_DIR.mkdir(parents=True, exist_ok=True)
-
-    cmake_args = [
-        cmake,
-        "-S",
-        str(ROOT_DIR / "dependencies"),
-        "-B",
-        str(DEPENDENCY_BUILD_DIR),
-        f"-DCMAKE_BUILD_TYPE={_build_type()}",
-        f"-DCMAKE_INSTALL_PREFIX={DEPENDENCY_INSTALL_DIR}",
-        "-DCMAKE_INSTALL_LIBDIR=lib",
-        f"-DCMAKE_PREFIX_PATH={DEPENDENCY_INSTALL_DIR}",
-        "-DTYR_BUILD_SHARED_DEPENDENCIES=ON",
-        f"-DPython_EXECUTABLE={sys.executable}",
+    return [
+        pypddl.native_prefix().resolve(),
+        pyyggdrasil.native_prefix().resolve(),
     ]
 
-    subprocess.run(cmake_args, cwd=ROOT_DIR, check=True)
-    subprocess.run([cmake, "--build", str(DEPENDENCY_BUILD_DIR), f"-j{_num_jobs()}"], cwd=ROOT_DIR, check=True)
-    subprocess.run([cmake, "--install", str(DEPENDENCY_BUILD_DIR)], cwd=ROOT_DIR, check=True)
+
+def _native_lib_dirs(prefixes: list[Path]) -> list[Path]:
+    return [path for prefix in prefixes for path in sorted(prefix.glob("lib*")) if path.is_dir()]
 
 
 def _prepend_cmake_args(*args: str) -> None:
@@ -51,16 +40,96 @@ def _prepend_cmake_args(*args: str) -> None:
     os.environ["CMAKE_ARGS"] = " ".join([*args, existing]).strip()
 
 
+def _is_native_library(path: Path) -> bool:
+    name = path.name
+    return ".so" in name or name.endswith(".dylib") or name.endswith(".pyd")
+
+
+def _strip_args() -> list[str]:
+    if platform.system() == "Darwin":
+        return ["-x"]
+    return ["--strip-unneeded"]
+
+
+def _record_digest(path: Path) -> tuple[str, str]:
+    content = path.read_bytes()
+    digest = base64.urlsafe_b64encode(hashlib.sha256(content).digest()).rstrip(b"=").decode("ascii")
+    return f"sha256={digest}", str(len(content))
+
+
+def _rewrite_record(wheel_root: Path) -> None:
+    record_files = list(wheel_root.glob("*.dist-info/RECORD"))
+    if len(record_files) != 1:
+        raise RuntimeError(f"expected exactly one RECORD file, found {len(record_files)}")
+
+    record_file = record_files[0]
+    rows = []
+    for path in sorted(wheel_root.rglob("*")):
+        if not path.is_file():
+            continue
+
+        relative_path = path.relative_to(wheel_root).as_posix()
+        if path == record_file:
+            rows.append((relative_path, "", ""))
+        else:
+            digest, size = _record_digest(path)
+            rows.append((relative_path, digest, size))
+
+    with record_file.open("w", newline="") as out:
+        csv.writer(out).writerows(rows)
+
+
+def _strip_wheel_native_libraries(wheel_path: Path) -> None:
+    if os.environ.get("PYTYR_STRIP_WHEEL", "ON").upper() in {"0", "FALSE", "OFF", "NO"}:
+        return
+
+    strip = shutil.which("strip")
+    if strip is None:
+        return
+
+    with tempfile.TemporaryDirectory(prefix="pytyr-wheel-") as tmp:
+        wheel_root = Path(tmp) / "wheel"
+        with zipfile.ZipFile(wheel_path) as wheel:
+            wheel.extractall(wheel_root)
+
+        for path in wheel_root.rglob("*"):
+            if path.is_file() and _is_native_library(path):
+                subprocess.run(
+                    [strip, *_strip_args(), str(path)],
+                    check=False,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+
+        _rewrite_record(wheel_root)
+
+        replacement_path = wheel_path.with_suffix(".tmp")
+        with zipfile.ZipFile(replacement_path, "w", compression=zipfile.ZIP_DEFLATED) as wheel:
+            for path in sorted(wheel_root.rglob("*")):
+                if path.is_file():
+                    wheel.write(path, path.relative_to(wheel_root).as_posix())
+
+        replacement_path.replace(wheel_path)
+
+
 def _prepare_native_build() -> None:
-    _configure_and_install_dependencies()
+    native_prefixes = _native_prefixes()
+    DEPENDENCY_LIB_DIR_FILE.write_text(
+        os.pathsep.join(str(path) for path in _native_lib_dirs(native_prefixes)),
+        encoding="utf-8",
+    )
+
     os.environ.setdefault("CMAKE_BUILD_PARALLEL_LEVEL", str(_num_jobs()))
     _prepend_cmake_args(
-        f"-DCMAKE_PREFIX_PATH={DEPENDENCY_INSTALL_DIR}",
+        f"-DCMAKE_PREFIX_PATH={';'.join(str(prefix) for prefix in native_prefixes)}",
+        f"-DPython_EXECUTABLE={sys.executable}",
+        f"-DPython3_EXECUTABLE={sys.executable}",
         "-DBUILD_PYTYR=ON",
         "-DBUILD_TESTS=OFF",
         "-DBUILD_EXECUTABLES=OFF",
         "-DBUILD_PROFILING=OFF",
         "-DTYR_USE_LLD=OFF",
+        "-DTYR_BUILD_SHARED=ON",
         "-DTYR_LINK_STATIC_DEPENDENCIES=OFF",
         "-DCMAKE_INSTALL_LIBDIR=lib",
         f"-DTYR_HEADER_INSTANTIATION={os.environ.get('TYR_HEADER_INSTANTIATION', 'OFF')}",
@@ -82,7 +151,9 @@ def prepare_metadata_for_build_wheel(metadata_directory, config_settings=None):
 
 def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
     _prepare_native_build()
-    return scikit_build.build_wheel(wheel_directory, config_settings, metadata_directory)
+    wheel_filename = scikit_build.build_wheel(wheel_directory, config_settings, metadata_directory)
+    _strip_wheel_native_libraries(Path(wheel_directory) / wheel_filename)
+    return wheel_filename
 
 
 def build_editable(wheel_directory, config_settings=None, metadata_directory=None):

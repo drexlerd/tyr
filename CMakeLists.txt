@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
-project(tyr VERSION 0.0.0)
+
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/pyproject.toml" TYR_PROJECT_VERSION_LINE REGEX "^version[ \t]*=" LIMIT_COUNT 1)
+if(NOT TYR_PROJECT_VERSION_LINE)
+    message(FATAL_ERROR "Could not read project version from pyproject.toml")
+endif()
+string(REGEX REPLACE "^version[ \t]*=[ \t]*\"([^\"]+)\".*$" "\\1" TYR_PROJECT_VERSION "${TYR_PROJECT_VERSION_LINE}")
+
+project(tyr VERSION "${TYR_PROJECT_VERSION}")
 
 
 ##############################################################
@@ -158,6 +165,8 @@ list(APPEND CMAKE_MODULE_PATH
 )
 include("configure_boost")
 include("configure_ccache")
+include("configure_yggdrasil")
+include("configure_pypddl")
 
 ##############################################################
 # CCache
@@ -173,14 +182,22 @@ configure_ccache()
 
 # set(CMAKE_FIND_DEBUG_MODE TRUE)
 
+configure_yggdrasil()
+configure_pypddl()
+
+# -----
+# argparse
+# -----
 
 find_package(argparse CONFIG REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 if(argparse_FOUND)
   message(STATUS "Found argparse: ${argparse_DIR} (found version ${argparse_VERSION})")
 endif()
 
-
+# -----
 # Boost
+# -----
+
 # Find Boost headers only according to https://cmake.org/cmake/help/latest/module/FindBoost.html
 configure_boost()
 find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS iostreams json PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
@@ -188,18 +205,36 @@ if(Boost_FOUND)
   message(STATUS "Found Boost: ${Boost_DIR} (found version ${Boost_VERSION})")
 endif()
 
+# -----
+# GTL
+# -----
+
+find_package(gtl CONFIG REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
+if(gtl_FOUND)
+  message(STATUS "Found gtl: ${gtl_DIR}")
+endif()
+
+# -----
+# Cista
+# -----
 
 find_package(cista CONFIG REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 if(cista_FOUND)
   message(STATUS "Found cista: ${cista_DIR} (found version ${cista_VERSION})")
 endif()
 
+# -----
+# Fmt
+# -----
 
-find_package(fmt REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
+find_package(fmt CONFIG REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 if(fmt_FOUND)
   message(STATUS "Found fmt: ${fmt_DIR} (found version ${fmt_VERSION})")
 endif()
 
+# -----
+# Threads
+# -----
 
 # Prefer -pthread over -lpthread on platforms that support it
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -209,6 +244,9 @@ if(Threads_FOUND)
   message(STATUS "Found Threads: ${CMAKE_THREAD_LIBS_INIT}")
 endif()
 
+# -----
+# TBB
+# -----
 
 find_package(TBB CONFIG REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 if(TBB_FOUND)
@@ -216,14 +254,20 @@ if(TBB_FOUND)
   message(STATUS "Found TBB: ${TBB_DIR} (found version ${TBB_VERSION})")
 endif()
 
+# -----
+# valla
+# -----
 
 find_package(valla CONFIG COMPONENTS core REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 if(valla_FOUND)
   message(STATUS "Found valla: ${valla_DIR} (found version ${valla_VERSION})")
 endif()
 
+# -----
+# Loki
+# -----
 
-find_package(loki ${LOKI_MIN_VERSION} COMPONENTS parsers REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
+find_package(loki 1.0.2 COMPONENTS parsers REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 if(loki_FOUND)
   message(STATUS "Found loki: ${loki_DIR} (found version ${loki_VERSION})")
 endif()
@@ -268,49 +312,37 @@ endif()
 
 
 
-###########
-# Install #
-###########
-
-# Install header files
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/tyr"
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-
-# Install cmake scripts
-install(
-    DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cmake/"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr/cmake"
-)
-
-
-###########
-# Exports #
-###########
-
-# https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html
+##############################################################
+# Install Package Files
+##############################################################
 
 include(CMakePackageConfigHelpers)
 
-# Generate the version file for the config file
+set(TYR_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/tyr")
+set(TYR_INSTALL_CMAKE_HELPERDIR "${TYR_INSTALL_CMAKEDIR}/cmake")
+
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/tyr"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cmake/"
+    DESTINATION "${TYR_INSTALL_CMAKE_HELPERDIR}")
+
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/tyrConfigVersion.cmake"
     VERSION ${tyr_VERSION}
     COMPATIBILITY ExactVersion
 )
 
-# Create config file
-# https://cmake.org/cmake/help/book/mastering-cmake/cmake/Help/guide/importing-exporting/index.html
-# https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-configuration-file
-configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in"
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/tyrConfig.cmake"
-    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr"
+    INSTALL_DESTINATION "${TYR_INSTALL_CMAKEDIR}"
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
 
-# Install config files
 install(
     FILES
         "${CMAKE_CURRENT_BINARY_DIR}/tyrConfig.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/tyrConfigVersion.cmake"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/tyr"
+    DESTINATION "${TYR_INSTALL_CMAKEDIR}"
 )

@@ -15,14 +15,16 @@ Tyr disables optional targets by default. Enable only the parts needed for the t
 
 ```console
 cmake -S . -B build \
-  -DCMAKE_PREFIX_PATH=${PWD}/dependencies-install \
+  -DPython_EXECUTABLE=${PWD}/.venv/bin/python \
+  -DPython3_EXECUTABLE=${PWD}/.venv/bin/python \
+  -DCMAKE_PREFIX_PATH="$(.venv/bin/python -c 'import pypddl, pyyggdrasil; print(f"{pypddl.native_prefix()};{pyyggdrasil.native_prefix()}")')" \
   -DBUILD_TESTS=ON \
   -DBUILD_EXECUTABLES=ON \
   -DBUILD_PROFILING=ON \
   -DBUILD_PYTYR=ON
 ```
 
-Keep dependency build and install artifacts outside `dependencies/`. Use `dependencies-build/` for the dependency build tree and `dependencies-install/` for installed dependency files.
+Install native dependencies through Python packages: `pyyggdrasil` provides shared third-party dependencies and `pypddl` provides Loki.
 
 Build options:
 

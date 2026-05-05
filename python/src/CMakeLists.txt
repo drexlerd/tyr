@@ -7,7 +7,7 @@ include(CMakePackageConfigHelpers)
 find_package(nanobind CONFIG REQUIRED PATHS ${CMAKE_PREFIX_PATH})
 message(STATUS "Found nanobind: ${nanobind_DIR} (found version ${nanobind_VERSION})")
 
-set(PYTYR_NATIVE_DIR "yggdrasil")
+set(PYTYR_NATIVE_DIR "pytyr/native")
 set(PYTYR_NATIVE_INCLUDEDIR "${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_INCLUDEDIR}")
 set(PYTYR_NATIVE_LIBDIR "${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_LIBDIR}")
 set(PYTYR_NATIVE_BINDIR "${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_BINDIR}")
@@ -31,15 +31,29 @@ target_link_libraries(pytyr PRIVATE tyr::core TBB::tbb)
 
 if(TYR_BUILD_SHARED)
     if(APPLE)
-        set(PYTYR_LIBRARY_ORIGIN "@loader_path/../${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_LIBDIR}")
+        set(PYTYR_MODULE_RPATH
+            "@loader_path/native/${CMAKE_INSTALL_LIBDIR}"
+            "@loader_path/../pypddl/native/${CMAKE_INSTALL_LIBDIR}"
+            "@loader_path/../pyyggdrasil/${CMAKE_INSTALL_LIBDIR}")
+        set(PYTYR_CORE_RPATH
+            "@loader_path"
+            "@loader_path/../../../pypddl/native/${CMAKE_INSTALL_LIBDIR}"
+            "@loader_path/../../../pyyggdrasil/${CMAKE_INSTALL_LIBDIR}")
     elseif(UNIX)
-        set(PYTYR_LIBRARY_ORIGIN "$ORIGIN/../${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_LIBDIR}")
+        set(PYTYR_MODULE_RPATH
+            "$ORIGIN/native/${CMAKE_INSTALL_LIBDIR}"
+            "$ORIGIN/../pypddl/native/${CMAKE_INSTALL_LIBDIR}"
+            "$ORIGIN/../pyyggdrasil/${CMAKE_INSTALL_LIBDIR}")
+        set(PYTYR_CORE_RPATH
+            "$ORIGIN"
+            "$ORIGIN/../../../pypddl/native/${CMAKE_INSTALL_LIBDIR}"
+            "$ORIGIN/../../../pyyggdrasil/${CMAKE_INSTALL_LIBDIR}")
     endif()
 
-    if(PYTYR_LIBRARY_ORIGIN)
+    if(PYTYR_MODULE_RPATH)
         set_target_properties(pytyr PROPERTIES
-            BUILD_RPATH "${PYTYR_LIBRARY_ORIGIN}"
-            INSTALL_RPATH "${PYTYR_LIBRARY_ORIGIN}")
+            BUILD_RPATH "${PYTYR_MODULE_RPATH}"
+            INSTALL_RPATH "${PYTYR_MODULE_RPATH}")
     endif()
 endif()
 
@@ -47,6 +61,7 @@ install(TARGETS pytyr DESTINATION "pytyr" COMPONENT pytyr)
 if(TYR_BUILD_SHARED)
     set_property(TARGET core PROPERTY INTERFACE_INCLUDE_DIRECTORIES
         "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>")
+    set_property(TARGET core PROPERTY INSTALL_RPATH "${PYTYR_CORE_RPATH}")
     install(TARGETS core
             EXPORT pytyrTyrcoreTargets
             LIBRARY DESTINATION "${PYTYR_NATIVE_LIBDIR}" COMPONENT pytyr
@@ -57,7 +72,7 @@ endif()
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/tyr"
         DESTINATION "${PYTYR_NATIVE_INCLUDEDIR}"
         COMPONENT pytyr)
-configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/tyrConfig.cmake"
+configure_package_config_file("${CMAKE_SOURCE_DIR}/Config.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/tyrConfig.cmake"
         INSTALL_DESTINATION "${PYTYR_NATIVE_CMAKEDIR}/tyr"
         NO_CHECK_REQUIRED_COMPONENTS_MACRO)
@@ -77,73 +92,13 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/cmake/"
         DESTINATION "${PYTYR_NATIVE_CMAKEDIR}/tyr/cmake"
         COMPONENT pytyr)
 
-set(PYTYR_DEPENDENCY_HEADER_DIRS
-    boost
-    cista
-    fmt
-    gtl
-    loki
-    oneapi
-    tbb
-    valla
-)
-
-set(PYTYR_DEPENDENCY_CMAKE_PACKAGES
-    Boost-*
-    boost_headers-*
-    fmt
-    gtl
-    loki
-    TBB
-    valla
-)
-
-foreach(prefix IN LISTS CMAKE_PREFIX_PATH)
-    if(EXISTS "${prefix}/include")
-        foreach(header_dir IN LISTS PYTYR_DEPENDENCY_HEADER_DIRS)
-            if(EXISTS "${prefix}/include/${header_dir}")
-                install(DIRECTORY "${prefix}/include/${header_dir}"
-                        DESTINATION "${PYTYR_NATIVE_INCLUDEDIR}"
-                        COMPONENT pytyr)
-            endif()
-        endforeach()
-    endif()
-    foreach(dependency_libdir IN ITEMS "${prefix}/${CMAKE_INSTALL_LIBDIR}" "${prefix}/lib" "${prefix}/lib64")
-        if(TYR_BUILD_SHARED AND EXISTS "${dependency_libdir}")
-            file(GLOB PYTYR_DEPENDENCY_RUNTIME_LIBRARIES
-                "${dependency_libdir}/libfmt${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-                "${dependency_libdir}/libfmt.*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-                "${dependency_libdir}/libloki_parsers${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-                "${dependency_libdir}/libloki_parsers.*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-                "${dependency_libdir}/libtbb*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-                "${dependency_libdir}/libvalla${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-                "${dependency_libdir}/libvalla.*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-            )
-            if(PYTYR_DEPENDENCY_RUNTIME_LIBRARIES)
-                install(FILES ${PYTYR_DEPENDENCY_RUNTIME_LIBRARIES}
-                        DESTINATION "${PYTYR_NATIVE_LIBDIR}"
-                        COMPONENT pytyr)
-            endif()
-        endif()
-        if(EXISTS "${dependency_libdir}/cmake")
-            foreach(cmake_package IN LISTS PYTYR_DEPENDENCY_CMAKE_PACKAGES)
-                file(GLOB PYTYR_DEPENDENCY_CMAKE_DIRS LIST_DIRECTORIES true "${dependency_libdir}/cmake/${cmake_package}")
-                foreach(cmake_dir IN LISTS PYTYR_DEPENDENCY_CMAKE_DIRS)
-                    if(IS_DIRECTORY "${cmake_dir}")
-                        install(DIRECTORY "${cmake_dir}"
-                                DESTINATION "${PYTYR_NATIVE_CMAKEDIR}"
-                                COMPONENT pytyr)
-                    endif()
-                endforeach()
-            endforeach()
-        endif()
-    endforeach()
-    if(EXISTS "${prefix}/nanobind")
-        install(DIRECTORY "${prefix}/nanobind"
-                DESTINATION "${PYTYR_NATIVE_DIR}"
-                COMPONENT pytyr)
-    endif()
-endforeach()
+if(APPLE)
+    install(SCRIPT "${CMAKE_SOURCE_DIR}/cmake/install/fix_macos_runtime_paths.cmake"
+            COMPONENT pytyr)
+elseif(UNIX)
+    install(SCRIPT "${CMAKE_SOURCE_DIR}/cmake/install/fix_unix_runtime_paths.cmake"
+            COMPONENT pytyr)
+endif()
 
 set(PYTYR_PYTHON_FILES
     pytyr/__init__.py
@@ -165,6 +120,26 @@ foreach(python_file IN LISTS PYTYR_PYTHON_FILES)
             DESTINATION "${python_file_directory}"
             COMPONENT pytyr)
 endforeach()
+
+set(PYTYR_INSTALL_LIBRARY_PATHS)
+foreach(native_prefix IN ITEMS "${PYPDDL_NATIVE_PREFIX}" "${YGGDRASIL_NATIVE_PREFIX}")
+    if(native_prefix)
+        file(GLOB native_lib_dirs LIST_DIRECTORIES true "${native_prefix}/lib*")
+        foreach(native_lib_dir IN LISTS native_lib_dirs)
+            if(IS_DIRECTORY "${native_lib_dir}")
+                list(APPEND PYTYR_INSTALL_LIBRARY_PATHS "${native_lib_dir}")
+            endif()
+        endforeach()
+    endif()
+endforeach()
+list(JOIN PYTYR_INSTALL_LIBRARY_PATHS ":" PYTYR_INSTALL_LIBRARY_PATH)
+
+if(PYTYR_INSTALL_LIBRARY_PATH)
+    install(CODE "
+        set(ENV{LD_LIBRARY_PATH} \"${PYTYR_INSTALL_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}\")
+        set(ENV{DYLD_LIBRARY_PATH} \"${PYTYR_INSTALL_LIBRARY_PATH}:$ENV{DYLD_LIBRARY_PATH}\")
+    " COMPONENT pytyr)
+endif()
 
 nanobind_add_stub(
     pytyr_stubs

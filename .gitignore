@@ -1,5 +1,6 @@
 # Virtual environments
 .venv
+.pytyr-dependency-lib-dirs
 
 # VSCode
 .vscode
