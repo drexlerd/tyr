@@ -267,7 +267,7 @@ endif()
 # Loki
 # -----
 
-find_package(loki 1.0.2 COMPONENTS parsers REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
+find_package(loki 1.0.3 COMPONENTS parsers REQUIRED PATHS ${CMAKE_PREFIX_PATH} NO_DEFAULT_PATH)
 if(loki_FOUND)
   message(STATUS "Found loki: ${loki_DIR} (found version ${loki_VERSION})")
 endif()
