@@ -126,12 +126,13 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
     auto preferred_openlist = Queue<Kind>();
     auto standard_openlist = Queue<Kind>();
     auto openlist = AlternatingOpenList<Queue<Kind>, Queue<Kind>>(preferred_openlist, standard_openlist, std::array<size_t, 2> { 1, 1 });
+    const auto start_g_value = FloatTolerance<float_t>::canonicalize(start_node.get_metric());
     const auto start_h_value = FloatTolerance<float_t>::canonicalize(heuristic.evaluate(start_state));
     auto best_h_value = start_h_value;
     const auto start_preferred = false;
     auto& start_search_node = get_or_create_search_node(start_state_index, search_nodes);
     start_search_node.status = (start_h_value == std::numeric_limits<float_t>::infinity()) ? SearchNodeStatus::DEAD_END : SearchNodeStatus::OPEN;
-    start_search_node.g_value = start_node.get_metric();
+    start_search_node.g_value = start_g_value;
     start_search_node.preferred = start_preferred;
 
     event_handler->on_start_search(start_node, start_h_value);
@@ -193,7 +194,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
     auto labeled_succ_nodes = std::vector<LabeledNode<Kind>> {};
 
-    standard_openlist.insert(QueueEntry { start_node.get_metric(), start_h_value, start_state_index, step++, start_search_node.status });
+    standard_openlist.insert(QueueEntry { start_g_value, start_h_value, start_state_index, step++, start_search_node.status });
 
     auto stopwatch = options.max_time ? std::optional<CountdownWatch>(options.max_time.value()) : std::nullopt;
 
@@ -285,9 +286,11 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
             /* Open new state. */
 
+            const auto successor_g_value = FloatTolerance<float_t>::canonicalize(succ_node.get_metric());
+
             successor_search_node.status = SearchNodeStatus::OPEN;
             successor_search_node.parent_state = state_index;
-            successor_search_node.g_value = succ_node.get_metric();
+            successor_search_node.g_value = successor_g_value;
             successor_search_node.preferred = is_preferred;
 
             /* Early goal test. */
@@ -325,9 +328,9 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
             /* Exploration strategy */
 
             if (is_preferred)
-                preferred_openlist.insert(QueueEntry { succ_node.get_metric(), state_h_value, succ_state_index, step++, successor_search_node.status });
+                preferred_openlist.insert(QueueEntry { successor_g_value, state_h_value, succ_state_index, step++, successor_search_node.status });
             else
-                standard_openlist.insert(QueueEntry { succ_node.get_metric(), state_h_value, succ_state_index, step++, successor_search_node.status });
+                standard_openlist.insert(QueueEntry { successor_g_value, state_h_value, succ_state_index, step++, successor_search_node.status });
         }
     }
 

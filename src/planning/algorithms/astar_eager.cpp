@@ -120,11 +120,12 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
     auto result = SearchResult<Kind>();
     auto search_nodes = SearchNodeVector<Kind>();
     auto openlist = Queue<Kind>();
+    const auto start_g_value = FloatTolerance<float_t>::canonicalize(start_node.get_metric());
     const auto start_h_value = FloatTolerance<float_t>::canonicalize(heuristic.evaluate(start_state));
-    const auto start_f_value = FloatTolerance<float_t>::canonicalize(start_node.get_metric() + start_h_value);
+    const auto start_f_value = FloatTolerance<float_t>::canonicalize(start_g_value + start_h_value);
     auto& start_search_node = get_or_create_search_node(start_state_index, search_nodes);
     start_search_node.status = (start_h_value == std::numeric_limits<float_t>::infinity()) ? SearchNodeStatus::DEAD_END : SearchNodeStatus::OPEN;
-    start_search_node.g_value = start_node.get_metric();
+    start_search_node.g_value = start_g_value;
 
     event_handler->on_start_search(start_node, start_f_value);
 
@@ -282,12 +283,14 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
             /* Check whether state must be reopened or not. */
 
-            if (succ_node.get_metric() < successor_search_node.g_value)
+            const auto successor_g_value = FloatTolerance<float_t>::canonicalize(succ_node.get_metric());
+
+            if (successor_g_value < successor_search_node.g_value)
             {
                 event_handler->on_generate_node(labeled_succ_node);
 
                 successor_search_node.parent_state = state_index;
-                successor_search_node.g_value = succ_node.get_metric();
+                successor_search_node.g_value = successor_g_value;
 
                 const auto successor_h_value = FloatTolerance<float_t>::canonicalize(heuristic.evaluate(succ_state));
 
@@ -302,7 +305,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
                 event_handler->on_generate_node_relaxed(labeled_succ_node);
 
-                const auto successor_f_value = FloatTolerance<float_t>::canonicalize(succ_node.get_metric() + successor_h_value);
+                const auto successor_f_value = FloatTolerance<float_t>::canonicalize(successor_g_value + successor_h_value);
                 openlist.insert(QueueEntry { successor_f_value, succ_state_index, successor_search_node.status });
             }
             else
