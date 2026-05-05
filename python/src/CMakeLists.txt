@@ -121,6 +121,26 @@ foreach(python_file IN LISTS PYTYR_PYTHON_FILES)
             COMPONENT pytyr)
 endforeach()
 
+set(PYTYR_INSTALL_LIBRARY_PATHS)
+foreach(native_prefix IN ITEMS "${PYPDDL_NATIVE_PREFIX}" "${YGGDRASIL_NATIVE_PREFIX}")
+    if(native_prefix)
+        file(GLOB native_lib_dirs LIST_DIRECTORIES true "${native_prefix}/lib*")
+        foreach(native_lib_dir IN LISTS native_lib_dirs)
+            if(IS_DIRECTORY "${native_lib_dir}")
+                list(APPEND PYTYR_INSTALL_LIBRARY_PATHS "${native_lib_dir}")
+            endif()
+        endforeach()
+    endif()
+endforeach()
+list(JOIN PYTYR_INSTALL_LIBRARY_PATHS ":" PYTYR_INSTALL_LIBRARY_PATH)
+
+if(PYTYR_INSTALL_LIBRARY_PATH)
+    install(CODE "
+        set(ENV{LD_LIBRARY_PATH} \"${PYTYR_INSTALL_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}\")
+        set(ENV{DYLD_LIBRARY_PATH} \"${PYTYR_INSTALL_LIBRARY_PATH}:$ENV{DYLD_LIBRARY_PATH}\")
+    " COMPONENT pytyr)
+endif()
+
 nanobind_add_stub(
     pytyr_stubs
     MODULE pytyr
