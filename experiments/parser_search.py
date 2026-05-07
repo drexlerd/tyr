@@ -77,6 +77,8 @@ class SearchParser(Parser):
         self.add_pattern("search_time_ns", r"\[Search\] Search time: \d+ ms \((\d+) ns\)", type=int)
         self.add_pattern("num_expanded", r"\[Search\] Number of expanded states: (\d+)", type=int)
         self.add_pattern("num_generated", r"\[Search\] Number of generated states: (\d+)", type=int)
+        self.add_pattern("num_expanded_until_last_snapshot", r"\[Search\] Number of expanded states at last snapshot: (\d+)", type=int)
+        self.add_pattern("num_generated_until_last_snapshot", r"\[Search\] Number of generated states at last snapshot: (\d+)", type=int)
 
         self.add_pattern("total_time_ms", r"\[Total\] Total time: (\d+) ms", type=int)
         self.add_pattern("total_time_ns", r"\[Total\] Total time: \d+ ms \((\d+) ns\)", type=int)
@@ -113,6 +115,8 @@ class SearchParser(Parser):
             Attribute("search_time_s", function=geometric_mean, digits=2),
             "num_expanded",
             "num_generated",
+            "num_expanded_until_last_snapshot",
+            "num_generated_until_last_snapshot",
             Attribute("search_time_ms_per_expanded", function=geometric_mean, digits=2),
             Attribute("total_time_s", function=geometric_mean, digits=2),
             Attribute("preprocessing_time_s", function=geometric_mean, digits=2),
