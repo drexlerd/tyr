@@ -10,6 +10,7 @@
 #include <memory>
 #include <optional>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace tyr
@@ -46,7 +47,7 @@ public:
 
     RawVectorView<Size, T> operator[](uint_t idx) noexcept { return (*m_pool)[idx]; }
 
-    RawVectorView<const Size, const T> operator[](uint_t idx) const noexcept { return (*m_pool)[idx]; }
+    RawVectorView<const Size, const T> operator[](uint_t idx) const noexcept { return std::as_const(*m_pool)[idx]; }
 
     size_t memory_usage() const noexcept
     {
