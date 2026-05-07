@@ -30,17 +30,17 @@
 #include "tyr/planning/applicability.hpp"
 #include "tyr/planning/ground_task.hpp"
 #include "tyr/planning/ground_task/node.hpp"
+#include "tyr/planning/ground_task/state_builder.hpp"
 #include "tyr/planning/ground_task/state_repository.hpp"
 #include "tyr/planning/ground_task/state_view.hpp"
 #include "tyr/planning/ground_task/successor_generator.hpp"
-#include "tyr/planning/ground_task/state_builder.hpp"
 #include "tyr/planning/heuristic.hpp"
 #include "tyr/planning/lifted_task.hpp"
 #include "tyr/planning/lifted_task/node.hpp"
+#include "tyr/planning/lifted_task/state_builder.hpp"
 #include "tyr/planning/lifted_task/state_repository.hpp"
 #include "tyr/planning/lifted_task/state_view.hpp"
 #include "tyr/planning/lifted_task/successor_generator.hpp"
-#include "tyr/planning/lifted_task/state_builder.hpp"
 #include "tyr/planning/search_node.hpp"
 #include "tyr/planning/search_space.hpp"
 #include "tyr/planning/state_index.hpp"
@@ -244,10 +244,11 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
             event_handler->on_new_best_h_value(best_h_value);
 
             // Boost prefered queue
-            openlist_weights[0] += options.boost_preferred_queue;
+            if (options.use_preferred_actions)
+                openlist_weights[0] += options.boost_preferred_queue;
         }
 
-        const auto& preferred_actions = heuristic.get_preferred_actions();
+        const auto* preferred_actions = options.use_preferred_actions ? &heuristic.get_preferred_actions() : nullptr;
 
         /* Ensure that the state is closed */
 
@@ -268,7 +269,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
             assert(!std::isnan(succ_node.get_metric()));
 
-            const auto is_preferred = preferred_actions.contains(labeled_succ_node.label.get_index());
+            const auto is_preferred = preferred_actions && preferred_actions->contains(labeled_succ_node.label.get_index());
             const auto is_new_successor_state = (successor_search_node.status == SearchNodeStatus::NEW);
 
             if (is_new_successor_state && search_nodes.size() >= options.max_num_states)

@@ -33,6 +33,7 @@ int main(int argc, char** argv)
     program.add_argument("-N", "--num-worker-threads").default_value(size_t(1)).scan<'u', size_t>().help("The number of worker threads.");
     program.add_argument("-R", "--random-seed").default_value(uint64_t(0)).scan<'u', uint64_t>().help("The random seed.");
     program.add_argument("-S", "--shuffle-labeled-succ-nodes").default_value(false).implicit_value(true).help("Toggle shuffling the labeled successor nodes.");
+    program.add_argument("--disable-preferred-actions").default_value(false).implicit_value(true).help("Disable preferred action queues.");
     program.add_argument("-G", "--instantiate-ground-task")
         .default_value(false)
         .implicit_value(true)
@@ -68,6 +69,7 @@ int main(int argc, char** argv)
         auto num_worker_threads = program.get<std::size_t>("--num-worker-threads");
         auto random_seed = program.get<uint64_t>("--random-seed");
         auto shuffle_labeled_succ_nodes = program.get<bool>("--shuffle-labeled-succ-nodes");
+        auto disable_preferred_actions = program.get<bool>("--disable-preferred-actions");
         auto instantiate_ground_task = program.get<bool>("--instantiate-ground-task");
         auto disable_invariant_synthesis = program.get<bool>("--disable-invariant-synthesis");
         auto heuristic_type = program.get<std::string>("--heuristic-type");
@@ -76,6 +78,7 @@ int main(int argc, char** argv)
         std::cout << "[INPUT] Num worker threads: " << num_worker_threads << std::endl;
         std::cout << "[INPUT] Random seed: " << random_seed << std::endl;
         std::cout << "[INPUT] Shuffle labeled successor nodes: " << shuffle_labeled_succ_nodes << std::endl;
+        std::cout << "[INPUT] Use preferred actions: " << !disable_preferred_actions << std::endl;
 
         auto parser_options = loki::ParserOptions();
         // parser_options.strict = true;
@@ -100,6 +103,7 @@ int main(int argc, char** argv)
             options.start_node = successor_generator.get_initial_node();
             options.event_handler = planning::gbfs_lazy::DefaultEventHandler<planning::LiftedTag>::create(verbosity);
             options.random_seed = random_seed;
+            options.use_preferred_actions = !disable_preferred_actions;
             options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
 
             auto heuristic = std::shared_ptr<planning::Heuristic<planning::LiftedTag>> { nullptr };
@@ -164,6 +168,7 @@ int main(int argc, char** argv)
                 options.start_node = successor_generator.get_initial_node();
                 options.event_handler = planning::gbfs_lazy::DefaultEventHandler<planning::GroundTag>::create(verbosity);
                 options.random_seed = random_seed;
+                options.use_preferred_actions = !disable_preferred_actions;
                 options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
 
                 auto heuristic = std::shared_ptr<planning::Heuristic<planning::GroundTag>> { nullptr };
