@@ -51,6 +51,40 @@ private:
 public:
     using U = std::remove_const_t<Block>;
 
+    class bit_reference
+    {
+    private:
+        U* m_block;
+        U m_mask;
+
+        bit_reference(U& block, U mask) noexcept : m_block(&block), m_mask(mask) {}
+
+        friend class BitsetSpan;
+
+    public:
+        bit_reference(const bit_reference&) noexcept = default;
+
+        operator bool() const noexcept { return (*m_block & m_mask) != U { 0 }; }
+
+        bit_reference& operator=(bool value) noexcept
+        {
+            if (value)
+                *m_block |= m_mask;
+            else
+                *m_block &= ~m_mask;
+
+            return *this;
+        }
+
+        bit_reference& operator=(const bit_reference& other) noexcept { return *this = static_cast<bool>(other); }
+
+        bit_reference& flip() noexcept
+        {
+            *m_block ^= m_mask;
+            return *this;
+        }
+    };
+
     static constexpr size_t Digits = std::numeric_limits<U>::digits;
     static constexpr size_t BlockShift = std::countr_zero(Digits);
     static constexpr size_t BlockMask = Digits - 1;
@@ -106,6 +140,16 @@ public:
         return (m_data[block_index(pos)] & (U { 1 } << block_pos(pos))) != U { 0 };
     }
 
+    bool operator[](size_t pos) const noexcept { return test(pos); }
+
+    bit_reference operator[](size_t pos) noexcept
+        requires(!std::is_const_v<Block>)
+    {
+        assert(pos < m_num_bits);
+
+        return bit_reference(m_data[block_index(pos)], U { 1 } << block_pos(pos));
+    }
+
     size_t count() const noexcept
     {
         assert(trailing_bits_zero());
@@ -126,6 +170,10 @@ public:
         return m_num_bits - count();
     }
 
+    size_t size() const noexcept { return m_num_bits; }
+
+    bool empty() const noexcept { return m_num_bits == 0; }
+
     bool any() const noexcept
     {
         assert(trailing_bits_zero());
@@ -135,6 +183,89 @@ public:
             if (m_data[i] != U { 0 })
                 return true;
         return false;
+    }
+
+    bool none() const noexcept { return !any(); }
+
+    bool all() const noexcept
+    {
+        assert(trailing_bits_zero());
+
+        const size_t n = num_blocks(m_num_bits);
+        if (n == 0)
+            return true;
+
+        for (size_t i = 0; i + 1 < n; ++i)
+            if (m_data[i] != full_mask())
+                return false;
+
+        return m_data[n - 1] == last_mask(m_num_bits);
+    }
+
+    template<std::unsigned_integral OtherBlock>
+        requires(std::same_as<std::remove_const_t<OtherBlock>, U>)
+    bool intersects(const BitsetSpan<OtherBlock>& other) const noexcept
+    {
+        assert(m_num_bits == other.m_num_bits);
+        assert(trailing_bits_zero());
+        assert(other.trailing_bits_zero());
+
+        const size_t n = num_blocks(m_num_bits);
+        for (size_t i = 0; i < n; ++i)
+            if ((m_data[i] & other.m_data[i]) != U { 0 })
+                return true;
+
+        return false;
+    }
+
+    template<std::unsigned_integral OtherBlock>
+        requires(std::same_as<std::remove_const_t<OtherBlock>, U>)
+    bool is_subset_of(const BitsetSpan<OtherBlock>& other) const noexcept
+    {
+        assert(m_num_bits == other.m_num_bits);
+        assert(trailing_bits_zero());
+        assert(other.trailing_bits_zero());
+
+        const size_t n = num_blocks(m_num_bits);
+        for (size_t i = 0; i < n; ++i)
+            if ((m_data[i] & ~other.m_data[i]) != U { 0 })
+                return false;
+
+        return true;
+    }
+
+    template<std::unsigned_integral OtherBlock>
+        requires(std::same_as<std::remove_const_t<OtherBlock>, U>)
+    bool is_proper_subset_of(const BitsetSpan<OtherBlock>& other) const noexcept
+    {
+        assert(m_num_bits == other.m_num_bits);
+        assert(trailing_bits_zero());
+        assert(other.trailing_bits_zero());
+
+        const size_t n = num_blocks(m_num_bits);
+        bool proper = false;
+        for (size_t i = 0; i < n; ++i)
+        {
+            if ((m_data[i] & ~other.m_data[i]) != U { 0 })
+                return false;
+            proper = proper || (m_data[i] != other.m_data[i]);
+        }
+
+        return proper;
+    }
+
+    template<std::unsigned_integral OtherBlock>
+        requires(std::same_as<std::remove_const_t<OtherBlock>, U>)
+    bool is_superset_of(const BitsetSpan<OtherBlock>& other) const noexcept
+    {
+        return other.is_subset_of(*this);
+    }
+
+    template<std::unsigned_integral OtherBlock>
+        requires(std::same_as<std::remove_const_t<OtherBlock>, U>)
+    bool is_proper_superset_of(const BitsetSpan<OtherBlock>& other) const noexcept
+    {
+        return other.is_proper_subset_of(*this);
     }
 
     /**
@@ -147,6 +278,15 @@ public:
         assert(pos < m_num_bits);
 
         m_data[block_index(pos)] |= (U { 1 } << block_pos(pos));
+    }
+
+    void set(size_t pos, bool value) noexcept
+        requires(!std::is_const_v<Block>)
+    {
+        if (value)
+            set(pos);
+        else
+            reset(pos);
     }
 
     void set() noexcept
@@ -171,6 +311,24 @@ public:
     {
         const size_t n = num_blocks(m_num_bits);
         std::fill(m_data, m_data + n, U { 0 });
+    }
+
+    void flip(size_t pos) noexcept
+        requires(!std::is_const_v<Block>)
+    {
+        assert(pos < m_num_bits);
+
+        m_data[block_index(pos)] ^= (U { 1 } << block_pos(pos));
+    }
+
+    void flip() noexcept
+        requires(!std::is_const_v<Block>)
+    {
+        const size_t n = num_blocks(m_num_bits);
+        for (size_t i = 0; i < n; ++i)
+            m_data[i] = ~m_data[i];
+
+        clear_trailing_bits();
     }
 
     /**
@@ -336,6 +494,21 @@ public:
 
     template<std::unsigned_integral OtherBlock>
         requires(std::same_as<std::remove_const_t<OtherBlock>, U>)
+    BitsetSpan& operator^=(const BitsetSpan<OtherBlock>& other) noexcept
+    {
+        assert(m_num_bits == other.m_num_bits);
+        assert(trailing_bits_zero());
+        assert(other.trailing_bits_zero());
+
+        const size_t n = num_blocks(m_num_bits);
+        for (size_t i = 0; i < n; ++i)
+            m_data[i] ^= other.m_data[i];
+
+        return *this;
+    }
+
+    template<std::unsigned_integral OtherBlock>
+        requires(std::same_as<std::remove_const_t<OtherBlock>, U>)
     BitsetSpan& operator-=(const BitsetSpan<OtherBlock>& other) noexcept
     {
         assert(m_num_bits == other.m_num_bits);
@@ -352,6 +525,12 @@ public:
     /**
      * Getters
      */
+
+    std::span<U> blocks() noexcept
+        requires(!std::is_const_v<Block>)
+    {
+        return { m_data, num_blocks(m_num_bits) };
+    }
 
     std::span<const U> blocks() const noexcept { return { m_data, num_blocks(m_num_bits) }; }
     size_t num_bits() const noexcept { return m_num_bits; }
