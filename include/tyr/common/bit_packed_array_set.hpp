@@ -25,8 +25,10 @@
 
 #include <algorithm>
 #include <concepts>
+#include <memory>
 #include <optional>
 #include <ranges>
+#include <span>
 
 namespace tyr
 {
@@ -42,58 +44,11 @@ public:
     using ConstArrayView = typename pool_type::ConstArrayView;
 
 private:
-    std::unique_ptr<pool_type> m_pool;
+    struct Hash;
+    struct EqualTo;
 
-    class IndexableHash
-    {
-    private:
-        const pool_type* pool = nullptr;
-
-        template<std::ranges::input_range Range>
-        size_t hash_range(const Range& el) const noexcept
-        {
-            size_t aggregated_hash = 0;
-            for (const auto& item : el)
-                hash_combine(aggregated_hash, item);
-            return aggregated_hash;
-        }
-
-    public:
-        using is_transparent = void;
-
-        IndexableHash() noexcept = default;
-        explicit IndexableHash(const pool_type& pool_) noexcept : pool(&pool_) {}
-
-        size_t operator()(index_type idx) const noexcept { return hash_range((*pool)[idx]); }
-
-        size_t operator()(std::span<const value_type> values) const noexcept { return hash_range(values); }
-    };
-
-    class IndexableEqualTo
-    {
-    private:
-        const pool_type* pool = nullptr;
-
-        template<std::ranges::input_range Range1, std::ranges::input_range Range2>
-        bool equal_ranges(const Range1& lhs, const Range2& rhs) const noexcept
-        {
-            return std::ranges::equal(lhs, rhs);
-        }
-
-    public:
-        using is_transparent = void;
-
-        IndexableEqualTo() noexcept = default;
-        explicit IndexableEqualTo(const pool_type& pool_) noexcept : pool(&pool_) {}
-
-        bool operator()(index_type lhs, index_type rhs) const noexcept { return equal_ranges((*pool)[lhs], (*pool)[rhs]); }
-
-        bool operator()(std::span<const value_type> lhs, index_type rhs) const noexcept { return equal_ranges((*pool)[rhs], lhs); }
-
-        bool operator()(index_type lhs, std::span<const value_type> rhs) const noexcept { return equal_ranges((*pool)[lhs], rhs); }
-    };
-
-    gtl::flat_hash_set<index_type, IndexableHash, IndexableEqualTo> m_set;
+    class IndexableHash;
+    class IndexableEqualTo;
 
 public:
     BitPackedArraySet(size_t length, uint8_t width) :
@@ -108,38 +63,68 @@ public:
         m_pool->clear();
     }
 
-    size_t hash(std::span<const value_type> elements) const noexcept { return m_set.hash(elements); }
+    static size_t hash(std::span<const value_type> element) noexcept { return gtl::phmap_mix<sizeof(size_t)>()(Hash {}(element)); }
 
-    std::optional<index_type> find_with_hash(std::span<const value_type> elements, size_t h) const
+    std::optional<index_type> find_with_hash(std::span<const value_type> element, size_t h) const
     {
-        const auto it = m_set.find(elements, h);
+        assert(h == BitPackedArraySet::hash(element) && "The given hash does not match container internal's hash.");
+        assert(h == m_set.hash(element));
+
+        const auto it = m_set.find(element, h);
         if (it != m_set.end())
             return *it;
 
         return std::nullopt;
     }
 
-    std::optional<index_type> find(std::span<const value_type> elements) const { return find_with_hash(elements, hash(elements)); }
-
-    std::pair<index_type, bool> insert_with_hash(size_t h, std::span<const value_type> elements)
+    std::optional<index_type> find(std::span<const value_type> element) const
     {
-        if (const auto it = m_set.find(elements, h); it != m_set.end())
+        assert(BitPackedArraySet::hash(element) == m_set.hash(element));
+
+        return find_with_hash(element, BitPackedArraySet::hash(element));
+    }
+
+    std::pair<index_type, bool> insert_with_hash(size_t h, std::span<const value_type> element)
+    {
+        assert(h == BitPackedArraySet::hash(element) && "The given hash does not match container internal's hash.");
+        assert(h == m_set.hash(element));
+
+        if (const auto it = m_set.find(element, h); it != m_set.end())
             return { *it, false };
 
+        return { insert_new_with_hash(h, element), true };
+    }
+
+    index_type insert_new_with_hash(size_t h, std::span<const value_type> element)
+    {
+        assert(h == BitPackedArraySet::hash(element) && "The given hash does not match container internal's hash.");
+        assert(h == m_set.hash(element));
+
         const auto index = static_cast<index_type>(m_pool->size());
-        m_pool->push_back(elements);
+        m_pool->push_back(element);
 
         [[maybe_unused]] const auto [it, inserted] = m_set.emplace_with_hash(h, index);
         assert(inserted);
 
-        return { index, true };
+        return index;
     }
 
-    std::pair<index_type, bool> insert(std::span<const value_type> elements) { return insert_with_hash(hash(elements), elements); }
+    std::pair<index_type, bool> insert(std::span<const value_type> element)
+    {
+        assert(BitPackedArraySet::hash(element) == m_set.hash(element));
 
-    bool contains(std::span<const value_type> elements) const { return m_set.contains(elements); }
+        return insert_with_hash(BitPackedArraySet::hash(element), element);
+    }
+
+    bool contains(std::span<const value_type> element) const { return m_set.contains(element); }
 
     ConstArrayView operator[](index_type index) const { return std::as_const(*m_pool)[index]; }
+
+    ConstArrayView front() const
+    {
+        assert(!empty());
+        return (*this)[0];
+    }
 
     size_t size() const noexcept { return m_pool->size(); }
     size_t capacity() const noexcept { return m_pool->capacity(); }
@@ -147,7 +132,68 @@ public:
     size_t length() const noexcept { return m_pool->length(); }
     uint8_t width() const noexcept { return m_pool->width(); }
     const auto& segments() const noexcept { return m_pool->segments(); }
+
+private:
+    struct Hash
+    {
+        template<std::ranges::input_range Range>
+            requires std::same_as<std::ranges::range_value_t<Range>, value_type>
+        size_t operator()(const Range& el) const noexcept
+        {
+            size_t aggregated_hash = 0;
+            for (const auto& item : el)
+                hash_combine(aggregated_hash, item);
+            return aggregated_hash;
+        }
+    };
+
+    struct EqualTo
+    {
+        template<std::ranges::input_range Range1, std::ranges::input_range Range2>
+            requires std::same_as<std::ranges::range_value_t<Range1>, value_type> && std::same_as<std::ranges::range_value_t<Range2>, value_type>
+        bool operator()(const Range1& lhs, const Range2& rhs) const noexcept
+        {
+            return std::ranges::equal(lhs, rhs);
+        }
+    };
+
+    class IndexableHash
+    {
+    private:
+        const pool_type* pool = nullptr;
+        Hash m_hash;
+
+    public:
+        using is_transparent = void;
+
+        IndexableHash() noexcept = default;
+        explicit IndexableHash(const pool_type& pool_) noexcept : pool(&pool_), m_hash() {}
+
+        size_t operator()(index_type idx) const noexcept { return m_hash((*pool)[idx]); }
+        size_t operator()(std::span<const value_type> values) const noexcept { return m_hash(values); }
+    };
+
+    class IndexableEqualTo
+    {
+    private:
+        const pool_type* pool = nullptr;
+        EqualTo m_equal_to;
+
+    public:
+        using is_transparent = void;
+
+        IndexableEqualTo() noexcept = default;
+        explicit IndexableEqualTo(const pool_type& pool_) noexcept : pool(&pool_), m_equal_to() {}
+
+        bool operator()(index_type lhs, index_type rhs) const noexcept { return m_equal_to((*pool)[lhs], (*pool)[rhs]); }
+        bool operator()(std::span<const value_type> lhs, index_type rhs) const noexcept { return m_equal_to(lhs, (*pool)[rhs]); }
+        bool operator()(index_type lhs, std::span<const value_type> rhs) const noexcept { return m_equal_to((*pool)[lhs], rhs); }
+    };
+
+    std::unique_ptr<pool_type> m_pool;
+    gtl::flat_hash_set<index_type, IndexableHash, IndexableEqualTo> m_set;
 };
-}
+
+}  // namespace tyr
 
 #endif

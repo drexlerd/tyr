@@ -20,12 +20,14 @@
 
 #include "tyr/common/bit.hpp"
 
+#include <algorithm>
 #include <bit>
 #include <cassert>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <ranges>
 #include <span>
 #include <stdexcept>
 #include <type_traits>
@@ -86,8 +88,6 @@ public:
     BasicBitPackedArrayView& operator=(std::span<const value_type> elements)
         requires(!std::is_const_v<Block>)
     {
-        assert(elements.size() == m_length);
-
         ensure_fits(elements);
 
         for (size_t i = 0; i < m_length; ++i)
@@ -100,29 +100,9 @@ public:
      * Operators
      */
 
-    friend bool operator==(const BasicBitPackedArrayView& lhs, const BasicBitPackedArrayView& rhs)
-    {
-        if (lhs.size() != rhs.size())
-            return false;
+    friend bool operator==(const BasicBitPackedArrayView& lhs, const BasicBitPackedArrayView& rhs) { return std::ranges::equal(lhs, rhs); }
 
-        for (size_t i = 0; i < lhs.size(); ++i)
-            if (lhs[i] != rhs[i])
-                return false;
-
-        return true;
-    }
-
-    friend bool operator==(const BasicBitPackedArrayView& lhs, std::span<const value_type> rhs)
-    {
-        if (lhs.size() != rhs.size())
-            return false;
-
-        for (size_t i = 0; i < lhs.size(); ++i)
-            if (lhs[i] != rhs[i])
-                return false;
-
-        return true;
-    }
+    friend bool operator==(const BasicBitPackedArrayView& lhs, std::span<const value_type> rhs) { return std::ranges::equal(lhs, rhs); }
 
     friend bool operator==(std::span<const value_type> lhs, const BasicBitPackedArrayView& rhs) { return rhs == lhs; }
 
