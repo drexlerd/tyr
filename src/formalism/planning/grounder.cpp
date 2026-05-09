@@ -30,21 +30,21 @@ template std::pair<GroundFunctionTermView<StaticTag>, bool> ground(FunctionTermV
 template std::pair<GroundFunctionTermView<FluentTag>, bool> ground(FunctionTermView<FluentTag> element, GrounderContext& context);
 template std::pair<GroundFunctionTermView<AuxiliaryTag>, bool> ground(FunctionTermView<AuxiliaryTag> element, GrounderContext& context);
 
-template std::pair<GroundUnaryOperatorView<OpSub>, bool> ground(LiftedUnaryOperatorView<OpSub> element, GrounderContext& context);
+template std::pair<GroundUnaryOperatorView<Sub>, bool> ground(LiftedUnaryOperatorView<Sub> element, GrounderContext& context);
 
-template std::pair<GroundBinaryOperatorView<OpEq>, bool> ground(LiftedBinaryOperatorView<OpEq> element, GrounderContext& context);
-template std::pair<GroundBinaryOperatorView<OpNe>, bool> ground(LiftedBinaryOperatorView<OpNe> element, GrounderContext& context);
-template std::pair<GroundBinaryOperatorView<OpGe>, bool> ground(LiftedBinaryOperatorView<OpGe> element, GrounderContext& context);
-template std::pair<GroundBinaryOperatorView<OpGt>, bool> ground(LiftedBinaryOperatorView<OpGt> element, GrounderContext& context);
-template std::pair<GroundBinaryOperatorView<OpLe>, bool> ground(LiftedBinaryOperatorView<OpLe> element, GrounderContext& context);
-template std::pair<GroundBinaryOperatorView<OpLt>, bool> ground(LiftedBinaryOperatorView<OpLt> element, GrounderContext& context);
-template std::pair<GroundBinaryOperatorView<OpAdd>, bool> ground(LiftedBinaryOperatorView<OpAdd> element, GrounderContext& context);
-template std::pair<GroundBinaryOperatorView<OpSub>, bool> ground(LiftedBinaryOperatorView<OpSub> element, GrounderContext& context);
-template std::pair<GroundBinaryOperatorView<OpMul>, bool> ground(LiftedBinaryOperatorView<OpMul> element, GrounderContext& context);
-template std::pair<GroundBinaryOperatorView<OpDiv>, bool> ground(LiftedBinaryOperatorView<OpDiv> element, GrounderContext& context);
+template std::pair<GroundBinaryOperatorView<Eq>, bool> ground(LiftedBinaryOperatorView<Eq> element, GrounderContext& context);
+template std::pair<GroundBinaryOperatorView<Ne>, bool> ground(LiftedBinaryOperatorView<Ne> element, GrounderContext& context);
+template std::pair<GroundBinaryOperatorView<Ge>, bool> ground(LiftedBinaryOperatorView<Ge> element, GrounderContext& context);
+template std::pair<GroundBinaryOperatorView<Gt>, bool> ground(LiftedBinaryOperatorView<Gt> element, GrounderContext& context);
+template std::pair<GroundBinaryOperatorView<Le>, bool> ground(LiftedBinaryOperatorView<Le> element, GrounderContext& context);
+template std::pair<GroundBinaryOperatorView<Lt>, bool> ground(LiftedBinaryOperatorView<Lt> element, GrounderContext& context);
+template std::pair<GroundBinaryOperatorView<Add>, bool> ground(LiftedBinaryOperatorView<Add> element, GrounderContext& context);
+template std::pair<GroundBinaryOperatorView<Sub>, bool> ground(LiftedBinaryOperatorView<Sub> element, GrounderContext& context);
+template std::pair<GroundBinaryOperatorView<Mul>, bool> ground(LiftedBinaryOperatorView<Mul> element, GrounderContext& context);
+template std::pair<GroundBinaryOperatorView<Div>, bool> ground(LiftedBinaryOperatorView<Div> element, GrounderContext& context);
 
-template std::pair<GroundMultiOperatorView<OpAdd>, bool> ground(LiftedMultiOperatorView<OpAdd> element, GrounderContext& context);
-template std::pair<GroundMultiOperatorView<OpMul>, bool> ground(LiftedMultiOperatorView<OpMul> element, GrounderContext& context);
+template std::pair<GroundMultiOperatorView<Add>, bool> ground(LiftedMultiOperatorView<Add> element, GrounderContext& context);
+template std::pair<GroundMultiOperatorView<Mul>, bool> ground(LiftedMultiOperatorView<Mul> element, GrounderContext& context);
 
 template std::pair<PredicateBindingView<StaticTag>, bool> ground(TermListView terms, PredicateView<StaticTag> predicate, GrounderContext& context);
 template std::pair<PredicateBindingView<FluentTag>, bool> ground(TermListView terms, PredicateView<FluentTag> predicate, GrounderContext& context);
@@ -58,14 +58,13 @@ template std::pair<GroundLiteralView<StaticTag>, bool> ground(LiteralView<Static
 template std::pair<GroundLiteralView<FluentTag>, bool> ground(LiteralView<FluentTag> element, GrounderContext& context);
 template std::pair<GroundLiteralView<DerivedTag>, bool> ground(LiteralView<DerivedTag> element, GrounderContext& context);
 
-template std::pair<GroundNumericEffectView<OpAssign, FluentTag>, bool> ground(NumericEffectView<OpAssign, FluentTag> element, GrounderContext& context);
-template std::pair<GroundNumericEffectView<OpIncrease, FluentTag>, bool> ground(NumericEffectView<OpIncrease, FluentTag> element, GrounderContext& context);
-template std::pair<GroundNumericEffectView<OpDecrease, FluentTag>, bool> ground(NumericEffectView<OpDecrease, FluentTag> element, GrounderContext& context);
-template std::pair<GroundNumericEffectView<OpScaleUp, FluentTag>, bool> ground(NumericEffectView<OpScaleUp, FluentTag> element, GrounderContext& context);
-template std::pair<GroundNumericEffectView<OpScaleDown, FluentTag>, bool> ground(NumericEffectView<OpScaleDown, FluentTag> element, GrounderContext& context);
+template std::pair<GroundNumericEffectView<Assign, FluentTag>, bool> ground(NumericEffectView<Assign, FluentTag> element, GrounderContext& context);
+template std::pair<GroundNumericEffectView<Increase, FluentTag>, bool> ground(NumericEffectView<Increase, FluentTag> element, GrounderContext& context);
+template std::pair<GroundNumericEffectView<Decrease, FluentTag>, bool> ground(NumericEffectView<Decrease, FluentTag> element, GrounderContext& context);
+template std::pair<GroundNumericEffectView<ScaleUp, FluentTag>, bool> ground(NumericEffectView<ScaleUp, FluentTag> element, GrounderContext& context);
+template std::pair<GroundNumericEffectView<ScaleDown, FluentTag>, bool> ground(NumericEffectView<ScaleDown, FluentTag> element, GrounderContext& context);
 
-template std::pair<GroundNumericEffectView<OpIncrease, AuxiliaryTag>, bool> ground(NumericEffectView<OpIncrease, AuxiliaryTag> element,
-                                                                                   GrounderContext& context);
+template std::pair<GroundNumericEffectView<Increase, AuxiliaryTag>, bool> ground(NumericEffectView<Increase, AuxiliaryTag> element, GrounderContext& context);
 
 template Data<GroundNumericEffectOperator<FluentTag>> ground(NumericEffectOperatorView<FluentTag> element, GrounderContext& context);
 template Data<GroundNumericEffectOperator<AuxiliaryTag>> ground(NumericEffectOperatorView<AuxiliaryTag> element, GrounderContext& context);

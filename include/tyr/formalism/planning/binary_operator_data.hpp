@@ -61,7 +61,7 @@ struct Data<formalism::planning::BinaryOperator<Op, T>>
     auto identifying_members() const noexcept { return std::tie(Op::kind, lhs, rhs); }
 };
 
-static_assert(!uses_trivial_storage_v<formalism::planning::BinaryOperator<formalism::OpAdd, Data<formalism::planning::FunctionExpression>>>);
+static_assert(!uses_trivial_storage_v<formalism::planning::BinaryOperator<formalism::Add, Data<formalism::planning::FunctionExpression>>>);
 
 }
 

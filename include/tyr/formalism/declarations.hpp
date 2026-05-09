@@ -32,15 +32,19 @@ namespace tyr::formalism
 
 struct StaticTag
 {
+    static constexpr auto name = "Static";
 };
 struct FluentTag
 {
+    static constexpr auto name = "Fluent";
 };
 struct DerivedTag
 {
+    static constexpr auto name = "Derived";
 };
 struct AuxiliaryTag
 {
+    static constexpr auto name = "Auxiliary";
 };
 
 template<typename T>
@@ -55,72 +59,116 @@ using FluentDerivedTags = TypeList<FluentTag, DerivedTag>;
  * Tags to dispatch operators
  */
 
-struct OpEq
+struct Eq
 {
     static constexpr int kind = 0;
     auto identifying_members() const noexcept { return std::tie(kind); }
 };
-struct OpNe
+struct Ne
 {
     static constexpr int kind = 1;
     auto identifying_members() const noexcept { return std::tie(kind); }
 };
-struct OpLe
+struct Le
 {
     static constexpr int kind = 2;
     auto identifying_members() const noexcept { return std::tie(kind); }
 };
-struct OpLt
+struct Lt
 {
     static constexpr int kind = 3;
     auto identifying_members() const noexcept { return std::tie(kind); }
 };
-struct OpGe
+struct Ge
 {
     static constexpr int kind = 4;
     auto identifying_members() const noexcept { return std::tie(kind); }
 };
-struct OpGt
+struct Gt
 {
     static constexpr int kind = 5;
     auto identifying_members() const noexcept { return std::tie(kind); }
 };
-struct OpAdd
+struct Add
 {
     static constexpr int kind = 0;
     auto identifying_members() const noexcept { return std::tie(kind); }
 };
-struct OpSub
+struct Sub
 {
     static constexpr int kind = 1;
     auto identifying_members() const noexcept { return std::tie(kind); }
 };
-struct OpMul
+struct Mul
 {
     static constexpr int kind = 2;
     auto identifying_members() const noexcept { return std::tie(kind); }
 };
-struct OpDiv
+struct Div
 {
     static constexpr int kind = 3;
     auto identifying_members() const noexcept { return std::tie(kind); }
 };
 
 template<typename T>
-concept BooleanOpKind =
-    std::same_as<T, OpEq> || std::same_as<T, OpNe> || std::same_as<T, OpLe> || std::same_as<T, OpLt> || std::same_as<T, OpGe> || std::same_as<T, OpGt>;
+concept BooleanOpKind = std::same_as<T, Eq> || std::same_as<T, Ne> || std::same_as<T, Le> || std::same_as<T, Lt> || std::same_as<T, Ge> || std::same_as<T, Gt>;
 
 template<typename T>
-concept ArithmeticOpKind = std::same_as<T, OpAdd> || std::same_as<T, OpMul> || std::same_as<T, OpDiv> || std::same_as<T, OpSub>;
+concept ArithmeticOpKind = std::same_as<T, Add> || std::same_as<T, Mul> || std::same_as<T, Div> || std::same_as<T, Sub>;
 
 template<typename T>
 concept OpKind = BooleanOpKind<T> || ArithmeticOpKind<T>;
 
-using BooleanOpKinds = TypeList<OpEq, OpNe, OpLe, OpLt, OpGe, OpGt>;
-using ArithmeticOpKinds = TypeList<OpAdd, OpSub, OpMul, OpDiv>;
-using UnaryArithmeticOpKinds = TypeList<OpSub>;
-using BinaryArithmeticOpKinds = TypeList<OpAdd, OpSub, OpMul, OpDiv>;
-using MultiArithmeticOpKinds = TypeList<OpAdd, OpMul>;
+using BooleanOpKinds = TypeList<Eq, Ne, Le, Lt, Ge, Gt>;
+using ArithmeticOpKinds = TypeList<Add, Sub, Mul, Div>;
+using UnaryArithmeticOpKinds = TypeList<Sub>;
+using BinaryArithmeticOpKinds = TypeList<Add, Sub, Mul, Div>;
+using MultiArithmeticOpKinds = TypeList<Add, Mul>;
+
+enum class EffectFamily
+{
+    NONE = 0,
+    ASSIGN = 1,
+    INCREASE_DECREASE = 2,
+    SCALE_UP_SCALE_DOWN = 3,
+};
+
+struct Assign
+{
+    static constexpr EffectFamily family = EffectFamily::ASSIGN;
+    static constexpr int kind = 0;
+    auto identifying_members() const noexcept { return std::tie(kind); }
+};
+struct Increase
+{
+    static constexpr EffectFamily family = EffectFamily::INCREASE_DECREASE;
+    static constexpr int kind = 1;
+    auto identifying_members() const noexcept { return std::tie(kind); }
+};
+struct Decrease
+{
+    static constexpr EffectFamily family = EffectFamily::INCREASE_DECREASE;
+    static constexpr int kind = 2;
+    auto identifying_members() const noexcept { return std::tie(kind); }
+};
+struct ScaleUp
+{
+    static constexpr EffectFamily family = EffectFamily::SCALE_UP_SCALE_DOWN;
+    static constexpr int kind = 3;
+    auto identifying_members() const noexcept { return std::tie(kind); }
+};
+struct ScaleDown
+{
+    static constexpr EffectFamily family = EffectFamily::SCALE_UP_SCALE_DOWN;
+    static constexpr int kind = 4;
+    auto identifying_members() const noexcept { return std::tie(kind); }
+};
+
+template<typename T>
+concept NumericEffectOpKind =
+    std::same_as<T, Assign> || std::same_as<T, Increase> || std::same_as<T, Decrease> || std::same_as<T, ScaleUp> || std::same_as<T, ScaleDown>;
+
+using NumericEffectOpKinds = TypeList<Assign, Increase, Decrease, ScaleUp, ScaleDown>;
 
 /**
  * Formalism tag

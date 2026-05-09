@@ -274,42 +274,42 @@ extern template class BasicSymbolRepository<datalog::GroundFunctionTerm<StaticTa
 extern template class BasicSymbolRepository<datalog::GroundFunctionTerm<FluentTag>>;
 extern template class BasicSymbolRepository<datalog::GroundFunctionTermValue<StaticTag>>;
 extern template class BasicSymbolRepository<datalog::GroundFunctionTermValue<FluentTag>>;
-extern template class BasicSymbolRepository<datalog::UnaryOperator<OpSub, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpAdd, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpSub, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpMul, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpDiv, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::MultiOperator<OpAdd, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::MultiOperator<OpMul, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpEq, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpNe, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpLe, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpLt, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpGe, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpGt, Data<datalog::FunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::UnaryOperator<OpSub, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpAdd, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpSub, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpMul, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpDiv, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::MultiOperator<OpAdd, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::MultiOperator<OpMul, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpEq, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpNe, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpLe, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpLt, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpGe, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::BinaryOperator<OpGt, Data<datalog::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<datalog::NumericEffect<datalog::OpAssign, FluentTag>>;
-extern template class BasicSymbolRepository<datalog::NumericEffect<datalog::OpIncrease, FluentTag>>;
-extern template class BasicSymbolRepository<datalog::NumericEffect<datalog::OpDecrease, FluentTag>>;
-extern template class BasicSymbolRepository<datalog::NumericEffect<datalog::OpScaleUp, FluentTag>>;
-extern template class BasicSymbolRepository<datalog::NumericEffect<datalog::OpScaleDown, FluentTag>>;
-extern template class BasicSymbolRepository<datalog::GroundNumericEffect<datalog::OpAssign, FluentTag>>;
-extern template class BasicSymbolRepository<datalog::GroundNumericEffect<datalog::OpIncrease, FluentTag>>;
-extern template class BasicSymbolRepository<datalog::GroundNumericEffect<datalog::OpDecrease, FluentTag>>;
-extern template class BasicSymbolRepository<datalog::GroundNumericEffect<datalog::OpScaleUp, FluentTag>>;
-extern template class BasicSymbolRepository<datalog::GroundNumericEffect<datalog::OpScaleDown, FluentTag>>;
+extern template class BasicSymbolRepository<datalog::UnaryOperator<Sub, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Add, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Sub, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Mul, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Div, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::MultiOperator<Add, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::MultiOperator<Mul, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Eq, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Ne, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Le, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Lt, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Ge, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Gt, Data<datalog::FunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::UnaryOperator<Sub, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Add, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Sub, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Mul, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Div, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::MultiOperator<Add, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::MultiOperator<Mul, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Eq, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Ne, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Le, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Lt, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Ge, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::BinaryOperator<Gt, Data<datalog::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<datalog::NumericEffect<Assign, FluentTag>>;
+extern template class BasicSymbolRepository<datalog::NumericEffect<Increase, FluentTag>>;
+extern template class BasicSymbolRepository<datalog::NumericEffect<Decrease, FluentTag>>;
+extern template class BasicSymbolRepository<datalog::NumericEffect<ScaleUp, FluentTag>>;
+extern template class BasicSymbolRepository<datalog::NumericEffect<ScaleDown, FluentTag>>;
+extern template class BasicSymbolRepository<datalog::GroundNumericEffect<Assign, FluentTag>>;
+extern template class BasicSymbolRepository<datalog::GroundNumericEffect<Increase, FluentTag>>;
+extern template class BasicSymbolRepository<datalog::GroundNumericEffect<Decrease, FluentTag>>;
+extern template class BasicSymbolRepository<datalog::GroundNumericEffect<ScaleUp, FluentTag>>;
+extern template class BasicSymbolRepository<datalog::GroundNumericEffect<ScaleDown, FluentTag>>;
 extern template class BasicSymbolRepository<datalog::ConjunctiveCondition>;
 extern template class BasicSymbolRepository<datalog::Rule>;
 extern template class BasicSymbolRepository<datalog::GroundConjunctiveCondition>;
@@ -357,79 +357,74 @@ extern template struct View<Index<formalism::datalog::GroundFunctionTerm<formali
 extern template struct View<Index<formalism::datalog::GroundFunctionTermValue<formalism::StaticTag>>, formalism::datalog::Repository>;
 extern template struct View<Index<formalism::datalog::GroundFunctionTermValue<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-extern template struct View<Index<formalism::datalog::UnaryOperator<formalism::OpSub, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::UnaryOperator<formalism::Sub, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
 
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpAdd, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Add, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpSub, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Sub, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpMul, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Mul, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpDiv, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Div, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpEq, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Eq, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpNe, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Ne, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLe, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Le, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLt, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Lt, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGe, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Ge, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGt, Data<formalism::datalog::FunctionExpression>>>,
-                            formalism::datalog::Repository>;
-
-extern template struct View<Index<formalism::datalog::MultiOperator<formalism::OpAdd, Data<formalism::datalog::FunctionExpression>>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::MultiOperator<formalism::OpMul, Data<formalism::datalog::FunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Gt, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
 
-extern template struct View<Index<formalism::datalog::UnaryOperator<formalism::OpSub, Data<formalism::datalog::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::MultiOperator<formalism::Add, Data<formalism::datalog::FunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::MultiOperator<formalism::Mul, Data<formalism::datalog::FunctionExpression>>>,
                             formalism::datalog::Repository>;
 
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpAdd, Data<formalism::datalog::GroundFunctionExpression>>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpSub, Data<formalism::datalog::GroundFunctionExpression>>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpMul, Data<formalism::datalog::GroundFunctionExpression>>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpDiv, Data<formalism::datalog::GroundFunctionExpression>>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpEq, Data<formalism::datalog::GroundFunctionExpression>>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpNe, Data<formalism::datalog::GroundFunctionExpression>>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLe, Data<formalism::datalog::GroundFunctionExpression>>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLt, Data<formalism::datalog::GroundFunctionExpression>>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGe, Data<formalism::datalog::GroundFunctionExpression>>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGt, Data<formalism::datalog::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::UnaryOperator<formalism::Sub, Data<formalism::datalog::GroundFunctionExpression>>>,
                             formalism::datalog::Repository>;
 
-extern template struct View<Index<formalism::datalog::MultiOperator<formalism::OpAdd, Data<formalism::datalog::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Add, Data<formalism::datalog::GroundFunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::MultiOperator<formalism::OpMul, Data<formalism::datalog::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Sub, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Mul, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Div, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Eq, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Ne, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Le, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Lt, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Ge, Data<formalism::datalog::GroundFunctionExpression>>>,
+                            formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::BinaryOperator<formalism::Gt, Data<formalism::datalog::GroundFunctionExpression>>>,
                             formalism::datalog::Repository>;
 
-extern template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpAssign, formalism::FluentTag>>, formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpIncrease, formalism::FluentTag>>, formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpDecrease, formalism::FluentTag>>, formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpScaleUp, formalism::FluentTag>>, formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpScaleDown, formalism::FluentTag>>, formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpAssign, formalism::FluentTag>>,
+extern template struct View<Index<formalism::datalog::MultiOperator<formalism::Add, Data<formalism::datalog::GroundFunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpIncrease, formalism::FluentTag>>,
+extern template struct View<Index<formalism::datalog::MultiOperator<formalism::Mul, Data<formalism::datalog::GroundFunctionExpression>>>,
                             formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpDecrease, formalism::FluentTag>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpScaleUp, formalism::FluentTag>>,
-                            formalism::datalog::Repository>;
-extern template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpScaleDown, formalism::FluentTag>>,
-                            formalism::datalog::Repository>;
+
+extern template struct View<Index<formalism::datalog::NumericEffect<formalism::Assign, formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::NumericEffect<formalism::Increase, formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::NumericEffect<formalism::Decrease, formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::NumericEffect<formalism::ScaleUp, formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::NumericEffect<formalism::ScaleDown, formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::Assign, formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::Increase, formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::Decrease, formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::ScaleUp, formalism::FluentTag>>, formalism::datalog::Repository>;
+extern template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::ScaleDown, formalism::FluentTag>>, formalism::datalog::Repository>;
 extern template struct View<Data<formalism::datalog::NumericEffectOperator<formalism::FluentTag>>, formalism::datalog::Repository>;
 extern template struct View<Data<formalism::datalog::GroundNumericEffectOperator<formalism::FluentTag>>, formalism::datalog::Repository>;
 

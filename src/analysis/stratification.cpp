@@ -42,25 +42,32 @@ struct RelationVertexMap
 
 void add_function_dependencies(fd::FunctionExpressionView expression, uint_t head_vertex, const RelationVertexMap& vertices, stratification::DepGraph& graph);
 
-void add_function_dependencies(float_t, uint_t, const RelationVertexMap&, stratification::DepGraph&)
-{
-}
+void add_function_dependencies(float_t, uint_t, const RelationVertexMap&, stratification::DepGraph&) {}
 
 template<f::OpKind O>
-void add_function_dependencies(fd::LiftedUnaryOperatorView<O> expression, uint_t head_vertex, const RelationVertexMap& vertices, stratification::DepGraph& graph)
+void add_function_dependencies(fd::LiftedUnaryOperatorView<O> expression,
+                               uint_t head_vertex,
+                               const RelationVertexMap& vertices,
+                               stratification::DepGraph& graph)
 {
     add_function_dependencies(expression.get_arg(), head_vertex, vertices, graph);
 }
 
 template<f::OpKind O>
-void add_function_dependencies(fd::LiftedBinaryOperatorView<O> expression, uint_t head_vertex, const RelationVertexMap& vertices, stratification::DepGraph& graph)
+void add_function_dependencies(fd::LiftedBinaryOperatorView<O> expression,
+                               uint_t head_vertex,
+                               const RelationVertexMap& vertices,
+                               stratification::DepGraph& graph)
 {
     add_function_dependencies(expression.get_lhs(), head_vertex, vertices, graph);
     add_function_dependencies(expression.get_rhs(), head_vertex, vertices, graph);
 }
 
 template<f::OpKind O>
-void add_function_dependencies(fd::LiftedMultiOperatorView<O> expression, uint_t head_vertex, const RelationVertexMap& vertices, stratification::DepGraph& graph)
+void add_function_dependencies(fd::LiftedMultiOperatorView<O> expression,
+                               uint_t head_vertex,
+                               const RelationVertexMap& vertices,
+                               stratification::DepGraph& graph)
 {
     for (const auto arg : expression.get_args())
         add_function_dependencies(arg, head_vertex, vertices, graph);
@@ -78,7 +85,10 @@ void add_function_dependencies(fd::FunctionTermView<f::FluentTag> term, uint_t h
     boost::add_edge(vertices.get_vertex(term.get_function().get_index()), head_vertex, ep, graph);
 }
 
-void add_function_dependencies(fd::LiftedArithmeticOperatorView expression, uint_t head_vertex, const RelationVertexMap& vertices, stratification::DepGraph& graph)
+void add_function_dependencies(fd::LiftedArithmeticOperatorView expression,
+                               uint_t head_vertex,
+                               const RelationVertexMap& vertices,
+                               stratification::DepGraph& graph)
 {
     visit([&](auto&& arg) { add_function_dependencies(arg, head_vertex, vertices, graph); }, expression.get_variant());
 }
@@ -99,13 +109,13 @@ void add_function_dependencies(fd::LiftedBooleanOperatorView expression, uint_t 
         expression.get_variant());
 }
 
-template<fd::NumericEffectOpKind Op>
+template<f::NumericEffectOpKind Op>
 void add_numeric_effect_head_dependencies(fd::NumericEffectView<Op, f::FluentTag> effect,
                                           uint_t head_vertex,
                                           const RelationVertexMap& vertices,
                                           stratification::DepGraph& graph)
 {
-    if constexpr (!std::is_same_v<Op, fd::OpAssign>)
+    if constexpr (!std::is_same_v<Op, f::Assign>)
         add_function_dependencies(effect.get_fterm(), head_vertex, vertices, graph);
 
     add_function_dependencies(effect.get_fexpr(), head_vertex, vertices, graph);
@@ -130,12 +140,7 @@ uint_t get_head_vertex(fd::AtomView<f::FluentTag> head, const RelationVertexMap&
 
 uint_t get_head_vertex(fd::NumericEffectOperatorView<f::FluentTag> head, const RelationVertexMap& vertices)
 {
-    return visit(
-        [&](auto&& effect)
-        {
-            return vertices.get_vertex(effect.get_fterm().get_function().get_index());
-        },
-        head.get_variant());
+    return visit([&](auto&& effect) { return vertices.get_vertex(effect.get_fterm().get_function().get_index()); }, head.get_variant());
 }
 
 }  // namespace

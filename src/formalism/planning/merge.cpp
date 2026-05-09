@@ -67,60 +67,60 @@ template std::pair<GroundFunctionTermValueView<StaticTag>, bool> merge_p2p(Groun
 template std::pair<GroundFunctionTermValueView<FluentTag>, bool> merge_p2p(GroundFunctionTermValueView<FluentTag> element, MergeContext& context);
 template std::pair<GroundFunctionTermValueView<AuxiliaryTag>, bool> merge_p2p(GroundFunctionTermValueView<AuxiliaryTag> element, MergeContext& context);
 
-template std::pair<UnaryOperatorView<OpSub, Data<FunctionExpression>>, bool> merge_p2p(UnaryOperatorView<OpSub, Data<FunctionExpression>> element,
-                                                                                       MergeContext& context);
-template std::pair<UnaryOperatorView<OpSub, Data<GroundFunctionExpression>>, bool> merge_p2p(UnaryOperatorView<OpSub, Data<GroundFunctionExpression>> element,
-                                                                                             MergeContext& context);
+template std::pair<UnaryOperatorView<Sub, Data<FunctionExpression>>, bool> merge_p2p(UnaryOperatorView<Sub, Data<FunctionExpression>> element,
+                                                                                     MergeContext& context);
+template std::pair<UnaryOperatorView<Sub, Data<GroundFunctionExpression>>, bool> merge_p2p(UnaryOperatorView<Sub, Data<GroundFunctionExpression>> element,
+                                                                                           MergeContext& context);
 
-template std::pair<BinaryOperatorView<OpEq, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpEq, Data<FunctionExpression>> element,
-                                                                                       MergeContext& context);
-template std::pair<BinaryOperatorView<OpNe, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpNe, Data<FunctionExpression>> element,
-                                                                                       MergeContext& context);
-template std::pair<BinaryOperatorView<OpGe, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpGe, Data<FunctionExpression>> element,
-                                                                                       MergeContext& context);
-template std::pair<BinaryOperatorView<OpGt, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpGt, Data<FunctionExpression>> element,
-                                                                                       MergeContext& context);
-template std::pair<BinaryOperatorView<OpLe, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpLe, Data<FunctionExpression>> element,
-                                                                                       MergeContext& context);
-template std::pair<BinaryOperatorView<OpLt, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpLt, Data<FunctionExpression>> element,
-                                                                                       MergeContext& context);
-template std::pair<BinaryOperatorView<OpAdd, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpAdd, Data<FunctionExpression>> element,
-                                                                                        MergeContext& context);
-template std::pair<BinaryOperatorView<OpSub, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpSub, Data<FunctionExpression>> element,
-                                                                                        MergeContext& context);
-template std::pair<BinaryOperatorView<OpMul, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpMul, Data<FunctionExpression>> element,
-                                                                                        MergeContext& context);
-template std::pair<BinaryOperatorView<OpDiv, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpDiv, Data<FunctionExpression>> element,
-                                                                                        MergeContext& context);
-template std::pair<BinaryOperatorView<OpEq, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpEq, Data<GroundFunctionExpression>> element,
-                                                                                             MergeContext& context);
-template std::pair<BinaryOperatorView<OpNe, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpNe, Data<GroundFunctionExpression>> element,
-                                                                                             MergeContext& context);
-template std::pair<BinaryOperatorView<OpGe, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpGe, Data<GroundFunctionExpression>> element,
-                                                                                             MergeContext& context);
-template std::pair<BinaryOperatorView<OpGt, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpGt, Data<GroundFunctionExpression>> element,
-                                                                                             MergeContext& context);
-template std::pair<BinaryOperatorView<OpLe, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpLe, Data<GroundFunctionExpression>> element,
-                                                                                             MergeContext& context);
-template std::pair<BinaryOperatorView<OpLt, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpLt, Data<GroundFunctionExpression>> element,
-                                                                                             MergeContext& context);
-template std::pair<BinaryOperatorView<OpAdd, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpAdd, Data<GroundFunctionExpression>> element,
-                                                                                              MergeContext& context);
-template std::pair<BinaryOperatorView<OpSub, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpSub, Data<GroundFunctionExpression>> element,
-                                                                                              MergeContext& context);
-template std::pair<BinaryOperatorView<OpMul, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpMul, Data<GroundFunctionExpression>> element,
-                                                                                              MergeContext& context);
-template std::pair<BinaryOperatorView<OpDiv, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<OpDiv, Data<GroundFunctionExpression>> element,
-                                                                                              MergeContext& context);
+template std::pair<BinaryOperatorView<Eq, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Eq, Data<FunctionExpression>> element,
+                                                                                     MergeContext& context);
+template std::pair<BinaryOperatorView<Ne, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Ne, Data<FunctionExpression>> element,
+                                                                                     MergeContext& context);
+template std::pair<BinaryOperatorView<Ge, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Ge, Data<FunctionExpression>> element,
+                                                                                     MergeContext& context);
+template std::pair<BinaryOperatorView<Gt, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Gt, Data<FunctionExpression>> element,
+                                                                                     MergeContext& context);
+template std::pair<BinaryOperatorView<Le, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Le, Data<FunctionExpression>> element,
+                                                                                     MergeContext& context);
+template std::pair<BinaryOperatorView<Lt, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Lt, Data<FunctionExpression>> element,
+                                                                                     MergeContext& context);
+template std::pair<BinaryOperatorView<Add, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Add, Data<FunctionExpression>> element,
+                                                                                      MergeContext& context);
+template std::pair<BinaryOperatorView<Sub, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Sub, Data<FunctionExpression>> element,
+                                                                                      MergeContext& context);
+template std::pair<BinaryOperatorView<Mul, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Mul, Data<FunctionExpression>> element,
+                                                                                      MergeContext& context);
+template std::pair<BinaryOperatorView<Div, Data<FunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Div, Data<FunctionExpression>> element,
+                                                                                      MergeContext& context);
+template std::pair<BinaryOperatorView<Eq, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Eq, Data<GroundFunctionExpression>> element,
+                                                                                           MergeContext& context);
+template std::pair<BinaryOperatorView<Ne, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Ne, Data<GroundFunctionExpression>> element,
+                                                                                           MergeContext& context);
+template std::pair<BinaryOperatorView<Ge, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Ge, Data<GroundFunctionExpression>> element,
+                                                                                           MergeContext& context);
+template std::pair<BinaryOperatorView<Gt, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Gt, Data<GroundFunctionExpression>> element,
+                                                                                           MergeContext& context);
+template std::pair<BinaryOperatorView<Le, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Le, Data<GroundFunctionExpression>> element,
+                                                                                           MergeContext& context);
+template std::pair<BinaryOperatorView<Lt, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Lt, Data<GroundFunctionExpression>> element,
+                                                                                           MergeContext& context);
+template std::pair<BinaryOperatorView<Add, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Add, Data<GroundFunctionExpression>> element,
+                                                                                            MergeContext& context);
+template std::pair<BinaryOperatorView<Sub, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Sub, Data<GroundFunctionExpression>> element,
+                                                                                            MergeContext& context);
+template std::pair<BinaryOperatorView<Mul, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Mul, Data<GroundFunctionExpression>> element,
+                                                                                            MergeContext& context);
+template std::pair<BinaryOperatorView<Div, Data<GroundFunctionExpression>>, bool> merge_p2p(BinaryOperatorView<Div, Data<GroundFunctionExpression>> element,
+                                                                                            MergeContext& context);
 
-template std::pair<MultiOperatorView<OpAdd, Data<FunctionExpression>>, bool> merge_p2p(MultiOperatorView<OpAdd, Data<FunctionExpression>> element,
-                                                                                       MergeContext& context);
-template std::pair<MultiOperatorView<OpMul, Data<FunctionExpression>>, bool> merge_p2p(MultiOperatorView<OpMul, Data<FunctionExpression>> element,
-                                                                                       MergeContext& context);
-template std::pair<MultiOperatorView<OpAdd, Data<GroundFunctionExpression>>, bool> merge_p2p(MultiOperatorView<OpAdd, Data<GroundFunctionExpression>> element,
-                                                                                             MergeContext& context);
-template std::pair<MultiOperatorView<OpMul, Data<GroundFunctionExpression>>, bool> merge_p2p(MultiOperatorView<OpMul, Data<GroundFunctionExpression>> element,
-                                                                                             MergeContext& context);
+template std::pair<MultiOperatorView<Add, Data<FunctionExpression>>, bool> merge_p2p(MultiOperatorView<Add, Data<FunctionExpression>> element,
+                                                                                     MergeContext& context);
+template std::pair<MultiOperatorView<Mul, Data<FunctionExpression>>, bool> merge_p2p(MultiOperatorView<Mul, Data<FunctionExpression>> element,
+                                                                                     MergeContext& context);
+template std::pair<MultiOperatorView<Add, Data<GroundFunctionExpression>>, bool> merge_p2p(MultiOperatorView<Add, Data<GroundFunctionExpression>> element,
+                                                                                           MergeContext& context);
+template std::pair<MultiOperatorView<Mul, Data<GroundFunctionExpression>>, bool> merge_p2p(MultiOperatorView<Mul, Data<GroundFunctionExpression>> element,
+                                                                                           MergeContext& context);
 
 template Data<ArithmeticOperator<Data<FunctionExpression>>> merge_p2p(ArithmeticOperatorView<Data<FunctionExpression>> element, MergeContext& context);
 template Data<ArithmeticOperator<Data<GroundFunctionExpression>>> merge_p2p(ArithmeticOperatorView<Data<GroundFunctionExpression>> element,
@@ -129,28 +129,25 @@ template Data<ArithmeticOperator<Data<GroundFunctionExpression>>> merge_p2p(Arit
 template Data<BooleanOperator<Data<FunctionExpression>>> merge_p2p(BooleanOperatorView<Data<FunctionExpression>> element, MergeContext& context);
 template Data<BooleanOperator<Data<GroundFunctionExpression>>> merge_p2p(BooleanOperatorView<Data<GroundFunctionExpression>> element, MergeContext& context);
 
-template std::pair<NumericEffectView<OpAssign, FluentTag>, bool> merge_p2p(NumericEffectView<OpAssign, FluentTag> element, MergeContext& context);
-template std::pair<NumericEffectView<OpIncrease, FluentTag>, bool> merge_p2p(NumericEffectView<OpIncrease, FluentTag> element, MergeContext& context);
-template std::pair<NumericEffectView<OpDecrease, FluentTag>, bool> merge_p2p(NumericEffectView<OpDecrease, FluentTag> element, MergeContext& context);
-template std::pair<NumericEffectView<OpScaleUp, FluentTag>, bool> merge_p2p(NumericEffectView<OpScaleUp, FluentTag> element, MergeContext& context);
-template std::pair<NumericEffectView<OpScaleDown, FluentTag>, bool> merge_p2p(NumericEffectView<OpScaleDown, FluentTag> element, MergeContext& context);
+template std::pair<NumericEffectView<Assign, FluentTag>, bool> merge_p2p(NumericEffectView<Assign, FluentTag> element, MergeContext& context);
+template std::pair<NumericEffectView<Increase, FluentTag>, bool> merge_p2p(NumericEffectView<Increase, FluentTag> element, MergeContext& context);
+template std::pair<NumericEffectView<Decrease, FluentTag>, bool> merge_p2p(NumericEffectView<Decrease, FluentTag> element, MergeContext& context);
+template std::pair<NumericEffectView<ScaleUp, FluentTag>, bool> merge_p2p(NumericEffectView<ScaleUp, FluentTag> element, MergeContext& context);
+template std::pair<NumericEffectView<ScaleDown, FluentTag>, bool> merge_p2p(NumericEffectView<ScaleDown, FluentTag> element, MergeContext& context);
 
-template std::pair<NumericEffectView<OpIncrease, AuxiliaryTag>, bool> merge_p2p(NumericEffectView<OpIncrease, AuxiliaryTag> element, MergeContext& context);
+template std::pair<NumericEffectView<Increase, AuxiliaryTag>, bool> merge_p2p(NumericEffectView<Increase, AuxiliaryTag> element, MergeContext& context);
 
 template Data<NumericEffectOperator<FluentTag>> merge_p2p(NumericEffectOperatorView<FluentTag> element, MergeContext& context);
 template Data<NumericEffectOperator<AuxiliaryTag>> merge_p2p(NumericEffectOperatorView<AuxiliaryTag> element, MergeContext& context);
 
-template std::pair<GroundNumericEffectView<OpAssign, FluentTag>, bool> merge_p2p(GroundNumericEffectView<OpAssign, FluentTag> element, MergeContext& context);
-template std::pair<GroundNumericEffectView<OpIncrease, FluentTag>, bool> merge_p2p(GroundNumericEffectView<OpIncrease, FluentTag> element,
-                                                                                   MergeContext& context);
-template std::pair<GroundNumericEffectView<OpDecrease, FluentTag>, bool> merge_p2p(GroundNumericEffectView<OpDecrease, FluentTag> element,
-                                                                                   MergeContext& context);
-template std::pair<GroundNumericEffectView<OpScaleUp, FluentTag>, bool> merge_p2p(GroundNumericEffectView<OpScaleUp, FluentTag> element, MergeContext& context);
-template std::pair<GroundNumericEffectView<OpScaleDown, FluentTag>, bool> merge_p2p(GroundNumericEffectView<OpScaleDown, FluentTag> element,
-                                                                                    MergeContext& context);
+template std::pair<GroundNumericEffectView<Assign, FluentTag>, bool> merge_p2p(GroundNumericEffectView<Assign, FluentTag> element, MergeContext& context);
+template std::pair<GroundNumericEffectView<Increase, FluentTag>, bool> merge_p2p(GroundNumericEffectView<Increase, FluentTag> element, MergeContext& context);
+template std::pair<GroundNumericEffectView<Decrease, FluentTag>, bool> merge_p2p(GroundNumericEffectView<Decrease, FluentTag> element, MergeContext& context);
+template std::pair<GroundNumericEffectView<ScaleUp, FluentTag>, bool> merge_p2p(GroundNumericEffectView<ScaleUp, FluentTag> element, MergeContext& context);
+template std::pair<GroundNumericEffectView<ScaleDown, FluentTag>, bool> merge_p2p(GroundNumericEffectView<ScaleDown, FluentTag> element, MergeContext& context);
 
-template std::pair<GroundNumericEffectView<OpIncrease, AuxiliaryTag>, bool> merge_p2p(GroundNumericEffectView<OpIncrease, AuxiliaryTag> element,
-                                                                                      MergeContext& context);
+template std::pair<GroundNumericEffectView<Increase, AuxiliaryTag>, bool> merge_p2p(GroundNumericEffectView<Increase, AuxiliaryTag> element,
+                                                                                    MergeContext& context);
 
 template Data<GroundNumericEffectOperator<FluentTag>> merge_p2p(GroundNumericEffectOperatorView<FluentTag> element, MergeContext& context);
 template Data<GroundNumericEffectOperator<AuxiliaryTag>> merge_p2p(GroundNumericEffectOperatorView<AuxiliaryTag> element, MergeContext& context);

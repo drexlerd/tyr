@@ -28,10 +28,10 @@
 namespace tyr
 {
 
-template<formalism::planning::NumericEffectOpKind Op, formalism::FactKind T, formalism::planning::Context C>
+template<formalism::NumericEffectOpKind Op, formalism::FactKind T, formalism::planning::Context C>
 class View<Index<formalism::planning::NumericEffect<Op, T>>, C>
 {
-    static_assert(std::same_as<T, formalism::FluentTag> || (std::same_as<T, formalism::AuxiliaryTag> && std::same_as<Op, formalism::planning::OpIncrease>),
+    static_assert(std::same_as<T, formalism::FluentTag> || (std::same_as<T, formalism::AuxiliaryTag> && std::same_as<Op, formalism::Increase>),
                   "Unsupported NumericEffect<Op, T> combination.");
 
 private:

@@ -32,7 +32,7 @@
 #include <cista/containers/vector.h>  // for basic_vector
 #include <gtl/phmap.hpp>              // for flat_hash_set
 #include <type_traits>
-#include <utility>                    // for move
+#include <utility>  // for move
 
 namespace f = tyr::formalism;
 namespace fd = tyr::formalism::datalog;
@@ -43,9 +43,7 @@ namespace
 {
 void add_function_listeners(fd::FunctionExpressionView expression, Index<fd::Rule> rule, ListenerStratum& listeners);
 
-void add_function_listeners(float_t, Index<fd::Rule>, ListenerStratum&)
-{
-}
+void add_function_listeners(float_t, Index<fd::Rule>, ListenerStratum&) {}
 
 template<f::OpKind O>
 void add_function_listeners(fd::LiftedUnaryOperatorView<O> expression, Index<fd::Rule> rule, ListenerStratum& listeners)
@@ -98,10 +96,10 @@ void add_function_listeners(fd::LiftedBooleanOperatorView expression, Index<fd::
         expression.get_variant());
 }
 
-template<fd::NumericEffectOpKind Op>
+template<f::NumericEffectOpKind Op>
 void add_numeric_effect_head_listeners(fd::NumericEffectView<Op, f::FluentTag> effect, Index<fd::Rule> rule, ListenerStratum& listeners)
 {
-    if constexpr (!std::is_same_v<Op, fd::OpAssign>)
+    if constexpr (!std::is_same_v<Op, f::Assign>)
         add_function_listeners(effect.get_fterm(), rule, listeners);
 
     add_function_listeners(effect.get_fexpr(), rule, listeners);

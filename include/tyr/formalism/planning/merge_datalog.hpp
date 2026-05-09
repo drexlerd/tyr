@@ -107,20 +107,20 @@ std::pair<formalism::datalog::GroundFunctionTermView<T>, bool> merge_p2d(GroundF
 template<FactKind T>
 std::pair<formalism::datalog::GroundFunctionTermValueView<T>, bool> merge_p2d(GroundFunctionTermValueView<T> element, MergeDatalogContext& context);
 
-std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpAssign, FluentTag>, bool>
-merge_p2d(NumericEffectView<OpAssign, FluentTag> element, MergeDatalogContext& context);
+std::pair<formalism::datalog::NumericEffectView<formalism::Assign, FluentTag>, bool> merge_p2d(NumericEffectView<Assign, FluentTag> element,
+                                                                                               MergeDatalogContext& context);
 
-std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpIncrease, FluentTag>, bool>
-merge_p2d(NumericEffectView<OpIncrease, FluentTag> element, MergeDatalogContext& context);
+std::pair<formalism::datalog::NumericEffectView<formalism::Increase, FluentTag>, bool> merge_p2d(NumericEffectView<Increase, FluentTag> element,
+                                                                                                 MergeDatalogContext& context);
 
-std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpDecrease, FluentTag>, bool>
-merge_p2d(NumericEffectView<OpDecrease, FluentTag> element, MergeDatalogContext& context);
+std::pair<formalism::datalog::NumericEffectView<formalism::Decrease, FluentTag>, bool> merge_p2d(NumericEffectView<Decrease, FluentTag> element,
+                                                                                                 MergeDatalogContext& context);
 
-std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpScaleUp, FluentTag>, bool>
-merge_p2d(NumericEffectView<OpScaleUp, FluentTag> element, MergeDatalogContext& context);
+std::pair<formalism::datalog::NumericEffectView<formalism::ScaleUp, FluentTag>, bool> merge_p2d(NumericEffectView<ScaleUp, FluentTag> element,
+                                                                                                MergeDatalogContext& context);
 
-std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpScaleDown, FluentTag>, bool>
-merge_p2d(NumericEffectView<OpScaleDown, FluentTag> element, MergeDatalogContext& context);
+std::pair<formalism::datalog::NumericEffectView<formalism::ScaleDown, FluentTag>, bool> merge_p2d(NumericEffectView<ScaleDown, FluentTag> element,
+                                                                                                  MergeDatalogContext& context);
 
 Data<formalism::datalog::NumericEffectOperator<FluentTag>> merge_p2d(NumericEffectOperatorView<FluentTag> element, MergeDatalogContext& context);
 

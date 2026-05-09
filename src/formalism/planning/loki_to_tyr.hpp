@@ -61,12 +61,12 @@ using GroundFunctionTermViewVariant = std::variant<GroundFunctionTermView<Static
 using GroundFunctionTermValueViewVariant =
     std::variant<GroundFunctionTermValueView<StaticTag>, GroundFunctionTermValueView<FluentTag>, GroundFunctionTermValueView<AuxiliaryTag>>;
 
-using NumericEffectViewVariant = std::variant<NumericEffectView<OpAssign, FluentTag>,
-                                              NumericEffectView<OpIncrease, FluentTag>,
-                                              NumericEffectView<OpDecrease, FluentTag>,
-                                              NumericEffectView<OpScaleUp, FluentTag>,
-                                              NumericEffectView<OpScaleDown, FluentTag>,
-                                              NumericEffectView<OpIncrease, AuxiliaryTag>>;
+using NumericEffectViewVariant = std::variant<NumericEffectView<Assign, FluentTag>,
+                                              NumericEffectView<Increase, FluentTag>,
+                                              NumericEffectView<Decrease, FluentTag>,
+                                              NumericEffectView<ScaleUp, FluentTag>,
+                                              NumericEffectView<ScaleDown, FluentTag>,
+                                              NumericEffectView<Increase, AuxiliaryTag>>;
 
 class LokiToTyrTranslator
 {

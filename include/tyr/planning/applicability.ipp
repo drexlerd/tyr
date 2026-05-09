@@ -83,7 +83,7 @@ float_t evaluate(formalism::planning::GroundMultiOperatorView<O> element, const 
                            child_fexprs.end(),
                            evaluate(child_fexprs.front(), context),
                            [&](const auto& value, const auto& child_expr)
-                           { return formalism::apply(formalism::OpMul {}, value, evaluate(child_expr, context)); });
+                           { return formalism::apply(formalism::Mul {}, value, evaluate(child_expr, context)); });
 }
 
 template<TaskKind Kind>
@@ -122,7 +122,7 @@ bool evaluate(formalism::planning::GroundBooleanOperatorView element, const Stat
     return visit([&](auto&& arg) { return evaluate(arg, context); }, element.get_variant());
 }
 
-template<TaskKind Kind, formalism::planning::NumericEffectOpKind Op, formalism::FactKind T>
+template<TaskKind Kind, formalism::NumericEffectOpKind Op, formalism::FactKind T>
 float_t evaluate(formalism::planning::GroundNumericEffectView<Op, T> element, const StateContext<Kind>& context)
 {
     return formalism::planning::apply(Op {}, evaluate(element.get_fterm(), context), evaluate(element.get_fexpr(), context));
@@ -217,22 +217,22 @@ bool is_applicable(formalism::planning::GroundBooleanOperatorListView elements, 
     return std::all_of(elements.begin(), elements.end(), [&](auto&& arg) { return is_applicable(arg, context); });
 }
 
-template<TaskKind Kind, formalism::planning::NumericEffectOpKind Op>
+template<TaskKind Kind, formalism::NumericEffectOpKind Op>
 bool is_applicable(formalism::planning::GroundNumericEffectView<Op, formalism::FluentTag> element,
                    const StateContext<Kind>& context,
                    formalism::planning::EffectFamilyList& ref_fluent_effect_families)
 {
     const auto fterm_index = element.get_fterm().get_index();
-    ref_fluent_effect_families.resize(fterm_index.get_value() + 1, formalism::planning::EffectFamily::NONE);
+    ref_fluent_effect_families.resize(fterm_index.get_value() + 1, formalism::EffectFamily::NONE);
 
     // Check non-conflicting effects
-    if (!is_compatible_effect_family(Op::family, ref_fluent_effect_families[fterm_index.get_value()]))
+    if (!formalism::planning::is_compatible_effect_family(Op::family, ref_fluent_effect_families[fterm_index.get_value()]))
         return false;  /// incompatible effects
 
     ref_fluent_effect_families[fterm_index.get_value()] = Op::family;
 
     // Check fterm is well-defined in context
-    if constexpr (!std::is_same_v<Op, formalism::planning::OpAssign>)
+    if constexpr (!std::is_same_v<Op, formalism::Assign>)
     {
         if (std::isnan(context.unpacked_state.get(fterm_index)))
             return false;  /// target function is undefined and operator is not assign
@@ -259,8 +259,7 @@ bool is_applicable(formalism::planning::GroundNumericEffectOperatorListView<form
 }
 
 template<TaskKind Kind>
-bool is_applicable(formalism::planning::GroundNumericEffectView<formalism::planning::OpIncrease, formalism::AuxiliaryTag> element,
-                   const StateContext<Kind>& context)
+bool is_applicable(formalism::planning::GroundNumericEffectView<formalism::Increase, formalism::AuxiliaryTag> element, const StateContext<Kind>& context)
 {
     // Check fexpr is well-defined in context
     return !std::isnan(evaluate(element.get_fexpr(), context));

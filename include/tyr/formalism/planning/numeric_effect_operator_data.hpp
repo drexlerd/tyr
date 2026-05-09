@@ -30,20 +30,20 @@ namespace tyr
 template<>
 struct Data<formalism::planning::NumericEffectOperator<formalism::FluentTag>>
 {
-    using Variant = ::cista::offset::variant<Index<formalism::planning::NumericEffect<formalism::planning::OpAssign, formalism::FluentTag>>,
-                                             Index<formalism::planning::NumericEffect<formalism::planning::OpIncrease, formalism::FluentTag>>,
-                                             Index<formalism::planning::NumericEffect<formalism::planning::OpDecrease, formalism::FluentTag>>,
-                                             Index<formalism::planning::NumericEffect<formalism::planning::OpScaleUp, formalism::FluentTag>>,
-                                             Index<formalism::planning::NumericEffect<formalism::planning::OpScaleDown, formalism::FluentTag>>>;
+    using Variant = ::cista::offset::variant<Index<formalism::planning::NumericEffect<formalism::Assign, formalism::FluentTag>>,
+                                             Index<formalism::planning::NumericEffect<formalism::Increase, formalism::FluentTag>>,
+                                             Index<formalism::planning::NumericEffect<formalism::Decrease, formalism::FluentTag>>,
+                                             Index<formalism::planning::NumericEffect<formalism::ScaleUp, formalism::FluentTag>>,
+                                             Index<formalism::planning::NumericEffect<formalism::ScaleDown, formalism::FluentTag>>>;
 
     Variant value;
 
     template<typename C>
-    using ViewVariant = std::variant<View<Index<formalism::planning::NumericEffect<formalism::planning::OpAssign, formalism::FluentTag>>, C>,
-                                     View<Index<formalism::planning::NumericEffect<formalism::planning::OpIncrease, formalism::FluentTag>>, C>,
-                                     View<Index<formalism::planning::NumericEffect<formalism::planning::OpDecrease, formalism::FluentTag>>, C>,
-                                     View<Index<formalism::planning::NumericEffect<formalism::planning::OpScaleUp, formalism::FluentTag>>, C>,
-                                     View<Index<formalism::planning::NumericEffect<formalism::planning::OpScaleDown, formalism::FluentTag>>, C>>;
+    using ViewVariant = std::variant<View<Index<formalism::planning::NumericEffect<formalism::Assign, formalism::FluentTag>>, C>,
+                                     View<Index<formalism::planning::NumericEffect<formalism::Increase, formalism::FluentTag>>, C>,
+                                     View<Index<formalism::planning::NumericEffect<formalism::Decrease, formalism::FluentTag>>, C>,
+                                     View<Index<formalism::planning::NumericEffect<formalism::ScaleUp, formalism::FluentTag>>, C>,
+                                     View<Index<formalism::planning::NumericEffect<formalism::ScaleDown, formalism::FluentTag>>, C>>;
 
     Data() = default;
     Data(Variant value_) : value(value_) {}
@@ -62,12 +62,12 @@ struct Data<formalism::planning::NumericEffectOperator<formalism::FluentTag>>
 template<>
 struct Data<formalism::planning::NumericEffectOperator<formalism::AuxiliaryTag>>
 {
-    using Variant = ::cista::offset::variant<Index<formalism::planning::NumericEffect<formalism::planning::OpIncrease, formalism::AuxiliaryTag>>>;
+    using Variant = ::cista::offset::variant<Index<formalism::planning::NumericEffect<formalism::Increase, formalism::AuxiliaryTag>>>;
 
     Variant value;
 
     template<typename C>
-    using ViewVariant = std::variant<View<Index<formalism::planning::NumericEffect<formalism::planning::OpIncrease, formalism::AuxiliaryTag>>, C>>;
+    using ViewVariant = std::variant<View<Index<formalism::planning::NumericEffect<formalism::Increase, formalism::AuxiliaryTag>>, C>>;
 
     Data() = default;
     Data(Variant value_) : value(value_) {}

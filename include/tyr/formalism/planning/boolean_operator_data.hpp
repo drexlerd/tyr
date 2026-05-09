@@ -30,22 +30,22 @@ namespace tyr
 template<typename T>
 struct Data<formalism::planning::BooleanOperator<T>>
 {
-    using Variant = ::cista::offset::variant<Index<formalism::planning::BinaryOperator<formalism::OpEq, T>>,
-                                             Index<formalism::planning::BinaryOperator<formalism::OpNe, T>>,
-                                             Index<formalism::planning::BinaryOperator<formalism::OpLe, T>>,
-                                             Index<formalism::planning::BinaryOperator<formalism::OpLt, T>>,
-                                             Index<formalism::planning::BinaryOperator<formalism::OpGe, T>>,
-                                             Index<formalism::planning::BinaryOperator<formalism::OpGt, T>>>;
+    using Variant = ::cista::offset::variant<Index<formalism::planning::BinaryOperator<formalism::Eq, T>>,
+                                             Index<formalism::planning::BinaryOperator<formalism::Ne, T>>,
+                                             Index<formalism::planning::BinaryOperator<formalism::Le, T>>,
+                                             Index<formalism::planning::BinaryOperator<formalism::Lt, T>>,
+                                             Index<formalism::planning::BinaryOperator<formalism::Ge, T>>,
+                                             Index<formalism::planning::BinaryOperator<formalism::Gt, T>>>;
 
     Variant value;
 
     template<typename C>
-    using ViewVariant = std::variant<View<Index<formalism::planning::BinaryOperator<formalism::OpEq, T>>, C>,
-                                     View<Index<formalism::planning::BinaryOperator<formalism::OpNe, T>>, C>,
-                                     View<Index<formalism::planning::BinaryOperator<formalism::OpLe, T>>, C>,
-                                     View<Index<formalism::planning::BinaryOperator<formalism::OpLt, T>>, C>,
-                                     View<Index<formalism::planning::BinaryOperator<formalism::OpGe, T>>, C>,
-                                     View<Index<formalism::planning::BinaryOperator<formalism::OpGt, T>>, C>>;
+    using ViewVariant = std::variant<View<Index<formalism::planning::BinaryOperator<formalism::Eq, T>>, C>,
+                                     View<Index<formalism::planning::BinaryOperator<formalism::Ne, T>>, C>,
+                                     View<Index<formalism::planning::BinaryOperator<formalism::Le, T>>, C>,
+                                     View<Index<formalism::planning::BinaryOperator<formalism::Lt, T>>, C>,
+                                     View<Index<formalism::planning::BinaryOperator<formalism::Ge, T>>, C>,
+                                     View<Index<formalism::planning::BinaryOperator<formalism::Gt, T>>, C>>;
 
     Data() = default;
     Data(Variant value_) : value(value_) {}

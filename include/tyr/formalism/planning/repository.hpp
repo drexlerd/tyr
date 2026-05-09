@@ -346,44 +346,44 @@ extern template class BasicSymbolRepository<planning::GroundFunctionTerm<Auxilia
 extern template class BasicSymbolRepository<planning::GroundFunctionTermValue<StaticTag>>;
 extern template class BasicSymbolRepository<planning::GroundFunctionTermValue<FluentTag>>;
 extern template class BasicSymbolRepository<planning::GroundFunctionTermValue<AuxiliaryTag>>;
-extern template class BasicSymbolRepository<planning::UnaryOperator<OpSub, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpAdd, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpSub, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpMul, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpDiv, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::MultiOperator<OpAdd, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::MultiOperator<OpMul, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpEq, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpNe, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpLe, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpLt, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpGe, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpGt, Data<planning::FunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::UnaryOperator<OpSub, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpAdd, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpSub, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpMul, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpDiv, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::MultiOperator<OpAdd, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::MultiOperator<OpMul, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpEq, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpNe, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpLe, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpLt, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpGe, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::BinaryOperator<OpGt, Data<planning::GroundFunctionExpression>>>;
-extern template class BasicSymbolRepository<planning::NumericEffect<planning::OpAssign, FluentTag>>;
-extern template class BasicSymbolRepository<planning::NumericEffect<planning::OpIncrease, FluentTag>>;
-extern template class BasicSymbolRepository<planning::NumericEffect<planning::OpDecrease, FluentTag>>;
-extern template class BasicSymbolRepository<planning::NumericEffect<planning::OpScaleUp, FluentTag>>;
-extern template class BasicSymbolRepository<planning::NumericEffect<planning::OpScaleDown, FluentTag>>;
-extern template class BasicSymbolRepository<planning::NumericEffect<planning::OpIncrease, AuxiliaryTag>>;
-extern template class BasicSymbolRepository<planning::GroundNumericEffect<planning::OpAssign, FluentTag>>;
-extern template class BasicSymbolRepository<planning::GroundNumericEffect<planning::OpIncrease, FluentTag>>;
-extern template class BasicSymbolRepository<planning::GroundNumericEffect<planning::OpDecrease, FluentTag>>;
-extern template class BasicSymbolRepository<planning::GroundNumericEffect<planning::OpScaleUp, FluentTag>>;
-extern template class BasicSymbolRepository<planning::GroundNumericEffect<planning::OpScaleDown, FluentTag>>;
-extern template class BasicSymbolRepository<planning::GroundNumericEffect<planning::OpIncrease, AuxiliaryTag>>;
+extern template class BasicSymbolRepository<planning::UnaryOperator<Sub, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Add, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Sub, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Mul, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Div, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::MultiOperator<Add, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::MultiOperator<Mul, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Eq, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Ne, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Le, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Lt, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Ge, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Gt, Data<planning::FunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::UnaryOperator<Sub, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Add, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Sub, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Mul, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Div, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::MultiOperator<Add, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::MultiOperator<Mul, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Eq, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Ne, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Le, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Lt, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Ge, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::BinaryOperator<Gt, Data<planning::GroundFunctionExpression>>>;
+extern template class BasicSymbolRepository<planning::NumericEffect<Assign, FluentTag>>;
+extern template class BasicSymbolRepository<planning::NumericEffect<Increase, FluentTag>>;
+extern template class BasicSymbolRepository<planning::NumericEffect<Decrease, FluentTag>>;
+extern template class BasicSymbolRepository<planning::NumericEffect<ScaleUp, FluentTag>>;
+extern template class BasicSymbolRepository<planning::NumericEffect<ScaleDown, FluentTag>>;
+extern template class BasicSymbolRepository<planning::NumericEffect<Increase, AuxiliaryTag>>;
+extern template class BasicSymbolRepository<planning::GroundNumericEffect<Assign, FluentTag>>;
+extern template class BasicSymbolRepository<planning::GroundNumericEffect<Increase, FluentTag>>;
+extern template class BasicSymbolRepository<planning::GroundNumericEffect<Decrease, FluentTag>>;
+extern template class BasicSymbolRepository<planning::GroundNumericEffect<ScaleUp, FluentTag>>;
+extern template class BasicSymbolRepository<planning::GroundNumericEffect<ScaleDown, FluentTag>>;
+extern template class BasicSymbolRepository<planning::GroundNumericEffect<Increase, AuxiliaryTag>>;
 extern template class BasicSymbolRepository<planning::ConditionalEffect>;
 extern template class BasicSymbolRepository<planning::GroundConditionalEffect>;
 extern template class BasicSymbolRepository<planning::ConjunctiveEffect>;
@@ -468,86 +468,79 @@ extern template struct View<Index<formalism::Predicate<formalism::DerivedTag>>, 
 extern template struct View<Index<formalism::planning::FDRVariable<formalism::FluentTag>>, formalism::planning::Repository>;
 
 // Operator index views: lifted
-extern template struct View<Index<formalism::planning::UnaryOperator<formalism::OpSub, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::UnaryOperator<formalism::Sub, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
 
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpAdd, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Add, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpSub, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Sub, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpMul, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Mul, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpDiv, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Div, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpEq, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Eq, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpNe, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Ne, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpLe, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Le, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpLt, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Lt, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpGe, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Ge, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpGt, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Gt, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
 
-extern template struct View<Index<formalism::planning::MultiOperator<formalism::OpAdd, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::MultiOperator<formalism::Add, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::MultiOperator<formalism::OpMul, Data<formalism::planning::FunctionExpression>>>,
+extern template struct View<Index<formalism::planning::MultiOperator<formalism::Mul, Data<formalism::planning::FunctionExpression>>>,
                             formalism::planning::Repository>;
 
 // Operator index views: grounded
-extern template struct View<Index<formalism::planning::UnaryOperator<formalism::OpSub, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::UnaryOperator<formalism::Sub, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
 
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpAdd, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Add, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpSub, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Sub, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpMul, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Mul, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpDiv, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Div, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpEq, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Eq, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpNe, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Ne, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpLe, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Le, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpLt, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Lt, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpGe, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Ge, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::BinaryOperator<formalism::OpGt, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::BinaryOperator<formalism::Gt, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
 
-extern template struct View<Index<formalism::planning::MultiOperator<formalism::OpAdd, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::MultiOperator<formalism::Add, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::MultiOperator<formalism::OpMul, Data<formalism::planning::GroundFunctionExpression>>>,
+extern template struct View<Index<formalism::planning::MultiOperator<formalism::Mul, Data<formalism::planning::GroundFunctionExpression>>>,
                             formalism::planning::Repository>;
 
 // Numeric effect index views
-extern template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpAssign, formalism::FluentTag>>, formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpIncrease, formalism::FluentTag>>, formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpDecrease, formalism::FluentTag>>, formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpScaleUp, formalism::FluentTag>>, formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpScaleDown, formalism::FluentTag>>, formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpIncrease, formalism::AuxiliaryTag>>,
-                            formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::NumericEffect<formalism::Assign, formalism::FluentTag>>, formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::NumericEffect<formalism::Increase, formalism::FluentTag>>, formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::NumericEffect<formalism::Decrease, formalism::FluentTag>>, formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::NumericEffect<formalism::ScaleUp, formalism::FluentTag>>, formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::NumericEffect<formalism::ScaleDown, formalism::FluentTag>>, formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::NumericEffect<formalism::Increase, formalism::AuxiliaryTag>>, formalism::planning::Repository>;
 
-extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpAssign, formalism::FluentTag>>,
-                            formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpIncrease, formalism::FluentTag>>,
-                            formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpDecrease, formalism::FluentTag>>,
-                            formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpScaleUp, formalism::FluentTag>>,
-                            formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpScaleDown, formalism::FluentTag>>,
-                            formalism::planning::Repository>;
-extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpIncrease, formalism::AuxiliaryTag>>,
-                            formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::Assign, formalism::FluentTag>>, formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::Increase, formalism::FluentTag>>, formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::Decrease, formalism::FluentTag>>, formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::ScaleUp, formalism::FluentTag>>, formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::ScaleDown, formalism::FluentTag>>, formalism::planning::Repository>;
+extern template struct View<Index<formalism::planning::GroundNumericEffect<formalism::Increase, formalism::AuxiliaryTag>>, formalism::planning::Repository>;
 
 // Data views
 extern template struct View<Data<formalism::planning::ArithmeticOperator<Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;

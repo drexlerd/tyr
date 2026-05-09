@@ -29,11 +29,11 @@ namespace tyr
 template<>
 struct Data<formalism::datalog::NumericEffectOperator<formalism::FluentTag>>
 {
-    using Variant = ::cista::offset::variant<Index<formalism::datalog::NumericEffect<formalism::datalog::OpAssign, formalism::FluentTag>>,
-                                             Index<formalism::datalog::NumericEffect<formalism::datalog::OpIncrease, formalism::FluentTag>>,
-                                             Index<formalism::datalog::NumericEffect<formalism::datalog::OpDecrease, formalism::FluentTag>>,
-                                             Index<formalism::datalog::NumericEffect<formalism::datalog::OpScaleUp, formalism::FluentTag>>,
-                                             Index<formalism::datalog::NumericEffect<formalism::datalog::OpScaleDown, formalism::FluentTag>>>;
+    using Variant = ::cista::offset::variant<Index<formalism::datalog::NumericEffect<formalism::Assign, formalism::FluentTag>>,
+                                             Index<formalism::datalog::NumericEffect<formalism::Increase, formalism::FluentTag>>,
+                                             Index<formalism::datalog::NumericEffect<formalism::Decrease, formalism::FluentTag>>,
+                                             Index<formalism::datalog::NumericEffect<formalism::ScaleUp, formalism::FluentTag>>,
+                                             Index<formalism::datalog::NumericEffect<formalism::ScaleDown, formalism::FluentTag>>>;
 
     Variant value;
 

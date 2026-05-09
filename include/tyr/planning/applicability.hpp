@@ -80,7 +80,7 @@ float_t evaluate(formalism::planning::GroundArithmeticOperatorView element, cons
 template<TaskKind Kind>
 bool evaluate(formalism::planning::GroundBooleanOperatorView element, const StateContext<Kind>& context);
 
-template<TaskKind Kind, formalism::planning::NumericEffectOpKind Op, formalism::FactKind T>
+template<TaskKind Kind, formalism::NumericEffectOpKind Op, formalism::FactKind T>
 float_t evaluate(formalism::planning::GroundNumericEffectView<Op, T> element, const StateContext<Kind>& context);
 
 template<TaskKind Kind, formalism::FactKind T>
@@ -125,7 +125,7 @@ bool is_applicable(formalism::planning::GroundBooleanOperatorView element, const
 template<TaskKind Kind>
 bool is_applicable(formalism::planning::GroundBooleanOperatorListView elements, const StateContext<Kind>& context);
 
-template<TaskKind Kind, formalism::planning::NumericEffectOpKind Op>
+template<TaskKind Kind, formalism::NumericEffectOpKind Op>
 bool is_applicable(formalism::planning::GroundNumericEffectView<Op, formalism::FluentTag> element,
                    const StateContext<Kind>& context,
                    formalism::planning::EffectFamilyList& ref_fluent_effect_families);
@@ -141,8 +141,7 @@ bool is_applicable(formalism::planning::GroundNumericEffectOperatorListView<form
                    formalism::planning::EffectFamilyList& ref_fluent_effect_families);
 
 template<TaskKind Kind>
-bool is_applicable(formalism::planning::GroundNumericEffectView<formalism::planning::OpIncrease, formalism::AuxiliaryTag> element,
-                   const StateContext<Kind>& context);
+bool is_applicable(formalism::planning::GroundNumericEffectView<formalism::Increase, formalism::AuxiliaryTag> element, const StateContext<Kind>& context);
 
 template<TaskKind Kind>
 bool is_applicable(formalism::planning::GroundNumericEffectOperatorView<formalism::AuxiliaryTag> element, const StateContext<Kind>& context);

@@ -97,14 +97,6 @@ struct GroundFunctionTermValue
 {
 };
 
-enum class EffectFamily
-{
-    NONE = 0,
-    ASSIGN = 1,
-    INCREASE_DECREASE = 2,
-    SCALE_UP_SCALE_DOWN = 3,
-};
-
 using EffectFamilyList = std::vector<EffectFamily>;
 
 inline bool is_compatible_effect_family(EffectFamily lhs, EffectFamily rhs)
@@ -117,41 +109,6 @@ inline bool is_compatible_effect_family(EffectFamily lhs, EffectFamily rhs)
 
     return false;  ///< disallow mixing assign, additive, or multiplicative
 }
-
-struct OpAssign
-{
-    static constexpr EffectFamily family = EffectFamily::ASSIGN;
-    static constexpr int kind = 0;
-    auto identifying_members() const noexcept { return std::tie(kind); }
-};
-struct OpIncrease
-{
-    static constexpr EffectFamily family = EffectFamily::INCREASE_DECREASE;
-    static constexpr int kind = 1;
-    auto identifying_members() const noexcept { return std::tie(kind); }
-};
-struct OpDecrease
-{
-    static constexpr EffectFamily family = EffectFamily::INCREASE_DECREASE;
-    static constexpr int kind = 2;
-    auto identifying_members() const noexcept { return std::tie(kind); }
-};
-struct OpScaleUp
-{
-    static constexpr EffectFamily family = EffectFamily::SCALE_UP_SCALE_DOWN;
-    static constexpr int kind = 3;
-    auto identifying_members() const noexcept { return std::tie(kind); }
-};
-struct OpScaleDown
-{
-    static constexpr EffectFamily family = EffectFamily::SCALE_UP_SCALE_DOWN;
-    static constexpr int kind = 4;
-    auto identifying_members() const noexcept { return std::tie(kind); }
-};
-
-template<typename T>
-concept NumericEffectOpKind =
-    std::same_as<T, OpAssign> || std::same_as<T, OpIncrease> || std::same_as<T, OpDecrease> || std::same_as<T, OpScaleUp> || std::same_as<T, OpScaleDown>;
 
 template<NumericEffectOpKind Op, FactKind T>
 struct NumericEffect
@@ -287,32 +244,33 @@ template<typename Op>
 using GroundMultiOperatorType = MultiOperator<Op, Data<GroundFunctionExpression>>;
 
 using LiftedArithmeticExpressionTypes = ConcatTypeListsT<MapTypeListT<LiftedUnaryOperatorType, UnaryArithmeticOpKinds>,
-                                                        MapTypeListT<LiftedBinaryOperatorType, BinaryArithmeticOpKinds>,
-                                                        MapTypeListT<LiftedMultiOperatorType, MultiArithmeticOpKinds>>;
+                                                         MapTypeListT<LiftedBinaryOperatorType, BinaryArithmeticOpKinds>,
+                                                         MapTypeListT<LiftedMultiOperatorType, MultiArithmeticOpKinds>>;
 
 using LiftedBooleanExpressionTypes = MapTypeListT<LiftedBinaryOperatorType, BooleanOpKinds>;
 
 using GroundArithmeticExpressionTypes = ConcatTypeListsT<MapTypeListT<GroundUnaryOperatorType, UnaryArithmeticOpKinds>,
-                                                        MapTypeListT<GroundBinaryOperatorType, BinaryArithmeticOpKinds>,
-                                                        MapTypeListT<GroundMultiOperatorType, MultiArithmeticOpKinds>>;
+                                                         MapTypeListT<GroundBinaryOperatorType, BinaryArithmeticOpKinds>,
+                                                         MapTypeListT<GroundMultiOperatorType, MultiArithmeticOpKinds>>;
 
 using GroundBooleanExpressionTypes = MapTypeListT<GroundBinaryOperatorType, BooleanOpKinds>;
 
-using ExpressionTypes = ConcatTypeListsT<LiftedArithmeticExpressionTypes, LiftedBooleanExpressionTypes, GroundArithmeticExpressionTypes, GroundBooleanExpressionTypes>;
+using ExpressionTypes =
+    ConcatTypeListsT<LiftedArithmeticExpressionTypes, LiftedBooleanExpressionTypes, GroundArithmeticExpressionTypes, GroundBooleanExpressionTypes>;
 
-using NumericEffectTypes = TypeList<NumericEffect<OpAssign, FluentTag>,
-                                    NumericEffect<OpIncrease, FluentTag>,
-                                    NumericEffect<OpDecrease, FluentTag>,
-                                    NumericEffect<OpScaleUp, FluentTag>,
-                                    NumericEffect<OpScaleDown, FluentTag>,
-                                    NumericEffect<OpIncrease, AuxiliaryTag>>;
+using NumericEffectTypes = TypeList<NumericEffect<Assign, FluentTag>,
+                                    NumericEffect<Increase, FluentTag>,
+                                    NumericEffect<Decrease, FluentTag>,
+                                    NumericEffect<ScaleUp, FluentTag>,
+                                    NumericEffect<ScaleDown, FluentTag>,
+                                    NumericEffect<Increase, AuxiliaryTag>>;
 
-using GroundNumericEffectTypes = TypeList<GroundNumericEffect<OpAssign, FluentTag>,
-                                          GroundNumericEffect<OpIncrease, FluentTag>,
-                                          GroundNumericEffect<OpDecrease, FluentTag>,
-                                          GroundNumericEffect<OpScaleUp, FluentTag>,
-                                          GroundNumericEffect<OpScaleDown, FluentTag>,
-                                          GroundNumericEffect<OpIncrease, AuxiliaryTag>>;
+using GroundNumericEffectTypes = TypeList<GroundNumericEffect<Assign, FluentTag>,
+                                          GroundNumericEffect<Increase, FluentTag>,
+                                          GroundNumericEffect<Decrease, FluentTag>,
+                                          GroundNumericEffect<ScaleUp, FluentTag>,
+                                          GroundNumericEffect<ScaleDown, FluentTag>,
+                                          GroundNumericEffect<Increase, AuxiliaryTag>>;
 
 using NumericEffectOperatorTypes = TypeList<NumericEffectOperator<FluentTag>, NumericEffectOperator<AuxiliaryTag>>;
 using GroundNumericEffectOperatorTypes = TypeList<GroundNumericEffectOperator<FluentTag>, GroundNumericEffectOperator<AuxiliaryTag>>;

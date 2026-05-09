@@ -83,80 +83,70 @@ template struct View<Index<formalism::Predicate<formalism::DerivedTag>>, formali
 template struct View<Index<formalism::planning::FDRVariable<formalism::FluentTag>>, formalism::planning::Repository>;
 
 // Operator index views: lifted
-template struct View<Index<formalism::planning::UnaryOperator<formalism::OpSub, Data<formalism::planning::FunctionExpression>>>,
-                     formalism::planning::Repository>;
+template struct View<Index<formalism::planning::UnaryOperator<formalism::Sub, Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;
 
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpAdd, Data<formalism::planning::FunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Add, Data<formalism::planning::FunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpSub, Data<formalism::planning::FunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Sub, Data<formalism::planning::FunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpMul, Data<formalism::planning::FunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Mul, Data<formalism::planning::FunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpDiv, Data<formalism::planning::FunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Div, Data<formalism::planning::FunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpEq, Data<formalism::planning::FunctionExpression>>>,
-                     formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpNe, Data<formalism::planning::FunctionExpression>>>,
-                     formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpLe, Data<formalism::planning::FunctionExpression>>>,
-                     formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpLt, Data<formalism::planning::FunctionExpression>>>,
-                     formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpGe, Data<formalism::planning::FunctionExpression>>>,
-                     formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpGt, Data<formalism::planning::FunctionExpression>>>,
-                     formalism::planning::Repository>;
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Eq, Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Ne, Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Le, Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Lt, Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Ge, Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Gt, Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;
 
-template struct View<Index<formalism::planning::MultiOperator<formalism::OpAdd, Data<formalism::planning::FunctionExpression>>>,
-                     formalism::planning::Repository>;
-template struct View<Index<formalism::planning::MultiOperator<formalism::OpMul, Data<formalism::planning::FunctionExpression>>>,
-                     formalism::planning::Repository>;
+template struct View<Index<formalism::planning::MultiOperator<formalism::Add, Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::MultiOperator<formalism::Mul, Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;
 
 // Operator index views: grounded
-template struct View<Index<formalism::planning::UnaryOperator<formalism::OpSub, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::UnaryOperator<formalism::Sub, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
 
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpAdd, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Add, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpSub, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Sub, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpMul, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Mul, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpDiv, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Div, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpEq, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Eq, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpNe, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Ne, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpLe, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Le, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpLt, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Lt, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpGe, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Ge, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::BinaryOperator<formalism::OpGt, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::BinaryOperator<formalism::Gt, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
 
-template struct View<Index<formalism::planning::MultiOperator<formalism::OpAdd, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::MultiOperator<formalism::Add, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
-template struct View<Index<formalism::planning::MultiOperator<formalism::OpMul, Data<formalism::planning::GroundFunctionExpression>>>,
+template struct View<Index<formalism::planning::MultiOperator<formalism::Mul, Data<formalism::planning::GroundFunctionExpression>>>,
                      formalism::planning::Repository>;
 
 // Numeric effect index views
-template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpAssign, formalism::FluentTag>>, formalism::planning::Repository>;
-template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpIncrease, formalism::FluentTag>>, formalism::planning::Repository>;
-template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpDecrease, formalism::FluentTag>>, formalism::planning::Repository>;
-template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpScaleUp, formalism::FluentTag>>, formalism::planning::Repository>;
-template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpScaleDown, formalism::FluentTag>>, formalism::planning::Repository>;
-template struct View<Index<formalism::planning::NumericEffect<formalism::planning::OpIncrease, formalism::AuxiliaryTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::NumericEffect<formalism::Assign, formalism::FluentTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::NumericEffect<formalism::Increase, formalism::FluentTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::NumericEffect<formalism::Decrease, formalism::FluentTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::NumericEffect<formalism::ScaleUp, formalism::FluentTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::NumericEffect<formalism::ScaleDown, formalism::FluentTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::NumericEffect<formalism::Increase, formalism::AuxiliaryTag>>, formalism::planning::Repository>;
 
-template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpAssign, formalism::FluentTag>>, formalism::planning::Repository>;
-template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpIncrease, formalism::FluentTag>>, formalism::planning::Repository>;
-template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpDecrease, formalism::FluentTag>>, formalism::planning::Repository>;
-template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpScaleUp, formalism::FluentTag>>, formalism::planning::Repository>;
-template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpScaleDown, formalism::FluentTag>>, formalism::planning::Repository>;
-template struct View<Index<formalism::planning::GroundNumericEffect<formalism::planning::OpIncrease, formalism::AuxiliaryTag>>,
-                     formalism::planning::Repository>;
+template struct View<Index<formalism::planning::GroundNumericEffect<formalism::Assign, formalism::FluentTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::GroundNumericEffect<formalism::Increase, formalism::FluentTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::GroundNumericEffect<formalism::Decrease, formalism::FluentTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::GroundNumericEffect<formalism::ScaleUp, formalism::FluentTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::GroundNumericEffect<formalism::ScaleDown, formalism::FluentTag>>, formalism::planning::Repository>;
+template struct View<Index<formalism::planning::GroundNumericEffect<formalism::Increase, formalism::AuxiliaryTag>>, formalism::planning::Repository>;
 
 // Data views
 template struct View<Data<formalism::planning::ArithmeticOperator<Data<formalism::planning::FunctionExpression>>>, formalism::planning::Repository>;

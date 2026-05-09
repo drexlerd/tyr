@@ -52,7 +52,7 @@ struct Data<formalism::datalog::UnaryOperator<Op, T>>
     auto identifying_members() const noexcept { return std::tie(Op::kind, arg); }
 };
 
-static_assert(!uses_trivial_storage_v<formalism::datalog::UnaryOperator<formalism::OpAdd, Data<formalism::datalog::FunctionExpression>>>);
+static_assert(!uses_trivial_storage_v<formalism::datalog::UnaryOperator<formalism::Add, Data<formalism::datalog::FunctionExpression>>>);
 
 }
 

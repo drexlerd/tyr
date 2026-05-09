@@ -71,61 +71,6 @@ struct formatter<tyr::formalism::planning::FDRValue, char>
 };
 
 template<>
-struct formatter<tyr::formalism::planning::OpAssign, char>
-{
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-    template<typename FormatContext>
-    auto format(const tyr::formalism::planning::OpAssign&, FormatContext& ctx) const
-    {
-        return fmt::format_to(ctx.out(), "assign");
-    }
-};
-
-template<>
-struct formatter<tyr::formalism::planning::OpIncrease, char>
-{
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-    template<typename FormatContext>
-    auto format(const tyr::formalism::planning::OpIncrease&, FormatContext& ctx) const
-    {
-        return fmt::format_to(ctx.out(), "increase");
-    }
-};
-
-template<>
-struct formatter<tyr::formalism::planning::OpDecrease, char>
-{
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-    template<typename FormatContext>
-    auto format(const tyr::formalism::planning::OpDecrease&, FormatContext& ctx) const
-    {
-        return fmt::format_to(ctx.out(), "decrease");
-    }
-};
-
-template<>
-struct formatter<tyr::formalism::planning::OpScaleUp, char>
-{
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-    template<typename FormatContext>
-    auto format(const tyr::formalism::planning::OpScaleUp&, FormatContext& ctx) const
-    {
-        return fmt::format_to(ctx.out(), "scale-up");
-    }
-};
-
-template<>
-struct formatter<tyr::formalism::planning::OpScaleDown, char>
-{
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-    template<typename FormatContext>
-    auto format(const tyr::formalism::planning::OpScaleDown&, FormatContext& ctx) const
-    {
-        return fmt::format_to(ctx.out(), "scale-down");
-    }
-};
-
-template<>
 struct formatter<tyr::formalism::planning::Minimize, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
@@ -287,7 +232,7 @@ struct formatter<tyr::Data<tyr::formalism::planning::GroundFunctionTermValue<T>>
     }
 };
 
-template<tyr::formalism::planning::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+template<tyr::formalism::NumericEffectOpKind Op, tyr::formalism::FactKind T>
 struct formatter<tyr::Data<tyr::formalism::planning::NumericEffect<Op, T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
@@ -298,7 +243,7 @@ struct formatter<tyr::Data<tyr::formalism::planning::NumericEffect<Op, T>>, char
     }
 };
 
-template<tyr::formalism::planning::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+template<tyr::formalism::NumericEffectOpKind Op, tyr::formalism::FactKind T>
 struct formatter<tyr::Data<tyr::formalism::planning::GroundNumericEffect<Op, T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
@@ -877,10 +822,7 @@ struct formatter<tyr::formalism::planning::GroundAtomView<T>, char>
     template<typename FormatContext>
     auto format(const tyr::formalism::planning::GroundAtomView<T>& value, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(),
-                              "({} {})",
-                              value.get_predicate().get_name(),
-                              fmt::join(tyr::to_strings(value.get_row().get_objects()), " "));
+        return fmt::format_to(ctx.out(), "({} {})", value.get_predicate().get_name(), fmt::join(tyr::to_strings(value.get_row().get_objects()), " "));
     }
 };
 
@@ -917,10 +859,7 @@ struct formatter<tyr::formalism::planning::GroundFunctionTermView<T>, char>
     template<typename FormatContext>
     auto format(const tyr::formalism::planning::GroundFunctionTermView<T>& value, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(),
-                              "({} {})",
-                              value.get_function().get_name(),
-                              fmt::join(tyr::to_strings(value.get_row().get_objects()), " "));
+        return fmt::format_to(ctx.out(), "({} {})", value.get_function().get_name(), fmt::join(tyr::to_strings(value.get_row().get_objects()), " "));
     }
 };
 
@@ -957,7 +896,7 @@ struct formatter<tyr::formalism::planning::GroundFunctionExpressionView, char>
     }
 };
 
-template<tyr::formalism::planning::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+template<tyr::formalism::NumericEffectOpKind Op, tyr::formalism::FactKind T>
 struct formatter<tyr::formalism::planning::NumericEffectView<Op, T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
@@ -968,7 +907,7 @@ struct formatter<tyr::formalism::planning::NumericEffectView<Op, T>, char>
     }
 };
 
-template<tyr::formalism::planning::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+template<tyr::formalism::NumericEffectOpKind Op, tyr::formalism::FactKind T>
 struct formatter<tyr::formalism::planning::GroundNumericEffectView<Op, T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
@@ -1046,11 +985,7 @@ struct formatter<tyr::formalism::planning::FDRFactView<T>, char>
                                   value.get_value(),
                                   fmt::join(tyr::to_strings(value.get_variable().get_atoms()), " "));
         }
-        return fmt::format_to(ctx.out(),
-                              "<{},{}>: {}",
-                              value.get_variable().get_index(),
-                              value.get_value(),
-                              atom.value());
+        return fmt::format_to(ctx.out(), "<{},{}>: {}", value.get_variable().get_index(), value.get_value(), atom.value());
     }
 };
 

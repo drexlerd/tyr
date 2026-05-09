@@ -620,20 +620,20 @@ void bind_datas(nb::module_& m)
     bind_ground_function_term_value_builder<FluentTag>(m, "FluentGroundFunctionTermValueBuilder");
     bind_ground_function_term_value_builder<AuxiliaryTag>(m, "AuxiliaryGroundFunctionTermValueBuilder");
 
-    bind_unary_operator_builder<OpSub, Data<FunctionExpression>>(m, "UnaryOperatorSubBuilder");
-    bind_binary_operator_builder<OpAdd, Data<FunctionExpression>>(m, "BinaryOperatorAddBuilder");
-    bind_binary_operator_builder<OpSub, Data<FunctionExpression>>(m, "BinaryOperatorSubBuilder");
-    bind_binary_operator_builder<OpMul, Data<FunctionExpression>>(m, "BinaryOperatorMulBuilder");
-    bind_binary_operator_builder<OpDiv, Data<FunctionExpression>>(m, "BinaryOperatorDivBuilder");
-    bind_binary_operator_builder<OpEq, Data<FunctionExpression>>(m, "BinaryOperatorEqBuilder");
-    bind_binary_operator_builder<OpNe, Data<FunctionExpression>>(m, "BinaryOperatorNeBuilder");
-    bind_binary_operator_builder<OpLe, Data<FunctionExpression>>(m, "BinaryOperatorLeBuilder");
-    bind_binary_operator_builder<OpLt, Data<FunctionExpression>>(m, "BinaryOperatorLtBuilder");
-    bind_binary_operator_builder<OpGe, Data<FunctionExpression>>(m, "BinaryOperatorGeBuilder");
-    bind_binary_operator_builder<OpGt, Data<FunctionExpression>>(m, "BinaryOperatorGtBuilder");
+    bind_unary_operator_builder<Sub, Data<FunctionExpression>>(m, "UnaryOperatorSubBuilder");
+    bind_binary_operator_builder<Add, Data<FunctionExpression>>(m, "BinaryOperatorAddBuilder");
+    bind_binary_operator_builder<Sub, Data<FunctionExpression>>(m, "BinaryOperatorSubBuilder");
+    bind_binary_operator_builder<Mul, Data<FunctionExpression>>(m, "BinaryOperatorMulBuilder");
+    bind_binary_operator_builder<Div, Data<FunctionExpression>>(m, "BinaryOperatorDivBuilder");
+    bind_binary_operator_builder<Eq, Data<FunctionExpression>>(m, "BinaryOperatorEqBuilder");
+    bind_binary_operator_builder<Ne, Data<FunctionExpression>>(m, "BinaryOperatorNeBuilder");
+    bind_binary_operator_builder<Le, Data<FunctionExpression>>(m, "BinaryOperatorLeBuilder");
+    bind_binary_operator_builder<Lt, Data<FunctionExpression>>(m, "BinaryOperatorLtBuilder");
+    bind_binary_operator_builder<Ge, Data<FunctionExpression>>(m, "BinaryOperatorGeBuilder");
+    bind_binary_operator_builder<Gt, Data<FunctionExpression>>(m, "BinaryOperatorGtBuilder");
 
-    bind_multi_operator_builder<OpAdd, Data<FunctionExpression>>(m, "MultiOperatorAddBuilder");
-    bind_multi_operator_builder<OpMul, Data<FunctionExpression>>(m, "MultiOperatorMulBuilder");
+    bind_multi_operator_builder<Add, Data<FunctionExpression>>(m, "MultiOperatorAddBuilder");
+    bind_multi_operator_builder<Mul, Data<FunctionExpression>>(m, "MultiOperatorMulBuilder");
 
     bind_arithmethic_operator_builder<Data<FunctionExpression>>(m, "ArithmeticOperatorBuilder");
     bind_boolean_operator_builder<Data<FunctionExpression>>(m, "BooleanOperatorBuilder");
@@ -641,12 +641,12 @@ void bind_datas(nb::module_& m)
     bind_function_expression_builder(m, "FunctionExpressionBuilder");
     bind_conjunctive_condition_builder(m, "ConjunctiveConditionBuilder");
 
-    bind_numeric_effect_builder<OpAssign, FluentTag>(m, "FluentNumericEffectAssignBuilder");
-    bind_numeric_effect_builder<OpIncrease, FluentTag>(m, "FluentNumericEffectIncreaseBuilder");
-    bind_numeric_effect_builder<OpDecrease, FluentTag>(m, "FluentNumericEffectDecreaseBuilder");
-    bind_numeric_effect_builder<OpScaleUp, FluentTag>(m, "FluentNumericEffectScaleUpBuilder");
-    bind_numeric_effect_builder<OpScaleDown, FluentTag>(m, "FluentNumericEffectScaleDownBuilder");
-    bind_numeric_effect_builder<OpIncrease, AuxiliaryTag>(m, "AuxiliaryNumericEffectIncreaseBuilder");
+    bind_numeric_effect_builder<Assign, FluentTag>(m, "FluentNumericEffectAssignBuilder");
+    bind_numeric_effect_builder<Increase, FluentTag>(m, "FluentNumericEffectIncreaseBuilder");
+    bind_numeric_effect_builder<Decrease, FluentTag>(m, "FluentNumericEffectDecreaseBuilder");
+    bind_numeric_effect_builder<ScaleUp, FluentTag>(m, "FluentNumericEffectScaleUpBuilder");
+    bind_numeric_effect_builder<ScaleDown, FluentTag>(m, "FluentNumericEffectScaleDownBuilder");
+    bind_numeric_effect_builder<Increase, AuxiliaryTag>(m, "AuxiliaryNumericEffectIncreaseBuilder");
 
     bind_numeric_effect_operator_builder<FluentTag>(m, "FluentNumericEffectOperatorBuilder");
     bind_numeric_effect_operator_builder<AuxiliaryTag>(m, "AuxiliaryNumericEffectOperatorBuilder");
@@ -656,20 +656,20 @@ void bind_datas(nb::module_& m)
     bind_action_builder(m, "ActionBuilder");
     bind_axiom_builder(m, "AxiomBuilder");
 
-    bind_unary_operator_builder<OpSub, Data<GroundFunctionExpression>>(m, "GroundUnaryOperatorSubBuilder");
-    bind_binary_operator_builder<OpAdd, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorAddBuilder");
-    bind_binary_operator_builder<OpSub, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorSubBuilder");
-    bind_binary_operator_builder<OpMul, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorMulBuilder");
-    bind_binary_operator_builder<OpDiv, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorDivBuilder");
-    bind_binary_operator_builder<OpEq, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorEqBuilder");
-    bind_binary_operator_builder<OpNe, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorNeBuilder");
-    bind_binary_operator_builder<OpLe, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorLeBuilder");
-    bind_binary_operator_builder<OpLt, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorLtBuilder");
-    bind_binary_operator_builder<OpGe, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorGeBuilder");
-    bind_binary_operator_builder<OpGt, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorGtBuilder");
+    bind_unary_operator_builder<Sub, Data<GroundFunctionExpression>>(m, "GroundUnaryOperatorSubBuilder");
+    bind_binary_operator_builder<Add, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorAddBuilder");
+    bind_binary_operator_builder<Sub, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorSubBuilder");
+    bind_binary_operator_builder<Mul, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorMulBuilder");
+    bind_binary_operator_builder<Div, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorDivBuilder");
+    bind_binary_operator_builder<Eq, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorEqBuilder");
+    bind_binary_operator_builder<Ne, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorNeBuilder");
+    bind_binary_operator_builder<Le, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorLeBuilder");
+    bind_binary_operator_builder<Lt, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorLtBuilder");
+    bind_binary_operator_builder<Ge, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorGeBuilder");
+    bind_binary_operator_builder<Gt, Data<GroundFunctionExpression>>(m, "GroundBinaryOperatorGtBuilder");
 
-    bind_multi_operator_builder<OpAdd, Data<GroundFunctionExpression>>(m, "GroundMultiOperatorAddBuilder");
-    bind_multi_operator_builder<OpMul, Data<GroundFunctionExpression>>(m, "GroundMultiOperatorMulBuilder");
+    bind_multi_operator_builder<Add, Data<GroundFunctionExpression>>(m, "GroundMultiOperatorAddBuilder");
+    bind_multi_operator_builder<Mul, Data<GroundFunctionExpression>>(m, "GroundMultiOperatorMulBuilder");
 
     bind_arithmethic_operator_builder<Data<GroundFunctionExpression>>(m, "GroundArithmeticOperatorBuilder");
     bind_boolean_operator_builder<Data<GroundFunctionExpression>>(m, "GroundBooleanOperatorBuilder");
@@ -678,12 +678,12 @@ void bind_datas(nb::module_& m)
 
     bind_ground_conjunctive_condition_builder(m, "GroundConjunctiveConditionBuilder");
 
-    bind_ground_numeric_effect_builder<OpAssign, FluentTag>(m, "FluentGroundNumericEffectAssignBuilder");
-    bind_ground_numeric_effect_builder<OpIncrease, FluentTag>(m, "FluentGroundNumericEffectIncreaseBuilder");
-    bind_ground_numeric_effect_builder<OpDecrease, FluentTag>(m, "FluentGroundNumericEffectDecreaseBuilder");
-    bind_ground_numeric_effect_builder<OpScaleUp, FluentTag>(m, "FluentGroundNumericEffectScaleUpBuilder");
-    bind_ground_numeric_effect_builder<OpScaleDown, FluentTag>(m, "FluentGroundNumericEffectScaleDownBuilder");
-    bind_ground_numeric_effect_builder<OpIncrease, AuxiliaryTag>(m, "AuxiliaryGroundNumericEffectIncreaseBuilder");
+    bind_ground_numeric_effect_builder<Assign, FluentTag>(m, "FluentGroundNumericEffectAssignBuilder");
+    bind_ground_numeric_effect_builder<Increase, FluentTag>(m, "FluentGroundNumericEffectIncreaseBuilder");
+    bind_ground_numeric_effect_builder<Decrease, FluentTag>(m, "FluentGroundNumericEffectDecreaseBuilder");
+    bind_ground_numeric_effect_builder<ScaleUp, FluentTag>(m, "FluentGroundNumericEffectScaleUpBuilder");
+    bind_ground_numeric_effect_builder<ScaleDown, FluentTag>(m, "FluentGroundNumericEffectScaleDownBuilder");
+    bind_ground_numeric_effect_builder<Increase, AuxiliaryTag>(m, "AuxiliaryGroundNumericEffectIncreaseBuilder");
 
     bind_ground_numeric_effect_operator_builder<FluentTag>(m, "FluentGroundNumericEffectOperatorBuilder");
     bind_ground_numeric_effect_operator_builder<AuxiliaryTag>(m, "AuxiliaryGroundNumericEffectOperatorBuilder");

@@ -58,7 +58,7 @@ struct Data<formalism::planning::UnaryOperator<Op, T>>
     auto identifying_members() const noexcept { return std::tie(Op::kind, arg); }
 };
 
-static_assert(!uses_trivial_storage_v<formalism::planning::UnaryOperator<formalism::OpAdd, Data<formalism::planning::FunctionExpression>>>);
+static_assert(!uses_trivial_storage_v<formalism::planning::UnaryOperator<formalism::Add, Data<formalism::planning::FunctionExpression>>>);
 
 }
 

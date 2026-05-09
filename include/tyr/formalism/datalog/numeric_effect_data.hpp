@@ -27,7 +27,7 @@
 
 namespace tyr
 {
-template<formalism::datalog::NumericEffectOpKind Op, formalism::FactKind T>
+template<formalism::NumericEffectOpKind Op, formalism::FactKind T>
 struct Data<formalism::datalog::NumericEffect<Op, T>>
 {
     static_assert(std::same_as<T, formalism::FluentTag>, "Datalog numeric effects are currently only supported for fluent functions.");
@@ -50,7 +50,7 @@ struct Data<formalism::datalog::NumericEffect<Op, T>>
     auto identifying_members() const noexcept { return std::tie(Op::kind, fterm, fexpr); }
 };
 
-static_assert(!uses_trivial_storage_v<formalism::datalog::NumericEffect<formalism::datalog::OpAssign, formalism::FluentTag>>);
+static_assert(!uses_trivial_storage_v<formalism::datalog::NumericEffect<formalism::Assign, formalism::FluentTag>>);
 
 }
 

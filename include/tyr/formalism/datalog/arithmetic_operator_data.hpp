@@ -30,13 +30,13 @@ namespace tyr
 template<typename T>
 struct Data<formalism::datalog::ArithmeticOperator<T>>
 {
-    using Variant = ::cista::offset::variant<Index<formalism::datalog::UnaryOperator<formalism::OpSub, T>>,
-                                             Index<formalism::datalog::BinaryOperator<formalism::OpAdd, T>>,
-                                             Index<formalism::datalog::BinaryOperator<formalism::OpSub, T>>,
-                                             Index<formalism::datalog::BinaryOperator<formalism::OpMul, T>>,
-                                             Index<formalism::datalog::BinaryOperator<formalism::OpDiv, T>>,
-                                             Index<formalism::datalog::MultiOperator<formalism::OpAdd, T>>,
-                                             Index<formalism::datalog::MultiOperator<formalism::OpMul, T>>>;
+    using Variant = ::cista::offset::variant<Index<formalism::datalog::UnaryOperator<formalism::Sub, T>>,
+                                             Index<formalism::datalog::BinaryOperator<formalism::Add, T>>,
+                                             Index<formalism::datalog::BinaryOperator<formalism::Sub, T>>,
+                                             Index<formalism::datalog::BinaryOperator<formalism::Mul, T>>,
+                                             Index<formalism::datalog::BinaryOperator<formalism::Div, T>>,
+                                             Index<formalism::datalog::MultiOperator<formalism::Add, T>>,
+                                             Index<formalism::datalog::MultiOperator<formalism::Mul, T>>>;
 
     Variant value;
 

@@ -75,7 +75,7 @@ float_t evaluate(formalism::planning::LiftedArithmeticOperatorView element, cons
 
 bool evaluate(formalism::planning::LiftedBooleanOperatorView element, const ApplicabilityContext& context);
 
-template<formalism::planning::NumericEffectOpKind Op, formalism::FactKind T>
+template<formalism::NumericEffectOpKind Op, formalism::FactKind T>
 float_t evaluate(formalism::planning::NumericEffectView<Op, T> element, const ApplicabilityContext& context);
 
 template<formalism::FactKind T>
@@ -114,7 +114,7 @@ bool is_applicable(formalism::planning::LiftedBooleanOperatorView element, const
 
 bool is_applicable(formalism::planning::LiftedBooleanOperatorListView elements, const ApplicabilityContext& context);
 
-template<formalism::planning::NumericEffectOpKind Op>
+template<formalism::NumericEffectOpKind Op>
 bool is_applicable(formalism::planning::NumericEffectView<Op, formalism::FluentTag> element,
                    const ApplicabilityContext& context,
                    formalism::planning::EffectFamilyList& ref_fluent_effect_families);
@@ -127,8 +127,7 @@ bool is_applicable(formalism::planning::NumericEffectOperatorListView<formalism:
                    const ApplicabilityContext& context,
                    formalism::planning::EffectFamilyList& ref_fluent_effect_families);
 
-bool is_applicable(formalism::planning::NumericEffectView<formalism::planning::OpIncrease, formalism::AuxiliaryTag> element,
-                   const ApplicabilityContext& context);
+bool is_applicable(formalism::planning::NumericEffectView<formalism::Increase, formalism::AuxiliaryTag> element, const ApplicabilityContext& context);
 
 bool is_applicable(formalism::planning::NumericEffectOperatorView<formalism::AuxiliaryTag> element, const ApplicabilityContext& context);
 

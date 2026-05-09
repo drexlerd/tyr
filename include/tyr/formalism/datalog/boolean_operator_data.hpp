@@ -28,12 +28,12 @@ namespace tyr
 template<typename T>
 struct Data<formalism::datalog::BooleanOperator<T>>
 {
-    using Variant = ::cista::offset::variant<Index<formalism::datalog::BinaryOperator<formalism::OpEq, T>>,
-                                             Index<formalism::datalog::BinaryOperator<formalism::OpNe, T>>,
-                                             Index<formalism::datalog::BinaryOperator<formalism::OpLe, T>>,
-                                             Index<formalism::datalog::BinaryOperator<formalism::OpLt, T>>,
-                                             Index<formalism::datalog::BinaryOperator<formalism::OpGe, T>>,
-                                             Index<formalism::datalog::BinaryOperator<formalism::OpGt, T>>>;
+    using Variant = ::cista::offset::variant<Index<formalism::datalog::BinaryOperator<formalism::Eq, T>>,
+                                             Index<formalism::datalog::BinaryOperator<formalism::Ne, T>>,
+                                             Index<formalism::datalog::BinaryOperator<formalism::Le, T>>,
+                                             Index<formalism::datalog::BinaryOperator<formalism::Lt, T>>,
+                                             Index<formalism::datalog::BinaryOperator<formalism::Ge, T>>,
+                                             Index<formalism::datalog::BinaryOperator<formalism::Gt, T>>>;
 
     Variant value;
 

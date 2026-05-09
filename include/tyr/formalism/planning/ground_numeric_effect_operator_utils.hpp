@@ -28,31 +28,31 @@ namespace tyr::formalism::planning
  */
 
 template<typename T>
-inline T apply(OpAssign, T lhs, T rhs)
+inline T apply(Assign, T lhs, T rhs)
 {
     return rhs;
 }
 
 template<typename T>
-inline T apply(OpIncrease, T lhs, T rhs)
+inline T apply(Increase, T lhs, T rhs)
 {
     return lhs + rhs;
 }
 
 template<typename T>
-inline T apply(OpDecrease, T lhs, T rhs)
+inline T apply(Decrease, T lhs, T rhs)
 {
     return lhs - rhs;
 }
 
 template<typename T>
-inline T apply(OpScaleUp, T lhs, T rhs)
+inline T apply(ScaleUp, T lhs, T rhs)
 {
     return lhs * rhs;
 }
 
 template<typename T>
-inline T apply(OpScaleDown, T lhs, T rhs)
+inline T apply(ScaleDown, T lhs, T rhs)
 {
     return lhs / rhs;
 }

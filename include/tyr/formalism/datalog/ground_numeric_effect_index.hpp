@@ -24,7 +24,7 @@
 
 namespace tyr
 {
-template<formalism::datalog::NumericEffectOpKind Op, formalism::FactKind T>
+template<formalism::NumericEffectOpKind Op, formalism::FactKind T>
 struct Index<formalism::datalog::GroundNumericEffect<Op, T>> : IndexMixin<Index<formalism::datalog::GroundNumericEffect<Op, T>>>
 {
     static_assert(std::same_as<T, formalism::FluentTag>, "Datalog numeric effects are currently only supported for fluent functions.");

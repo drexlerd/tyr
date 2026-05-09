@@ -24,10 +24,10 @@
 
 namespace tyr
 {
-template<formalism::planning::NumericEffectOpKind Op, formalism::FactKind T>
+template<formalism::NumericEffectOpKind Op, formalism::FactKind T>
 struct Index<formalism::planning::GroundNumericEffect<Op, T>> : IndexMixin<Index<formalism::planning::GroundNumericEffect<Op, T>>>
 {
-    static_assert(std::same_as<T, formalism::FluentTag> || (std::same_as<T, formalism::AuxiliaryTag> && std::same_as<Op, formalism::planning::OpIncrease>),
+    static_assert(std::same_as<T, formalism::FluentTag> || (std::same_as<T, formalism::AuxiliaryTag> && std::same_as<Op, formalism::Increase>),
                   "Unsupported NumericEffect<Op, T> combination.");
 
     // Inherit constructors

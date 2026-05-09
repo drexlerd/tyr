@@ -32,24 +32,24 @@ namespace tyr
 template<typename T>
 struct Data<formalism::planning::ArithmeticOperator<T>>
 {
-    using Variant = ::cista::offset::variant<Index<formalism::planning::UnaryOperator<formalism::OpSub, T>>,
-                                             Index<formalism::planning::BinaryOperator<formalism::OpAdd, T>>,
-                                             Index<formalism::planning::BinaryOperator<formalism::OpSub, T>>,
-                                             Index<formalism::planning::BinaryOperator<formalism::OpMul, T>>,
-                                             Index<formalism::planning::BinaryOperator<formalism::OpDiv, T>>,
-                                             Index<formalism::planning::MultiOperator<formalism::OpAdd, T>>,
-                                             Index<formalism::planning::MultiOperator<formalism::OpMul, T>>>;
+    using Variant = ::cista::offset::variant<Index<formalism::planning::UnaryOperator<formalism::Sub, T>>,
+                                             Index<formalism::planning::BinaryOperator<formalism::Add, T>>,
+                                             Index<formalism::planning::BinaryOperator<formalism::Sub, T>>,
+                                             Index<formalism::planning::BinaryOperator<formalism::Mul, T>>,
+                                             Index<formalism::planning::BinaryOperator<formalism::Div, T>>,
+                                             Index<formalism::planning::MultiOperator<formalism::Add, T>>,
+                                             Index<formalism::planning::MultiOperator<formalism::Mul, T>>>;
 
     Variant value;
 
     template<typename C>
-    using ViewVariant = std::variant<View<Index<formalism::planning::UnaryOperator<formalism::OpSub, T>>, C>,
-                                     View<Index<formalism::planning::BinaryOperator<formalism::OpAdd, T>>, C>,
-                                     View<Index<formalism::planning::BinaryOperator<formalism::OpSub, T>>, C>,
-                                     View<Index<formalism::planning::BinaryOperator<formalism::OpMul, T>>, C>,
-                                     View<Index<formalism::planning::BinaryOperator<formalism::OpDiv, T>>, C>,
-                                     View<Index<formalism::planning::MultiOperator<formalism::OpAdd, T>>, C>,
-                                     View<Index<formalism::planning::MultiOperator<formalism::OpMul, T>>, C>>;
+    using ViewVariant = std::variant<View<Index<formalism::planning::UnaryOperator<formalism::Sub, T>>, C>,
+                                     View<Index<formalism::planning::BinaryOperator<formalism::Add, T>>, C>,
+                                     View<Index<formalism::planning::BinaryOperator<formalism::Sub, T>>, C>,
+                                     View<Index<formalism::planning::BinaryOperator<formalism::Mul, T>>, C>,
+                                     View<Index<formalism::planning::BinaryOperator<formalism::Div, T>>, C>,
+                                     View<Index<formalism::planning::MultiOperator<formalism::Add, T>>, C>,
+                                     View<Index<formalism::planning::MultiOperator<formalism::Mul, T>>, C>>;
 
     Data() = default;
     Data(Variant value_) : value(value_) {}

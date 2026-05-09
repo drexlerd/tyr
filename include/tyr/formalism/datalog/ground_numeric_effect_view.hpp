@@ -26,7 +26,7 @@
 
 namespace tyr
 {
-template<formalism::datalog::NumericEffectOpKind Op, formalism::FactKind T, formalism::datalog::Context C>
+template<formalism::NumericEffectOpKind Op, formalism::FactKind T, formalism::datalog::Context C>
 class View<Index<formalism::datalog::GroundNumericEffect<Op, T>>, C>
 {
 private:

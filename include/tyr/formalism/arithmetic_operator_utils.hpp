@@ -29,31 +29,31 @@ namespace tyr::formalism
  */
 
 template<typename T>
-inline T apply(OpSub, T el)
+inline T apply(Sub, T el)
 {
     return -el;
 }
 
 template<typename T>
-inline T apply(OpAdd, T lhs, T rhs)
+inline T apply(Add, T lhs, T rhs)
 {
     return lhs + rhs;
 }
 
 template<typename T>
-inline T apply(OpSub, T lhs, T rhs)
+inline T apply(Sub, T lhs, T rhs)
 {
     return lhs - rhs;
 }
 
 template<typename T>
-inline T apply(OpMul, T lhs, T rhs)
+inline T apply(Mul, T lhs, T rhs)
 {
     return lhs * rhs;
 }
 
 template<typename T>
-inline T apply(OpDiv, T lhs, T rhs)
+inline T apply(Div, T lhs, T rhs)
 {
     return lhs / rhs;
 }

@@ -54,7 +54,7 @@ struct Data<formalism::datalog::BinaryOperator<Op, T>>
     auto identifying_members() const noexcept { return std::tie(Op::kind, lhs, rhs); }
 };
 
-static_assert(!uses_trivial_storage_v<formalism::datalog::BinaryOperator<formalism::OpAdd, Data<formalism::datalog::FunctionExpression>>>);
+static_assert(!uses_trivial_storage_v<formalism::datalog::BinaryOperator<formalism::Add, Data<formalism::datalog::FunctionExpression>>>);
 
 }
 

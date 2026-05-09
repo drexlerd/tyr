@@ -423,7 +423,7 @@ void apply_policy(fd::FunctionTermView<T> element, Policy& policy)
         element.get_terms());
 }
 
-template<fd::NumericEffectOpKind Op, f::FactKind T, typename Policy>
+template<f::NumericEffectOpKind Op, f::FactKind T, typename Policy>
 void apply_policy(fd::NumericEffectView<Op, T> element, Policy& policy)
 {
     apply_policy(element.get_fterm(), policy);

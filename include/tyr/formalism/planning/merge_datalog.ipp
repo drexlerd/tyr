@@ -296,9 +296,9 @@ std::pair<formalism::datalog::GroundFunctionTermValueView<T>, bool> merge_p2d(Gr
     return context.destination.get_or_create(fterm_value);
 }
 
-template<formalism::datalog::NumericEffectOpKind DOp, NumericEffectOpKind Op>
-std::pair<formalism::datalog::NumericEffectView<DOp, FluentTag>, bool>
-merge_numeric_effect_as(NumericEffectView<Op, FluentTag> element, MergeDatalogContext& context)
+template<formalism::NumericEffectOpKind DOp, NumericEffectOpKind Op>
+std::pair<formalism::datalog::NumericEffectView<DOp, FluentTag>, bool> merge_numeric_effect_as(NumericEffectView<Op, FluentTag> element,
+                                                                                               MergeDatalogContext& context)
 {
     auto numeric_effect_ptr = context.builder.template get_builder<formalism::datalog::NumericEffect<DOp, FluentTag>>();
     auto& numeric_effect = *numeric_effect_ptr;
@@ -311,43 +311,41 @@ merge_numeric_effect_as(NumericEffectView<Op, FluentTag> element, MergeDatalogCo
     return context.destination.get_or_create(numeric_effect);
 }
 
-TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpAssign, FluentTag>, bool>
-merge_p2d(NumericEffectView<OpAssign, FluentTag> element, MergeDatalogContext& context)
+TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::Assign, FluentTag>, bool> merge_p2d(NumericEffectView<Assign, FluentTag> element,
+                                                                                                               MergeDatalogContext& context)
 {
-    return merge_numeric_effect_as<formalism::datalog::OpAssign>(element, context);
+    return merge_numeric_effect_as<formalism::Assign>(element, context);
 }
 
-TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpIncrease, FluentTag>, bool>
-merge_p2d(NumericEffectView<OpIncrease, FluentTag> element, MergeDatalogContext& context)
+TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::Increase, FluentTag>, bool> merge_p2d(NumericEffectView<Increase, FluentTag> element,
+                                                                                                                 MergeDatalogContext& context)
 {
-    return merge_numeric_effect_as<formalism::datalog::OpIncrease>(element, context);
+    return merge_numeric_effect_as<formalism::Increase>(element, context);
 }
 
-TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpDecrease, FluentTag>, bool>
-merge_p2d(NumericEffectView<OpDecrease, FluentTag> element, MergeDatalogContext& context)
+TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::Decrease, FluentTag>, bool> merge_p2d(NumericEffectView<Decrease, FluentTag> element,
+                                                                                                                 MergeDatalogContext& context)
 {
-    return merge_numeric_effect_as<formalism::datalog::OpDecrease>(element, context);
+    return merge_numeric_effect_as<formalism::Decrease>(element, context);
 }
 
-TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpScaleUp, FluentTag>, bool>
-merge_p2d(NumericEffectView<OpScaleUp, FluentTag> element, MergeDatalogContext& context)
+TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::ScaleUp, FluentTag>, bool> merge_p2d(NumericEffectView<ScaleUp, FluentTag> element,
+                                                                                                                MergeDatalogContext& context)
 {
-    return merge_numeric_effect_as<formalism::datalog::OpScaleUp>(element, context);
+    return merge_numeric_effect_as<formalism::ScaleUp>(element, context);
 }
 
-TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::datalog::OpScaleDown, FluentTag>, bool>
-merge_p2d(NumericEffectView<OpScaleDown, FluentTag> element, MergeDatalogContext& context)
+TYR_INLINE_IMPL std::pair<formalism::datalog::NumericEffectView<formalism::ScaleDown, FluentTag>, bool>
+merge_p2d(NumericEffectView<ScaleDown, FluentTag> element, MergeDatalogContext& context)
 {
-    return merge_numeric_effect_as<formalism::datalog::OpScaleDown>(element, context);
+    return merge_numeric_effect_as<formalism::ScaleDown>(element, context);
 }
 
-TYR_INLINE_IMPL Data<formalism::datalog::NumericEffectOperator<FluentTag>> merge_p2d(NumericEffectOperatorView<FluentTag> element,
-                                                                                      MergeDatalogContext& context)
+TYR_INLINE_IMPL Data<formalism::datalog::NumericEffectOperator<FluentTag>> merge_p2d(NumericEffectOperatorView<FluentTag> element, MergeDatalogContext& context)
 {
     using OperatorData = Data<formalism::datalog::NumericEffectOperator<FluentTag>>;
 
-    return visit([&](auto&& arg) { return OperatorData(typename OperatorData::Variant(merge_p2d(arg, context).first.get_index())); },
-                 element.get_variant());
+    return visit([&](auto&& arg) { return OperatorData(typename OperatorData::Variant(merge_p2d(arg, context).first.get_index())); }, element.get_variant());
 }
 
 TYR_INLINE_IMPL Data<formalism::datalog::FunctionExpression> merge_p2d(FunctionExpressionView element, MergeDatalogContext& context)

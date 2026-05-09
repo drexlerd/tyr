@@ -55,61 +55,61 @@ template struct View<Index<formalism::datalog::GroundFunctionTerm<formalism::Flu
 template struct View<Index<formalism::datalog::GroundFunctionTermValue<formalism::StaticTag>>, formalism::datalog::Repository>;
 template struct View<Index<formalism::datalog::GroundFunctionTermValue<formalism::FluentTag>>, formalism::datalog::Repository>;
 
-template struct View<Index<formalism::datalog::UnaryOperator<formalism::OpSub, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::UnaryOperator<formalism::Sub, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
 
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpAdd, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpSub, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpMul, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpDiv, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpEq, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpNe, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLe, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLt, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGe, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGt, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Add, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Sub, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Mul, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Div, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Eq, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Ne, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Le, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Lt, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Ge, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Gt, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
 
-template struct View<Index<formalism::datalog::MultiOperator<formalism::OpAdd, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::MultiOperator<formalism::OpMul, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::MultiOperator<formalism::Add, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::MultiOperator<formalism::Mul, Data<formalism::datalog::FunctionExpression>>>, formalism::datalog::Repository>;
 
-template struct View<Index<formalism::datalog::UnaryOperator<formalism::OpSub, Data<formalism::datalog::GroundFunctionExpression>>>,
-                     formalism::datalog::Repository>;
-
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpAdd, Data<formalism::datalog::GroundFunctionExpression>>>,
-                     formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpSub, Data<formalism::datalog::GroundFunctionExpression>>>,
-                     formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpMul, Data<formalism::datalog::GroundFunctionExpression>>>,
-                     formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpDiv, Data<formalism::datalog::GroundFunctionExpression>>>,
-                     formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpEq, Data<formalism::datalog::GroundFunctionExpression>>>,
-                     formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpNe, Data<formalism::datalog::GroundFunctionExpression>>>,
-                     formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLe, Data<formalism::datalog::GroundFunctionExpression>>>,
-                     formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpLt, Data<formalism::datalog::GroundFunctionExpression>>>,
-                     formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGe, Data<formalism::datalog::GroundFunctionExpression>>>,
-                     formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::BinaryOperator<formalism::OpGt, Data<formalism::datalog::GroundFunctionExpression>>>,
+template struct View<Index<formalism::datalog::UnaryOperator<formalism::Sub, Data<formalism::datalog::GroundFunctionExpression>>>,
                      formalism::datalog::Repository>;
 
-template struct View<Index<formalism::datalog::MultiOperator<formalism::OpAdd, Data<formalism::datalog::GroundFunctionExpression>>>,
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Add, Data<formalism::datalog::GroundFunctionExpression>>>,
                      formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::MultiOperator<formalism::OpMul, Data<formalism::datalog::GroundFunctionExpression>>>,
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Sub, Data<formalism::datalog::GroundFunctionExpression>>>,
+                     formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Mul, Data<formalism::datalog::GroundFunctionExpression>>>,
+                     formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Div, Data<formalism::datalog::GroundFunctionExpression>>>,
+                     formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Eq, Data<formalism::datalog::GroundFunctionExpression>>>,
+                     formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Ne, Data<formalism::datalog::GroundFunctionExpression>>>,
+                     formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Le, Data<formalism::datalog::GroundFunctionExpression>>>,
+                     formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Lt, Data<formalism::datalog::GroundFunctionExpression>>>,
+                     formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Ge, Data<formalism::datalog::GroundFunctionExpression>>>,
+                     formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::BinaryOperator<formalism::Gt, Data<formalism::datalog::GroundFunctionExpression>>>,
                      formalism::datalog::Repository>;
 
-template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpAssign, formalism::FluentTag>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpIncrease, formalism::FluentTag>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpDecrease, formalism::FluentTag>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpScaleUp, formalism::FluentTag>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::NumericEffect<formalism::datalog::OpScaleDown, formalism::FluentTag>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpAssign, formalism::FluentTag>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpIncrease, formalism::FluentTag>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpDecrease, formalism::FluentTag>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpScaleUp, formalism::FluentTag>>, formalism::datalog::Repository>;
-template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::datalog::OpScaleDown, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::MultiOperator<formalism::Add, Data<formalism::datalog::GroundFunctionExpression>>>,
+                     formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::MultiOperator<formalism::Mul, Data<formalism::datalog::GroundFunctionExpression>>>,
+                     formalism::datalog::Repository>;
+
+template struct View<Index<formalism::datalog::NumericEffect<formalism::Assign, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::NumericEffect<formalism::Increase, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::NumericEffect<formalism::Decrease, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::NumericEffect<formalism::ScaleUp, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::NumericEffect<formalism::ScaleDown, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::Assign, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::Increase, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::Decrease, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::ScaleUp, formalism::FluentTag>>, formalism::datalog::Repository>;
+template struct View<Index<formalism::datalog::GroundNumericEffect<formalism::ScaleDown, formalism::FluentTag>>, formalism::datalog::Repository>;
 template struct View<Data<formalism::datalog::NumericEffectOperator<formalism::FluentTag>>, formalism::datalog::Repository>;
 template struct View<Data<formalism::datalog::GroundNumericEffectOperator<formalism::FluentTag>>, formalism::datalog::Repository>;
 

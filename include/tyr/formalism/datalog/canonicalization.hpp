@@ -47,13 +47,13 @@ bool is_canonical(const Data<BinaryOperator<Op, T>>& data)
 }
 
 template<typename T>
-bool is_canonical(const Data<BinaryOperator<OpAdd, T>>& data)
+bool is_canonical(const Data<BinaryOperator<Add, T>>& data)
 {
     return LessEqual<T> {}(data.lhs, data.rhs);
 }
 
 template<typename T>
-bool is_canonical(const Data<BinaryOperator<OpMul, T>>& data)
+bool is_canonical(const Data<BinaryOperator<Mul, T>>& data)
 {
     return LessEqual<T> {}(data.lhs, data.rhs);
 }
@@ -65,13 +65,13 @@ bool is_canonical(const Data<MultiOperator<Op, T>>& data)
 }
 
 template<typename T>
-bool is_canonical(const Data<MultiOperator<OpAdd, T>>& data)
+bool is_canonical(const Data<MultiOperator<Add, T>>& data)
 {
     return is_canonical(data.args);
 }
 
 template<typename T>
-bool is_canonical(const Data<MultiOperator<OpMul, T>>& data)
+bool is_canonical(const Data<MultiOperator<Mul, T>>& data)
 {
     return is_canonical(data.args);
 }
@@ -184,14 +184,14 @@ void canonicalize(Data<BinaryOperator<Op, T>>& data)
 }
 
 template<typename T>
-void canonicalize(Data<BinaryOperator<OpAdd, T>>& data)
+void canonicalize(Data<BinaryOperator<Add, T>>& data)
 {
     if (Greater<T> {}(data.lhs, data.rhs))
         std::swap(data.lhs, data.rhs);
 }
 
 template<typename T>
-void canonicalize(Data<BinaryOperator<OpMul, T>>& data)
+void canonicalize(Data<BinaryOperator<Mul, T>>& data)
 {
     if (Greater<T> {}(data.lhs, data.rhs))
         std::swap(data.lhs, data.rhs);
@@ -204,13 +204,13 @@ void canonicalize(Data<MultiOperator<Op, T>>& data)
 }
 
 template<typename T>
-void canonicalize(Data<MultiOperator<OpAdd, T>>& data)
+void canonicalize(Data<MultiOperator<Add, T>>& data)
 {
     canonicalize(data.args);
 }
 
 template<typename T>
-void canonicalize(Data<MultiOperator<OpMul, T>>& data)
+void canonicalize(Data<MultiOperator<Mul, T>>& data)
 {
     canonicalize(data.args);
 }

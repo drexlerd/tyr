@@ -441,13 +441,13 @@ Data<FunctionExpression> LokiToTyrTranslator::translate_lifted(loki::FunctionExp
     switch (element->get_binary_operator())
     {
         case loki::BinaryOperatorEnum::PLUS:
-            return build_binary_op(OpAdd {});
+            return build_binary_op(Add {});
         case loki::BinaryOperatorEnum::MINUS:
-            return build_binary_op(OpSub {});
+            return build_binary_op(Sub {});
         case loki::BinaryOperatorEnum::MUL:
-            return build_binary_op(OpMul {});
+            return build_binary_op(Mul {});
         case loki::BinaryOperatorEnum::DIV:
-            return build_binary_op(OpDiv {});
+            return build_binary_op(Div {});
         default:
             throw std::runtime_error("Unexpected case");
     }
@@ -470,9 +470,9 @@ Data<FunctionExpression> LokiToTyrTranslator::translate_lifted(loki::FunctionExp
     switch (element->get_multi_operator())
     {
         case loki::MultiOperatorEnum::PLUS:
-            return build_multi_op(OpAdd {});
+            return build_multi_op(Add {});
         case loki::MultiOperatorEnum::MUL:
-            return build_multi_op(OpMul {});
+            return build_multi_op(Mul {});
         default:
             throw std::runtime_error("Unexpected case");
     }
@@ -480,7 +480,7 @@ Data<FunctionExpression> LokiToTyrTranslator::translate_lifted(loki::FunctionExp
 
 Data<FunctionExpression> LokiToTyrTranslator::translate_lifted(loki::FunctionExpressionMinus element, Builder& builder, Repository& context)
 {
-    auto minus_ptr = builder.template get_builder<UnaryOperator<OpSub, Data<FunctionExpression>>>();
+    auto minus_ptr = builder.template get_builder<UnaryOperator<Sub, Data<FunctionExpression>>>();
     auto& minus = *minus_ptr;
     minus.clear();
     minus.arg = translate_lifted(element->get_function_expression(), builder, context);
@@ -548,7 +548,8 @@ FunctionTermViewVariant LokiToTyrTranslator::translate_lifted(loki::Function ele
         function_view_variant);
 }
 
-Data<BooleanOperator<Data<FunctionExpression>>> LokiToTyrTranslator::translate_lifted(loki::ConditionNumericConstraint element, Builder& builder, Repository& context)
+Data<BooleanOperator<Data<FunctionExpression>>>
+LokiToTyrTranslator::translate_lifted(loki::ConditionNumericConstraint element, Builder& builder, Repository& context)
 {
     auto build_binary_op = [&](auto op_tag) -> Data<BooleanOperator<Data<FunctionExpression>>>
     {
@@ -566,23 +567,24 @@ Data<BooleanOperator<Data<FunctionExpression>>> LokiToTyrTranslator::translate_l
     switch (element->get_binary_comparator())
     {
         case loki::BinaryComparatorEnum::EQUAL:
-            return build_binary_op(OpEq {});
+            return build_binary_op(Eq {});
         case loki::BinaryComparatorEnum::UNEQUAL:
-            return build_binary_op(OpNe {});
+            return build_binary_op(Ne {});
         case loki::BinaryComparatorEnum::LESS_EQUAL:
-            return build_binary_op(OpLe {});
+            return build_binary_op(Le {});
         case loki::BinaryComparatorEnum::LESS:
-            return build_binary_op(OpLt {});
+            return build_binary_op(Lt {});
         case loki::BinaryComparatorEnum::GREATER_EQUAL:
-            return build_binary_op(OpGe {});
+            return build_binary_op(Ge {});
         case loki::BinaryComparatorEnum::GREATER:
-            return build_binary_op(OpGt {});
+            return build_binary_op(Gt {});
         default:
             throw std::runtime_error("Unexpected case");
     }
 }
 
-Index<ConjunctiveCondition> LokiToTyrTranslator::translate_lifted(loki::Condition element, const IndexList<Variable>& parameters, Builder& builder, Repository& context)
+Index<ConjunctiveCondition>
+LokiToTyrTranslator::translate_lifted(loki::Condition element, const IndexList<Variable>& parameters, Builder& builder, Repository& context)
 {
     auto conj_condition_ptr = builder.template get_builder<ConjunctiveCondition>();
     auto& conj_condition = *conj_condition_ptr;
@@ -708,22 +710,22 @@ NumericEffectViewVariant LokiToTyrTranslator::translate_lifted(loki::EffectNumer
             if (element->get_assign_operator() != loki::AssignOperatorEnum::INCREASE)
                 throw std::runtime_error("Auxiliary numeric effect must use INCREASE operator.");
 
-            return build_numeric_effect_term_helper(Tag {}, OpIncrease {}, fterm);
+            return build_numeric_effect_term_helper(Tag {}, Increase {}, fterm);
         }
         else
         {
             switch (element->get_assign_operator())
             {
                 case loki::AssignOperatorEnum::ASSIGN:
-                    return build_numeric_effect_term_helper(Tag {}, OpAssign {}, fterm);
+                    return build_numeric_effect_term_helper(Tag {}, Assign {}, fterm);
                 case loki::AssignOperatorEnum::INCREASE:
-                    return build_numeric_effect_term_helper(Tag {}, OpIncrease {}, fterm);
+                    return build_numeric_effect_term_helper(Tag {}, Increase {}, fterm);
                 case loki::AssignOperatorEnum::DECREASE:
-                    return build_numeric_effect_term_helper(Tag {}, OpDecrease {}, fterm);
+                    return build_numeric_effect_term_helper(Tag {}, Decrease {}, fterm);
                 case loki::AssignOperatorEnum::SCALE_UP:
-                    return build_numeric_effect_term_helper(Tag {}, OpScaleUp {}, fterm);
+                    return build_numeric_effect_term_helper(Tag {}, ScaleUp {}, fterm);
                 case loki::AssignOperatorEnum::SCALE_DOWN:
-                    return build_numeric_effect_term_helper(Tag {}, OpScaleDown {}, fterm);
+                    return build_numeric_effect_term_helper(Tag {}, ScaleDown {}, fterm);
                 default:
                     throw std::runtime_error("Unexpected case.");
             }
@@ -747,7 +749,8 @@ NumericEffectViewVariant LokiToTyrTranslator::translate_lifted(loki::EffectNumer
         fterm_view_variant);
 }
 
-IndexList<ConditionalEffect> LokiToTyrTranslator::translate_lifted(loki::Effect element, const IndexList<Variable>& parameters, Builder& builder, Repository& context)
+IndexList<ConditionalEffect>
+LokiToTyrTranslator::translate_lifted(loki::Effect element, const IndexList<Variable>& parameters, Builder& builder, Repository& context)
 {
     using ConditionalEffectData = UnorderedMap<Index<ConjunctiveCondition>,
                                                std::tuple<IndexList<Variable>,
@@ -855,17 +858,17 @@ IndexList<ConditionalEffect> LokiToTyrTranslator::translate_lifted(loki::Effect 
                             {
                                 using SubSubEffectT = std::decay_t<decltype(subsubeffect)>;
 
-                                if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpAssign, FluentTag>>)
+                                if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<Assign, FluentTag>>)
                                     data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect.get_index()));
-                                else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpIncrease, FluentTag>>)
+                                else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<Increase, FluentTag>>)
                                     data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect.get_index()));
-                                else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpDecrease, FluentTag>>)
+                                else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<Decrease, FluentTag>>)
                                     data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect.get_index()));
-                                else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpScaleUp, FluentTag>>)
+                                else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<ScaleUp, FluentTag>>)
                                     data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect.get_index()));
-                                else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpScaleDown, FluentTag>>)
+                                else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<ScaleDown, FluentTag>>)
                                     data_fluent_numeric_effects.push_back(Data<NumericEffectOperator<FluentTag>>(subsubeffect.get_index()));
-                                else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<OpIncrease, AuxiliaryTag>>)
+                                else if constexpr (std::is_same_v<SubSubEffectT, NumericEffectView<Increase, AuxiliaryTag>>)
                                 {
                                     assert(!data_auxiliary_numeric_effect);
                                     data_auxiliary_numeric_effect = Data<NumericEffectOperator<AuxiliaryTag>>(subsubeffect.get_index());
@@ -913,10 +916,8 @@ IndexList<ConditionalEffect> LokiToTyrTranslator::translate_lifted(loki::Effect 
 
     for (const auto& [cond_conjunctive_condition, value] : conditional_effect_data)
     {
-        const auto& [cond_effect_universal_parameters,
-                     cond_effect_fluent_literals,
-                     cond_effect_fluent_numeric_effects,
-                     cond_effect_auxiliary_numeric_effects] = value;
+        const auto& [cond_effect_universal_parameters, cond_effect_fluent_literals, cond_effect_fluent_numeric_effects, cond_effect_auxiliary_numeric_effects] =
+            value;
 
         auto conj_effect_ptr = builder.template get_builder<ConjunctiveEffect>();
         auto& conj_effect = *conj_effect_ptr;
@@ -1041,8 +1042,6 @@ Index<Object> LokiToTyrTranslator::translate_grounded(loki::Term element, Builde
         },
         element->get_object_or_variable());
 }
-
-
 
 GroundAtomViewVariant LokiToTyrTranslator::translate_grounded(loki::Atom element, Builder& builder, Repository& context)
 {
@@ -1172,13 +1171,13 @@ Data<GroundFunctionExpression> LokiToTyrTranslator::translate_grounded(loki::Fun
     switch (element->get_binary_operator())
     {
         case loki::BinaryOperatorEnum::PLUS:
-            return build_binary_op(OpAdd {});
+            return build_binary_op(Add {});
         case loki::BinaryOperatorEnum::MINUS:
-            return build_binary_op(OpSub {});
+            return build_binary_op(Sub {});
         case loki::BinaryOperatorEnum::MUL:
-            return build_binary_op(OpMul {});
+            return build_binary_op(Mul {});
         case loki::BinaryOperatorEnum::DIV:
-            return build_binary_op(OpDiv {});
+            return build_binary_op(Div {});
         default:
             throw std::runtime_error("Unexpected case");
     }
@@ -1201,9 +1200,9 @@ Data<GroundFunctionExpression> LokiToTyrTranslator::translate_grounded(loki::Fun
     switch (element->get_multi_operator())
     {
         case loki::MultiOperatorEnum::PLUS:
-            return build_multi_op(OpAdd {});
+            return build_multi_op(Add {});
         case loki::MultiOperatorEnum::MUL:
-            return build_multi_op(OpMul {});
+            return build_multi_op(Mul {});
         default:
             throw std::runtime_error("Unexpected case");
     }
@@ -1211,7 +1210,7 @@ Data<GroundFunctionExpression> LokiToTyrTranslator::translate_grounded(loki::Fun
 
 Data<GroundFunctionExpression> LokiToTyrTranslator::translate_grounded(loki::FunctionExpressionMinus element, Builder& builder, Repository& context)
 {
-    auto minus_ptr = builder.template get_builder<UnaryOperator<OpSub, Data<GroundFunctionExpression>>>();
+    auto minus_ptr = builder.template get_builder<UnaryOperator<Sub, Data<GroundFunctionExpression>>>();
     auto& minus = *minus_ptr;
     minus.clear();
     minus.arg = translate_grounded(element->get_function_expression(), builder, context);
@@ -1310,7 +1309,8 @@ GroundFunctionTermValueViewVariant LokiToTyrTranslator::translate_grounded(loki:
         fterm_view_variant);
 }
 
-Data<BooleanOperator<Data<GroundFunctionExpression>>> LokiToTyrTranslator::translate_grounded(loki::ConditionNumericConstraint element, Builder& builder, Repository& context)
+Data<BooleanOperator<Data<GroundFunctionExpression>>>
+LokiToTyrTranslator::translate_grounded(loki::ConditionNumericConstraint element, Builder& builder, Repository& context)
 {
     auto build_binary_op = [&](auto op_tag) -> Data<BooleanOperator<Data<GroundFunctionExpression>>>
     {
@@ -1328,21 +1328,22 @@ Data<BooleanOperator<Data<GroundFunctionExpression>>> LokiToTyrTranslator::trans
     switch (element->get_binary_comparator())
     {
         case loki::BinaryComparatorEnum::EQUAL:
-            return build_binary_op(OpEq {});
+            return build_binary_op(Eq {});
         case loki::BinaryComparatorEnum::LESS_EQUAL:
-            return build_binary_op(OpLe {});
+            return build_binary_op(Le {});
         case loki::BinaryComparatorEnum::LESS:
-            return build_binary_op(OpLt {});
+            return build_binary_op(Lt {});
         case loki::BinaryComparatorEnum::GREATER_EQUAL:
-            return build_binary_op(OpGe {});
+            return build_binary_op(Ge {});
         case loki::BinaryComparatorEnum::GREATER:
-            return build_binary_op(OpGt {});
+            return build_binary_op(Gt {});
         default:
             throw std::runtime_error("Unexpected case");
     }
 }
 
-Index<GroundConjunctiveCondition> LokiToTyrTranslator::translate_grounded(loki::Condition element, Builder& builder, Repository& context, FDRContext& fdr_context)
+Index<GroundConjunctiveCondition>
+LokiToTyrTranslator::translate_grounded(loki::Condition element, Builder& builder, Repository& context, FDRContext& fdr_context)
 {
     auto conj_condition_ptr = builder.template get_builder<GroundConjunctiveCondition>();
     auto& conj_condition = *conj_condition_ptr;

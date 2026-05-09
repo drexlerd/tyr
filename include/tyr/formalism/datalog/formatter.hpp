@@ -306,7 +306,7 @@ struct formatter<tyr::formalism::datalog::GroundFunctionTermValueView<T>, char>
     }
 };
 
-template<tyr::formalism::datalog::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+template<tyr::formalism::NumericEffectOpKind Op, tyr::formalism::FactKind T>
 struct formatter<tyr::Data<tyr::formalism::datalog::NumericEffect<Op, T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
@@ -317,7 +317,7 @@ struct formatter<tyr::Data<tyr::formalism::datalog::NumericEffect<Op, T>>, char>
     }
 };
 
-template<tyr::formalism::datalog::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+template<tyr::formalism::NumericEffectOpKind Op, tyr::formalism::FactKind T>
 struct formatter<tyr::formalism::datalog::NumericEffectView<Op, T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
@@ -350,7 +350,7 @@ struct formatter<tyr::formalism::datalog::NumericEffectOperatorView<T>, char>
     }
 };
 
-template<tyr::formalism::datalog::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+template<tyr::formalism::NumericEffectOpKind Op, tyr::formalism::FactKind T>
 struct formatter<tyr::Data<tyr::formalism::datalog::GroundNumericEffect<Op, T>>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
@@ -361,7 +361,7 @@ struct formatter<tyr::Data<tyr::formalism::datalog::GroundNumericEffect<Op, T>>,
     }
 };
 
-template<tyr::formalism::datalog::NumericEffectOpKind Op, tyr::formalism::FactKind T>
+template<tyr::formalism::NumericEffectOpKind Op, tyr::formalism::FactKind T>
 struct formatter<tyr::formalism::datalog::GroundNumericEffectView<Op, T>, char>
 {
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }

@@ -126,60 +126,60 @@ template std::pair<GroundFunctionTermValueView<StaticTag>, bool> merge_d2p(forma
 template std::pair<GroundFunctionTermValueView<FluentTag>, bool> merge_d2p(formalism::datalog::GroundFunctionTermValueView<FluentTag> element,
                                                                            MergePlanningContext& context);
 
-template std::pair<UnaryOperatorView<OpSub, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::UnaryOperatorView<OpSub, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<UnaryOperatorView<OpSub, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::UnaryOperatorView<OpSub, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<UnaryOperatorView<Sub, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::UnaryOperatorView<Sub, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<UnaryOperatorView<Sub, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::UnaryOperatorView<Sub, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
 
-template std::pair<BinaryOperatorView<OpEq, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpEq, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpNe, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpNe, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpGe, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpGe, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpGt, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpGt, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpLe, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpLe, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpLt, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpLt, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpAdd, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpAdd, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpSub, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpSub, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpMul, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpMul, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpDiv, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpDiv, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpEq, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpEq, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpNe, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpNe, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpGe, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpGe, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpGt, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpGt, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpLe, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpLe, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpLt, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpLt, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpAdd, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpAdd, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpSub, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpSub, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpMul, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpMul, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
-template std::pair<BinaryOperatorView<OpDiv, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::BinaryOperatorView<OpDiv, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Eq, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Eq, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Ne, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Ne, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Ge, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Ge, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Gt, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Gt, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Le, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Le, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Lt, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Lt, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Add, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Add, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Sub, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Sub, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Mul, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Mul, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Div, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Div, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Eq, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Eq, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Ne, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Ne, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Ge, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Ge, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Gt, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Gt, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Le, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Le, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Lt, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Lt, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Add, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Add, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Sub, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Sub, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Mul, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Mul, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<BinaryOperatorView<Div, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::BinaryOperatorView<Div, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
 
-template std::pair<MultiOperatorView<OpAdd, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::MultiOperatorView<OpAdd, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<MultiOperatorView<OpMul, Data<FunctionExpression>>, bool>
-merge_d2p(formalism::datalog::MultiOperatorView<OpMul, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
-template std::pair<MultiOperatorView<OpAdd, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::MultiOperatorView<OpAdd, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
-template std::pair<MultiOperatorView<OpMul, Data<GroundFunctionExpression>>, bool>
-merge_d2p(formalism::datalog::MultiOperatorView<OpMul, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<MultiOperatorView<Add, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::MultiOperatorView<Add, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<MultiOperatorView<Mul, Data<FunctionExpression>>, bool>
+merge_d2p(formalism::datalog::MultiOperatorView<Mul, Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);
+template std::pair<MultiOperatorView<Add, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::MultiOperatorView<Add, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
+template std::pair<MultiOperatorView<Mul, Data<GroundFunctionExpression>>, bool>
+merge_d2p(formalism::datalog::MultiOperatorView<Mul, Data<formalism::datalog::GroundFunctionExpression>> element, MergePlanningContext& context);
 
 template Data<ArithmeticOperator<Data<FunctionExpression>>>
 merge_d2p(formalism::datalog::ArithmeticOperatorView<Data<formalism::datalog::FunctionExpression>> element, MergePlanningContext& context);

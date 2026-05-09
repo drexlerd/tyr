@@ -81,7 +81,7 @@ float_t evaluate(formalism::planning::LiftedMultiOperatorView<O> element, const 
                            child_fexprs.end(),
                            evaluate(child_fexprs.front(), context),
                            [&](const auto& value, const auto& child_expr)
-                           { return formalism::apply(formalism::OpMul {}, value, evaluate(child_expr, context)); });
+                           { return formalism::apply(formalism::Mul {}, value, evaluate(child_expr, context)); });
 }
 
 TYR_INLINE_IMPL float_t evaluate(formalism::planning::FunctionTermView<formalism::StaticTag> element, const ApplicabilityContext& context)
@@ -122,7 +122,7 @@ TYR_INLINE_IMPL bool evaluate(formalism::planning::LiftedBooleanOperatorView ele
     return visit([&](auto&& arg) { return evaluate(arg, context); }, element.get_variant());
 }
 
-template<formalism::planning::NumericEffectOpKind Op, formalism::FactKind T>
+template<formalism::NumericEffectOpKind Op, formalism::FactKind T>
 float_t evaluate(formalism::planning::NumericEffectView<Op, T> element, const ApplicabilityContext& context)
 {
     return formalism::planning::apply(Op {}, evaluate(element.get_fterm(), context), evaluate(element.get_fexpr(), context));
@@ -246,22 +246,22 @@ TYR_INLINE_IMPL bool is_applicable(formalism::planning::LiftedBooleanOperatorLis
     return std::all_of(elements.begin(), elements.end(), [&](auto&& arg) { return is_applicable(arg, context); });
 }
 
-template<formalism::planning::NumericEffectOpKind Op>
+template<formalism::NumericEffectOpKind Op>
 bool is_applicable(formalism::planning::NumericEffectView<Op, formalism::FluentTag> element,
                    const ApplicabilityContext& context,
                    formalism::planning::EffectFamilyList& ref_fluent_effect_families)
 {
     const auto fterm_index = element.get_fterm().get_index();
-    ref_fluent_effect_families.resize(fterm_index.get_value() + 1, formalism::planning::EffectFamily::NONE);
+    ref_fluent_effect_families.resize(fterm_index.get_value() + 1, formalism::EffectFamily::NONE);
 
     // Check non-conflicting effects
-    if (!is_compatible_effect_family(Op::family, ref_fluent_effect_families[fterm_index.get_value()]))
+    if (!formalism::planning::is_compatible_effect_family(Op::family, ref_fluent_effect_families[fterm_index.get_value()]))
         return false;  /// incompatible effects
 
     ref_fluent_effect_families[fterm_index.get_value()] = Op::family;
 
     // Check fterm is well-defined in context
-    if constexpr (!std::is_same_v<Op, formalism::planning::OpAssign>)
+    if constexpr (!std::is_same_v<Op, formalism::Assign>)
     {
         if (std::isnan(evaluate(element.get_fterm(), context)))
             return false;  /// target function is undefined and operator is not assign
@@ -285,7 +285,7 @@ TYR_INLINE_IMPL bool is_applicable(formalism::planning::NumericEffectOperatorLis
     return std::all_of(elements.begin(), elements.end(), [&](auto&& arg) { return is_applicable(arg, context, ref_fluent_effect_families); });
 }
 
-TYR_INLINE_IMPL bool is_applicable(formalism::planning::NumericEffectView<formalism::planning::OpIncrease, formalism::AuxiliaryTag> element,
+TYR_INLINE_IMPL bool is_applicable(formalism::planning::NumericEffectView<formalism::Increase, formalism::AuxiliaryTag> element,
                                    const ApplicabilityContext& context)
 {
     // Check fexpr is well-defined in context

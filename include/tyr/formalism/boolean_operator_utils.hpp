@@ -34,10 +34,7 @@ namespace tyr::formalism
 template<std::floating_point T>
 struct FloatCmp
 {
-    static T tol(T a, T b) noexcept
-    {
-        return FloatTolerance<T>::tolerance(a, b);
-    }
+    static T tol(T a, T b) noexcept { return FloatTolerance<T>::tolerance(a, b); }
 
     static bool eq(T a, T b) noexcept { return std::abs(a - b) <= tol(a, b); }
 
@@ -114,37 +111,37 @@ bool lt_scalar(T lhs, T rhs) noexcept
  */
 
 template<typename T>
-bool apply(OpEq, T lhs, T rhs) noexcept
+bool apply(Eq, T lhs, T rhs) noexcept
 {
     return detail::eq_scalar(lhs, rhs);
 }
 
 template<typename T>
-bool apply(OpNe, T lhs, T rhs) noexcept
+bool apply(Ne, T lhs, T rhs) noexcept
 {
     return detail::ne_scalar(lhs, rhs);
 }
 
 template<typename T>
-bool apply(OpGe, T lhs, T rhs) noexcept
+bool apply(Ge, T lhs, T rhs) noexcept
 {
     return detail::ge_scalar(lhs, rhs);
 }
 
 template<typename T>
-bool apply(OpGt, T lhs, T rhs) noexcept
+bool apply(Gt, T lhs, T rhs) noexcept
 {
     return detail::gt_scalar(lhs, rhs);
 }
 
 template<typename T>
-bool apply(OpLe, T lhs, T rhs) noexcept
+bool apply(Le, T lhs, T rhs) noexcept
 {
     return detail::le_scalar(lhs, rhs);
 }
 
 template<typename T>
-bool apply(OpLt, T lhs, T rhs) noexcept
+bool apply(Lt, T lhs, T rhs) noexcept
 {
     return detail::lt_scalar(lhs, rhs);
 }
@@ -154,7 +151,7 @@ bool apply(OpLt, T lhs, T rhs) noexcept
  */
 
 template<std::floating_point A>
-bool apply_existential(OpEq, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
+bool apply_existential(Eq, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
 {
     if (empty(lhs) || empty(rhs))
         return false;
@@ -163,7 +160,7 @@ bool apply_existential(OpEq, const ClosedInterval<A>& lhs, const ClosedInterval<
 }
 
 template<std::floating_point A>
-bool apply_existential(OpNe, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
+bool apply_existential(Ne, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
 {
     if (empty(lhs) || empty(rhs))
         return false;
@@ -178,7 +175,7 @@ bool apply_existential(OpNe, const ClosedInterval<A>& lhs, const ClosedInterval<
 }
 
 template<std::floating_point A>
-bool apply_existential(OpGe, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
+bool apply_existential(Ge, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
 {
     if (empty(lhs) || empty(rhs))
         return false;
@@ -187,7 +184,7 @@ bool apply_existential(OpGe, const ClosedInterval<A>& lhs, const ClosedInterval<
 }
 
 template<std::floating_point A>
-bool apply_existential(OpGt, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
+bool apply_existential(Gt, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
 {
     if (empty(lhs) || empty(rhs))
         return false;
@@ -196,7 +193,7 @@ bool apply_existential(OpGt, const ClosedInterval<A>& lhs, const ClosedInterval<
 }
 
 template<std::floating_point A>
-bool apply_existential(OpLe, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
+bool apply_existential(Le, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
 {
     if (empty(lhs) || empty(rhs))
         return false;
@@ -205,7 +202,7 @@ bool apply_existential(OpLe, const ClosedInterval<A>& lhs, const ClosedInterval<
 }
 
 template<std::floating_point A>
-bool apply_existential(OpLt, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
+bool apply_existential(Lt, const ClosedInterval<A>& lhs, const ClosedInterval<A>& rhs)
 {
     if (empty(lhs) || empty(rhs))
         return false;

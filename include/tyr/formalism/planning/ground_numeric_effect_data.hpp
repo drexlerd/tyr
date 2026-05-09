@@ -28,10 +28,10 @@
 namespace tyr
 {
 
-template<formalism::planning::NumericEffectOpKind Op, formalism::FactKind T>
+template<formalism::NumericEffectOpKind Op, formalism::FactKind T>
 struct Data<formalism::planning::GroundNumericEffect<Op, T>>
 {
-    static_assert(std::same_as<T, formalism::FluentTag> || (std::same_as<T, formalism::AuxiliaryTag> && std::same_as<Op, formalism::planning::OpIncrease>),
+    static_assert(std::same_as<T, formalism::FluentTag> || (std::same_as<T, formalism::AuxiliaryTag> && std::same_as<Op, formalism::Increase>),
                   "Unsupported NumericEffect<Op, T> combination.");
 
     Index<formalism::planning::GroundNumericEffect<Op, T>> index;
@@ -71,7 +71,7 @@ struct Data<formalism::planning::GroundNumericEffect<Op, T>>
     auto identifying_members() const noexcept { return std::tie(Op::kind, fterm, fexpr); }
 };
 
-static_assert(!uses_trivial_storage_v<formalism::planning::GroundNumericEffect<formalism::planning::OpAssign, formalism::FluentTag>>);
+static_assert(!uses_trivial_storage_v<formalism::planning::GroundNumericEffect<formalism::Assign, formalism::FluentTag>>);
 }
 
 #endif

@@ -185,16 +185,14 @@ is_valid_binding(formalism::datalog::FunctionTermView<T> element, const FactSets
     return fact_sets.template get<T>().function[*binding_or_nullopt];
 }
 
-TYR_INLINE_IMPL ClosedInterval<float_t> is_valid_binding(formalism::datalog::FunctionExpressionView element,
-                                                         const FactSets& fact_sets,
-                                                         formalism::datalog::GrounderContext& context)
+TYR_INLINE_IMPL ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::FunctionExpressionView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
 {
     return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
 }
 
-TYR_INLINE_IMPL ClosedInterval<float_t> is_valid_binding(formalism::datalog::LiftedArithmeticOperatorView element,
-                                                         const FactSets& fact_sets,
-                                                         formalism::datalog::GrounderContext& context)
+TYR_INLINE_IMPL ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::LiftedArithmeticOperatorView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
 {
     return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
 }
@@ -240,15 +238,15 @@ namespace details
 template<typename Op>
 ClosedInterval<float_t> apply_numeric_effect(Op, ClosedInterval<float_t> lhs, ClosedInterval<float_t> rhs)
 {
-    if constexpr (std::is_same_v<Op, formalism::datalog::OpAssign>)
+    if constexpr (std::is_same_v<Op, formalism::Assign>)
         return rhs;
-    else if constexpr (std::is_same_v<Op, formalism::datalog::OpIncrease>)
+    else if constexpr (std::is_same_v<Op, formalism::Increase>)
         return lhs + rhs;
-    else if constexpr (std::is_same_v<Op, formalism::datalog::OpDecrease>)
+    else if constexpr (std::is_same_v<Op, formalism::Decrease>)
         return lhs - rhs;
-    else if constexpr (std::is_same_v<Op, formalism::datalog::OpScaleUp>)
+    else if constexpr (std::is_same_v<Op, formalism::ScaleUp>)
         return lhs * rhs;
-    else if constexpr (std::is_same_v<Op, formalism::datalog::OpScaleDown>)
+    else if constexpr (std::is_same_v<Op, formalism::ScaleDown>)
         return lhs / rhs;
     else
         static_assert(dependent_false<Op>::value, "Missing case");
@@ -256,16 +254,15 @@ ClosedInterval<float_t> apply_numeric_effect(Op, ClosedInterval<float_t> lhs, Cl
 
 }
 
-template<formalism::datalog::NumericEffectOpKind Op, formalism::FactKind T>
-ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<Op, T> element,
-                                         const FactSets& fact_sets,
-                                         formalism::datalog::GrounderContext& context)
+template<formalism::NumericEffectOpKind Op, formalism::FactKind T>
+ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::NumericEffectView<Op, T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
 {
     const auto rhs = is_valid_binding(element.get_fexpr(), fact_sets, context);
     if (empty(rhs))
         return {};
 
-    if constexpr (std::is_same_v<Op, formalism::datalog::OpAssign>)
+    if constexpr (std::is_same_v<Op, formalism::Assign>)
     {
         return rhs;
     }
@@ -280,9 +277,8 @@ ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<O
 }
 
 template<formalism::FactKind T>
-ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectOperatorView<T> element,
-                                         const FactSets& fact_sets,
-                                         formalism::datalog::GrounderContext& context)
+ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::NumericEffectOperatorView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
 {
     return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
 }
