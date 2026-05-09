@@ -15,11 +15,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_PYTHON_COMMON_HPP_
-#define TYR_PYTHON_COMMON_HPP_
+#ifndef TYR_COMMON_PYTHON_TYPE_CASTERS_HPP_
+#define TYR_COMMON_PYTHON_TYPE_CASTERS_HPP_
 
-#include "../init_declarations.hpp"
-
-#include <tyr/common/python/bindings.hpp>
+#include "tyr/common/python/type_casters/optional.hpp"
+#include "tyr/common/python/type_casters/string.hpp"
+#include "tyr/common/python/type_casters/unordered_map.hpp"
+#include "tyr/common/python/type_casters/unordered_set.hpp"
+#include "tyr/common/python/type_casters/variant.hpp"
+#include "tyr/common/python/type_casters/vector.hpp"
 
 #endif

@@ -18,12 +18,7 @@
 #ifndef TYR_PYTHON_INIT_DECLARATIONS_HPP
 #define TYR_PYTHON_INIT_DECLARATIONS_HPP
 
-#include "utils/optional.hpp"
-#include "utils/string.hpp"
-#include "utils/unordered_map.hpp"
-#include "utils/unordered_set.hpp"
-#include "utils/variant.hpp"
-#include "utils/vector.hpp"
+#include <tyr/common/python/type_casters.hpp>
 
 #include <iostream>
 #include <iterator>
