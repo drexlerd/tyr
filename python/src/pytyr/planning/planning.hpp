@@ -18,12 +18,32 @@
 #ifndef TYR_PYTHON_PLANNING_BINDINGS_HPP
 #define TYR_PYTHON_PLANNING_BINDINGS_HPP
 
-#include "../../init_declarations.hpp"
+#include "../common.hpp"
 
 #include <nanobind/trampoline.h>
 
 namespace tyr::planning
 {
+
+extern void bind_module_definitions(nb::module_& m);
+
+extern void bind_ground_module_definitions(nb::module_& m);
+
+extern void bind_lifted_module_definitions(nb::module_& m);
+
+namespace astar_eager
+{
+extern void bind_ground_module_definitions(nb::module_& m);
+
+extern void bind_lifted_module_definitions(nb::module_& m);
+}
+
+namespace gbfs_lazy
+{
+extern void bind_ground_module_definitions(nb::module_& m);
+
+extern void bind_lifted_module_definitions(nb::module_& m);
+}
 
 }
 

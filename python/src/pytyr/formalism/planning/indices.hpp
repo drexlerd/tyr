@@ -19,7 +19,7 @@
 #define TYR_PYTHON_FORMALISM_PLANNING_INDICES_HPP
 
 #include "../../common.hpp"
-#include "../../../init_declarations.hpp"
+
 
 namespace tyr::formalism::planning
 {

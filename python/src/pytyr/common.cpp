@@ -17,6 +17,8 @@
 
 #include "common.hpp"
 
+#include <tyr/tyr.hpp>
+
 namespace tyr
 {
 namespace

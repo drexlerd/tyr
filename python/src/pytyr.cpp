@@ -15,7 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "init_declarations.hpp"
+#include "pytyr/common.hpp"
+#include "pytyr/formalism/planning.hpp"
+#include "pytyr/planning/planning.hpp"
 
 namespace nb = nanobind;
 using namespace nb::literals;

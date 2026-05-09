@@ -19,6 +19,9 @@
 
 #include "tyr/analysis/formatter.hpp"
 
+#include <tyr/common/python/bindings.hpp>
+#include <tyr/tyr.hpp>
+
 namespace nb = nanobind;
 using namespace nb::literals;
 

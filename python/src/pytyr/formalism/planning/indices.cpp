@@ -17,6 +17,9 @@
 
 #include "indices.hpp"
 
+#include <tyr/common/python/bindings.hpp>
+#include <tyr/tyr.hpp>
+
 namespace tyr::formalism::planning
 {
 namespace

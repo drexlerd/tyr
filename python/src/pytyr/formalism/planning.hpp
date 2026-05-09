@@ -19,10 +19,18 @@
 #define TYR_PYTHON_FORMALISM_PLANNING_BINDINGS_HPP
 
 #include "../common.hpp"
-#include "../../init_declarations.hpp"
+
+namespace tyr::formalism
+{
+
+extern void bind_module_definitions(nb::module_& m);
+
+}
 
 namespace tyr::formalism::planning
 {
+
+extern void bind_module_definitions(nb::module_& m);
 
 }
 

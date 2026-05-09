@@ -19,6 +19,16 @@
 
 #include "../common.hpp"
 
+#include <nanobind/make_iterator.h>
+#include <nanobind/stl/chrono.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <tyr/common/python/bindings.hpp>
+#include <tyr/common/python/type_casters.hpp>
+#include <tyr/tyr.hpp>
+
 namespace f = tyr::formalism;
 namespace fp = tyr::formalism::planning;
 

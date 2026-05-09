@@ -15,8 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../../init_declarations.hpp"
+#include "../common.hpp"
 
+#include <tyr/tyr.hpp>
 namespace tyr::formalism
 {
 

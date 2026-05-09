@@ -18,8 +18,16 @@
 #ifndef TYR_PYTHON_COMMON_HPP_
 #define TYR_PYTHON_COMMON_HPP_
 
-#include "../init_declarations.hpp"
+#include <nanobind/nanobind.h>
 
-#include <tyr/common/python/bindings.hpp>
+namespace nb = nanobind;
+using namespace nb::literals;
+
+namespace tyr
+{
+
+extern void bind_module_definitions(nb::module_& m);
+
+}
 
 #endif
