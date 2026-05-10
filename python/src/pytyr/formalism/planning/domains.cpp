@@ -19,7 +19,10 @@
 
 #include "tyr/analysis/formatter.hpp"
 
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/vector.h>
 #include <tyr/common/python/bindings.hpp>
+#include <tyr/common/python/type_casters.hpp>
 #include <tyr/tyr.hpp>
 
 namespace nb = nanobind;

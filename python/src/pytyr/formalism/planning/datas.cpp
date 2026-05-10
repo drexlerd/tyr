@@ -17,6 +17,7 @@
 
 #include "datas.hpp"
 
+#include <nanobind/stl/optional.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 #include <tyr/common/python/bindings.hpp>

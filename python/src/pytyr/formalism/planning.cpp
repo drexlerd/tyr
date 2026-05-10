@@ -26,6 +26,7 @@
 #include <nanobind/stl/chrono.h>
 #include <nanobind/stl/filesystem.h>
 #include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>

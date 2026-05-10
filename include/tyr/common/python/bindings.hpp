@@ -24,6 +24,7 @@
 #include "tyr/common/types.hpp"
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
 #include <string>
 
 namespace tyr

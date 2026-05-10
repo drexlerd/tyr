@@ -17,6 +17,8 @@
 
 #include "invariants.hpp"
 
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
 #include <nanobind/stl/vector.h>
 #include <tyr/common/python/bindings.hpp>
 #include <tyr/common/python/type_casters.hpp>
