@@ -17,12 +17,11 @@
 
 #include "tyr/common/json_loader.hpp"
 
+#include <algorithm>
 #include <gtest/gtest.h>
+#include <string>
 #include <tyr/formalism/formalism.hpp>
 #include <tyr/planning/planning.hpp>
-
-#include <algorithm>
-#include <string>
 
 namespace p = tyr::planning;
 namespace f = tyr::formalism;
@@ -65,7 +64,7 @@ std::vector<LiftedSuccessorCountCase> load_cases()
 void expect_same_node(const p::Node<p::LiftedTag>& expected, const p::Node<p::LiftedTag>& actual)
 {
     EXPECT_EQ(uint_t(expected.get_state().get_index()), uint_t(actual.get_state().get_index()));
-    EXPECT_TRUE(f::apply(f::OpEq {}, expected.get_metric(), actual.get_metric()))
+    EXPECT_TRUE(f::apply(f::Eq {}, expected.get_metric(), actual.get_metric()))
         << "expected metric " << expected.get_metric() << ", actual metric " << actual.get_metric();
 }
 
@@ -130,22 +129,18 @@ void expect_action_binding_apis_match_ground_actions(const LiftedSuccessorCountC
     }
 
     size_t no_interning_pos = 0;
-    successor_generator.for_each_applicable_action_binding(initial_node,
-                                                           [&](const auto& binding)
-                                                           {
-                                                               const auto expected = std::ranges::find_if(ground_successors,
-                                                                                                          [&](const auto& successor)
-                                                                                                          {
-                                                                                                              return are_same_binding(
-                                                                                                                  successor.label.get_row(),
-                                                                                                                  binding);
-                                                                                                          });
-                                                               ASSERT_NE(expected, ground_successors.end());
+    successor_generator.for_each_applicable_action_binding(
+        initial_node,
+        [&](const auto& binding)
+        {
+            const auto expected =
+                std::ranges::find_if(ground_successors, [&](const auto& successor) { return are_same_binding(successor.label.get_row(), binding); });
+            ASSERT_NE(expected, ground_successors.end());
 
-                                                               expect_same_binding(expected->label.get_row(), binding);
-                                                               expect_same_node(expected->node, successor_generator.get_successor_node(initial_node, binding));
-                                                               ++no_interning_pos;
-                                                           });
+            expect_same_binding(expected->label.get_row(), binding);
+            expect_same_node(expected->node, successor_generator.get_successor_node(initial_node, binding));
+            ++no_interning_pos;
+        });
 
     EXPECT_EQ(no_interning_pos, ground_successors.size());
 }
@@ -165,10 +160,7 @@ TEST_P(LiftedTaskSuccessorCountTest, InitialNodeHasExpectedSuccessorCount)
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), param.expected_successors);
 }
 
-TEST_P(LiftedTaskSuccessorCountTest, ActionBindingApisMatchGroundActions)
-{
-    expect_action_binding_apis_match_ground_actions(GetParam());
-}
+TEST_P(LiftedTaskSuccessorCountTest, ActionBindingApisMatchGroundActions) { expect_action_binding_apis_match_ground_actions(GetParam()); }
 
 INSTANTIATE_TEST_SUITE_P(TyrPlanningLiftedTask,
                          LiftedTaskSuccessorCountTest,

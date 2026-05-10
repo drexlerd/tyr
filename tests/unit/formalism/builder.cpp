@@ -38,7 +38,7 @@ TEST(TyrTests, TyrFormalismBuilder)
     auto builder = fp::Builder();
 
     {
-        auto numeric_effect_ptr = builder.template get_builder<fp::GroundNumericEffect<fp::OpIncrease, f::AuxiliaryTag>>();
+        auto numeric_effect_ptr = builder.template get_builder<fp::GroundNumericEffect<f::Increase, f::AuxiliaryTag>>();
         auto& numeric_effect = *numeric_effect_ptr;
         numeric_effect.clear();
 
@@ -48,7 +48,7 @@ TEST(TyrTests, TyrFormalismBuilder)
     }
 
     {
-        auto numeric_effect_ptr = builder.template get_builder<fp::GroundNumericEffect<fp::OpIncrease, f::AuxiliaryTag>>();
+        auto numeric_effect_ptr = builder.template get_builder<fp::GroundNumericEffect<f::Increase, f::AuxiliaryTag>>();
         auto& numeric_effect = *numeric_effect_ptr;
         numeric_effect.clear();
 

@@ -17,6 +17,7 @@
 
 #include "common.hpp"
 
+#include <nanobind/stl/shared_ptr.h>
 #include <tyr/tyr.hpp>
 
 namespace tyr

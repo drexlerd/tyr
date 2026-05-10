@@ -42,7 +42,7 @@ struct SearchSummary
 
     bool operator==(const SearchSummary& other) const
     {
-        return expanded_last_snapshot == other.expanded_last_snapshot && status == other.status && f::apply(f::OpEq {}, plan_cost, other.plan_cost);
+        return expanded_last_snapshot == other.expanded_last_snapshot && status == other.status && f::apply(f::Eq {}, plan_cost, other.plan_cost);
     }
 };
 
