@@ -49,13 +49,13 @@ public:
     virtual void on_expand_goal_node(const Node<Kind>& node) = 0;
 
     /// @brief React on generating a successor `node` by applying an action.
-    virtual void on_generate_node(const LabeledNode<Kind>& labeled_succ_node) = 0;
+    virtual void on_generate_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) = 0;
 
     /// @brief React on pruning a node.
     virtual void on_prune_node(const Node<Kind>& node) = 0;
 
     /// @brief React on pruning a generated successor node.
-    virtual void on_prune_node(const LabeledNode<Kind>& labeled_succ_node) = 0;
+    virtual void on_prune_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) = 0;
 
     /// @brief React on starting a search.
     virtual void on_start_search(const Node<Kind>& node, float_t h_value) = 0;
@@ -115,8 +115,9 @@ public:
             self().on_expand_goal_node_impl(node);
     }
 
-    void on_generate_node(const LabeledNode<Kind>& labeled_succ_node) override
+    void on_generate_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
     {
+        static_cast<void>(source_node);
         m_statistics.increment_num_generated();
 
         if (verbosity(2))
@@ -135,8 +136,9 @@ public:
         }
     }
 
-    void on_prune_node(const LabeledNode<Kind>& labeled_succ_node) override
+    void on_prune_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
     {
+        static_cast<void>(source_node);
         m_statistics.increment_num_pruned();
 
         if (verbosity(2))

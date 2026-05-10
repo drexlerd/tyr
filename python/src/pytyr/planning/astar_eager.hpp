@@ -35,20 +35,29 @@ public:
 
     void on_expand_goal_node(const Node<Kind>& node) override { NB_OVERRIDE_PURE(on_expand_goal_node, node); }
 
-    void on_generate_node(const LabeledNode<Kind>& labeled_succ_node) override { NB_OVERRIDE_PURE(on_generate_node, labeled_succ_node); }
-
-    void on_generate_node_relaxed(const LabeledNode<Kind>& labeled_succ_node) override { NB_OVERRIDE_PURE(on_generate_node_relaxed, labeled_succ_node); };
-
-    void on_generate_node_not_relaxed(const LabeledNode<Kind>& labeled_succ_node) override
+    void on_generate_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
     {
-        NB_OVERRIDE_PURE(on_generate_node_not_relaxed, labeled_succ_node);
+        NB_OVERRIDE_PURE(on_generate_node, source_node, labeled_succ_node);
+    }
+
+    void on_generate_node_relaxed(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
+    {
+        NB_OVERRIDE_PURE(on_generate_node_relaxed, source_node, labeled_succ_node);
+    };
+
+    void on_generate_node_not_relaxed(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
+    {
+        NB_OVERRIDE_PURE(on_generate_node_not_relaxed, source_node, labeled_succ_node);
     }
 
     void on_close_node(const Node<Kind>& node) override { NB_OVERRIDE_PURE(on_close_node, node); }
 
     void on_prune_node(const Node<Kind>& node) override { NB_OVERRIDE_PURE(on_prune_node, node); }
 
-    void on_prune_node(const LabeledNode<Kind>& labeled_succ_node) override { NB_OVERRIDE_PURE(on_prune_node, labeled_succ_node); }
+    void on_prune_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
+    {
+        NB_OVERRIDE_PURE(on_prune_node, source_node, labeled_succ_node);
+    }
 
     void on_start_search(const Node<Kind>& node, float_t f_value) override { NB_OVERRIDE_PURE(on_start_search, node, f_value); }
 
@@ -102,12 +111,12 @@ void bind_event_handler(nb::module_& m, const std::string& name)
     nb::class_<T, PyEventHandler<Kind>>(m, name.c_str())
         .def("on_expand_node", &T::on_expand_node, "node"_a)
         .def("on_expand_goal_node", &T::on_expand_goal_node, "node"_a)
-        .def("on_generate_node", &T::on_generate_node, "labeled_succ_node"_a)
-        .def("on_generate_node_relaxed", &T::on_generate_node_relaxed, "labeled_succ_node"_a)
-        .def("on_generate_node_not_relaxed", &T::on_generate_node_not_relaxed, "labeled_succ_node"_a)
+        .def("on_generate_node", &T::on_generate_node, "source_node"_a, "labeled_succ_node"_a)
+        .def("on_generate_node_relaxed", &T::on_generate_node_relaxed, "source_node"_a, "labeled_succ_node"_a)
+        .def("on_generate_node_not_relaxed", &T::on_generate_node_not_relaxed, "source_node"_a, "labeled_succ_node"_a)
         .def("on_close_node", &T::on_close_node, "node"_a)
         .def("on_prune_node", nb::overload_cast<const Node<Kind>&>(&T::on_prune_node), "node"_a)
-        .def("on_prune_node", nb::overload_cast<const LabeledNode<Kind>&>(&T::on_prune_node), "labeled_succ_node"_a)
+        .def("on_prune_node", nb::overload_cast<const Node<Kind>&, const LabeledNode<Kind>&>(&T::on_prune_node), "source_node"_a, "labeled_succ_node"_a)
         .def("on_start_search", &T::on_start_search, "node"_a, "f_value"_a)
         .def("on_finish_f_layer", &T::on_finish_f_layer, "f_value"_a)
         .def("on_end_search", &T::on_end_search)

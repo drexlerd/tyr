@@ -320,11 +320,11 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
             if (pruning_strategy->should_prune_successor_state(state, succ_state, is_new_successor_state))
             {
                 successor_search_node.status = SearchNodeStatus::CLOSED;
-                event_handler->on_prune_node(labeled_succ_node);
+                event_handler->on_prune_node(node, labeled_succ_node);
                 continue;
             }
 
-            event_handler->on_generate_node(labeled_succ_node);
+            event_handler->on_generate_node(node, labeled_succ_node);
 
             /* Exploration strategy */
 

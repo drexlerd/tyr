@@ -277,7 +277,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
             if (pruning_strategy->should_prune_successor_state(state, succ_state, is_new_successor_state))
             {
                 successor_search_node.status = SearchNodeStatus::CLOSED;
-                event_handler->on_prune_node(labeled_succ_node);
+                event_handler->on_prune_node(node, labeled_succ_node);
                 continue;
             }
 
@@ -287,7 +287,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
             if (successor_g_value < successor_search_node.g_value)
             {
-                event_handler->on_generate_node(labeled_succ_node);
+                event_handler->on_generate_node(node, labeled_succ_node);
 
                 successor_search_node.parent_state = state_index;
                 successor_search_node.g_value = successor_g_value;
@@ -303,14 +303,14 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
                 const auto successor_is_goal_state = goal_strategy->is_dynamic_goal_satisfied(succ_state);
                 successor_search_node.status = successor_is_goal_state ? SearchNodeStatus::GOAL : SearchNodeStatus::OPEN;
 
-                event_handler->on_generate_node_relaxed(labeled_succ_node);
+                event_handler->on_generate_node_relaxed(node, labeled_succ_node);
 
                 const auto successor_f_value = FloatTolerance<float_t>::canonicalize(successor_g_value + successor_h_value);
                 openlist.insert(QueueEntry { successor_f_value, succ_state_index, successor_search_node.status });
             }
             else
             {
-                event_handler->on_generate_node_not_relaxed(labeled_succ_node);
+                event_handler->on_generate_node_not_relaxed(node, labeled_succ_node);
             }
         }
     }

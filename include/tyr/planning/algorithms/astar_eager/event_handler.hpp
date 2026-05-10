@@ -49,11 +49,11 @@ public:
     virtual void on_expand_goal_node(const Node<Kind>& node) = 0;
 
     /// @brief React on generating a successor `node` by applying an action.
-    virtual void on_generate_node(const LabeledNode<Kind>& labeled_succ_node) = 0;
+    virtual void on_generate_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) = 0;
 
-    virtual void on_generate_node_relaxed(const LabeledNode<Kind>& labeled_succ_node) = 0;
+    virtual void on_generate_node_relaxed(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) = 0;
 
-    virtual void on_generate_node_not_relaxed(const LabeledNode<Kind>& labeled_succ_node) = 0;
+    virtual void on_generate_node_not_relaxed(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) = 0;
 
     virtual void on_close_node(const Node<Kind>& node) = 0;
 
@@ -61,7 +61,7 @@ public:
     virtual void on_prune_node(const Node<Kind>& node) = 0;
 
     /// @brief React on pruning a generated successor node.
-    virtual void on_prune_node(const LabeledNode<Kind>& labeled_succ_node) = 0;
+    virtual void on_prune_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) = 0;
 
     /// @brief React on starting a search.
     virtual void on_start_search(const Node<Kind>& node, float_t f_value) = 0;
@@ -122,8 +122,9 @@ public:
             self().on_expand_goal_node_impl(node);
     }
 
-    void on_generate_node(const LabeledNode<Kind>& labeled_succ_node) override
+    void on_generate_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
     {
+        static_cast<void>(source_node);
         m_statistics.increment_num_generated();
 
         if (verbosity(2))
@@ -132,16 +133,18 @@ public:
         }
     }
 
-    void on_generate_node_relaxed(const LabeledNode<Kind>& labeled_succ_node) override
+    void on_generate_node_relaxed(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
     {
+        static_cast<void>(source_node);
         if (verbosity(2))
         {
             self().on_generate_node_relaxed_impl(labeled_succ_node);
         }
     }
 
-    void on_generate_node_not_relaxed(const LabeledNode<Kind>& labeled_succ_node) override
+    void on_generate_node_not_relaxed(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
     {
+        static_cast<void>(source_node);
         if (verbosity(2))
         {
             self().on_generate_node_not_relaxed_impl(labeled_succ_node);
@@ -166,8 +169,9 @@ public:
         }
     }
 
-    void on_prune_node(const LabeledNode<Kind>& labeled_succ_node) override
+    void on_prune_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
     {
+        static_cast<void>(source_node);
         m_statistics.increment_num_pruned();
 
         if (verbosity(2))
