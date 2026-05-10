@@ -18,8 +18,7 @@
 #ifndef TYR_PYTHON_FORMALISM_PLANNING_MUTABLE_HPP
 #define TYR_PYTHON_FORMALISM_PLANNING_MUTABLE_HPP
 
-#include "../../common.hpp"
-
+#include "module.hpp"
 
 namespace tyr::formalism::planning
 {

@@ -15,23 +15,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_PYTHON_FORMALISM_PLANNING_BINDINGS_HPP
-#define TYR_PYTHON_FORMALISM_PLANNING_BINDINGS_HPP
+#include "module.hpp"
 
-#include "../common.hpp"
+#include "planning/module.hpp"
 
 namespace tyr::formalism
 {
 
-extern void bind_module_definitions(nb::module_& m);
-
-}
-
-namespace tyr::formalism::planning
+void bind_module_definitions(nb::module_& m)
 {
-
-extern void bind_module_definitions(nb::module_& m);
-
+    auto planning_module = m.def_submodule("planning");
+    planning::bind_module_definitions(planning_module);
 }
 
-#endif
+}  // namespace tyr::formalism

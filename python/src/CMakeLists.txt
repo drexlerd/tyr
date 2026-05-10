@@ -14,9 +14,10 @@ set(PYTYR_NATIVE_BINDIR "${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_BINDIR}")
 set(PYTYR_NATIVE_CMAKEDIR "${PYTYR_NATIVE_LIBDIR}/cmake")
 
 nanobind_add_module(pytyr
-    pytyr.cpp
-    pytyr/common.cpp
-    pytyr/formalism/formalism.cpp
+    module.cpp
+    pytyr/module.cpp
+    pytyr/common/module.cpp
+    pytyr/formalism/module.cpp
     pytyr/formalism/planning.cpp
     pytyr/formalism/planning/datas.cpp
     pytyr/formalism/planning/domains.cpp
@@ -24,7 +25,13 @@ nanobind_add_module(pytyr
     pytyr/formalism/planning/invariants.cpp
     pytyr/formalism/planning/mutable.cpp
     pytyr/formalism/planning/views.cpp
-    pytyr/planning/planning.cpp
+    pytyr/planning/module.cpp
+    pytyr/planning/ground/module.cpp
+    pytyr/planning/lifted/module.cpp
+    pytyr/planning/ground/astar_eager/module.cpp
+    pytyr/planning/ground/gbfs_lazy/module.cpp
+    pytyr/planning/lifted/astar_eager/module.cpp
+    pytyr/planning/lifted/gbfs_lazy/module.cpp
 )
 
 target_link_libraries(pytyr PRIVATE tyr::core TBB::tbb)
@@ -102,16 +109,16 @@ endif()
 
 set(PYTYR_PYTHON_FILES
     pytyr/__init__.py
-    pytyr/common.py
+    pytyr/common/__init__.py
     pytyr/formalism/__init__.py
-    pytyr/formalism/planning.py
+    pytyr/formalism/planning/__init__.py
     pytyr/planning/__init__.py
     pytyr/planning/ground/__init__.py
-    pytyr/planning/ground/astar_eager.py
-    pytyr/planning/ground/gbfs_lazy.py
+    pytyr/planning/ground/astar_eager/__init__.py
+    pytyr/planning/ground/gbfs_lazy/__init__.py
     pytyr/planning/lifted/__init__.py
-    pytyr/planning/lifted/astar_eager.py
-    pytyr/planning/lifted/gbfs_lazy.py
+    pytyr/planning/lifted/astar_eager/__init__.py
+    pytyr/planning/lifted/gbfs_lazy/__init__.py
 )
 
 foreach(python_file IN LISTS PYTYR_PYTHON_FILES)
@@ -136,8 +143,10 @@ list(JOIN PYTYR_INSTALL_LIBRARY_PATHS ":" PYTYR_INSTALL_LIBRARY_PATH)
 
 if(PYTYR_INSTALL_LIBRARY_PATH)
     install(CODE "
-        set(ENV{LD_LIBRARY_PATH} \"${PYTYR_INSTALL_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}\")
-        set(ENV{DYLD_LIBRARY_PATH} \"${PYTYR_INSTALL_LIBRARY_PATH}:$ENV{DYLD_LIBRARY_PATH}\")
+        set(ENV{
+    LD_LIBRARY_PATH} \"${PYTYR_INSTALL_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}\")
+        set(ENV{
+    DYLD_LIBRARY_PATH} \"${PYTYR_INSTALL_LIBRARY_PATH}:$ENV{DYLD_LIBRARY_PATH}\")
     " COMPONENT pytyr)
 endif()
 

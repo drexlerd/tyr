@@ -15,16 +15,19 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_PYTHON_FORMALISM_PLANNING_DATAS_HPP
-#define TYR_PYTHON_FORMALISM_PLANNING_DATAS_HPP
+#ifndef TYR_PYTHON_COMMON_MODULE_HPP_
+#define TYR_PYTHON_COMMON_MODULE_HPP_
 
-#include "module.hpp"
+#include <nanobind/nanobind.h>
 
-namespace tyr::formalism::planning
+namespace nb = nanobind;
+using namespace nb::literals;
+
+namespace tyr::common
 {
 
-void bind_datas(nb::module_& m);
+extern void bind_module_definitions(nb::module_& m);
 
-}
+}  // namespace tyr::common
 
 #endif

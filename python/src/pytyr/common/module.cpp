@@ -15,16 +15,23 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_PYTHON_FORMALISM_PLANNING_DATAS_HPP
-#define TYR_PYTHON_FORMALISM_PLANNING_DATAS_HPP
-
 #include "module.hpp"
 
-namespace tyr::formalism::planning
+#include <nanobind/stl/shared_ptr.h>
+#include <tyr/tyr.hpp>
+
+namespace tyr::common
 {
-
-void bind_datas(nb::module_& m);
-
+namespace
+{
+void bind_execution_context(nb::module_& m)
+{
+    nb::class_<ExecutionContext>(m, "ExecutionContext")
+        .def(nb::new_([](size_t num_threads) { return ExecutionContext::create(num_threads); }), "num_threads")
+        .def_prop_ro("num_threads", &ExecutionContext::get_num_threads);
+}
 }
 
-#endif
+void bind_module_definitions(nb::module_& m) { bind_execution_context(m); }
+
+}  // namespace tyr::common

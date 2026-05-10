@@ -15,16 +15,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_PYTHON_FORMALISM_PLANNING_DATAS_HPP
-#define TYR_PYTHON_FORMALISM_PLANNING_DATAS_HPP
+#ifndef TYR_PYTHON_PLANNING_GROUND_ASTAR_EAGER_MODULE_HPP_
+#define TYR_PYTHON_PLANNING_GROUND_ASTAR_EAGER_MODULE_HPP_
 
-#include "module.hpp"
+#include "../../module.hpp"
 
-namespace tyr::formalism::planning
+namespace tyr::planning::astar_eager
 {
 
-void bind_datas(nb::module_& m);
+void bind_ground_module_definitions(nb::module_& m);
 
-}
+}  // namespace tyr::planning::astar_eager
 
 #endif

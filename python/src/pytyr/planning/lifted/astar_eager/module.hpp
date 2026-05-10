@@ -15,19 +15,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_PYTHON_COMMON_HPP_
-#define TYR_PYTHON_COMMON_HPP_
+#ifndef TYR_PYTHON_PLANNING_LIFTED_ASTAR_EAGER_MODULE_HPP_
+#define TYR_PYTHON_PLANNING_LIFTED_ASTAR_EAGER_MODULE_HPP_
 
-#include <nanobind/nanobind.h>
+#include "../../module.hpp"
 
-namespace nb = nanobind;
-using namespace nb::literals;
-
-namespace tyr
+namespace tyr::planning::astar_eager
 {
 
-extern void bind_module_definitions(nb::module_& m);
+void bind_lifted_module_definitions(nb::module_& m);
 
-}
+}  // namespace tyr::planning::astar_eager
 
 #endif

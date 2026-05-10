@@ -15,16 +15,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_PYTHON_FORMALISM_PLANNING_DATAS_HPP
-#define TYR_PYTHON_FORMALISM_PLANNING_DATAS_HPP
+#ifndef TYR_PYTHON_PLANNING_GROUND_GBFS_LAZY_MODULE_HPP_
+#define TYR_PYTHON_PLANNING_GROUND_GBFS_LAZY_MODULE_HPP_
 
-#include "module.hpp"
+#include "../../module.hpp"
 
-namespace tyr::formalism::planning
+namespace tyr::planning::gbfs_lazy
 {
 
-void bind_datas(nb::module_& m);
+void bind_ground_module_definitions(nb::module_& m);
 
-}
+}  // namespace tyr::planning::gbfs_lazy
 
 #endif

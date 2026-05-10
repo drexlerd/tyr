@@ -15,12 +15,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../common.hpp"
+#ifndef TYR_PYTHON_PLANNING_LIFTED_MODULE_HPP_
+#define TYR_PYTHON_PLANNING_LIFTED_MODULE_HPP_
 
-#include <tyr/tyr.hpp>
-namespace tyr::formalism
+#include "../module.hpp"
+
+namespace tyr::planning
 {
 
-void bind_module_definitions(nb::module_& m) {}
+void bind_lifted_module_definitions(nb::module_& m);
 
-}
+}  // namespace tyr::planning
+
+#endif

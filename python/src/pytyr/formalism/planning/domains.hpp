@@ -18,8 +18,7 @@
 #ifndef TYR_PYTHON_FORMALISM_PLANNING_DOMAINS_HPP
 #define TYR_PYTHON_FORMALISM_PLANNING_DOMAINS_HPP
 
-#include "../../common.hpp"
-
+#include "module.hpp"
 
 namespace tyr::formalism::planning
 {

@@ -15,22 +15,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "common.hpp"
+#include "../../astar_eager.hpp"
 
-#include <nanobind/stl/shared_ptr.h>
-#include <tyr/tyr.hpp>
+namespace tyr::planning::astar_eager
+{
 
-namespace tyr
-{
-namespace
-{
-void bind_execution_context(nb::module_& m)
-{
-    nb::class_<ExecutionContext>(m, "ExecutionContext")
-        .def(nb::new_([](size_t num_threads) { return ExecutionContext::create(num_threads); }), "num_threads")
-        .def_prop_ro("num_threads", &ExecutionContext::get_num_threads);
-}
-}
+void bind_ground_module_definitions(nb::module_& m) { bind_module_definitions_impl<GroundTag>(m); }
 
-void bind_module_definitions(nb::module_& m) { bind_execution_context(m); }
-}
+}  // namespace tyr::planning::astar_eager
