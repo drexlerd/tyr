@@ -30,9 +30,26 @@ def _native_prefixes() -> list[Path]:
     ]
 
 
+def _native_library_dirs(native_prefixes: list[Path]) -> list[Path]:
+    result = []
+    for prefix in native_prefixes:
+        for path in sorted(prefix.glob("lib*")):
+            if path.is_dir():
+                result.append(path)
+    return result
+
+
 def _prepend_cmake_args(*args: str) -> None:
     existing = os.environ.get("CMAKE_ARGS", "")
     os.environ["CMAKE_ARGS"] = " ".join([*args, existing]).strip()
+
+
+def _prepend_env_paths(name: str, paths: list[Path]) -> None:
+    existing = os.environ.get(name, "")
+    entries = [str(path) for path in paths]
+    if existing:
+        entries.append(existing)
+    os.environ[name] = os.pathsep.join(entries)
 
 
 def _is_native_library(path: Path) -> bool:
@@ -109,8 +126,11 @@ def _strip_wheel_native_libraries(wheel_path: Path) -> None:
 
 def _prepare_native_build() -> None:
     native_prefixes = _native_prefixes()
+    native_library_dirs = _native_library_dirs(native_prefixes)
 
     os.environ.setdefault("CMAKE_BUILD_PARALLEL_LEVEL", str(_num_jobs()))
+    _prepend_env_paths("LD_LIBRARY_PATH", native_library_dirs)
+    _prepend_env_paths("DYLD_LIBRARY_PATH", native_library_dirs)
     _prepend_cmake_args(
         f"-DCMAKE_PREFIX_PATH={';'.join(str(prefix) for prefix in native_prefixes)}",
         f"-DPython_EXECUTABLE={sys.executable}",
