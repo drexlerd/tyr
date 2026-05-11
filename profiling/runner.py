@@ -99,6 +99,7 @@ def collect_metadata(args, executable: pathlib.Path, test_dir: pathlib.Path, out
         "runner": {
             "command": sys.argv,
             "suite_json": str(args.suite_json),
+            "suite_prefix": args.suite_prefix,
             "output_dir": str(output_dir),
             "benchmark_min_time": args.benchmark_min_time,
             "benchmark_repetitions": args.benchmark_repetitions,
@@ -112,6 +113,10 @@ def load_suite(suite_json: pathlib.Path):
     suite = json.loads(suite_json.read_text())
     validate_suite(suite)
     return suite
+
+
+def suite_prefix(suite):
+    return suite.get("prefix", ".")
 
 
 def normalize_stdout(stdout):
@@ -313,6 +318,7 @@ def main():
 
     suite = load_suite(args.suite_json)
     cases = load_cases(suite)
+    args.suite_prefix = suite_prefix(suite)
     metadata = collect_metadata(args, executable, test_dir, output_dir)
 
     benchmark_results, benchmark_failures = run_benchmarks(

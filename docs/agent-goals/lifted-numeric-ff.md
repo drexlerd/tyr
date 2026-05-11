@@ -131,5 +131,5 @@ The agent should work on the highest unchecked task in this list. The agent must
     - Run the RPG profiling suite only if explicitly requested.
   - Notes:
     - This task is about correctness, explainability, and heuristic behavior rather than constant-factor optimization.
-    - Prefer small synthetic planning tasks from the `data/tests/numeric` directory.
+    - Prefer small synthetic planning tasks from the `data/planning-benchmarks/tests/numeric` directory.
     - Keep implementation changes minimal unless the tests expose an actual semantic issue.

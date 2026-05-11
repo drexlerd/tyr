@@ -15,11 +15,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "tyr/formalism/formalism.hpp"
 #include "tyr/common/json_loader.hpp"
+#include "tyr/formalism/formalism.hpp"
 
 #include <boost/json.hpp>
-
 #include <gtest/gtest.h>
 
 namespace json = boost::json;
@@ -112,8 +111,8 @@ TEST(TyrTests, TyrFormalismPlanningInvariantsSynthesis)
 
         SCOPED_TRACE(name);
 
-        auto lifted_task = fp::Parser(tyr::common::root_path() / tyr::common::as_string(case_object, "domain_file", "case"))
-                               .parse_task(tyr::common::root_path() / tyr::common::as_string(case_object, "task_file", "case"));
+        auto lifted_task = fp::Parser(tyr::common::suite_path(suite_object, tyr::common::as_string(case_object, "domain_file", "case")))
+                               .parse_task(tyr::common::suite_path(suite_object, tyr::common::as_string(case_object, "task_file", "case")));
         auto& repository = *lifted_task.get_repository();
 
         auto actual = fpi::synthesize_invariants(lifted_task.get_task().get_domain());

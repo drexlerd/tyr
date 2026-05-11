@@ -1,4 +1,5 @@
 {
+    "prefix": "data/planning-benchmarks",
     "domains": {
         "block-grouping": {
             "domain_file": "profiling/ipc2023-numeric/block-grouping/domain.pddl",

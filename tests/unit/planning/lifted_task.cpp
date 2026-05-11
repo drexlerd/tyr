@@ -18,6 +18,7 @@
 #include "tyr/common/json_loader.hpp"
 
 #include <algorithm>
+#include <filesystem>
 #include <gtest/gtest.h>
 #include <string>
 #include <tyr/formalism/formalism.hpp>
@@ -34,16 +35,16 @@ namespace
 struct LiftedSuccessorCountCase
 {
     std::string name;
-    std::string domain_file;
-    std::string task_file;
+    std::filesystem::path domain_file;
+    std::filesystem::path task_file;
     size_t expected_successors;
 };
 
-LiftedSuccessorCountCase parse_case(const boost::json::object& object)
+LiftedSuccessorCountCase parse_case(const boost::json::object& suite, const boost::json::object& object)
 {
     return LiftedSuccessorCountCase { tyr::common::as_string(object, "name", "case"),
-                                      tyr::common::as_string(object, "domain_file", "case"),
-                                      tyr::common::as_string(object, "task_file", "case"),
+                                      tyr::common::suite_path(suite, tyr::common::as_string(object, "domain_file", "case")),
+                                      tyr::common::suite_path(suite, tyr::common::as_string(object, "task_file", "case")),
                                       tyr::common::as_size(object, "expected_successors", "case") };
 }
 
@@ -57,7 +58,7 @@ std::vector<LiftedSuccessorCountCase> load_cases()
 
     auto result = std::vector<LiftedSuccessorCountCase> {};
     for (const auto& case_value : tyr::common::as_array(*cases_value, "suite.cases"))
-        result.push_back(parse_case(tyr::common::as_object(case_value, "case")));
+        result.push_back(parse_case(suite_object, tyr::common::as_object(case_value, "case")));
     return result;
 }
 
@@ -109,8 +110,7 @@ bool are_same_binding(fp::ActionBindingView lhs, const Data<formalism::RelationB
 
 void expect_action_binding_apis_match_ground_actions(const LiftedSuccessorCountCase& test_case)
 {
-    auto lifted_task =
-        p::Task<p::LiftedTag>::create(fp::Parser(tyr::common::root_path() / test_case.domain_file).parse_task(tyr::common::root_path() / test_case.task_file));
+    auto lifted_task = p::Task<p::LiftedTag>::create(fp::Parser(test_case.domain_file).parse_task(test_case.task_file));
     auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(lifted_task, ExecutionContext::create(1));
     const auto initial_node = successor_generator.get_initial_node();
 
@@ -153,8 +153,7 @@ class LiftedTaskSuccessorCountTest : public ::testing::TestWithParam<LiftedSucce
 TEST_P(LiftedTaskSuccessorCountTest, InitialNodeHasExpectedSuccessorCount)
 {
     const auto& param = GetParam();
-    auto lifted_task =
-        p::Task<p::LiftedTag>::create(fp::Parser(tyr::common::root_path() / param.domain_file).parse_task(tyr::common::root_path() / param.task_file));
+    auto lifted_task = p::Task<p::LiftedTag>::create(fp::Parser(param.domain_file).parse_task(param.task_file));
     auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(lifted_task, ExecutionContext::create(1));
 
     EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), param.expected_successors);

@@ -1,4 +1,5 @@
 {
+    "prefix": "data/planning-benchmarks",
     "domains": {
         "blocksworld-large-simple": {
             "domain_file": "profiling/htg/blocksworld-large-simple/domain.pddl",

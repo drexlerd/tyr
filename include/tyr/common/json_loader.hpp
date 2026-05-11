@@ -19,7 +19,6 @@
 #define TYR_COMMON_JSON_LOADER_HPP_
 
 #include <boost/json.hpp>
-
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
@@ -29,19 +28,16 @@
 namespace tyr::common
 {
 
-inline std::filesystem::path root_path()
-{
-    return std::filesystem::path(std::string(ROOT_DIR));
-}
+inline std::filesystem::path root_path() { return std::filesystem::path(std::string(ROOT_DIR)); }
 
-inline std::filesystem::path data_path(std::string_view relative_path)
-{
-    return root_path() / "data" / relative_path;
-}
+inline std::filesystem::path data_path(std::string_view relative_path) { return root_path() / "data" / relative_path; }
 
-inline std::filesystem::path profiling_path(std::string_view relative_path)
+inline std::filesystem::path profiling_path(std::string_view relative_path) { return root_path() / "profiling" / relative_path; }
+
+inline std::filesystem::path resolve_path(const std::filesystem::path& prefix, std::string_view path)
 {
-    return root_path() / "profiling" / relative_path;
+    const auto result = std::filesystem::path(std::string(path));
+    return result.is_absolute() ? result : prefix / result;
 }
 
 inline std::string read_file(const std::filesystem::path& path)
@@ -53,10 +49,7 @@ inline std::string read_file(const std::filesystem::path& path)
     return std::string(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>());
 }
 
-inline boost::json::value load_json_file(const std::filesystem::path& path)
-{
-    return boost::json::parse(read_file(path));
-}
+inline boost::json::value load_json_file(const std::filesystem::path& path) { return boost::json::parse(read_file(path)); }
 
 inline const boost::json::object& as_object(const boost::json::value& value, std::string_view context)
 {
@@ -79,6 +72,20 @@ inline std::string as_string(const boost::json::object& object, std::string_view
         throw std::runtime_error(std::string(context) + "." + std::string(key) + " must be a string.");
     return std::string(value->as_string());
 }
+
+inline std::filesystem::path suite_prefix_path(const boost::json::object& suite)
+{
+    const auto* value = suite.if_contains("prefix");
+    if (!value)
+        return root_path();
+
+    if (!value->is_string())
+        throw std::runtime_error("suite.prefix must be a string.");
+
+    return resolve_path(root_path(), std::string(value->as_string()));
+}
+
+inline std::filesystem::path suite_path(const boost::json::object& suite, std::string_view path) { return resolve_path(suite_prefix_path(suite), path); }
 
 inline size_t as_size(const boost::json::object& object, std::string_view key, std::string_view context)
 {

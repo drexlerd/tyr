@@ -1,321 +1,322 @@
 {
+    "prefix": "data/planning-benchmarks",
     "cases": [
         {
             "name": "Agricola",
-            "domain_file": "data/tests/classical/agricola/domain.pddl",
-            "task_file": "data/tests/classical/agricola/test-1.pddl",
+            "domain_file": "tests/classical/agricola/domain.pddl",
+            "task_file": "tests/classical/agricola/test-1.pddl",
             "expected_successors": 8
         },
         {
             "name": "Airport",
-            "domain_file": "data/tests/classical/airport/domain.pddl",
-            "task_file": "data/tests/classical/airport/test-1.pddl",
+            "domain_file": "tests/classical/airport/domain.pddl",
+            "task_file": "tests/classical/airport/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "Assembly",
-            "domain_file": "data/tests/classical/assembly/domain.pddl",
-            "task_file": "data/tests/classical/assembly/test-1.pddl",
+            "domain_file": "tests/classical/assembly/domain.pddl",
+            "task_file": "tests/classical/assembly/test-1.pddl",
             "expected_successors": 3
         },
         {
             "name": "Barman",
-            "domain_file": "data/tests/classical/barman/domain.pddl",
-            "task_file": "data/tests/classical/barman/test-1.pddl",
+            "domain_file": "tests/classical/barman/domain.pddl",
+            "task_file": "tests/classical/barman/test-1.pddl",
             "expected_successors": 4
         },
         {
             "name": "Blocks3",
-            "domain_file": "data/tests/classical/blocks_3/domain.pddl",
-            "task_file": "data/tests/classical/blocks_3/test-1.pddl",
+            "domain_file": "tests/classical/blocks_3/domain.pddl",
+            "task_file": "tests/classical/blocks_3/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "Blocks4",
-            "domain_file": "data/tests/classical/blocks_4/domain.pddl",
-            "task_file": "data/tests/classical/blocks_4/test-1.pddl",
+            "domain_file": "tests/classical/blocks_4/domain.pddl",
+            "task_file": "tests/classical/blocks_4/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "Childsnack",
-            "domain_file": "data/tests/classical/childsnack/domain.pddl",
-            "task_file": "data/tests/classical/childsnack/test-1.pddl",
+            "domain_file": "tests/classical/childsnack/domain.pddl",
+            "task_file": "tests/classical/childsnack/test-1.pddl",
             "expected_successors": 3
         },
         {
             "name": "Delivery",
-            "domain_file": "data/tests/classical/delivery/domain.pddl",
-            "task_file": "data/tests/classical/delivery/test-1.pddl",
+            "domain_file": "tests/classical/delivery/domain.pddl",
+            "task_file": "tests/classical/delivery/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "Driverlog",
-            "domain_file": "data/tests/classical/driverlog/domain.pddl",
-            "task_file": "data/tests/classical/driverlog/test-1.pddl",
+            "domain_file": "tests/classical/driverlog/domain.pddl",
+            "task_file": "tests/classical/driverlog/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "Ferry",
-            "domain_file": "data/tests/classical/ferry/domain.pddl",
-            "task_file": "data/tests/classical/ferry/test-1.pddl",
+            "domain_file": "tests/classical/ferry/domain.pddl",
+            "task_file": "tests/classical/ferry/test-1.pddl",
             "expected_successors": 3
         },
         {
             "name": "Grid",
-            "domain_file": "data/tests/classical/grid/domain.pddl",
-            "task_file": "data/tests/classical/grid/test-1.pddl",
+            "domain_file": "tests/classical/grid/domain.pddl",
+            "task_file": "tests/classical/grid/test-1.pddl",
             "expected_successors": 1
         },
         {
             "name": "Gripper",
-            "domain_file": "data/tests/classical/gripper/domain.pddl",
-            "task_file": "data/tests/classical/gripper/test-1.pddl",
+            "domain_file": "tests/classical/gripper/domain.pddl",
+            "task_file": "tests/classical/gripper/test-1.pddl",
             "expected_successors": 6
         },
         {
             "name": "Hiking",
-            "domain_file": "data/tests/classical/hiking/domain.pddl",
-            "task_file": "data/tests/classical/hiking/test-1.pddl",
+            "domain_file": "tests/classical/hiking/domain.pddl",
+            "task_file": "tests/classical/hiking/test-1.pddl",
             "expected_successors": 18
         },
         {
             "name": "Logistics",
-            "domain_file": "data/tests/classical/logistics/domain.pddl",
-            "task_file": "data/tests/classical/logistics/test-1.pddl",
+            "domain_file": "tests/classical/logistics/domain.pddl",
+            "task_file": "tests/classical/logistics/test-1.pddl",
             "expected_successors": 6
         },
         {
             "name": "Miconic",
-            "domain_file": "data/tests/classical/miconic/domain.pddl",
-            "task_file": "data/tests/classical/miconic/test-1.pddl",
+            "domain_file": "tests/classical/miconic/domain.pddl",
+            "task_file": "tests/classical/miconic/test-1.pddl",
             "expected_successors": 3
         },
         {
             "name": "MiconicFulladl",
-            "domain_file": "data/tests/classical/miconic-fulladl/domain.pddl",
-            "task_file": "data/tests/classical/miconic-fulladl/test-1.pddl",
+            "domain_file": "tests/classical/miconic-fulladl/domain.pddl",
+            "task_file": "tests/classical/miconic-fulladl/test-1.pddl",
             "expected_successors": 3
         },
         {
             "name": "MiconicSimpleadl",
-            "domain_file": "data/tests/classical/miconic-simpleadl/domain.pddl",
-            "task_file": "data/tests/classical/miconic-simpleadl/test-1.pddl",
+            "domain_file": "tests/classical/miconic-simpleadl/domain.pddl",
+            "task_file": "tests/classical/miconic-simpleadl/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "Parcprinter",
-            "domain_file": "data/tests/classical/parcprinter/domain.pddl",
-            "task_file": "data/tests/classical/parcprinter/test-1.pddl",
+            "domain_file": "tests/classical/parcprinter/domain.pddl",
+            "task_file": "tests/classical/parcprinter/test-1.pddl",
             "expected_successors": 1
         },
         {
             "name": "Pathways",
-            "domain_file": "data/tests/classical/pathways/domain.pddl",
-            "task_file": "data/tests/classical/pathways/test-1.pddl",
+            "domain_file": "tests/classical/pathways/domain.pddl",
+            "task_file": "tests/classical/pathways/test-1.pddl",
             "expected_successors": 16
         },
         {
             "name": "Philosophers",
-            "domain_file": "data/tests/classical/philosophers/domain.pddl",
-            "task_file": "data/tests/classical/philosophers/test-1.pddl",
+            "domain_file": "tests/classical/philosophers/domain.pddl",
+            "task_file": "tests/classical/philosophers/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "PsrMiddle",
-            "domain_file": "data/tests/classical/psr-middle/domain.pddl",
-            "task_file": "data/tests/classical/psr-middle/test-1.pddl",
+            "domain_file": "tests/classical/psr-middle/domain.pddl",
+            "task_file": "tests/classical/psr-middle/test-1.pddl",
             "expected_successors": 1
         },
         {
             "name": "Pushworld",
-            "domain_file": "data/tests/classical/pushworld/domain.pddl",
-            "task_file": "data/tests/classical/pushworld/test-1.pddl",
+            "domain_file": "tests/classical/pushworld/domain.pddl",
+            "task_file": "tests/classical/pushworld/test-1.pddl",
             "expected_successors": 4
         },
         {
             "name": "Reward",
-            "domain_file": "data/tests/classical/reward/domain.pddl",
-            "task_file": "data/tests/classical/reward/test-1.pddl",
+            "domain_file": "tests/classical/reward/domain.pddl",
+            "task_file": "tests/classical/reward/test-1.pddl",
             "expected_successors": 1
         },
         {
             "name": "Rovers",
-            "domain_file": "data/tests/classical/rovers/domain.pddl",
-            "task_file": "data/tests/classical/rovers/test-1.pddl",
+            "domain_file": "tests/classical/rovers/domain.pddl",
+            "task_file": "tests/classical/rovers/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "Satellite",
-            "domain_file": "data/tests/classical/satellite/domain.pddl",
-            "task_file": "data/tests/classical/satellite/test-1.pddl",
+            "domain_file": "tests/classical/satellite/domain.pddl",
+            "task_file": "tests/classical/satellite/test-1.pddl",
             "expected_successors": 4
         },
         {
             "name": "Schedule",
-            "domain_file": "data/tests/classical/schedule/domain.pddl",
-            "task_file": "data/tests/classical/schedule/test-1.pddl",
+            "domain_file": "tests/classical/schedule/domain.pddl",
+            "task_file": "tests/classical/schedule/test-1.pddl",
             "expected_successors": 44
         },
         {
             "name": "Sokoban",
-            "domain_file": "data/tests/classical/sokoban/domain.pddl",
-            "task_file": "data/tests/classical/sokoban/test-1.pddl",
+            "domain_file": "tests/classical/sokoban/domain.pddl",
+            "task_file": "tests/classical/sokoban/test-1.pddl",
             "expected_successors": 3
         },
         {
             "name": "Spanner",
-            "domain_file": "data/tests/classical/spanner/domain.pddl",
-            "task_file": "data/tests/classical/spanner/test-1.pddl",
+            "domain_file": "tests/classical/spanner/domain.pddl",
+            "task_file": "tests/classical/spanner/test-1.pddl",
             "expected_successors": 1
         },
         {
             "name": "Transport",
-            "domain_file": "data/tests/classical/transport/domain.pddl",
-            "task_file": "data/tests/classical/transport/test-1.pddl",
+            "domain_file": "tests/classical/transport/domain.pddl",
+            "task_file": "tests/classical/transport/test-1.pddl",
             "expected_successors": 5
         },
         {
             "name": "Visitall",
-            "domain_file": "data/tests/classical/visitall/domain.pddl",
-            "task_file": "data/tests/classical/visitall/test-1.pddl",
+            "domain_file": "tests/classical/visitall/domain.pddl",
+            "task_file": "tests/classical/visitall/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "Woodworking",
-            "domain_file": "data/tests/classical/woodworking/domain.pddl",
-            "task_file": "data/tests/classical/woodworking/test-1.pddl",
+            "domain_file": "tests/classical/woodworking/domain.pddl",
+            "task_file": "tests/classical/woodworking/test-1.pddl",
             "expected_successors": 8
         },
         {
             "name": "FoCounters",
-            "domain_file": "data/tests/numeric/fo-counters/domain.pddl",
-            "task_file": "data/tests/numeric/fo-counters/test-1.pddl",
+            "domain_file": "tests/numeric/fo-counters/domain.pddl",
+            "task_file": "tests/numeric/fo-counters/test-1.pddl",
             "expected_successors": 9
         },
         {
             "name": "Refuel",
-            "domain_file": "data/tests/numeric/refuel/domain.pddl",
-            "task_file": "data/tests/numeric/refuel/test-1.pddl",
+            "domain_file": "tests/numeric/refuel/domain.pddl",
+            "task_file": "tests/numeric/refuel/test-1.pddl",
             "expected_successors": 1
         },
         {
             "name": "RefuelAdl",
-            "domain_file": "data/tests/numeric/refuel-adl/domain.pddl",
-            "task_file": "data/tests/numeric/refuel-adl/test-1.pddl",
+            "domain_file": "tests/numeric/refuel-adl/domain.pddl",
+            "task_file": "tests/numeric/refuel-adl/test-1.pddl",
             "expected_successors": 5
         },
         {
             "name": "Tpp",
-            "domain_file": "data/tests/numeric/tpp/domain.pddl",
-            "task_file": "data/tests/numeric/tpp/test-1.pddl",
+            "domain_file": "tests/numeric/tpp/domain.pddl",
+            "task_file": "tests/numeric/tpp/test-1.pddl",
             "expected_successors": 5
         },
         {
             "name": "Zenotravel",
-            "domain_file": "data/tests/numeric/zenotravel/domain.pddl",
-            "task_file": "data/tests/numeric/zenotravel/test-1.pddl",
+            "domain_file": "tests/numeric/zenotravel/domain.pddl",
+            "task_file": "tests/numeric/zenotravel/test-1.pddl",
             "expected_successors": 7
         },
         {
             "name": "BlockGrouping",
-            "domain_file": "data/tests/numeric/block-grouping/domain.pddl",
-            "task_file": "data/tests/numeric/block-grouping/test-1.pddl",
+            "domain_file": "tests/numeric/block-grouping/domain.pddl",
+            "task_file": "tests/numeric/block-grouping/test-1.pddl",
             "expected_successors": 19
         },
         {
             "name": "Counters",
-            "domain_file": "data/tests/numeric/counters/domain.pddl",
-            "task_file": "data/tests/numeric/counters/test-1.pddl",
+            "domain_file": "tests/numeric/counters/domain.pddl",
+            "task_file": "tests/numeric/counters/test-1.pddl",
             "expected_successors": 7
         },
         {
             "name": "NumericDelivery",
-            "domain_file": "data/tests/numeric/delivery/domain.pddl",
-            "task_file": "data/tests/numeric/delivery/test-1.pddl",
+            "domain_file": "tests/numeric/delivery/domain.pddl",
+            "task_file": "tests/numeric/delivery/test-1.pddl",
             "expected_successors": 20
         },
         {
             "name": "Drone",
-            "domain_file": "data/tests/numeric/drone/domain.pddl",
-            "task_file": "data/tests/numeric/drone/test-1.pddl",
+            "domain_file": "tests/numeric/drone/domain.pddl",
+            "task_file": "tests/numeric/drone/test-1.pddl",
             "expected_successors": 5
         },
         {
             "name": "Expedition",
-            "domain_file": "data/tests/numeric/expedition/domain.pddl",
-            "task_file": "data/tests/numeric/expedition/test-1.pddl",
+            "domain_file": "tests/numeric/expedition/domain.pddl",
+            "task_file": "tests/numeric/expedition/test-1.pddl",
             "expected_successors": 6
         },
         {
             "name": "ExtPlantWatering",
-            "domain_file": "data/tests/numeric/ext-plant-watering/domain.pddl",
-            "task_file": "data/tests/numeric/ext-plant-watering/test-1.pddl",
+            "domain_file": "tests/numeric/ext-plant-watering/domain.pddl",
+            "task_file": "tests/numeric/ext-plant-watering/test-1.pddl",
             "expected_successors": 16
         },
         {
             "name": "Farmland",
-            "domain_file": "data/tests/numeric/farmland/domain.pddl",
-            "task_file": "data/tests/numeric/farmland/test-1.pddl",
+            "domain_file": "tests/numeric/farmland/domain.pddl",
+            "task_file": "tests/numeric/farmland/test-1.pddl",
             "expected_successors": 3
         },
         {
             "name": "FoFarmland",
-            "domain_file": "data/tests/numeric/fo-farmland/domain.pddl",
-            "task_file": "data/tests/numeric/fo-farmland/test-1.pddl",
+            "domain_file": "tests/numeric/fo-farmland/domain.pddl",
+            "task_file": "tests/numeric/fo-farmland/test-1.pddl",
             "expected_successors": 5
         },
         {
             "name": "FoSailing",
-            "domain_file": "data/tests/numeric/fo-sailing/domain.pddl",
-            "task_file": "data/tests/numeric/fo-sailing/test-1.pddl",
+            "domain_file": "tests/numeric/fo-sailing/domain.pddl",
+            "task_file": "tests/numeric/fo-sailing/test-1.pddl",
             "expected_successors": 8
         },
         {
             "name": "Hydropower",
-            "domain_file": "data/tests/numeric/hydropower/domain.pddl",
-            "task_file": "data/tests/numeric/hydropower/test-1.pddl",
+            "domain_file": "tests/numeric/hydropower/domain.pddl",
+            "task_file": "tests/numeric/hydropower/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "Markettrader",
-            "domain_file": "data/tests/numeric/markettrader/domain.pddl",
-            "task_file": "data/tests/numeric/markettrader/test-1.pddl",
+            "domain_file": "tests/numeric/markettrader/domain.pddl",
+            "task_file": "tests/numeric/markettrader/test-1.pddl",
             "expected_successors": 12
         },
         {
             "name": "Mprime",
-            "domain_file": "data/tests/numeric/mprime/domain.pddl",
-            "task_file": "data/tests/numeric/mprime/test-1.pddl",
+            "domain_file": "tests/numeric/mprime/domain.pddl",
+            "task_file": "tests/numeric/mprime/test-1.pddl",
             "expected_successors": 21
         },
         {
             "name": "Pathwaysmetric",
-            "domain_file": "data/tests/numeric/pathwaysmetric/domain.pddl",
-            "task_file": "data/tests/numeric/pathwaysmetric/test-1.pddl",
+            "domain_file": "tests/numeric/pathwaysmetric/domain.pddl",
+            "task_file": "tests/numeric/pathwaysmetric/test-1.pddl",
             "expected_successors": 16
         },
         {
             "name": "Rover",
-            "domain_file": "data/tests/numeric/rover/domain.pddl",
-            "task_file": "data/tests/numeric/rover/test-1.pddl",
+            "domain_file": "tests/numeric/rover/domain.pddl",
+            "task_file": "tests/numeric/rover/test-1.pddl",
             "expected_successors": 7
         },
         {
             "name": "Sailing",
-            "domain_file": "data/tests/numeric/sailing/domain.pddl",
-            "task_file": "data/tests/numeric/sailing/test-1.pddl",
+            "domain_file": "tests/numeric/sailing/domain.pddl",
+            "task_file": "tests/numeric/sailing/test-1.pddl",
             "expected_successors": 14
         },
         {
             "name": "Settersnumeric",
-            "domain_file": "data/tests/numeric/settersnumeric/domain.pddl",
-            "task_file": "data/tests/numeric/settersnumeric/test-1.pddl",
+            "domain_file": "tests/numeric/settersnumeric/domain.pddl",
+            "task_file": "tests/numeric/settersnumeric/test-1.pddl",
             "expected_successors": 2
         },
         {
             "name": "Sugar",
-            "domain_file": "data/tests/numeric/sugar/domain.pddl",
-            "task_file": "data/tests/numeric/sugar/test-1.pddl",
+            "domain_file": "tests/numeric/sugar/domain.pddl",
+            "task_file": "tests/numeric/sugar/test-1.pddl",
             "expected_successors": 16
         }
     ]

@@ -11,7 +11,7 @@ with their failure reason.
 Keep benchmark instances in the same domain directory:
 
 ```text
-data/profiling/<suite>/<domain>/
+data/planning-benchmarks/profiling/<suite>/<domain>/
   domain.pddl
   profiling-1.pddl
   profiling-2.pddl
@@ -24,6 +24,7 @@ Example:
 
 ```json
 {
+  "prefix": "data/planning-benchmarks",
   "domains": {
     "blocksworld-large-simple": {
       "domain_file": "profiling/htg/blocksworld-large-simple/domain.pddl",
@@ -42,8 +43,9 @@ Example:
 }
 ```
 
-Domain and task paths are relative to `data/`. Run names are derived as
-`<domain>/<task>`.
+Domain and task paths are relative to the suite `prefix`. Relative prefixes are
+resolved from the repository root; absolute prefixes can point to benchmark data
+outside the repository. Run names are derived as `<domain>/<task>`.
 
 Attribute types:
 

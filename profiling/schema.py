@@ -53,6 +53,8 @@ def validate_attributes(attributes):
 
 def validate_suite(suite):
     require_mapping(suite, "suite")
+    if "prefix" in suite:
+        require_non_empty_string(suite["prefix"], "prefix")
 
     try:
         domains = require_mapping(suite["domains"], "domains")

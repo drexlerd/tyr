@@ -17,6 +17,7 @@
 
 #include "tyr/common/json_loader.hpp"
 
+#include <filesystem>
 #include <gtest/gtest.h>
 #include <string>
 #include <tyr/formalism/formalism.hpp>
@@ -49,15 +50,15 @@ struct SearchSummary
 struct GroundVsLiftedCase
 {
     std::string name;
-    std::string domain_file;
-    std::string task_file;
+    std::filesystem::path domain_file;
+    std::filesystem::path task_file;
 };
 
-GroundVsLiftedCase parse_case(const boost::json::object& object)
+GroundVsLiftedCase parse_case(const boost::json::object& suite, const boost::json::object& object)
 {
     return GroundVsLiftedCase { tyr::common::as_string(object, "name", "case"),
-                                tyr::common::as_string(object, "domain_file", "case"),
-                                tyr::common::as_string(object, "task_file", "case") };
+                                tyr::common::suite_path(suite, tyr::common::as_string(object, "domain_file", "case")),
+                                tyr::common::suite_path(suite, tyr::common::as_string(object, "task_file", "case")) };
 }
 
 std::vector<GroundVsLiftedCase> load_cases()
@@ -70,7 +71,7 @@ std::vector<GroundVsLiftedCase> load_cases()
 
     auto result = std::vector<GroundVsLiftedCase> {};
     for (const auto& case_value : tyr::common::as_array(*cases_value, "suite.cases"))
-        result.push_back(parse_case(tyr::common::as_object(case_value, "case")));
+        result.push_back(parse_case(suite_object, tyr::common::as_object(case_value, "case")));
     return result;
 }
 
@@ -122,11 +123,9 @@ class GroundVsLiftedTest : public ::testing::TestWithParam<GroundVsLiftedCase>
 TEST_P(GroundVsLiftedTest, BlindAStarMatches)
 {
     const auto& param = GetParam();
-    const auto domain = tyr::common::root_path() / param.domain_file;
-    const auto problem = tyr::common::root_path() / param.task_file;
 
-    const auto lifted = run_blind_astar<p::LiftedTag>(domain, problem);
-    const auto grounded = run_blind_astar<p::GroundTag>(domain, problem);
+    const auto lifted = run_blind_astar<p::LiftedTag>(param.domain_file, param.task_file);
+    const auto grounded = run_blind_astar<p::GroundTag>(param.domain_file, param.task_file);
 
     EXPECT_EQ(lifted, grounded);
 }

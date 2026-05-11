@@ -8,8 +8,8 @@ navigate and explore all structures.
 Example usage (run from the repository root):
 
     python3 python/examples/formalism/planning/structures.py \
-        -d data/tests/classical/gripper/domain.pddl \
-        -p data/tests/classical/gripper/test-1.pddl
+        -d data/planning-benchmarks/tests/classical/gripper/domain.pddl \
+        -p data/planning-benchmarks/tests/classical/gripper/test-1.pddl
 
 Author: Dominik Drexler (dominik.drexler@liu.se)
 """

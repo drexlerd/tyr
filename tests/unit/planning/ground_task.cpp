@@ -17,11 +17,11 @@
 
 #include "tyr/common/json_loader.hpp"
 
+#include <filesystem>
 #include <gtest/gtest.h>
+#include <string>
 #include <tyr/formalism/formalism.hpp>
 #include <tyr/planning/planning.hpp>
-
-#include <string>
 
 namespace p = tyr::planning;
 namespace f = tyr::formalism;
@@ -34,8 +34,8 @@ namespace
 struct GroundTaskCase
 {
     std::string name;
-    std::string domain_file;
-    std::string task_file;
+    std::filesystem::path domain_file;
+    std::filesystem::path task_file;
     size_t expected_fluent_atoms;
     size_t expected_derived_atoms;
     size_t expected_actions;
@@ -43,11 +43,11 @@ struct GroundTaskCase
     size_t expected_successors;
 };
 
-GroundTaskCase parse_case(const boost::json::object& object)
+GroundTaskCase parse_case(const boost::json::object& suite, const boost::json::object& object)
 {
     return GroundTaskCase { tyr::common::as_string(object, "name", "case"),
-                            tyr::common::as_string(object, "domain_file", "case"),
-                            tyr::common::as_string(object, "task_file", "case"),
+                            tyr::common::suite_path(suite, tyr::common::as_string(object, "domain_file", "case")),
+                            tyr::common::suite_path(suite, tyr::common::as_string(object, "task_file", "case")),
                             tyr::common::as_size(object, "expected_fluent_atoms", "case"),
                             tyr::common::as_size(object, "expected_derived_atoms", "case"),
                             tyr::common::as_size(object, "expected_actions", "case"),
@@ -65,7 +65,7 @@ std::vector<GroundTaskCase> load_cases()
 
     auto result = std::vector<GroundTaskCase> {};
     for (const auto& case_value : tyr::common::as_array(*cases_value, "suite.cases"))
-        result.push_back(parse_case(tyr::common::as_object(case_value, "case")));
+        result.push_back(parse_case(suite_object, tyr::common::as_object(case_value, "case")));
     return result;
 }
 
@@ -79,9 +79,7 @@ TEST_P(GroundTaskTest, HasExpectedGroundTaskAndSuccessorCounts)
 {
     const auto& param = GetParam();
     auto execution_context = ExecutionContext(1);
-    auto ground_task = p::Task<p::LiftedTag>(fp::Parser(tyr::common::root_path() / param.domain_file).parse_task(tyr::common::root_path() / param.task_file))
-                           .instantiate_ground_task(execution_context)
-                           .task;
+    auto ground_task = p::Task<p::LiftedTag>(fp::Parser(param.domain_file).parse_task(param.task_file)).instantiate_ground_task(execution_context).task;
 
     EXPECT_EQ(ground_task->get_num_atoms<f::FluentTag>(), param.expected_fluent_atoms);
     EXPECT_EQ(ground_task->get_num_atoms<f::DerivedTag>(), param.expected_derived_atoms);
