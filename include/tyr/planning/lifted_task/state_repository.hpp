@@ -22,9 +22,9 @@
 #include "tyr/common/indexed_hash_set.hpp"
 #include "tyr/common/onetbb.hpp"
 #include "tyr/common/shared_object_pool.hpp"
+#include "tyr/planning/lifted_task/state_builder.hpp"
 #include "tyr/planning/lifted_task/state_data.hpp"
 #include "tyr/planning/lifted_task/state_view.hpp"
-#include "tyr/planning/lifted_task/state_builder.hpp"
 #include "tyr/planning/state_index.hpp"
 #include "tyr/planning/state_storage/config.hpp"
 
@@ -50,6 +50,8 @@ class StateRepository<LiftedTag> : public std::enable_shared_from_this<StateRepo
 {
 public:
     explicit StateRepository(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
+    StateRepository(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
+    StateRepository(uint_t index, TaskPtr<LiftedTag> task, AxiomEvaluatorPtr<LiftedTag> axiom_evaluator);
 
     static StateRepositoryPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
@@ -72,11 +74,15 @@ public:
 
     const auto& get_task() const noexcept { return m_task; }
     const auto& get_axiom_evaluator() const noexcept { return m_axiom_evaluator; }
+    const auto& get_execution_context() const noexcept { return m_execution_context; }
+    auto get_index() const noexcept { return m_index; }
 
     size_t num_states() const noexcept { return m_packed_states.size(); }
 
 private:
+    uint_t m_index;
     TaskPtr<LiftedTag> m_task;
+    ExecutionContextPtr m_execution_context;
 
     StateStorageContext<LiftedTag, StateStoragePolicyTag> m_context;
     FactStorageBackend<LiftedTag, StateStoragePolicyTag> m_fluent_backend;

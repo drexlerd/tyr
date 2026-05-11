@@ -59,13 +59,21 @@ class SuccessorGenerator;
 template<TaskKind Kind>
 using SuccessorGeneratorPtr = std::shared_ptr<SuccessorGenerator<Kind>>;
 template<TaskKind Kind>
+class SuccessorGeneratorFactory;
+
+template<TaskKind Kind>
 class StateRepository;
 template<TaskKind Kind>
 using StateRepositoryPtr = std::shared_ptr<StateRepository<Kind>>;
 template<TaskKind Kind>
+class StateRepositoryFactory;
+
+template<TaskKind Kind>
 class AxiomEvaluator;
 template<TaskKind Kind>
 using AxiomEvaluatorPtr = std::shared_ptr<AxiomEvaluator<Kind>>;
+template<TaskKind Kind>
+class AxiomEvaluatorFactory;
 
 template<TaskKind Kind>
 class Heuristic;

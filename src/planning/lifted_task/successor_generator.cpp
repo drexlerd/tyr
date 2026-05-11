@@ -29,13 +29,14 @@
 #include "tyr/planning/lifted_task.hpp"
 #include "tyr/planning/lifted_task/axiom_evaluator.hpp"
 #include "tyr/planning/lifted_task/node.hpp"
+#include "tyr/planning/lifted_task/state_builder.hpp"
 #include "tyr/planning/lifted_task/state_repository.hpp"
 #include "tyr/planning/lifted_task/state_view.hpp"
-#include "tyr/planning/lifted_task/state_builder.hpp"
 #include "tyr/planning/programs/action.hpp"
 #include "tyr/planning/successor_generator.hpp"
 #include "tyr/planning/task_utils.hpp"
 
+#include <cassert>
 #include <fmt/ostream.h>
 
 namespace d = tyr::datalog;
@@ -74,16 +75,28 @@ void for_each_action_binding(const d::ProgramWorkspace<d::NoOrAnnotationPolicy, 
 }
 
 SuccessorGenerator<LiftedTag>::SuccessorGenerator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
+    SuccessorGenerator(0, std::move(task), std::move(execution_context))
+{
+}
+
+SuccessorGenerator<LiftedTag>::SuccessorGenerator(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
+    SuccessorGenerator(index, task, std::make_shared<StateRepository<LiftedTag>>(index, task, execution_context))
+{
+}
+
+SuccessorGenerator<LiftedTag>::SuccessorGenerator(uint_t index, TaskPtr<LiftedTag> task, StateRepositoryPtr<LiftedTag> state_repository) :
+    m_index(index),
     m_task(std::move(task)),
-    m_execution_context(std::move(execution_context)),
+    m_execution_context(state_repository->get_execution_context()),
     m_workspace(m_task->get_action_program().get_program_context(),
                 m_task->get_action_program().get_const_program_workspace(),
                 d::NoOrAnnotationPolicy(),
                 d::NoAndAnnotationPolicy(),
                 d::NoTerminationPolicy()),
-    m_state_repository(std::make_shared<StateRepository<LiftedTag>>(m_task, m_execution_context)),
+    m_state_repository(std::move(state_repository)),
     m_executor()
 {
+    assert(m_execution_context);
 }
 
 SuccessorGeneratorPtr<LiftedTag> SuccessorGenerator<LiftedTag>::create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context)

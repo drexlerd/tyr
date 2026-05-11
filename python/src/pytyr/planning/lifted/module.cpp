@@ -79,8 +79,11 @@ should not be used further.
     bind_labeled_node<LiftedTag>(m, "LabeledNode");
     bind_plan<LiftedTag>(m, "Plan");
     bind_axiom_evaluator<LiftedTag>(m, "AxiomEvaluator");
+    bind_axiom_evaluator_factory<LiftedTag>(m, "AxiomEvaluatorFactory");
     bind_state_repository<LiftedTag>(m, "StateRepository");
+    bind_state_repository_factory<LiftedTag>(m, "StateRepositoryFactory");
     bind_successor_generator<LiftedTag>(m, "SuccessorGenerator");
+    bind_successor_generator_factory<LiftedTag>(m, "SuccessorGeneratorFactory");
     bind_search_result<LiftedTag>(m, "SearchResult");
     bind_goal_strategy<LiftedTag>(m, "GoalStrategy");
     bind_conjunctive_goal_strategy<LiftedTag>(m, "ConjunctiveGoalStrategy");

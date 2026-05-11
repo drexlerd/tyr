@@ -38,13 +38,26 @@ namespace tyr::planning
 {
 
 StateRepository<LiftedTag>::StateRepository(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
+    StateRepository(0, std::move(task), std::move(execution_context))
+{
+}
+
+StateRepository<LiftedTag>::StateRepository(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
+    StateRepository(index, task, task->has_axioms() ? std::make_shared<AxiomEvaluator<LiftedTag>>(index, task, execution_context) : nullptr)
+{
+    m_execution_context = std::move(execution_context);
+}
+
+StateRepository<LiftedTag>::StateRepository(uint_t index, TaskPtr<LiftedTag> task, AxiomEvaluatorPtr<LiftedTag> axiom_evaluator) :
+    m_index(index),
     m_task(task),
+    m_execution_context(axiom_evaluator ? axiom_evaluator->get_execution_context() : nullptr),
     m_context(),
     m_fluent_backend(m_context),
     m_derived_backend(m_context),
     m_numeric_backend(m_context),
     m_unpacked_state_pool(),
-    m_axiom_evaluator(m_task->has_axioms() ? std::make_shared<AxiomEvaluator<LiftedTag>>(task, execution_context) : nullptr)
+    m_axiom_evaluator(std::move(axiom_evaluator))
 {
 }
 

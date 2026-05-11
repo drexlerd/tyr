@@ -23,9 +23,9 @@
 #include "tyr/common/raw_array_set.hpp"
 #include "tyr/common/shared_object_pool.hpp"
 #include "tyr/planning/declarations.hpp"
+#include "tyr/planning/ground_task/state_builder.hpp"
 #include "tyr/planning/ground_task/state_data.hpp"
 #include "tyr/planning/ground_task/state_view.hpp"
-#include "tyr/planning/ground_task/state_builder.hpp"
 #include "tyr/planning/state_index.hpp"
 #include "tyr/planning/state_repository.hpp"
 #include "tyr/planning/state_storage/config.hpp"
@@ -52,6 +52,8 @@ class StateRepository<GroundTag> : public std::enable_shared_from_this<StateRepo
 {
 public:
     explicit StateRepository(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
+    StateRepository(uint_t index, TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
+    StateRepository(uint_t index, TaskPtr<GroundTag> task, AxiomEvaluatorPtr<GroundTag> axiom_evaluator);
 
     static StateRepositoryPtr<GroundTag> create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
@@ -74,10 +76,12 @@ public:
 
     const auto& get_task() const noexcept { return m_task; }
     const auto& get_axiom_evaluator() const noexcept { return m_axiom_evaluator; }
+    auto get_index() const noexcept { return m_index; }
 
     size_t num_states() const noexcept { return m_packed_states.size(); }
 
 private:
+    uint_t m_index;
     TaskPtr<GroundTag> m_task;
 
     StateStorageContext<GroundTag, StateStoragePolicyTag> m_context;

@@ -45,6 +45,8 @@ class SuccessorGenerator<LiftedTag>
 {
 public:
     explicit SuccessorGenerator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
+    SuccessorGenerator(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
+    SuccessorGenerator(uint_t index, TaskPtr<LiftedTag> task, StateRepositoryPtr<LiftedTag> state_repository);
 
     static SuccessorGeneratorPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
@@ -83,6 +85,7 @@ public:
 
     const auto& get_state_repository() const noexcept { return m_state_repository; }
     const auto& get_workspace() const noexcept { return m_workspace; }
+    auto get_index() const noexcept { return m_index; }
 
 private:
     void compute_action_facts(const Node<LiftedTag>& node);
@@ -95,6 +98,7 @@ private:
                                                  void* callback_data);
 
 private:
+    uint_t m_index;
     TaskPtr<LiftedTag> m_task;
     ExecutionContextPtr m_execution_context;
     itertools::cartesian_set::Workspace<Index<formalism::Object>> m_cartesian_workspace;

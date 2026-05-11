@@ -21,11 +21,11 @@
 #include "tyr/common/onetbb.hpp"
 #include "tyr/common/shared_object_pool.hpp"
 #include "tyr/planning/declarations.hpp"
+#include "tyr/planning/state_builder.hpp"
 #include "tyr/planning/state_index.hpp"
 #include "tyr/planning/state_repository.hpp"
 #include "tyr/planning/state_view.hpp"
 #include "tyr/planning/task.hpp"
-#include "tyr/planning/state_builder.hpp"
 
 #include <concepts>
 
@@ -55,6 +55,7 @@ concept StateRepositoryConcept =
         { r.get_unregistered_state() } -> std::same_as<SharedObjectPoolPtr<UnpackedState<Kind>>>;
         { r.register_state(unregistered_state) } -> std::same_as<StateView<Kind>>;
         { r.get_task() } -> std::same_as<const TaskPtr<Kind>&>;
+        { r.get_index() } -> std::same_as<uint_t>;
     };
 }
 

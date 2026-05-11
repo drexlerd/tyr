@@ -44,8 +44,11 @@ void bind_ground_module_definitions(nb::module_& m)
     bind_labeled_node<GroundTag>(m, "LabeledNode");
     bind_plan<GroundTag>(m, "Plan");
     bind_axiom_evaluator<GroundTag>(m, "AxiomEvaluator");
+    bind_axiom_evaluator_factory<GroundTag>(m, "AxiomEvaluatorFactory");
     bind_state_repository<GroundTag>(m, "StateRepository");
+    bind_state_repository_factory<GroundTag>(m, "StateRepositoryFactory");
     bind_successor_generator<GroundTag>(m, "SuccessorGenerator");
+    bind_successor_generator_factory<GroundTag>(m, "SuccessorGeneratorFactory");
     bind_search_result<GroundTag>(m, "SearchResult");
     bind_goal_strategy<GroundTag>(m, "GoalStrategy");
     bind_conjunctive_goal_strategy<GroundTag>(m, "ConjunctiveGoalStrategy");

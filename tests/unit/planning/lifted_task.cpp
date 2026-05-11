@@ -161,6 +161,40 @@ TEST_P(LiftedTaskSuccessorCountTest, InitialNodeHasExpectedSuccessorCount)
 
 TEST_P(LiftedTaskSuccessorCountTest, ActionBindingApisMatchGroundActions) { expect_action_binding_apis_match_ground_actions(GetParam()); }
 
+TEST_P(LiftedTaskSuccessorCountTest, StateViewsUseRepositoryIndexForIdentity)
+{
+    const auto& param = GetParam();
+    auto lifted_task = p::Task<p::LiftedTag>::create(fp::Parser(param.domain_file).parse_task(param.task_file));
+    auto execution_context = ExecutionContext::create(1);
+    auto axiom_evaluator_factory = p::AxiomEvaluatorFactory<p::LiftedTag>();
+    auto state_repository_factory = p::StateRepositoryFactory<p::LiftedTag>();
+    auto successor_generator_factory = p::SuccessorGeneratorFactory<p::LiftedTag>();
+
+    auto first_axiom_evaluator = axiom_evaluator_factory.create(lifted_task, execution_context);
+    auto second_axiom_evaluator = axiom_evaluator_factory.create(lifted_task, execution_context);
+
+    auto first_repository = state_repository_factory.create(lifted_task, first_axiom_evaluator);
+    auto second_repository = state_repository_factory.create(lifted_task, second_axiom_evaluator);
+
+    auto first_successor_generator = successor_generator_factory.create(lifted_task, first_repository);
+    auto second_successor_generator = successor_generator_factory.create(lifted_task, second_repository);
+
+    const auto first_state = first_repository->get_initial_state();
+    const auto second_state = second_repository->get_initial_state();
+
+    EXPECT_EQ(first_axiom_evaluator->get_index(), 0);
+    EXPECT_EQ(second_axiom_evaluator->get_index(), 1);
+    EXPECT_EQ(first_repository->get_index(), 0);
+    EXPECT_EQ(second_repository->get_index(), 1);
+    EXPECT_EQ(first_successor_generator->get_index(), 0);
+    EXPECT_EQ(second_successor_generator->get_index(), 1);
+    EXPECT_EQ(first_successor_generator->get_state_repository(), first_repository);
+    EXPECT_EQ(second_successor_generator->get_state_repository(), second_repository);
+    EXPECT_EQ(first_state.get_index(), second_state.get_index());
+    EXPECT_FALSE(EqualTo<p::StateView<p::LiftedTag>> {}(first_state, second_state));
+    EXPECT_NE(Hash<p::StateView<p::LiftedTag>> {}(first_state), Hash<p::StateView<p::LiftedTag>> {}(second_state));
+}
+
 INSTANTIATE_TEST_SUITE_P(TyrPlanningLiftedTask,
                          LiftedTaskSuccessorCountTest,
                          ::testing::ValuesIn(load_cases()),

@@ -37,16 +37,20 @@ class AxiomEvaluator<LiftedTag>
 {
 public:
     explicit AxiomEvaluator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
+    AxiomEvaluator(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
     static AxiomEvaluatorPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
     void compute_extended_state(UnpackedState<LiftedTag>& unpacked_state);
 
     const auto& get_workspace() const noexcept { return m_workspace; }
+    const auto& get_execution_context() const noexcept { return m_execution_context; }
+    auto get_index() const noexcept { return m_index; }
 
     void print_summary(size_t verbosity) const;
 
 private:
+    uint_t m_index;
     TaskPtr<LiftedTag> m_task;
     ExecutionContextPtr m_execution_context;
 

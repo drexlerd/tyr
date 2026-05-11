@@ -16,9 +16,9 @@
  */
 
 #include "tyr/planning/ground_task.hpp"
+#include "tyr/planning/ground_task/state_builder.hpp"
 #include "tyr/planning/ground_task/state_repository.hpp"
 #include "tyr/planning/ground_task/state_view.hpp"
-#include "tyr/planning/ground_task/state_builder.hpp"
 
 #include <cassert>
 #include <limits>
@@ -142,6 +142,11 @@ GroundStateView& GroundStateView::operator=(const View&) = default;
 GroundStateView& GroundStateView::operator=(View&&) noexcept = default;
 
 Index<planning::State<planning::GroundTag>> GroundStateView::get_index() const { return m_unpacked->get_index(); }
+
+std::tuple<Index<planning::State<planning::GroundTag>>, uint_t> GroundStateView::identifying_members() const noexcept
+{
+    return std::make_tuple(get_index(), m_state_repository->get_index());
+}
 
 formalism::planning::FDRValue GroundStateView::get(Index<formalism::planning::FDRVariable<formalism::FluentTag>> index) const { return m_unpacked->get(index); }
 

@@ -41,14 +41,25 @@ namespace tyr::planning
 {
 
 StateRepository<GroundTag>::StateRepository(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context) :
-    m_task(task),
+    StateRepository(0, std::move(task), std::move(execution_context))
+{
+}
+
+StateRepository<GroundTag>::StateRepository(uint_t index, TaskPtr<GroundTag> task, ExecutionContextPtr execution_context) :
+    StateRepository(index, task, task->has_axioms() ? std::make_shared<AxiomEvaluator<GroundTag>>(index, task, std::move(execution_context)) : nullptr)
+{
+}
+
+StateRepository<GroundTag>::StateRepository(uint_t index, TaskPtr<GroundTag> task, AxiomEvaluatorPtr<GroundTag> axiom_evaluator) :
+    m_index(index),
+    m_task(std::move(task)),
     m_context(*m_task),
     m_fluent_backend(m_context),
     m_derived_backend(m_context),
     m_numeric_backend(m_context),
     m_packed_states(),
     m_unpacked_state_pool(),
-    m_axiom_evaluator(m_task->has_axioms() ? std::make_shared<AxiomEvaluator<GroundTag>>(task, execution_context) : nullptr)
+    m_axiom_evaluator(std::move(axiom_evaluator))
 {
 }
 

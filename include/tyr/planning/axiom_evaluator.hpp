@@ -34,6 +34,7 @@ concept AxiomEvaluatorConcept = requires(T& r, TaskPtr<Kind> task, ExecutionCont
     requires TaskKind<Kind>;
     { T(task, execution_context) };
     { r.compute_extended_state(unpacked_state) } -> std::same_as<void>;
+    { r.get_index() } -> std::same_as<uint_t>;
 };
 
 }

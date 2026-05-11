@@ -28,6 +28,7 @@
 #include "tyr/planning/state_view.hpp"
 
 #include <boost/dynamic_bitset.hpp>
+#include <tuple>
 
 namespace tyr
 {
@@ -94,6 +95,8 @@ public:
     const std::shared_ptr<formalism::planning::Repository>& get_repository() const noexcept;
     const std::shared_ptr<planning::StateRepository<planning::LiftedTag>>& get_state_repository() const noexcept;
     const planning::UnpackedState<planning::LiftedTag>& get_unpacked_state() const noexcept;
+
+    std::tuple<Index<planning::State<planning::LiftedTag>>, uint_t> identifying_members() const noexcept;
 
 private:
     template<formalism::FactKind T>

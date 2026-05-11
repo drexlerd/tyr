@@ -18,10 +18,10 @@
 #ifndef TYR_PLANNING_GROUND_TASK_STATE_VIEW_HPP_
 #define TYR_PLANNING_GROUND_TASK_STATE_VIEW_HPP_
 
+#include "tyr/common/shared_object_pool.hpp"
 #include "tyr/formalism/planning/declarations.hpp"
 #include "tyr/formalism/planning/repository.hpp"
 #include "tyr/formalism/planning/views.hpp"
-#include "tyr/common/shared_object_pool.hpp"
 #include "tyr/planning/declarations.hpp"
 #include "tyr/planning/ground_task/state_iterators.hpp"
 #include "tyr/planning/state_iterators.hpp"
@@ -29,6 +29,7 @@
 #include "tyr/planning/task.hpp"
 
 #include <boost/dynamic_bitset.hpp>
+#include <tuple>
 
 namespace tyr
 {
@@ -95,6 +96,8 @@ public:
     const std::shared_ptr<formalism::planning::Repository>& get_repository() const noexcept;
     const std::shared_ptr<planning::StateRepository<planning::GroundTag>>& get_state_repository() const noexcept;
     const planning::UnpackedState<planning::GroundTag>& get_unpacked_state() const noexcept;
+
+    std::tuple<Index<planning::State<planning::GroundTag>>, uint_t> identifying_members() const noexcept;
 
     template<formalism::FactKind T>
     const boost::dynamic_bitset<>& get_atoms() const noexcept;

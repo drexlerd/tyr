@@ -23,6 +23,8 @@
 #include "tyr/planning/ground_task/state_view.hpp"
 #include "tyr/planning/node.hpp"
 
+#include <tuple>
+
 /**
  * Definitions
  */
@@ -40,7 +42,7 @@ public:
     const StateView<GroundTag>& get_state() const noexcept { return m_state; }
     float_t get_metric() const noexcept { return m_metric; }
 
-    auto identifying_members() const noexcept { return std::make_tuple(m_state.get_index(), m_metric); }
+    auto identifying_members() const noexcept { return std::tie(m_state, m_metric); }
 
 private:
     StateView<GroundTag> m_state;

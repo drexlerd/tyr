@@ -44,6 +44,7 @@ concept SuccessorGeneratorConcept = requires(T& r,
     { r.get_labeled_successor_nodes(node, labeled_successor_nodes) } -> std::same_as<void>;
     { r.get_successor_node(node, action) } -> std::same_as<Node<Kind>>;
     { r.get_node(state_index) } -> std::same_as<Node<Kind>>;
+    { r.get_index() } -> std::same_as<uint_t>;
 };
 
 }

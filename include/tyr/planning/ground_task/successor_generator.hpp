@@ -35,6 +35,8 @@ class SuccessorGenerator<GroundTag>
 {
 public:
     explicit SuccessorGenerator(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
+    SuccessorGenerator(uint_t index, TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
+    SuccessorGenerator(uint_t index, TaskPtr<GroundTag> task, StateRepositoryPtr<GroundTag> state_repository);
 
     static SuccessorGeneratorPtr<GroundTag> create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
@@ -48,8 +50,10 @@ public:
     Node<GroundTag> get_node(Index<State<GroundTag>> state_index);
 
     const auto& get_state_repository() const noexcept { return m_state_repository; }
+    auto get_index() const noexcept { return m_index; }
 
 private:
+    uint_t m_index;
     TaskPtr<GroundTag> m_task;
 
     IndexList<formalism::planning::GroundAction> m_applicable_actions;

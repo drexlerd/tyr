@@ -16,9 +16,9 @@
  */
 
 #include "tyr/planning/lifted_task.hpp"
+#include "tyr/planning/lifted_task/state_builder.hpp"
 #include "tyr/planning/lifted_task/state_repository.hpp"
 #include "tyr/planning/lifted_task/state_view.hpp"
-#include "tyr/planning/lifted_task/state_builder.hpp"
 
 #include <cassert>
 #include <limits>
@@ -162,6 +162,11 @@ LiftedStateView& LiftedStateView::operator=(const View&) = default;
 LiftedStateView& LiftedStateView::operator=(View&&) noexcept = default;
 
 Index<planning::State<planning::LiftedTag>> LiftedStateView::get_index() const { return m_unpacked->get_index(); }
+
+std::tuple<Index<planning::State<planning::LiftedTag>>, uint_t> LiftedStateView::identifying_members() const noexcept
+{
+    return std::make_tuple(get_index(), m_state_repository->get_index());
+}
 
 formalism::planning::FDRValue LiftedStateView::get(Index<formalism::planning::FDRVariable<formalism::FluentTag>> index) const { return m_unpacked->get(index); }
 

@@ -33,12 +33,16 @@ class AxiomEvaluator<GroundTag>
 {
 public:
     explicit AxiomEvaluator(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
+    AxiomEvaluator(uint_t index, TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
     static AxiomEvaluatorPtr<GroundTag> create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
     void compute_extended_state(UnpackedState<GroundTag>& unpacked_state);
 
+    auto get_index() const noexcept { return m_index; }
+
 private:
+    uint_t m_index;
     TaskPtr<GroundTag> m_task;
 
     IndexList<formalism::planning::GroundAxiom> m_applicable_axioms;

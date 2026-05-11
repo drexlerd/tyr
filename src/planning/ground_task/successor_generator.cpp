@@ -25,9 +25,9 @@
 #include "tyr/planning/ground_task.hpp"
 #include "tyr/planning/ground_task/match_tree/match_tree.hpp"
 #include "tyr/planning/ground_task/node.hpp"
+#include "tyr/planning/ground_task/state_builder.hpp"
 #include "tyr/planning/ground_task/state_repository.hpp"
 #include "tyr/planning/ground_task/state_view.hpp"
-#include "tyr/planning/ground_task/state_builder.hpp"
 #include "tyr/planning/state_index.hpp"
 #include "tyr/planning/task_utils.hpp"
 
@@ -37,9 +37,20 @@ namespace tyr::planning
 {
 
 SuccessorGenerator<GroundTag>::SuccessorGenerator(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context) :
-    m_task(task),
+    SuccessorGenerator(0, std::move(task), std::move(execution_context))
+{
+}
+
+SuccessorGenerator<GroundTag>::SuccessorGenerator(uint_t index, TaskPtr<GroundTag> task, ExecutionContextPtr execution_context) :
+    SuccessorGenerator(index, task, std::make_shared<StateRepository<GroundTag>>(index, task, std::move(execution_context)))
+{
+}
+
+SuccessorGenerator<GroundTag>::SuccessorGenerator(uint_t index, TaskPtr<GroundTag> task, StateRepositoryPtr<GroundTag> state_repository) :
+    m_index(index),
+    m_task(std::move(task)),
     m_applicable_actions(),
-    m_state_repository(std::make_shared<StateRepository<GroundTag>>(task, execution_context)),
+    m_state_repository(std::move(state_repository)),
     m_executor()
 {
 }
