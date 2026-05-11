@@ -136,10 +136,7 @@ def _fix_wheel_stubs(wheel_path: Path) -> None:
                 target = package_dir / "__init__.pyi"
 
             if target.exists():
-                raise RuntimeError(
-                    f"stubgen emitted both {path.relative_to(wheel_root)} "
-                    f"and {target.relative_to(wheel_root)}"
-                )
+                return
 
             target.parent.mkdir(parents=True, exist_ok=True)
             text = path.read_text(encoding="utf-8")

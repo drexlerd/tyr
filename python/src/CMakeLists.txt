@@ -109,6 +109,7 @@ endif()
 
 set(PYTYR_PYTHON_FILES
     pytyr/__init__.py
+    pytyr/__init__.pyi
     pytyr/common/__init__.py
     pytyr/formalism/__init__.py
     pytyr/formalism/planning/__init__.py
