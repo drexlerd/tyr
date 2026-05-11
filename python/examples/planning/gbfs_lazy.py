@@ -37,7 +37,10 @@ from pytyr.planning import (
 from pytyr.planning.lifted import (
     StateIndex, 
     SearchResult, 
+    AxiomEvaluatorFactory,
+    StateRepositoryFactory,
     SuccessorGenerator, 
+    SuccessorGeneratorFactory,
     Heuristic, 
     FFRPGHeuristic, 
     PruningStrategy, 
@@ -199,7 +202,12 @@ def main():
     parser = Parser(domain_filepath, parser_options)
     lifted_task = Task(parser.parse_task(task_filepath, parser_options))
     heuristic = FFRPGHeuristic(lifted_task, execution_context)
-    successor_generator = SuccessorGenerator(lifted_task, execution_context)
+    axiom_evaluator_factory = AxiomEvaluatorFactory()
+    state_repository_factory = StateRepositoryFactory()
+    successor_generator_factory = SuccessorGeneratorFactory()
+    axiom_evaluator = axiom_evaluator_factory.create(lifted_task, execution_context)
+    state_repository = state_repository_factory.create(lifted_task, axiom_evaluator)
+    successor_generator = successor_generator_factory.create(lifted_task, execution_context, state_repository)
 
     search_result = find_solution(lifted_task, successor_generator, heuristic)
 

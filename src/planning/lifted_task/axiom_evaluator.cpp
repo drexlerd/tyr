@@ -74,11 +74,6 @@ void read_derived_atoms_from_program_context(const AxiomEvaluatorProgram& axiom_
 }
 }
 
-AxiomEvaluator<LiftedTag>::AxiomEvaluator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
-    AxiomEvaluator(0, std::move(task), std::move(execution_context))
-{
-}
-
 AxiomEvaluator<LiftedTag>::AxiomEvaluator(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
     m_index(index),
     m_task(std::move(task)),
@@ -89,11 +84,6 @@ AxiomEvaluator<LiftedTag>::AxiomEvaluator(uint_t index, TaskPtr<LiftedTag> task,
                 d::NoAndAnnotationPolicy(),
                 d::NoTerminationPolicy())
 {
-}
-
-AxiomEvaluatorPtr<LiftedTag> AxiomEvaluator<LiftedTag>::create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context)
-{
-    return std::make_shared<AxiomEvaluator<LiftedTag>>(std::move(task), std::move(execution_context));
 }
 
 void AxiomEvaluator<LiftedTag>::compute_extended_state(UnpackedState<LiftedTag>& unpacked_state)

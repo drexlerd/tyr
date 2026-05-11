@@ -48,13 +48,12 @@ namespace tyr::planning
 template<>
 class StateRepository<LiftedTag> : public std::enable_shared_from_this<StateRepository<LiftedTag>>
 {
-public:
-    explicit StateRepository(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
-    StateRepository(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
+    friend class StateRepositoryFactory<LiftedTag>;
+
+private:
     StateRepository(uint_t index, TaskPtr<LiftedTag> task, AxiomEvaluatorPtr<LiftedTag> axiom_evaluator);
 
-    static StateRepositoryPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
-
+public:
     StateView<LiftedTag> get_initial_state();
 
     StateView<LiftedTag> get_registered_state(Index<State<LiftedTag>> state_index);

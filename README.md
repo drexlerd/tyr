@@ -56,9 +56,12 @@ execution_context = ExecutionContext(1)
 
 # Instantiate the planning objects. Factories assign unique context indices so
 # state views from different state repositories hash and compare correctly.
-axiom_evaluator = tpl.AxiomEvaluatorFactory().create(task, execution_context)
-state_repository = tpl.StateRepositoryFactory().create(task, axiom_evaluator)
-successor_generator = tpl.SuccessorGeneratorFactory().create(task, execution_context, state_repository)
+axiom_evaluator_factory = tpl.AxiomEvaluatorFactory()
+state_repository_factory = tpl.StateRepositoryFactory()
+successor_generator_factory = tpl.SuccessorGeneratorFactory()
+axiom_evaluator = axiom_evaluator_factory.create(task, execution_context)
+state_repository = state_repository_factory.create(task, axiom_evaluator)
+successor_generator = successor_generator_factory.create(task, execution_context, state_repository)
 
 # Get the initial node (state + metric value)
 initial_node = successor_generator.get_initial_node()

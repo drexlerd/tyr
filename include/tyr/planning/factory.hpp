@@ -40,7 +40,7 @@ public:
 
     StateRepositoryPtr<Kind> create(TaskPtr<Kind> task, AxiomEvaluatorPtr<Kind> axiom_evaluator)
     {
-        return std::make_shared<StateRepository<Kind>>(m_next_index++, std::move(task), std::move(axiom_evaluator));
+        return StateRepositoryPtr<Kind>(new StateRepository<Kind>(m_next_index++, std::move(task), std::move(axiom_evaluator)));
     }
 
 private:
@@ -55,7 +55,7 @@ public:
 
     AxiomEvaluatorPtr<Kind> create(TaskPtr<Kind> task, ExecutionContextPtr execution_context)
     {
-        return std::make_shared<AxiomEvaluator<Kind>>(m_next_index++, std::move(task), std::move(execution_context));
+        return AxiomEvaluatorPtr<Kind>(new AxiomEvaluator<Kind>(m_next_index++, std::move(task), std::move(execution_context)));
     }
 
 private:
@@ -70,7 +70,8 @@ public:
 
     SuccessorGeneratorPtr<Kind> create(TaskPtr<Kind> task, ExecutionContextPtr execution_context, StateRepositoryPtr<Kind> state_repository)
     {
-        return std::make_shared<SuccessorGenerator<Kind>>(m_next_index++, std::move(task), std::move(execution_context), std::move(state_repository));
+        return SuccessorGeneratorPtr<Kind>(
+            new SuccessorGenerator<Kind>(m_next_index++, std::move(task), std::move(execution_context), std::move(state_repository)));
     }
 
 private:

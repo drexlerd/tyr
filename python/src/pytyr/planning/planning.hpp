@@ -154,10 +154,6 @@ void bind_axiom_evaluator(nb::module_& m, const std::string& name)
     using T = AxiomEvaluator<Kind>;
 
     nb::class_<T>(m, name.c_str())  //
-        .def(nb::new_([](TaskPtr<Kind> task, std::shared_ptr<ExecutionContext> execution_context)
-                      { return T::create(std::move(task), std::move(execution_context)); }),
-             "task"_a,
-             "execution_context"_a)
         .def("get_index", &T::get_index);
 }
 
@@ -167,10 +163,6 @@ void bind_state_repository(nb::module_& m, const std::string& name)
     using T = StateRepository<Kind>;
 
     nb::class_<T>(m, name.c_str())  //
-        .def(nb::new_([](TaskPtr<Kind> task, std::shared_ptr<ExecutionContext> execution_context)
-                      { return T::create(std::move(task), std::move(execution_context)); }),
-             "task"_a,
-             "execution_context"_a)
         .def("get_index", &T::get_index)
         .def("get_initial_state", &T::get_initial_state, nb::rv_policy::move)
         .def("get_registered_state", &T::get_registered_state, nb::rv_policy::move, "state_index"_a)
@@ -189,10 +181,6 @@ void bind_successor_generator(nb::module_& m, const std::string& name)
     using T = SuccessorGenerator<Kind>;
 
     nb::class_<T>(m, name.c_str())
-        .def(nb::new_([](TaskPtr<Kind> task, std::shared_ptr<ExecutionContext> execution_context)
-                      { return T::create(std::move(task), std::move(execution_context)); }),
-             "task"_a,
-             "execution_context"_a)
         .def("get_index", &T::get_index)
         .def("get_initial_node", &T::get_initial_node, nb::rv_policy::move)
         .def("get_labeled_successor_nodes",

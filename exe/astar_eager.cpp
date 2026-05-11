@@ -94,10 +94,12 @@ int main(int argc, char** argv)
 
         if (!instantiate_ground_task)
         {
-            auto successor_generator = planning::SuccessorGenerator<planning::LiftedTag>(lifted_task, execution_context);
+            auto axiom_evaluator = planning::AxiomEvaluatorFactory<planning::LiftedTag>().create(lifted_task, execution_context);
+            auto state_repository = planning::StateRepositoryFactory<planning::LiftedTag>().create(lifted_task, axiom_evaluator);
+            auto successor_generator = planning::SuccessorGeneratorFactory<planning::LiftedTag>().create(lifted_task, execution_context, state_repository);
 
             auto options = planning::astar_eager::Options<planning::LiftedTag>();
-            options.start_node = successor_generator.get_initial_node();
+            options.start_node = successor_generator->get_initial_node();
             options.event_handler = planning::astar_eager::DefaultEventHandler<planning::LiftedTag>::create(verbosity);
             options.random_seed = random_seed;
             options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
@@ -116,7 +118,7 @@ int main(int argc, char** argv)
             else
                 throw std::invalid_argument("The heuristic is not implemented.");
 
-            auto result = planning::astar_eager::find_solution(*lifted_task, successor_generator, *heuristic, options);
+            auto result = planning::astar_eager::find_solution(*lifted_task, *successor_generator, *heuristic, options);
 
             if (result.status == planning::SearchStatus::SOLVED)
             {
@@ -137,7 +139,7 @@ int main(int argc, char** argv)
                       << std::endl;
             std::cout << "[Total] Number of fluent fterms: "
                       << lifted_task->get_repository()->size<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>() << std::endl;
-            std::cout << "[Total] States memory usage: " << successor_generator.get_state_repository()->memory_usage() << " bytes" << std::endl;
+            std::cout << "[Total] States memory usage: " << successor_generator->get_state_repository()->memory_usage() << " bytes" << std::endl;
         }
         else
         {
@@ -153,10 +155,12 @@ int main(int argc, char** argv)
             {
                 auto ground_task = ground_task_instantiation_result.task;
 
-                auto successor_generator = planning::SuccessorGenerator<planning::GroundTag>(ground_task, execution_context);
+                auto axiom_evaluator = planning::AxiomEvaluatorFactory<planning::GroundTag>().create(ground_task, execution_context);
+                auto state_repository = planning::StateRepositoryFactory<planning::GroundTag>().create(ground_task, axiom_evaluator);
+                auto successor_generator = planning::SuccessorGeneratorFactory<planning::GroundTag>().create(ground_task, execution_context, state_repository);
 
                 auto options = planning::astar_eager::Options<planning::GroundTag>();
-                options.start_node = successor_generator.get_initial_node();
+                options.start_node = successor_generator->get_initial_node();
                 options.event_handler = planning::astar_eager::DefaultEventHandler<planning::GroundTag>::create(verbosity);
                 options.random_seed = random_seed;
                 options.shuffle_labeled_succ_nodes = shuffle_labeled_succ_nodes;
@@ -169,7 +173,7 @@ int main(int argc, char** argv)
                 else
                     throw std::invalid_argument("The heuristic is not implemented.");
 
-                auto result = planning::astar_eager::find_solution(*ground_task, successor_generator, *heuristic, options);
+                auto result = planning::astar_eager::find_solution(*ground_task, *successor_generator, *heuristic, options);
 
                 if (result.status == planning::SearchStatus::SOLVED)
                 {
@@ -190,7 +194,7 @@ int main(int argc, char** argv)
                           << ground_task->get_repository()->size<formalism::planning::GroundAtom<formalism::DerivedTag>>() << std::endl;
                 std::cout << "[Total] Number of fluent fterms: "
                           << ground_task->get_repository()->size<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>() << std::endl;
-                std::cout << "[Total] States memory usage: " << successor_generator.get_state_repository()->memory_usage() << " bytes" << std::endl;
+                std::cout << "[Total] States memory usage: " << successor_generator->get_state_repository()->memory_usage() << " bytes" << std::endl;
             }
         }
     }

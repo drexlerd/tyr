@@ -97,10 +97,12 @@ int main(int argc, char** argv)
 
         if (!instantiate_ground_task)
         {
-            auto successor_generator = planning::SuccessorGenerator<planning::LiftedTag>(lifted_task, execution_context);
+            auto axiom_evaluator = planning::AxiomEvaluatorFactory<planning::LiftedTag>().create(lifted_task, execution_context);
+            auto state_repository = planning::StateRepositoryFactory<planning::LiftedTag>().create(lifted_task, axiom_evaluator);
+            auto successor_generator = planning::SuccessorGeneratorFactory<planning::LiftedTag>().create(lifted_task, execution_context, state_repository);
 
             auto options = planning::gbfs_lazy::Options<planning::LiftedTag>();
-            options.start_node = successor_generator.get_initial_node();
+            options.start_node = successor_generator->get_initial_node();
             options.event_handler = planning::gbfs_lazy::DefaultEventHandler<planning::LiftedTag>::create(verbosity);
             options.random_seed = random_seed;
             options.use_preferred_actions = !disable_preferred_actions;
@@ -120,7 +122,7 @@ int main(int argc, char** argv)
             else
                 throw std::invalid_argument("The heuristic is not implemented.");
 
-            auto result = planning::gbfs_lazy::find_solution(*lifted_task, successor_generator, *heuristic, options);
+            auto result = planning::gbfs_lazy::find_solution(*lifted_task, *successor_generator, *heuristic, options);
 
             if (result.status == planning::SearchStatus::SOLVED)
             {
@@ -135,9 +137,9 @@ int main(int argc, char** argv)
                 plan_file.close();
             }
 
-            successor_generator.print_summary(1);
-            if (successor_generator.get_state_repository()->get_axiom_evaluator())
-                successor_generator.get_state_repository()->get_axiom_evaluator()->print_summary(1);
+            successor_generator->print_summary(1);
+            if (successor_generator->get_state_repository()->get_axiom_evaluator())
+                successor_generator->get_state_repository()->get_axiom_evaluator()->print_summary(1);
             heuristic->print_summary(1);
 
             std::cout << "[Total] Number of fluent atoms: " << lifted_task->get_repository()->size<formalism::planning::GroundAtom<formalism::FluentTag>>()
@@ -146,7 +148,7 @@ int main(int argc, char** argv)
                       << std::endl;
             std::cout << "[Total] Number of fluent fterms: "
                       << lifted_task->get_repository()->size<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>() << std::endl;
-            std::cout << "[Total] States memory usage: " << successor_generator.get_state_repository()->memory_usage() << " bytes" << std::endl;
+            std::cout << "[Total] States memory usage: " << successor_generator->get_state_repository()->memory_usage() << " bytes" << std::endl;
         }
         else
         {
@@ -162,10 +164,12 @@ int main(int argc, char** argv)
             {
                 auto ground_task = ground_task_instantiation_result.task;
 
-                auto successor_generator = planning::SuccessorGenerator<planning::GroundTag>(ground_task, execution_context);
+                auto axiom_evaluator = planning::AxiomEvaluatorFactory<planning::GroundTag>().create(ground_task, execution_context);
+                auto state_repository = planning::StateRepositoryFactory<planning::GroundTag>().create(ground_task, axiom_evaluator);
+                auto successor_generator = planning::SuccessorGeneratorFactory<planning::GroundTag>().create(ground_task, execution_context, state_repository);
 
                 auto options = planning::gbfs_lazy::Options<planning::GroundTag>();
-                options.start_node = successor_generator.get_initial_node();
+                options.start_node = successor_generator->get_initial_node();
                 options.event_handler = planning::gbfs_lazy::DefaultEventHandler<planning::GroundTag>::create(verbosity);
                 options.random_seed = random_seed;
                 options.use_preferred_actions = !disable_preferred_actions;
@@ -179,7 +183,7 @@ int main(int argc, char** argv)
                 else
                     throw std::invalid_argument("The heuristic is not implemented.");
 
-                auto result = planning::gbfs_lazy::find_solution(*ground_task, successor_generator, *heuristic, options);
+                auto result = planning::gbfs_lazy::find_solution(*ground_task, *successor_generator, *heuristic, options);
 
                 if (result.status == planning::SearchStatus::SOLVED)
                 {
@@ -200,7 +204,7 @@ int main(int argc, char** argv)
                           << ground_task->get_repository()->size<formalism::planning::GroundAtom<formalism::DerivedTag>>() << std::endl;
                 std::cout << "[Total] Number of fluent fterms: "
                           << ground_task->get_repository()->size<formalism::planning::GroundFunctionTerm<formalism::FluentTag>>() << std::endl;
-                std::cout << "[Total] States memory usage: " << successor_generator.get_state_repository()->memory_usage() << " bytes" << std::endl;
+                std::cout << "[Total] States memory usage: " << successor_generator->get_state_repository()->memory_usage() << " bytes" << std::endl;
             }
         }
     }

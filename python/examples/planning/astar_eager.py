@@ -30,7 +30,10 @@ from pytyr.formalism.planning import (
 # However, some heuristics, like MaxRPGHeuristic might not be available yet.
 from pytyr.planning.lifted import (
     Task, 
+    AxiomEvaluatorFactory,
+    StateRepositoryFactory,
     SuccessorGenerator, 
+    SuccessorGeneratorFactory,
     Heuristic, 
     FFRPGHeuristic, 
     AddRPGHeuristic, 
@@ -170,7 +173,12 @@ def main():
     parser = Parser(domain_filepath, parser_options)
     lifted_task = Task(parser.parse_task(task_filepath, parser_options))
     heuristic = GoalCountHeuristic(lifted_task)
-    successor_generator = SuccessorGenerator(lifted_task, execution_context)
+    axiom_evaluator_factory = AxiomEvaluatorFactory()
+    state_repository_factory = StateRepositoryFactory()
+    successor_generator_factory = SuccessorGeneratorFactory()
+    axiom_evaluator = axiom_evaluator_factory.create(lifted_task, execution_context)
+    state_repository = state_repository_factory.create(lifted_task, axiom_evaluator)
+    successor_generator = successor_generator_factory.create(lifted_task, execution_context, state_repository)
 
     options = Options()                               # Lifted search is parallelized but only useful on large tasks.
     options.event_handler = DefaultEventHandler(0)         # Collects and prints statistics. If verbosity >= 2, then also prints labeled nodes.

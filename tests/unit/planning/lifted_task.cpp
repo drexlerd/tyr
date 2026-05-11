@@ -111,11 +111,14 @@ bool are_same_binding(fp::ActionBindingView lhs, const Data<formalism::RelationB
 void expect_action_binding_apis_match_ground_actions(const LiftedSuccessorCountCase& test_case)
 {
     auto lifted_task = p::Task<p::LiftedTag>::create(fp::Parser(test_case.domain_file).parse_task(test_case.task_file));
-    auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(lifted_task, ExecutionContext::create(1));
-    const auto initial_node = successor_generator.get_initial_node();
+    auto execution_context = ExecutionContext::create(1);
+    auto axiom_evaluator = p::AxiomEvaluatorFactory<p::LiftedTag>().create(lifted_task, execution_context);
+    auto state_repository = p::StateRepositoryFactory<p::LiftedTag>().create(lifted_task, axiom_evaluator);
+    auto successor_generator = p::SuccessorGeneratorFactory<p::LiftedTag>().create(lifted_task, execution_context, state_repository);
+    const auto initial_node = successor_generator->get_initial_node();
 
-    const auto ground_successors = successor_generator.get_labeled_successor_nodes(initial_node);
-    const auto interned_bindings = successor_generator.get_applicable_action_bindings(initial_node);
+    const auto ground_successors = successor_generator->get_labeled_successor_nodes(initial_node);
+    const auto interned_bindings = successor_generator->get_applicable_action_bindings(initial_node);
 
     ASSERT_EQ(ground_successors.size(), interned_bindings.size());
     for (const auto binding : interned_bindings)
@@ -125,11 +128,11 @@ void expect_action_binding_apis_match_ground_actions(const LiftedSuccessorCountC
         ASSERT_NE(expected, ground_successors.end());
 
         expect_same_binding(expected->label.get_row(), binding);
-        expect_same_node(expected->node, successor_generator.get_successor_node(initial_node, binding));
+        expect_same_node(expected->node, successor_generator->get_successor_node(initial_node, binding));
     }
 
     size_t no_interning_pos = 0;
-    successor_generator.for_each_applicable_action_binding(
+    successor_generator->for_each_applicable_action_binding(
         initial_node,
         [&](const auto& binding)
         {
@@ -138,7 +141,7 @@ void expect_action_binding_apis_match_ground_actions(const LiftedSuccessorCountC
             ASSERT_NE(expected, ground_successors.end());
 
             expect_same_binding(expected->label.get_row(), binding);
-            expect_same_node(expected->node, successor_generator.get_successor_node(initial_node, binding));
+            expect_same_node(expected->node, successor_generator->get_successor_node(initial_node, binding));
             ++no_interning_pos;
         });
 
@@ -154,9 +157,12 @@ TEST_P(LiftedTaskSuccessorCountTest, InitialNodeHasExpectedSuccessorCount)
 {
     const auto& param = GetParam();
     auto lifted_task = p::Task<p::LiftedTag>::create(fp::Parser(param.domain_file).parse_task(param.task_file));
-    auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(lifted_task, ExecutionContext::create(1));
+    auto execution_context = ExecutionContext::create(1);
+    auto axiom_evaluator = p::AxiomEvaluatorFactory<p::LiftedTag>().create(lifted_task, execution_context);
+    auto state_repository = p::StateRepositoryFactory<p::LiftedTag>().create(lifted_task, axiom_evaluator);
+    auto successor_generator = p::SuccessorGeneratorFactory<p::LiftedTag>().create(lifted_task, execution_context, state_repository);
 
-    EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), param.expected_successors);
+    EXPECT_EQ(successor_generator->get_labeled_successor_nodes(successor_generator->get_initial_node()).size(), param.expected_successors);
 }
 
 TEST_P(LiftedTaskSuccessorCountTest, ActionBindingApisMatchGroundActions) { expect_action_binding_apis_match_ground_actions(GetParam()); }

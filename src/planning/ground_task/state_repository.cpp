@@ -40,16 +40,6 @@ namespace fp = tyr::formalism::planning;
 namespace tyr::planning
 {
 
-StateRepository<GroundTag>::StateRepository(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context) :
-    StateRepository(0, std::move(task), std::move(execution_context))
-{
-}
-
-StateRepository<GroundTag>::StateRepository(uint_t index, TaskPtr<GroundTag> task, ExecutionContextPtr execution_context) :
-    StateRepository(index, task, task->has_axioms() ? std::make_shared<AxiomEvaluator<GroundTag>>(index, task, std::move(execution_context)) : nullptr)
-{
-}
-
 StateRepository<GroundTag>::StateRepository(uint_t index, TaskPtr<GroundTag> task, AxiomEvaluatorPtr<GroundTag> axiom_evaluator) :
     m_index(index),
     m_task(std::move(task)),
@@ -61,11 +51,6 @@ StateRepository<GroundTag>::StateRepository(uint_t index, TaskPtr<GroundTag> tas
     m_unpacked_state_pool(),
     m_axiom_evaluator(std::move(axiom_evaluator))
 {
-}
-
-StateRepositoryPtr<GroundTag> StateRepository<GroundTag>::create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context)
-{
-    return std::make_shared<StateRepository<GroundTag>>(std::move(task), std::move(execution_context));
 }
 
 StateView<GroundTag> StateRepository<GroundTag>::get_initial_state()

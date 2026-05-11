@@ -32,8 +32,6 @@ class SuccessorGenerator;
 
 template<typename T, typename Kind>
 concept SuccessorGeneratorConcept = requires(T& r,
-                                             TaskPtr<Kind> task,
-                                             ExecutionContextPtr execution_context,
                                              Index<State<Kind>> state_index,
                                              const Node<Kind>& node,
                                              std::vector<LabeledNode<Kind>>& labeled_successor_nodes,

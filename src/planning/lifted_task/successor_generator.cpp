@@ -74,16 +74,6 @@ void for_each_action_binding(const d::ProgramWorkspace<d::NoOrAnnotationPolicy, 
 }
 }
 
-SuccessorGenerator<LiftedTag>::SuccessorGenerator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
-    SuccessorGenerator(0, std::move(task), std::move(execution_context))
-{
-}
-
-SuccessorGenerator<LiftedTag>::SuccessorGenerator(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
-    SuccessorGenerator(index, task, execution_context, std::make_shared<StateRepository<LiftedTag>>(index, task, execution_context))
-{
-}
-
 SuccessorGenerator<LiftedTag>::SuccessorGenerator(uint_t index,
                                                   TaskPtr<LiftedTag> task,
                                                   ExecutionContextPtr execution_context,
@@ -101,11 +91,6 @@ SuccessorGenerator<LiftedTag>::SuccessorGenerator(uint_t index,
 {
     assert(m_execution_context);
     assert(m_state_repository->get_execution_context() == m_execution_context);
-}
-
-SuccessorGeneratorPtr<LiftedTag> SuccessorGenerator<LiftedTag>::create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context)
-{
-    return std::make_shared<SuccessorGenerator<LiftedTag>>(std::move(task), std::move(execution_context));
 }
 
 Node<LiftedTag> SuccessorGenerator<LiftedTag>::get_initial_node()

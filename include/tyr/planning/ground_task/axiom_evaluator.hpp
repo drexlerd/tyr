@@ -31,12 +31,12 @@ namespace tyr::planning
 template<>
 class AxiomEvaluator<GroundTag>
 {
-public:
-    explicit AxiomEvaluator(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
+    friend class AxiomEvaluatorFactory<GroundTag>;
+
+private:
     AxiomEvaluator(uint_t index, TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
 
-    static AxiomEvaluatorPtr<GroundTag> create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
-
+public:
     void compute_extended_state(UnpackedState<GroundTag>& unpacked_state);
 
     auto get_index() const noexcept { return m_index; }

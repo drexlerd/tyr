@@ -37,17 +37,6 @@ namespace fp = tyr::formalism::planning;
 namespace tyr::planning
 {
 
-StateRepository<LiftedTag>::StateRepository(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
-    StateRepository(0, std::move(task), std::move(execution_context))
-{
-}
-
-StateRepository<LiftedTag>::StateRepository(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context) :
-    StateRepository(index, task, task->has_axioms() ? std::make_shared<AxiomEvaluator<LiftedTag>>(index, task, execution_context) : nullptr)
-{
-    m_execution_context = std::move(execution_context);
-}
-
 StateRepository<LiftedTag>::StateRepository(uint_t index, TaskPtr<LiftedTag> task, AxiomEvaluatorPtr<LiftedTag> axiom_evaluator) :
     m_index(index),
     m_task(task),
@@ -59,11 +48,6 @@ StateRepository<LiftedTag>::StateRepository(uint_t index, TaskPtr<LiftedTag> tas
     m_unpacked_state_pool(),
     m_axiom_evaluator(std::move(axiom_evaluator))
 {
-}
-
-StateRepositoryPtr<LiftedTag> StateRepository<LiftedTag>::create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context)
-{
-    return std::make_shared<StateRepository<LiftedTag>>(std::move(task), std::move(execution_context));
 }
 
 StateView<LiftedTag> StateRepository<LiftedTag>::get_initial_state()

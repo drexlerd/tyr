@@ -90,13 +90,15 @@ SearchSummary run_blind_astar(const fs::path& domain_filepath, const fs::path& p
     else
         static_assert(tyr::dependent_false<Kind>::value, "Missing case");
 
-    auto successor_generator = p::SuccessorGenerator<Kind>(task, execution_context);
+    auto axiom_evaluator = p::AxiomEvaluatorFactory<Kind>().create(task, execution_context);
+    auto state_repository = p::StateRepositoryFactory<Kind>().create(task, axiom_evaluator);
+    auto successor_generator = p::SuccessorGeneratorFactory<Kind>().create(task, execution_context, state_repository);
     auto heuristic = p::BlindHeuristic<Kind>::create();
     auto event_handler = p::astar_eager::DefaultEventHandler<Kind>::create(0);
 
     auto options = p::astar_eager::Options<Kind>();
     options.event_handler = event_handler;
-    const auto result = p::astar_eager::find_solution(*task, successor_generator, *heuristic, options);
+    const auto result = p::astar_eager::find_solution(*task, *successor_generator, *heuristic, options);
 
     SearchSummary summary {};
 

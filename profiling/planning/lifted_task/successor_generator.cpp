@@ -3,6 +3,7 @@
 #include "tyr/common/json_loader.hpp"
 #include "tyr/formalism/planning/parser.hpp"
 #include "tyr/formalism/planning/views.hpp"
+#include "tyr/planning/factory.hpp"
 #include "tyr/planning/lifted_task.hpp"
 #include "tyr/planning/lifted_task/node.hpp"
 
@@ -59,16 +60,24 @@ p::TaskPtr<p::LiftedTag> create_task(const BenchmarkCase& benchmark_case)
     return p::Task<p::LiftedTag>::create(fp::Parser(benchmark_case.domain).parse_task(benchmark_case.task));
 }
 
+p::SuccessorGeneratorPtr<p::LiftedTag> create_successor_generator(p::TaskPtr<p::LiftedTag> task)
+{
+    auto execution_context = tyr::ExecutionContext::create(1);
+    auto axiom_evaluator = p::AxiomEvaluatorFactory<p::LiftedTag>().create(task, execution_context);
+    auto state_repository = p::StateRepositoryFactory<p::LiftedTag>().create(task, axiom_evaluator);
+    return p::SuccessorGeneratorFactory<p::LiftedTag>().create(task, execution_context, state_repository);
+}
+
 void benchmark_initial_successors(benchmark::State& state, const BenchmarkCase& benchmark_case)
 {
     auto task = create_task(benchmark_case);
-    auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(task, tyr::ExecutionContext::create(1));
-    const auto initial_node = successor_generator.get_initial_node();
+    auto successor_generator = create_successor_generator(task);
+    const auto initial_node = successor_generator->get_initial_node();
     auto successors = std::vector<p::LabeledNode<p::LiftedTag>>();
 
     for (auto _ : state)
     {
-        successor_generator.get_labeled_successor_nodes(initial_node, successors);
+        successor_generator->get_labeled_successor_nodes(initial_node, successors);
         benchmark::DoNotOptimize(successors.data());
         benchmark::DoNotOptimize(successors.size());
     }
@@ -79,13 +88,13 @@ void benchmark_initial_successors(benchmark::State& state, const BenchmarkCase& 
 void benchmark_interned_action_bindings(benchmark::State& state, const BenchmarkCase& benchmark_case)
 {
     auto task = create_task(benchmark_case);
-    auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(task, tyr::ExecutionContext::create(1));
-    const auto initial_node = successor_generator.get_initial_node();
+    auto successor_generator = create_successor_generator(task);
+    const auto initial_node = successor_generator->get_initial_node();
     auto bindings = std::vector<fp::ActionBindingView>();
 
     for (auto _ : state)
     {
-        successor_generator.get_applicable_action_bindings(initial_node, bindings);
+        successor_generator->get_applicable_action_bindings(initial_node, bindings);
         benchmark::DoNotOptimize(bindings.data());
         benchmark::DoNotOptimize(bindings.size());
     }
@@ -96,21 +105,21 @@ void benchmark_interned_action_bindings(benchmark::State& state, const Benchmark
 void benchmark_action_binding_iterator(benchmark::State& state, const BenchmarkCase& benchmark_case)
 {
     auto task = create_task(benchmark_case);
-    auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(task, tyr::ExecutionContext::create(1));
-    const auto initial_node = successor_generator.get_initial_node();
+    auto successor_generator = create_successor_generator(task);
+    const auto initial_node = successor_generator->get_initial_node();
     auto num_bindings = size_t(0);
 
     for (auto _ : state)
     {
         num_bindings = 0;
-        successor_generator.for_each_applicable_action_binding(initial_node,
-                                                               [&](const auto& binding)
-                                                               {
-                                                                   benchmark::DoNotOptimize(&binding);
-                                                                   benchmark::DoNotOptimize(binding.objects.data());
-                                                                   benchmark::DoNotOptimize(binding.objects.size());
-                                                                   ++num_bindings;
-                                                               });
+        successor_generator->for_each_applicable_action_binding(initial_node,
+                                                                [&](const auto& binding)
+                                                                {
+                                                                    benchmark::DoNotOptimize(&binding);
+                                                                    benchmark::DoNotOptimize(binding.objects.data());
+                                                                    benchmark::DoNotOptimize(binding.objects.size());
+                                                                    ++num_bindings;
+                                                                });
         benchmark::DoNotOptimize(num_bindings);
     }
 

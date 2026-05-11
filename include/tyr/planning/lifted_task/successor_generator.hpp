@@ -43,13 +43,12 @@ namespace tyr::planning
 template<>
 class SuccessorGenerator<LiftedTag>
 {
-public:
-    explicit SuccessorGenerator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
-    SuccessorGenerator(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
+    friend class SuccessorGeneratorFactory<LiftedTag>;
+
+private:
     SuccessorGenerator(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context, StateRepositoryPtr<LiftedTag> state_repository);
 
-    static SuccessorGeneratorPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
-
+public:
     Node<LiftedTag> get_initial_node();
 
     // Ground action API (interning)

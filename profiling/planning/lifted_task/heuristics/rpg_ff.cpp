@@ -4,6 +4,7 @@
 #include "tyr/formalism/planning/parser.hpp"
 #include "tyr/planning/algorithms/gbfs_lazy.hpp"
 #include "tyr/planning/algorithms/gbfs_lazy/event_handler.hpp"
+#include "tyr/planning/factory.hpp"
 #include "tyr/planning/lifted_task.hpp"
 #include "tyr/planning/lifted_task/node.hpp"
 #include "tyr/planning/lifted_task/successor_generator.hpp"
@@ -90,19 +91,21 @@ void benchmark_gbfs_lazy_rpg_ff(benchmark::State& state, const BenchmarkCase& be
 
     for (auto _ : state)
     {
-        auto successor_generator = p::SuccessorGenerator<p::LiftedTag>(task, execution_context);
+        auto axiom_evaluator = p::AxiomEvaluatorFactory<p::LiftedTag>().create(task, execution_context);
+        auto state_repository = p::StateRepositoryFactory<p::LiftedTag>().create(task, axiom_evaluator);
+        auto successor_generator = p::SuccessorGeneratorFactory<p::LiftedTag>().create(task, execution_context, state_repository);
         auto heuristic = p::FFRPGHeuristic<p::LiftedTag>::create(task, execution_context);
         auto event_handler = p::gbfs_lazy::DefaultEventHandler<p::LiftedTag>::create(0);
 
         auto options = p::gbfs_lazy::Options<p::LiftedTag>();
-        options.start_node = successor_generator.get_initial_node();
+        options.start_node = successor_generator->get_initial_node();
         options.event_handler = event_handler;
         initial_h_value = heuristic->evaluate(options.start_node->get_state());
 
         auto result = p::SearchResult<p::LiftedTag>();
         {
             const auto silence_cout = ScopedCoutSilencer();
-            result = p::gbfs_lazy::find_solution(*task, successor_generator, *heuristic, options);
+            result = p::gbfs_lazy::find_solution(*task, *successor_generator, *heuristic, options);
         }
 
         num_expanded = event_handler->get_statistics().get_num_expanded();

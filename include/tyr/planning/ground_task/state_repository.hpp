@@ -50,13 +50,12 @@ namespace tyr::planning
 template<>
 class StateRepository<GroundTag> : public std::enable_shared_from_this<StateRepository<GroundTag>>
 {
-public:
-    explicit StateRepository(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
-    StateRepository(uint_t index, TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
+    friend class StateRepositoryFactory<GroundTag>;
+
+private:
     StateRepository(uint_t index, TaskPtr<GroundTag> task, AxiomEvaluatorPtr<GroundTag> axiom_evaluator);
 
-    static StateRepositoryPtr<GroundTag> create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
-
+public:
     StateView<GroundTag> get_initial_state();
 
     StateView<GroundTag> get_registered_state(Index<State<GroundTag>> state_index);

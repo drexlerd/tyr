@@ -38,8 +38,6 @@ class StateRepository;
 template<typename T, typename Kind>
 concept StateRepositoryConcept =
     requires(T& r,
-             TaskPtr<Kind> task,
-             ExecutionContextPtr execution_context,
              Index<State<Kind>> index,
              SharedObjectPoolPtr<UnpackedState<Kind>> unregistered_state,
              const std::vector<Data<formalism::planning::FDRFact<formalism::FluentTag>>>& fluent_facts,
@@ -47,7 +45,6 @@ concept StateRepositoryConcept =
              const std::vector<formalism::planning::FDRFactView<formalism::FluentTag>>& fluent_fact_views,
              const std::vector<formalism::planning::GroundFunctionTermViewValuePair<formalism::FluentTag>>& fterm_value_views) {
         requires TaskKind<Kind>;
-        { T(task, execution_context) };
         { r.get_initial_state() } -> std::same_as<StateView<Kind>>;
         { r.get_registered_state(index) } -> std::same_as<StateView<Kind>>;
         { r.create_state(fluent_facts, fterm_values) } -> std::same_as<StateView<Kind>>;

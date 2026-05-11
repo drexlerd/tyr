@@ -33,13 +33,12 @@ namespace tyr::planning
 template<>
 class SuccessorGenerator<GroundTag>
 {
-public:
-    explicit SuccessorGenerator(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
-    SuccessorGenerator(uint_t index, TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
+    friend class SuccessorGeneratorFactory<GroundTag>;
+
+private:
     SuccessorGenerator(uint_t index, TaskPtr<GroundTag> task, ExecutionContextPtr execution_context, StateRepositoryPtr<GroundTag> state_repository);
 
-    static SuccessorGeneratorPtr<GroundTag> create(TaskPtr<GroundTag> task, ExecutionContextPtr execution_context);
-
+public:
     Node<GroundTag> get_initial_node();
 
     std::vector<LabeledNode<GroundTag>> get_labeled_successor_nodes(const Node<GroundTag>& node);

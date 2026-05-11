@@ -35,12 +35,12 @@ namespace tyr::planning
 template<>
 class AxiomEvaluator<LiftedTag>
 {
-public:
-    explicit AxiomEvaluator(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
+    friend class AxiomEvaluatorFactory<LiftedTag>;
+
+private:
     AxiomEvaluator(uint_t index, TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
 
-    static AxiomEvaluatorPtr<LiftedTag> create(TaskPtr<LiftedTag> task, ExecutionContextPtr execution_context);
-
+public:
     void compute_extended_state(UnpackedState<LiftedTag>& unpacked_state);
 
     const auto& get_workspace() const noexcept { return m_workspace; }

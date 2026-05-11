@@ -86,9 +86,12 @@ TEST_P(GroundTaskTest, HasExpectedGroundTaskAndSuccessorCounts)
     EXPECT_EQ(ground_task->get_num_actions(), param.expected_actions);
     EXPECT_EQ(ground_task->get_num_axioms(), param.expected_axioms);
 
-    auto successor_generator = p::SuccessorGenerator<p::GroundTag>(ground_task, ExecutionContext::create(1));
+    auto successor_execution_context = ExecutionContext::create(1);
+    auto axiom_evaluator = p::AxiomEvaluatorFactory<p::GroundTag>().create(ground_task, successor_execution_context);
+    auto state_repository = p::StateRepositoryFactory<p::GroundTag>().create(ground_task, axiom_evaluator);
+    auto successor_generator = p::SuccessorGeneratorFactory<p::GroundTag>().create(ground_task, successor_execution_context, state_repository);
 
-    EXPECT_EQ(successor_generator.get_labeled_successor_nodes(successor_generator.get_initial_node()).size(), param.expected_successors);
+    EXPECT_EQ(successor_generator->get_labeled_successor_nodes(successor_generator->get_initial_node()).size(), param.expected_successors);
 }
 
 INSTANTIATE_TEST_SUITE_P(TyrPlanningGroundTask,
