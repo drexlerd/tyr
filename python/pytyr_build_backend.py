@@ -124,6 +124,38 @@ def _strip_wheel_native_libraries(wheel_path: Path) -> None:
         replacement_path.replace(wheel_path)
 
 
+def _fix_wheel_stubs(wheel_path: Path) -> None:
+    with tempfile.TemporaryDirectory(prefix="pytyr-wheel-") as tmp:
+        wheel_root = Path(tmp) / "wheel"
+        with zipfile.ZipFile(wheel_path) as wheel:
+            wheel.extractall(wheel_root)
+
+        for path in wheel_root.rglob("*.pyi"):
+            text = path.read_text(encoding="utf-8")
+            path.write_text(text.replace("pytyr.pytyr.", "pytyr."), encoding="utf-8")
+
+        for path in sorted(wheel_root.rglob("*.pyi")):
+            package_dir = path.with_suffix("")
+            if package_dir.is_dir():
+                target = package_dir / "__init__.pyi"
+                if target.exists():
+                    raise RuntimeError(
+                        f"stubgen emitted both {path.relative_to(wheel_root)} "
+                        f"and {target.relative_to(wheel_root)}"
+                    )
+                shutil.move(path, target)
+
+        _rewrite_record(wheel_root)
+
+        replacement_path = wheel_path.with_suffix(".tmp")
+        with zipfile.ZipFile(replacement_path, "w", compression=zipfile.ZIP_DEFLATED) as wheel:
+            for path in sorted(wheel_root.rglob("*")):
+                if path.is_file():
+                    wheel.write(path, path.relative_to(wheel_root).as_posix())
+
+        replacement_path.replace(wheel_path)
+
+
 def _prepare_native_build() -> None:
     native_prefixes = _native_prefixes()
     native_library_dirs = _native_library_dirs(native_prefixes)
@@ -163,13 +195,17 @@ def prepare_metadata_for_build_wheel(metadata_directory, config_settings=None):
 def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
     _prepare_native_build()
     wheel_filename = scikit_build.build_wheel(wheel_directory, config_settings, metadata_directory)
-    _strip_wheel_native_libraries(Path(wheel_directory) / wheel_filename)
+    wheel_path = Path(wheel_directory) / wheel_filename
+    _fix_wheel_stubs(wheel_path)
+    _strip_wheel_native_libraries(wheel_path)
     return wheel_filename
 
 
 def build_editable(wheel_directory, config_settings=None, metadata_directory=None):
     _prepare_native_build()
-    return scikit_build.build_editable(wheel_directory, config_settings, metadata_directory)
+    wheel_filename = scikit_build.build_editable(wheel_directory, config_settings, metadata_directory)
+    _fix_wheel_stubs(Path(wheel_directory) / wheel_filename)
+    return wheel_filename
 
 
 def build_sdist(sdist_directory, config_settings=None):
