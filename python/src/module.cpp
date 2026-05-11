@@ -5,6 +5,6 @@
 namespace tyr
 {
 
-NB_MODULE(pytyr, m) { bind_module_definitions(m); }
+NB_MODULE(_pytyr, m) { bind_module_definitions(m); }
 
 }  // namespace tyr

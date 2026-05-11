@@ -1,12 +1,12 @@
 # Import all classes for better IDE support
 
-from ...pytyr.planning.lifted import (
+from ..._pytyr.planning.lifted import (
     GroundTaskInstantiationStatus,
     GroundTaskInstantiationResult,
     GroundTaskInstantiationOptions,
 )
 
-from ...pytyr.planning.lifted import (
+from ..._pytyr.planning.lifted import (
     Task,
     State,    
     StateIndex,

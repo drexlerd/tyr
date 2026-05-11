@@ -1,6 +1,6 @@
 # Import all classes for better IDE support
 
-from ....pytyr.planning.ground.gbfs_lazy import (
+from ...._pytyr.planning.ground.gbfs_lazy import (
     DefaultEventHandler,
     EventHandler,
     Options,

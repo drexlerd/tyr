@@ -130,20 +130,27 @@ def _fix_wheel_stubs(wheel_path: Path) -> None:
         with zipfile.ZipFile(wheel_path) as wheel:
             wheel.extractall(wheel_root)
 
-        for path in wheel_root.rglob("*.pyi"):
-            text = path.read_text(encoding="utf-8")
-            path.write_text(text.replace("pytyr.pytyr.", "pytyr."), encoding="utf-8")
-
-        for path in sorted(wheel_root.rglob("*.pyi")):
-            package_dir = path.with_suffix("")
+        def install_stub(path: Path, target: Path) -> None:
+            package_dir = target.with_suffix("")
             if package_dir.is_dir():
                 target = package_dir / "__init__.pyi"
-                if target.exists():
-                    raise RuntimeError(
-                        f"stubgen emitted both {path.relative_to(wheel_root)} "
-                        f"and {target.relative_to(wheel_root)}"
-                    )
-                shutil.move(path, target)
+
+            if target.exists():
+                raise RuntimeError(
+                    f"stubgen emitted both {path.relative_to(wheel_root)} "
+                    f"and {target.relative_to(wheel_root)}"
+                )
+
+            target.parent.mkdir(parents=True, exist_ok=True)
+            text = path.read_text(encoding="utf-8")
+            target.write_text(text.replace("pytyr._pytyr.", "pytyr."), encoding="utf-8")
+
+        private_stub_root = wheel_root / "pytyr" / "_pytyr"
+        if private_stub_root.is_dir():
+            public_stub_root = wheel_root / "pytyr"
+            for path in sorted(private_stub_root.rglob("*.pyi")):
+                install_stub(path, public_stub_root / path.relative_to(private_stub_root))
+            shutil.rmtree(private_stub_root)
 
         _rewrite_record(wheel_root)
 

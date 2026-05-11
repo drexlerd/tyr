@@ -13,7 +13,7 @@ set(PYTYR_NATIVE_LIBDIR "${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_LIBDIR}")
 set(PYTYR_NATIVE_BINDIR "${PYTYR_NATIVE_DIR}/${CMAKE_INSTALL_BINDIR}")
 set(PYTYR_NATIVE_CMAKEDIR "${PYTYR_NATIVE_LIBDIR}/cmake")
 
-nanobind_add_module(pytyr
+nanobind_add_module(_pytyr
     module.cpp
     pytyr/module.cpp
     pytyr/common/module.cpp
@@ -34,7 +34,7 @@ nanobind_add_module(pytyr
     pytyr/planning/lifted/gbfs_lazy/module.cpp
 )
 
-target_link_libraries(pytyr PRIVATE tyr::core TBB::tbb)
+target_link_libraries(_pytyr PRIVATE tyr::core TBB::tbb)
 
 if(TYR_BUILD_SHARED)
     if(APPLE)
@@ -58,13 +58,13 @@ if(TYR_BUILD_SHARED)
     endif()
 
     if(PYTYR_MODULE_RPATH)
-        set_target_properties(pytyr PROPERTIES
+        set_target_properties(_pytyr PROPERTIES
             BUILD_RPATH "${PYTYR_MODULE_RPATH}"
             INSTALL_RPATH "${PYTYR_MODULE_RPATH}")
     endif()
 endif()
 
-install(TARGETS pytyr DESTINATION "pytyr" COMPONENT pytyr)
+install(TARGETS _pytyr DESTINATION "pytyr" COMPONENT pytyr)
 if(TYR_BUILD_SHARED)
     set_property(TARGET core PROPERTY INTERFACE_INCLUDE_DIRECTORIES
         "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>")
@@ -150,12 +150,12 @@ endif()
 
 nanobind_add_stub(
     pytyr_stubs
-    MODULE pytyr
+    MODULE pytyr._pytyr
     RECURSIVE
     INSTALL_TIME
-    OUTPUT_PATH "."
+    OUTPUT_PATH "pytyr"
     PYTHON_PATH "."
     COMPONENT pytyr
 )
 
-add_custom_target(pytyr_wheel DEPENDS pytyr)
+add_custom_target(pytyr_wheel DEPENDS _pytyr)

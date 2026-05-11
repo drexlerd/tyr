@@ -1,6 +1,6 @@
 # Import all classes for better IDE support
 
-from ..pytyr.planning import (
+from .._pytyr.planning import (
     SearchStatus,
 )
 
