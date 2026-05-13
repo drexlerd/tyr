@@ -47,7 +47,7 @@
             "task_file": "tests/classical/blocks_3/test-1.pddl",
             "expected_fluent_atoms": 15,
             "expected_derived_atoms": 0,
-            "expected_actions": 45,
+            "expected_actions": 27,
             "expected_axioms": 0,
             "expected_successors": 2
         },
@@ -57,7 +57,7 @@
             "task_file": "tests/classical/blocks_4/test-1.pddl",
             "expected_fluent_atoms": 19,
             "expected_derived_atoms": 0,
-            "expected_actions": 24,
+            "expected_actions": 18,
             "expected_axioms": 0,
             "expected_successors": 2
         },

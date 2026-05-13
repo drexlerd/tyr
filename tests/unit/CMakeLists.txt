@@ -34,3 +34,4 @@ add_gtest(planning_ground_task                           "planning/ground_task.c
 target_link_libraries(planning_ground_task PRIVATE Boost::json)
 add_gtest(planning_ground_vs_lifted                      "planning/ground_vs_lifted.cpp")
 target_link_libraries(planning_ground_vs_lifted PRIVATE Boost::json)
+add_gtest(planning_iw_novelty_table                      "planning/algorithms/iw/novelty_table.cpp")

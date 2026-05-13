@@ -95,8 +95,8 @@ public:
         using raw_view_type = std::remove_const_t<View>;
         using value_type = typename raw_view_type::value_type;
         using reference = std::conditional_t<std::is_const_v<View>, value_type, typename raw_view_type::reference_type>;
-        using iterator_category = std::bidirectional_iterator_tag;
-        using iterator_concept = std::bidirectional_iterator_tag;
+        using iterator_category = std::random_access_iterator_tag;
+        using iterator_concept = std::random_access_iterator_tag;
 
         BasicIterator() : m_view(nullptr), m_pos(0) {}
         BasicIterator(view_type& view, size_t pos) : m_view(&view), m_pos(pos) {}
@@ -129,7 +129,48 @@ public:
             return tmp;
         }
 
+        BasicIterator& operator+=(difference_type n)
+        {
+            m_pos += n;
+            return *this;
+        }
+
+        BasicIterator& operator-=(difference_type n)
+        {
+            m_pos -= n;
+            return *this;
+        }
+
+        friend BasicIterator operator+(BasicIterator it, difference_type n)
+        {
+            it += n;
+            return it;
+        }
+
+        friend BasicIterator operator+(difference_type n, BasicIterator it)
+        {
+            it += n;
+            return it;
+        }
+
+        friend BasicIterator operator-(BasicIterator it, difference_type n)
+        {
+            it -= n;
+            return it;
+        }
+
+        friend difference_type operator-(const BasicIterator& lhs, const BasicIterator& rhs)
+        {
+            return static_cast<difference_type>(lhs.m_pos) - static_cast<difference_type>(rhs.m_pos);
+        }
+
+        reference operator[](difference_type n) const { return (*m_view)[m_pos + n]; }
+
         friend bool operator==(const BasicIterator&, const BasicIterator&) = default;
+        friend bool operator<(const BasicIterator& lhs, const BasicIterator& rhs) { return lhs.m_pos < rhs.m_pos; }
+        friend bool operator>(const BasicIterator& lhs, const BasicIterator& rhs) { return rhs < lhs; }
+        friend bool operator<=(const BasicIterator& lhs, const BasicIterator& rhs) { return !(rhs < lhs); }
+        friend bool operator>=(const BasicIterator& lhs, const BasicIterator& rhs) { return !(lhs < rhs); }
 
     private:
         view_pointer m_view;

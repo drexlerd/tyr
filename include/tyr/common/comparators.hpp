@@ -18,7 +18,9 @@
 #ifndef TYR_COMMON_COMPARATORS_HPP_
 #define TYR_COMMON_COMPARATORS_HPP_
 
+#include "tyr/common/block_array_pool.hpp"
 #include "tyr/common/declarations.hpp"
+#include "tyr/common/types.hpp"
 
 #include <algorithm>
 #include <array>
@@ -215,6 +217,34 @@ struct Less<std::span<T, Extent>>
     bool operator()(const std::span<T, Extent>& lhs, const std::span<T, Extent>& rhs) const noexcept
     {
         return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), Less<std::remove_cvref_t<T>> {});
+    }
+};
+
+template<typename Block, typename Coder>
+struct Less<BasicBlockArrayView<Block, Coder>>
+{
+    using Type = BasicBlockArrayView<Block, Coder>;
+
+    bool operator()(const Type& lhs, const Type& rhs) const noexcept
+    {
+        return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), Less<typename Type::value_type> {});
+    }
+};
+
+template<typename Block, typename Coder, typename C>
+struct Less<View<BasicBlockArrayView<Block, Coder>, C>>
+{
+    using Type = View<BasicBlockArrayView<Block, Coder>, C>;
+
+    bool operator()(const Type& lhs, const Type& rhs) const noexcept
+    {
+        return std::lexicographical_compare(
+            lhs.begin(),
+            lhs.end(),
+            rhs.begin(),
+            rhs.end(),
+            [](const auto& lhs_value, const auto& rhs_value)
+            { return Less<std::remove_cvref_t<decltype(lhs_value)>> {}(lhs_value, rhs_value); });
     }
 };
 

@@ -195,6 +195,56 @@ struct GroupKey
     auto identifying_members() const noexcept { return std::tie(invariant_index, rigid_values); }
 };
 
+bool structural_less(GroundAtomView<FluentTag> lhs, GroundAtomView<FluentTag> rhs)
+{
+    const auto lhs_key = std::tuple(lhs.get_predicate(), lhs.get_row().get_objects());
+    const auto rhs_key = std::tuple(rhs.get_predicate(), rhs.get_row().get_objects());
+
+    return tyr::Less<std::remove_cvref_t<decltype(lhs_key)>> {}(lhs_key, rhs_key);
+}
+
+bool structural_less(const GroundAtomViewList<FluentTag>& lhs, const GroundAtomViewList<FluentTag>& rhs)
+{
+    return std::lexicographical_compare(
+        lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), [](const auto lhs_atom, const auto rhs_atom) { return structural_less(lhs_atom, rhs_atom); });
+}
+
+GroundAtomViewList<FluentTag> uncovered_atoms(const PrecomputedGroup& group, const std::vector<bool>& uncovered)
+{
+    auto result = GroundAtomViewList<FluentTag> {};
+    result.reserve(group.atoms.size());
+
+    for (const auto atom : group.atoms)
+    {
+        const auto atom_index = uint_t(atom.get_index());
+        if (uncovered[atom_index])
+            result.push_back(atom);
+    }
+
+    return result;
+}
+
+bool deterministic_group_less(const PrecomputedGroup& lhs, const PrecomputedGroup& rhs)
+{
+    if (lhs.inv_index != rhs.inv_index)
+        return lhs.inv_index < rhs.inv_index;
+
+    if (lhs.rigid_values != rhs.rigid_values)
+        return lhs.rigid_values < rhs.rigid_values;
+
+    return structural_less(lhs.atoms, rhs.atoms);
+}
+
+bool uncovered_structural_less(const PrecomputedGroup& lhs, const PrecomputedGroup& rhs, const std::vector<bool>& uncovered)
+{
+    const auto lhs_atoms = uncovered_atoms(lhs, uncovered);
+    const auto rhs_atoms = uncovered_atoms(rhs, uncovered);
+    if (structural_less(lhs_atoms, rhs_atoms) || structural_less(rhs_atoms, lhs_atoms))
+        return structural_less(lhs_atoms, rhs_atoms);
+
+    return deterministic_group_less(lhs, rhs);
+}
+
 std::vector<PrecomputedGroup>
 precompute_groups(const GroundAtomViewList<FluentTag>& initial_atoms, const GroundAtomViewList<FluentTag>& all_atoms, const InvariantList& invariants)
 {
@@ -242,7 +292,9 @@ precompute_groups(const GroundAtomViewList<FluentTag>& initial_atoms, const Grou
                 if (initial_count > 1)
                     continue;
 
-                std::sort(instantiated_group.begin(), instantiated_group.end(), tyr::Less<GroundAtomView<FluentTag>> {});
+                std::sort(instantiated_group.begin(),
+                          instantiated_group.end(),
+                          [](const auto lhs, const auto rhs) { return structural_less(lhs, rhs); });
 
                 groups.push_back(PrecomputedGroup {
                     .inv_index = inv_index,
@@ -276,7 +328,8 @@ std::optional<size_t> select_best_group(const std::vector<PrecomputedGroup>& gro
     for (size_t i = 0; i < groups.size(); ++i)
     {
         const auto coverage = compute_uncovered_coverage(groups[i], uncovered);
-        if (coverage > best_coverage)
+        if (coverage > best_coverage
+            || (coverage == best_coverage && best_group_index.has_value() && uncovered_structural_less(groups[i], groups[*best_group_index], uncovered)))
         {
             best_group_index = i;
             best_coverage = coverage;
@@ -354,7 +407,7 @@ compute_mutex_groups(const GroundAtomViewList<FluentTag>& initial_atoms, const G
         assert(uint_t(all_atoms[i].get_index()) == i);
 
     auto groups = precompute_groups(initial_atoms, all_atoms, invariants);
-    std::sort(groups.begin(), groups.end(), tyr::Less<PrecomputedGroup> {});
+    std::sort(groups.begin(), groups.end(), deterministic_group_less);
 
     return choose_groups_greedily(groups, all_atoms);
 }
