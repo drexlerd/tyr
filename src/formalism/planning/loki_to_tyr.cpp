@@ -19,8 +19,29 @@
 
 #include "tyr/planning/lifted_task.hpp"
 
+#include <algorithm>
+#include <vector>
+
 namespace tyr::formalism::planning
 {
+
+namespace
+{
+template<typename T>
+std::vector<const T*> sorted_by_name(const std::vector<const T*>& input)
+{
+    auto result = input;
+    std::ranges::sort(result,
+                      [](const auto* lhs, const auto* rhs)
+                      {
+                          if (lhs->get_name() != rhs->get_name())
+                              return lhs->get_name() < rhs->get_name();
+
+                          return lhs < rhs;
+                      });
+    return result;
+}
+}
 
 /**
  * Prepare common
@@ -1496,7 +1517,7 @@ PlanningDomain LokiToTyrTranslator::translate(const loki::Domain& element)
     /* Requirements section */
 
     /* Constants section */
-    domain.constants = translate_common(element->get_constants(), builder, *context);
+    domain.constants = translate_common(sorted_by_name(element->get_constants()), builder, *context);
 
     /* Predicates section */
     const auto func_insert_predicate = [](PredicateViewVariant predicate_view_variant,
@@ -1521,7 +1542,7 @@ PlanningDomain LokiToTyrTranslator::translate(const loki::Domain& element)
             predicate_view_variant);
     };
 
-    for (const auto& predicate_view_variant : translate_common(element->get_predicates(), builder, *context))
+    for (const auto& predicate_view_variant : translate_common(sorted_by_name(element->get_predicates()), builder, *context))
     {
         func_insert_predicate(predicate_view_variant, domain.static_predicates, domain.fluent_predicates, domain.derived_predicates);
     }
@@ -1552,7 +1573,7 @@ PlanningDomain LokiToTyrTranslator::translate(const loki::Domain& element)
             function_view_variant);
     };
 
-    for (const auto& function_view_variant : translate_common(element->get_function_skeletons(), builder, *context))
+    for (const auto& function_view_variant : translate_common(sorted_by_name(element->get_function_skeletons()), builder, *context))
     {
         func_insert_function(function_view_variant, domain.static_functions, domain.fluent_functions, domain.auxiliary_function);
     }
@@ -1590,7 +1611,7 @@ PlanningTask LokiToTyrTranslator::translate(const loki::Problem& element, Planni
     /* Requirements section */
 
     /* Objects section */
-    task.objects = translate_common(element->get_objects(), builder, *task_context);
+    task.objects = translate_common(sorted_by_name(element->get_objects()), builder, *task_context);
 
     /* Predicates section */
     const auto func_insert_predicate = [](PredicateViewVariant predicate_view_variant, IndexList<Predicate<DerivedTag>>& derived_predicates)
@@ -1612,7 +1633,7 @@ PlanningTask LokiToTyrTranslator::translate(const loki::Problem& element, Planni
             predicate_view_variant);
     };
 
-    for (const auto& predicate_view_variant : translate_common(element->get_predicates(), builder, *task_context))
+    for (const auto& predicate_view_variant : translate_common(sorted_by_name(element->get_predicates()), builder, *task_context))
     {
         func_insert_predicate(predicate_view_variant, task.derived_predicates);
     }

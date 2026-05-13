@@ -1,0 +1,270 @@
+{
+    "prefix": "data/planning-benchmarks",
+    "cases": [
+        {
+            "name": "Agricola",
+            "domain_file": "tests/classical/agricola/domain.pddl",
+            "task_file": "tests/classical/agricola/test-1.pddl"
+        },
+        {
+            "name": "Airport",
+            "domain_file": "tests/classical/airport/domain.pddl",
+            "task_file": "tests/classical/airport/test-1.pddl"
+        },
+        {
+            "name": "Assembly",
+            "domain_file": "tests/classical/assembly/domain.pddl",
+            "task_file": "tests/classical/assembly/test-1.pddl"
+        },
+        {
+            "name": "Barman",
+            "domain_file": "tests/classical/barman/domain.pddl",
+            "task_file": "tests/classical/barman/test-1.pddl"
+        },
+        {
+            "name": "Blocks3",
+            "domain_file": "tests/classical/blocks_3/domain.pddl",
+            "task_file": "tests/classical/blocks_3/test-1.pddl"
+        },
+        {
+            "name": "Blocks4",
+            "domain_file": "tests/classical/blocks_4/domain.pddl",
+            "task_file": "tests/classical/blocks_4/test-1.pddl"
+        },
+        {
+            "name": "Childsnack",
+            "domain_file": "tests/classical/childsnack/domain.pddl",
+            "task_file": "tests/classical/childsnack/test-1.pddl"
+        },
+        {
+            "name": "Delivery",
+            "domain_file": "tests/classical/delivery/domain.pddl",
+            "task_file": "tests/classical/delivery/test-1.pddl"
+        },
+        {
+            "name": "Driverlog",
+            "domain_file": "tests/classical/driverlog/domain.pddl",
+            "task_file": "tests/classical/driverlog/test-1.pddl"
+        },
+        {
+            "name": "Ferry",
+            "domain_file": "tests/classical/ferry/domain.pddl",
+            "task_file": "tests/classical/ferry/test-1.pddl"
+        },
+        {
+            "name": "Grid",
+            "domain_file": "tests/classical/grid/domain.pddl",
+            "task_file": "tests/classical/grid/test-1.pddl"
+        },
+        {
+            "name": "Gripper",
+            "domain_file": "tests/classical/gripper/domain.pddl",
+            "task_file": "tests/classical/gripper/test-1.pddl"
+        },
+        {
+            "name": "Hiking",
+            "domain_file": "tests/classical/hiking/domain.pddl",
+            "task_file": "tests/classical/hiking/test-1.pddl"
+        },
+        {
+            "name": "Logistics",
+            "domain_file": "tests/classical/logistics/domain.pddl",
+            "task_file": "tests/classical/logistics/test-1.pddl"
+        },
+        {
+            "name": "Miconic",
+            "domain_file": "tests/classical/miconic/domain.pddl",
+            "task_file": "tests/classical/miconic/test-1.pddl"
+        },
+        {
+            "name": "MiconicFulladl",
+            "domain_file": "tests/classical/miconic-fulladl/domain.pddl",
+            "task_file": "tests/classical/miconic-fulladl/test-1.pddl"
+        },
+        {
+            "name": "MiconicSimpleadl",
+            "domain_file": "tests/classical/miconic-simpleadl/domain.pddl",
+            "task_file": "tests/classical/miconic-simpleadl/test-1.pddl"
+        },
+        {
+            "name": "Parcprinter",
+            "domain_file": "tests/classical/parcprinter/domain.pddl",
+            "task_file": "tests/classical/parcprinter/test-1.pddl"
+        },
+        {
+            "name": "Pathways",
+            "domain_file": "tests/classical/pathways/domain.pddl",
+            "task_file": "tests/classical/pathways/test-1.pddl"
+        },
+        {
+            "name": "Philosophers",
+            "domain_file": "tests/classical/philosophers/domain.pddl",
+            "task_file": "tests/classical/philosophers/test-1.pddl"
+        },
+        {
+            "name": "PsrMiddle",
+            "domain_file": "tests/classical/psr-middle/domain.pddl",
+            "task_file": "tests/classical/psr-middle/test-1.pddl"
+        },
+        {
+            "name": "Pushworld",
+            "domain_file": "tests/classical/pushworld/domain.pddl",
+            "task_file": "tests/classical/pushworld/test-1.pddl"
+        },
+        {
+            "name": "Reward",
+            "domain_file": "tests/classical/reward/domain.pddl",
+            "task_file": "tests/classical/reward/test-1.pddl"
+        },
+        {
+            "name": "Rovers",
+            "domain_file": "tests/classical/rovers/domain.pddl",
+            "task_file": "tests/classical/rovers/test-1.pddl"
+        },
+        {
+            "name": "Satellite",
+            "domain_file": "tests/classical/satellite/domain.pddl",
+            "task_file": "tests/classical/satellite/test-1.pddl"
+        },
+        {
+            "name": "Schedule",
+            "domain_file": "tests/classical/schedule/domain.pddl",
+            "task_file": "tests/classical/schedule/test-1.pddl"
+        },
+        {
+            "name": "Sokoban",
+            "domain_file": "tests/classical/sokoban/domain.pddl",
+            "task_file": "tests/classical/sokoban/test-1.pddl"
+        },
+        {
+            "name": "Spanner",
+            "domain_file": "tests/classical/spanner/domain.pddl",
+            "task_file": "tests/classical/spanner/test-1.pddl"
+        },
+        {
+            "name": "Transport",
+            "domain_file": "tests/classical/transport/domain.pddl",
+            "task_file": "tests/classical/transport/test-1.pddl"
+        },
+        {
+            "name": "Visitall",
+            "domain_file": "tests/classical/visitall/domain.pddl",
+            "task_file": "tests/classical/visitall/test-1.pddl"
+        },
+        {
+            "name": "Woodworking",
+            "domain_file": "tests/classical/woodworking/domain.pddl",
+            "task_file": "tests/classical/woodworking/test-1.pddl"
+        },
+        {
+            "name": "FoCounters",
+            "domain_file": "tests/numeric/fo-counters/domain.pddl",
+            "task_file": "tests/numeric/fo-counters/test-1.pddl"
+        },
+        {
+            "name": "Refuel",
+            "domain_file": "tests/numeric/refuel/domain.pddl",
+            "task_file": "tests/numeric/refuel/test-1.pddl"
+        },
+        {
+            "name": "RefuelAdl",
+            "domain_file": "tests/numeric/refuel-adl/domain.pddl",
+            "task_file": "tests/numeric/refuel-adl/test-1.pddl"
+        },
+        {
+            "name": "Tpp",
+            "domain_file": "tests/numeric/tpp/domain.pddl",
+            "task_file": "tests/numeric/tpp/test-1.pddl"
+        },
+        {
+            "name": "Zenotravel",
+            "domain_file": "tests/numeric/zenotravel/domain.pddl",
+            "task_file": "tests/numeric/zenotravel/test-1.pddl"
+        },
+        {
+            "name": "BlockGrouping",
+            "domain_file": "tests/numeric/block-grouping/domain.pddl",
+            "task_file": "tests/numeric/block-grouping/test-1.pddl"
+        },
+        {
+            "name": "Counters",
+            "domain_file": "tests/numeric/counters/domain.pddl",
+            "task_file": "tests/numeric/counters/test-1.pddl"
+        },
+        {
+            "name": "NumericDelivery",
+            "domain_file": "tests/numeric/delivery/domain.pddl",
+            "task_file": "tests/numeric/delivery/test-1.pddl"
+        },
+        {
+            "name": "Drone",
+            "domain_file": "tests/numeric/drone/domain.pddl",
+            "task_file": "tests/numeric/drone/test-1.pddl"
+        },
+        {
+            "name": "Expedition",
+            "domain_file": "tests/numeric/expedition/domain.pddl",
+            "task_file": "tests/numeric/expedition/test-1.pddl"
+        },
+        {
+            "name": "ExtPlantWatering",
+            "domain_file": "tests/numeric/ext-plant-watering/domain.pddl",
+            "task_file": "tests/numeric/ext-plant-watering/test-1.pddl"
+        },
+        {
+            "name": "Farmland",
+            "domain_file": "tests/numeric/farmland/domain.pddl",
+            "task_file": "tests/numeric/farmland/test-1.pddl"
+        },
+        {
+            "name": "FoFarmland",
+            "domain_file": "tests/numeric/fo-farmland/domain.pddl",
+            "task_file": "tests/numeric/fo-farmland/test-1.pddl"
+        },
+        {
+            "name": "FoSailing",
+            "domain_file": "tests/numeric/fo-sailing/domain.pddl",
+            "task_file": "tests/numeric/fo-sailing/test-1.pddl"
+        },
+        {
+            "name": "Hydropower",
+            "domain_file": "tests/numeric/hydropower/domain.pddl",
+            "task_file": "tests/numeric/hydropower/test-1.pddl"
+        },
+        {
+            "name": "Markettrader",
+            "domain_file": "tests/numeric/markettrader/domain.pddl",
+            "task_file": "tests/numeric/markettrader/test-1.pddl"
+        },
+        {
+            "name": "Mprime",
+            "domain_file": "tests/numeric/mprime/domain.pddl",
+            "task_file": "tests/numeric/mprime/test-1.pddl"
+        },
+        {
+            "name": "Pathwaysmetric",
+            "domain_file": "tests/numeric/pathwaysmetric/domain.pddl",
+            "task_file": "tests/numeric/pathwaysmetric/test-1.pddl"
+        },
+        {
+            "name": "Rover",
+            "domain_file": "tests/numeric/rover/domain.pddl",
+            "task_file": "tests/numeric/rover/test-1.pddl"
+        },
+        {
+            "name": "Sailing",
+            "domain_file": "tests/numeric/sailing/domain.pddl",
+            "task_file": "tests/numeric/sailing/test-1.pddl"
+        },
+        {
+            "name": "Settersnumeric",
+            "domain_file": "tests/numeric/settersnumeric/domain.pddl",
+            "task_file": "tests/numeric/settersnumeric/test-1.pddl"
+        },
+        {
+            "name": "Sugar",
+            "domain_file": "tests/numeric/sugar/domain.pddl",
+            "task_file": "tests/numeric/sugar/test-1.pddl"
+        }
+    ]
+}

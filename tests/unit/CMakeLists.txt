@@ -20,6 +20,8 @@ add_gtest(buffer_indexed_hash_set                        "buffer/indexed_hash_se
 
 add_gtest(formalism_planning_invariants_synthesis        "formalism/planning/invariants/synthesis.cpp")
 target_link_libraries(formalism_planning_invariants_synthesis PRIVATE Boost::json)
+add_gtest(formalism_planning_parser_symbol_index_stability "formalism/planning/parser_symbol_index_stability.cpp")
+target_link_libraries(formalism_planning_parser_symbol_index_stability PRIVATE Boost::json)
 add_gtest(formalism_builder                              "formalism/builder.cpp")
 add_gtest(formalism_repository                           "formalism/repository.cpp")
 add_gtest(formalism_view                                 "formalism/view.cpp")
