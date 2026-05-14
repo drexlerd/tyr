@@ -49,6 +49,7 @@ Before running a validation target, check whether the existing `build/` director
 - Compile on 8 cores only.
 - Explicitly instantiate templates when the set of types is small
 - Use JSON fixtures for large repetitive test data.
+- Never modify JSON test fixtures just to make them pass without permission.
 - Keep changes scoped to the active task.
 - Document only what is not directly inferrable from the code itself
 

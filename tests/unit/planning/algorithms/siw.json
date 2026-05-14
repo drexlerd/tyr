@@ -48,36 +48,46 @@
             "name": "Childsnack",
             "domain_file": "tests/classical/childsnack/domain.pddl",
             "task_file": "tests/classical/childsnack/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 4,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Delivery",
             "domain_file": "tests/classical/delivery/domain.pddl",
             "task_file": "tests/classical/delivery/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 4,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Ferry",
             "domain_file": "tests/classical/ferry/domain.pddl",
             "task_file": "tests/classical/ferry/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 7,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Grid",
             "domain_file": "tests/classical/grid/domain.pddl",
             "task_file": "tests/classical/grid/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 4,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Gripper",
             "domain_file": "tests/classical/gripper/domain.pddl",
             "task_file": "tests/classical/gripper/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 3,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Hiking",
@@ -90,29 +100,37 @@
             "name": "Logistics",
             "domain_file": "tests/classical/logistics/domain.pddl",
             "task_file": "tests/classical/logistics/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 4,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Miconic",
             "domain_file": "tests/classical/miconic/domain.pddl",
             "task_file": "tests/classical/miconic/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 7,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "MiconicFulladl",
             "domain_file": "tests/classical/miconic-fulladl/domain.pddl",
             "task_file": "tests/classical/miconic-fulladl/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 7,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "MiconicSimpleadl",
             "domain_file": "tests/classical/miconic-simpleadl/domain.pddl",
             "task_file": "tests/classical/miconic-simpleadl/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 4,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Parcprinter",
@@ -127,15 +145,19 @@
             "name": "Pathways",
             "domain_file": "tests/classical/pathways/domain.pddl",
             "task_file": "tests/classical/pathways/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 6,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Philosophers",
             "domain_file": "tests/classical/philosophers/domain.pddl",
             "task_file": "tests/classical/philosophers/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 18,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "PsrMiddle",
@@ -157,15 +179,19 @@
             "name": "Rovers",
             "domain_file": "tests/classical/rovers/domain.pddl",
             "task_file": "tests/classical/rovers/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 4,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Satellite",
             "domain_file": "tests/classical/satellite/domain.pddl",
             "task_file": "tests/classical/satellite/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 1.5,
+            "expected_plan_length": 7,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Schedule",
@@ -180,15 +206,19 @@
             "name": "Spanner",
             "domain_file": "tests/classical/spanner/domain.pddl",
             "task_file": "tests/classical/spanner/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 4,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Transport",
             "domain_file": "tests/classical/transport/domain.pddl",
             "task_file": "tests/classical/transport/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 7,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Visitall",
@@ -204,8 +234,8 @@
             "domain_file": "tests/classical/woodworking/domain.pddl",
             "task_file": "tests/classical/woodworking/test-1.pddl",
             "expected_status": "EXHAUSTED",
-            "expected_maximum_effective_width": 1,
-            "expected_average_effective_width": 0.428571
+            "expected_maximum_effective_width": 2,
+            "expected_average_effective_width": 0.625
         },
         {
             "name": "FoCounters",
@@ -240,7 +270,8 @@
             "domain_file": "tests/numeric/zenotravel/domain.pddl",
             "task_file": "tests/numeric/zenotravel/test-1.pddl",
             "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_average_effective_width": 2.0,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "BlockGrouping",
@@ -262,8 +293,10 @@
             "name": "NumericDelivery",
             "domain_file": "tests/numeric/delivery/domain.pddl",
             "task_file": "tests/numeric/delivery/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 3,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Drone",
@@ -330,8 +363,10 @@
             "name": "Mprime",
             "domain_file": "tests/numeric/mprime/domain.pddl",
             "task_file": "tests/numeric/mprime/test-1.pddl",
-            "expected_status": "EXHAUSTED",
-            "expected_average_effective_width": "NaN"
+            "expected_status": "SOLVED",
+            "expected_average_effective_width": 2.0,
+            "expected_plan_length": 4,
+            "expected_maximum_effective_width": 2
         },
         {
             "name": "Pathwaysmetric",

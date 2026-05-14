@@ -22,13 +22,17 @@
             "name": "Blocks3",
             "domain_file": "tests/classical/blocks_3/domain.pddl",
             "task_file": "tests/classical/blocks_3/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Blocks4",
             "domain_file": "tests/classical/blocks_4/domain.pddl",
             "task_file": "tests/classical/blocks_4/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Barman",
@@ -40,13 +44,17 @@
             "name": "Childsnack",
             "domain_file": "tests/classical/childsnack/domain.pddl",
             "task_file": "tests/classical/childsnack/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Delivery",
             "domain_file": "tests/classical/delivery/domain.pddl",
             "task_file": "tests/classical/delivery/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Ferry",
@@ -58,13 +66,17 @@
             "name": "Grid",
             "domain_file": "tests/classical/grid/domain.pddl",
             "task_file": "tests/classical/grid/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Gripper",
             "domain_file": "tests/classical/gripper/domain.pddl",
             "task_file": "tests/classical/gripper/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 3,
+            "expected_solution_arity": 2
         },
         {
             "name": "Hiking",
@@ -76,7 +88,9 @@
             "name": "Logistics",
             "domain_file": "tests/classical/logistics/domain.pddl",
             "task_file": "tests/classical/logistics/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Miconic",
@@ -88,13 +102,17 @@
             "name": "MiconicFulladl",
             "domain_file": "tests/classical/miconic-fulladl/domain.pddl",
             "task_file": "tests/classical/miconic-fulladl/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 7,
+            "expected_solution_arity": 2
         },
         {
             "name": "MiconicSimpleadl",
             "domain_file": "tests/classical/miconic-simpleadl/domain.pddl",
             "task_file": "tests/classical/miconic-simpleadl/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Parcprinter",
@@ -108,7 +126,9 @@
             "name": "Pathways",
             "domain_file": "tests/classical/pathways/domain.pddl",
             "task_file": "tests/classical/pathways/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 6,
+            "expected_solution_arity": 2
         },
         {
             "name": "Philosophers",
@@ -126,43 +146,57 @@
             "name": "Reward",
             "domain_file": "tests/classical/reward/domain.pddl",
             "task_file": "tests/classical/reward/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Rovers",
             "domain_file": "tests/classical/rovers/domain.pddl",
             "task_file": "tests/classical/rovers/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Satellite",
             "domain_file": "tests/classical/satellite/domain.pddl",
             "task_file": "tests/classical/satellite/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 7,
+            "expected_solution_arity": 2
         },
         {
             "name": "Schedule",
             "domain_file": "tests/classical/schedule/domain.pddl",
             "task_file": "tests/classical/schedule/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 2,
+            "expected_solution_arity": 2
         },
         {
             "name": "Spanner",
             "domain_file": "tests/classical/spanner/domain.pddl",
             "task_file": "tests/classical/spanner/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Transport",
             "domain_file": "tests/classical/transport/domain.pddl",
             "task_file": "tests/classical/transport/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 5,
+            "expected_solution_arity": 2
         },
         {
             "name": "Visitall",
             "domain_file": "tests/classical/visitall/domain.pddl",
             "task_file": "tests/classical/visitall/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 8,
+            "expected_solution_arity": 2
         },
         {
             "name": "Woodworking",
@@ -216,7 +250,9 @@
             "name": "NumericDelivery",
             "domain_file": "tests/numeric/delivery/domain.pddl",
             "task_file": "tests/numeric/delivery/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 3,
+            "expected_solution_arity": 2
         },
         {
             "name": "Drone",
@@ -272,7 +308,9 @@
             "name": "Mprime",
             "domain_file": "tests/numeric/mprime/domain.pddl",
             "task_file": "tests/numeric/mprime/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 4,
+            "expected_solution_arity": 2
         },
         {
             "name": "Pathwaysmetric",
@@ -284,7 +322,9 @@
             "name": "Rover",
             "domain_file": "tests/numeric/rover/domain.pddl",
             "task_file": "tests/numeric/rover/test-1.pddl",
-            "expected_status": "EXHAUSTED"
+            "expected_status": "SOLVED",
+            "expected_plan_length": 5,
+            "expected_solution_arity": 2
         },
         {
             "name": "Sailing",
