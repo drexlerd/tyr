@@ -241,7 +241,10 @@ public:
 
     bool is_static_goal_satisfied(const Task<Kind>& task) override { NB_OVERRIDE_PURE(is_static_goal_satisfied, task); }
 
-    bool is_dynamic_goal_satisfied(const StateView<Kind>& state) override { NB_OVERRIDE_PURE(is_dynamic_goal_satisfied, state); }
+    bool is_dynamic_goal_satisfied(const StateView<Kind>& seed_state, const StateView<Kind>& state) override
+    {
+        NB_OVERRIDE_PURE(is_dynamic_goal_satisfied, seed_state, state);
+    }
 };
 
 template<TaskKind Kind>
@@ -251,7 +254,7 @@ void bind_goal_strategy(nb::module_& m, const std::string& name)
 
     nb::class_<T, PyGoalStrategy<Kind>>(m, name.c_str())  //
         .def("is_static_goal_satisfied", &T::is_static_goal_satisfied, "task"_a)
-        .def("is_dynamic_goal_satisfied", &T::is_dynamic_goal_satisfied, "state"_a);
+        .def("is_dynamic_goal_satisfied", &T::is_dynamic_goal_satisfied, "seed_state"_a, "state"_a);
 }
 
 template<TaskKind Kind>

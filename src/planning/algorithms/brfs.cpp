@@ -105,7 +105,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
         return result;
     }
 
-    if (goal_strategy->is_dynamic_goal_satisfied(start_state))
+    if (goal_strategy->is_dynamic_goal_satisfied(start_state, start_state))
     {
         result.plan = Plan(start_node, LabeledNodeList<Kind> {});
         result.goal_node = start_node;
@@ -213,7 +213,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
             event_handler->on_generate_node(node, brfs_labeled_succ_node);
 
-            if (goal_strategy->is_dynamic_goal_satisfied(succ_state))
+            if (goal_strategy->is_dynamic_goal_satisfied(start_state, succ_state))
             {
                 successor_search_node.status = SearchNodeStatus::GOAL;
 

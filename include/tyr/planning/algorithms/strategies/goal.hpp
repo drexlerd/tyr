@@ -23,7 +23,6 @@
 #include "tyr/planning/state_view.hpp"
 
 #include <memory>
-#include <optional>
 
 namespace tyr::planning
 {
@@ -35,7 +34,7 @@ public:
     virtual ~GoalStrategy() = default;
 
     virtual bool is_static_goal_satisfied(const Task<Kind>& task) = 0;
-    virtual bool is_dynamic_goal_satisfied(const StateView<Kind>& state) = 0;
+    virtual bool is_dynamic_goal_satisfied(const StateView<Kind>& seed_state, const StateView<Kind>& state) = 0;
 };
 
 template<TaskKind Kind>
@@ -54,8 +53,9 @@ public:
     }
 
     bool is_static_goal_satisfied(const Task<Kind>& task) override { return is_statically_applicable(m_goal, task.get_static_atoms_bitset()); }
-    bool is_dynamic_goal_satisfied(const StateView<Kind>& state) override
+    bool is_dynamic_goal_satisfied(const StateView<Kind>& seed_state, const StateView<Kind>& state) override
     {
+        static_cast<void>(seed_state);
         const auto state_context = StateContext { *state.get_state_repository()->get_task(), state.get_unpacked_state(), float_t { 0 } };
         return is_dynamically_applicable(m_goal, state_context);
     }
@@ -71,7 +71,7 @@ public:
     SerializedGoalStrategy(const Task<Kind>& task) : m_goal(task.get_task().get_goal()) {}
     SerializedGoalStrategy(formalism::planning::GroundConjunctiveConditionView goal) : m_goal(goal) {}
 
-    void clear() noexcept { m_num_satisfied_goals = std::nullopt; }
+    void clear() noexcept {}
 
     static std::shared_ptr<SerializedGoalStrategy<Kind>> create(const Task<Kind>& task) { return std::make_shared<SerializedGoalStrategy<Kind>>(task); }
     static std::shared_ptr<SerializedGoalStrategy<Kind>> create(formalism::planning::GroundConjunctiveConditionView goal)
@@ -81,22 +81,9 @@ public:
 
     bool is_static_goal_satisfied(const Task<Kind>& task) override { return is_statically_applicable(m_goal, task.get_static_atoms_bitset()); }
 
-    bool is_dynamic_goal_satisfied(const StateView<Kind>& state) override
+    bool is_dynamic_goal_satisfied(const StateView<Kind>& seed_state, const StateView<Kind>& state) override
     {
-        const auto num_satisfied_goals = count_satisfied_goals(state);
-        if (!m_num_satisfied_goals)
-        {
-            m_num_satisfied_goals = num_satisfied_goals;
-            return false;
-        }
-
-        if (num_satisfied_goals > *m_num_satisfied_goals)
-        {
-            m_num_satisfied_goals = num_satisfied_goals;
-            return true;
-        }
-
-        return false;
+        return count_satisfied_goals(state) > count_satisfied_goals(seed_state);
     }
 
 private:
@@ -120,7 +107,6 @@ private:
     }
 
     formalism::planning::GroundConjunctiveConditionView m_goal;
-    std::optional<uint_t> m_num_satisfied_goals;
 };
 
 template<TaskKind Kind>
@@ -135,8 +121,9 @@ public:
         return true;
     }
 
-    bool is_dynamic_goal_satisfied(const StateView<Kind>& state) override
+    bool is_dynamic_goal_satisfied(const StateView<Kind>& seed_state, const StateView<Kind>& state) override
     {
+        static_cast<void>(seed_state);
         static_cast<void>(state);
         return false;
     }

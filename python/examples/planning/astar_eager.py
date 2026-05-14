@@ -106,7 +106,7 @@ class CustomGoalStrategy(GoalStrategy):
         """ Is checked before running a search. """
         pass
 
-    def is_dynamic_goal_satisfied(self, state: State) -> bool: 
+    def is_dynamic_goal_satisfied(self, seed_state: State, state: State) -> bool:
         """ Is checked for every generated state. """
         pass
 

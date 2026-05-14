@@ -115,7 +115,7 @@ SearchResult<Kind> find_solution(Solver& solver, const Options<Kind, Solver>& op
     auto combined_start_node = std::optional<Node<Kind>> {};
     auto combined_labeled_succ_nodes = LabeledNodeList<Kind> {};
 
-    if (current_start_node && options.goal_strategy->is_dynamic_goal_satisfied(current_start_node->get_state()))
+    if (current_start_node && options.goal_strategy->is_dynamic_goal_satisfied(current_start_node->get_state(), current_start_node->get_state()))
     {
         auto result = detail::make_empty_result(*current_start_node);
         event_handler->on_solved(*result.plan);
@@ -164,7 +164,10 @@ SearchResult<Kind> find_solution(Solver& solver, const Options<Kind, Solver>& op
         if (sub_result.plan->get_length() == 0)
         {
             auto result = SearchResult<Kind> {};
-            result.status = options.goal_strategy->is_dynamic_goal_satisfied(current_node.get_state()) ? SearchStatus::SOLVED : SearchStatus::EXHAUSTED;
+            result.status =
+                (combined_start_node && options.goal_strategy->is_dynamic_goal_satisfied(combined_start_node->get_state(), current_node.get_state())) ?
+                    SearchStatus::SOLVED :
+                    SearchStatus::EXHAUSTED;
             if (combined_start_node)
             {
                 result.plan = Plan<Kind>(*combined_start_node, std::move(combined_labeled_succ_nodes));
@@ -180,7 +183,7 @@ SearchResult<Kind> find_solution(Solver& solver, const Options<Kind, Solver>& op
         detail::append_plan(*sub_result.plan, current_node, combined_labeled_succ_nodes);
         current_start_node = Node<Kind>(sub_result.goal_node->get_state(), 0);
 
-        if (options.goal_strategy->is_dynamic_goal_satisfied(sub_result.goal_node->get_state()))
+        if (combined_start_node && options.goal_strategy->is_dynamic_goal_satisfied(combined_start_node->get_state(), sub_result.goal_node->get_state()))
         {
             auto result = SearchResult<Kind> {};
             result.status = SearchStatus::SOLVED;

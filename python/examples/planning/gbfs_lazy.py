@@ -119,7 +119,7 @@ def find_solution(task : Task, successor_generator : SuccessorGenerator, heurist
     initial_node = successor_generator.get_initial_node()
     initial_state = initial_node.get_state()
 
-    if goal_strategy.is_dynamic_goal_satisfied(initial_state):
+    if goal_strategy.is_dynamic_goal_satisfied(initial_state, initial_state):
         search_result.goal_node = initial_node
         search_result.plan = Plan(initial_node)
         search_result.status = SearchStatus.SOLVED
@@ -172,7 +172,7 @@ def find_solution(task : Task, successor_generator : SuccessorGenerator, heurist
             if action in preferred_actions:
                 pass  # the heuristic marked this labeled successor node as preferred
 
-            if goal_strategy.is_dynamic_goal_satisfied(succ_state):
+            if goal_strategy.is_dynamic_goal_satisfied(initial_state, succ_state):
                 search_result.goal_node = succ_node
                 search_result.plan = backtrack_plan(succ_node, succ_search_node, search_nodes, successor_generator)
                 search_result.status = SearchStatus.SOLVED

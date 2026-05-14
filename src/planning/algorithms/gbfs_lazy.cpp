@@ -148,7 +148,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
     /* Test whether initial state is goal. */
 
-    if (goal_strategy->is_dynamic_goal_satisfied(start_state))
+    if (goal_strategy->is_dynamic_goal_satisfied(start_state, start_state))
     {
         result.plan = Plan(start_node, LabeledNodeList<Kind> {});
         result.goal_node = start_node;
@@ -289,7 +289,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
             /* Early goal test. */
 
-            const auto successor_is_goal_state = goal_strategy->is_dynamic_goal_satisfied(succ_state);
+            const auto successor_is_goal_state = goal_strategy->is_dynamic_goal_satisfied(start_state, succ_state);
 
             if (successor_is_goal_state)
             {
