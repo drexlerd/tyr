@@ -69,8 +69,9 @@ void DefaultEventHandler<Kind>::on_finish_layer_impl(uint_t layer, uint64_t num_
 }
 
 template<TaskKind Kind>
-void DefaultEventHandler<Kind>::on_end_search_impl() const
+void DefaultEventHandler<Kind>::on_end_search_impl(tyr::planning::SearchStatus status) const
 {
+    static_cast<void>(status);
     fmt::print(std::cout, "[BRFS] Search ended.\n{}\n{}\n", this->get_statistics(), this->get_progress_statistics());
 }
 
@@ -82,18 +83,6 @@ void DefaultEventHandler<Kind>::on_solved_impl(const Plan<Kind>& plan) const
               << "[BRFS] Plan length: " << plan.get_length() << std::endl;
 
     fmt::print(std::cout, "{}\n", plan);
-}
-
-template<TaskKind Kind>
-void DefaultEventHandler<Kind>::on_unsolvable_impl() const
-{
-    std::cout << "[BRFS] Task is unsolvable!" << std::endl;
-}
-
-template<TaskKind Kind>
-void DefaultEventHandler<Kind>::on_exhausted_impl() const
-{
-    std::cout << "[BRFS] Task is unsolvable!" << std::endl;
 }
 
 template<TaskKind Kind>

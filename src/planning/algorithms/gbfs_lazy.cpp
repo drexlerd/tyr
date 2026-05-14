@@ -141,10 +141,8 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
     if (!goal_strategy->is_static_goal_satisfied(task))
     {
-        event_handler->on_end_search();
-        event_handler->on_unsolvable();
-
         result.status = SearchStatus::UNSOLVABLE;
+        event_handler->on_end_search(result.status);
         return result;
     }
 
@@ -152,12 +150,11 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
     if (goal_strategy->is_dynamic_goal_satisfied(start_state))
     {
-        event_handler->on_end_search();
-
         result.plan = Plan(start_node, LabeledNodeList<Kind> {});
         result.goal_node = start_node;
         result.status = SearchStatus::SOLVED;
 
+        event_handler->on_end_search(result.status);
         event_handler->on_solved(result.plan.value());
 
         return result;
@@ -165,7 +162,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
     if (std::isnan(start_node.get_metric()))
     {
-        event_handler->on_end_search();
+        event_handler->on_end_search(SearchStatus::FAILED);
 
         throw std::runtime_error("find_solution(...): start node metric value is NaN.");
     }
@@ -174,10 +171,8 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
     if (start_search_node.status == SearchNodeStatus::DEAD_END)
     {
-        event_handler->on_end_search();
-        event_handler->on_unsolvable();
-
         result.status = SearchStatus::UNSOLVABLE;
+        event_handler->on_end_search(result.status);
         return result;
     }
 
@@ -185,10 +180,8 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
     if (pruning_strategy->should_prune_state(start_state))
     {
-        event_handler->on_end_search();
-        event_handler->on_unsolvable();
-
         result.status = SearchStatus::EXHAUSTED;
+        event_handler->on_end_search(result.status);
         return result;
     }
 
@@ -204,9 +197,8 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
     {
         if (stopwatch && stopwatch->has_finished())
         {
-            event_handler->on_end_search();
-
             result.status = SearchStatus::OUT_OF_TIME;
+            event_handler->on_end_search(result.status);
             return result;
         }
 
@@ -274,9 +266,8 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
             if (is_new_successor_state && search_nodes.size() >= options.max_num_states)
             {
-                event_handler->on_end_search();
-
                 result.status = SearchStatus::OUT_OF_STATES;
+                event_handler->on_end_search(result.status);
                 return result;
             }
 
@@ -306,13 +297,12 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
                 event_handler->on_expand_goal_node(normalized_succ_node);
 
-                event_handler->on_end_search();
-
                 result.plan =
                     extract_total_ordered_plan(successor_search_node, normalized_succ_node, search_nodes, successor_generator, options.action_cost_mode);
                 result.goal_node = normalized_succ_node;
                 result.status = SearchStatus::SOLVED;
 
+                event_handler->on_end_search(result.status);
                 event_handler->on_solved(result.plan.value());
 
                 return result;
@@ -338,10 +328,8 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
         }
     }
 
-    event_handler->on_end_search();
-    event_handler->on_exhausted();
-
     result.status = SearchStatus::EXHAUSTED;
+    event_handler->on_end_search(result.status);
     return result;
 }
 

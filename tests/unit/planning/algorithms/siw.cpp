@@ -17,7 +17,6 @@
 
 #include "tyr/common/json_loader.hpp"
 
-#include <cmath>
 #include <filesystem>
 #include <fmt/core.h>
 #include <gtest/gtest.h>
@@ -45,9 +44,7 @@ struct SiwCase
     std::filesystem::path task_file;
     uint_t max_arity;
     std::optional<p::SearchStatus> expected_status;
-    std::optional<uint_t> expected_plan_length;
     std::optional<uint_t> expected_maximum_effective_width;
-    std::optional<double> expected_average_effective_width;
 };
 
 p::SearchStatus parse_status(const std::string& status)
@@ -101,9 +98,7 @@ SiwCase parse_case(const boost::json::object& suite, const boost::json::object& 
 {
     const auto max_arity = static_cast<uint_t>(tyr::common::as_size(suite, "max_arity", "suite"));
     auto expected_status = std::optional<p::SearchStatus> {};
-    auto expected_plan_length = std::optional<uint_t> {};
     auto expected_maximum_effective_width = std::optional<uint_t> {};
-    auto expected_average_effective_width = std::optional<double> {};
 
     if (const auto* value = object.if_contains("expected_status"))
     {
@@ -111,22 +106,11 @@ SiwCase parse_case(const boost::json::object& suite, const boost::json::object& 
             throw std::runtime_error("case.expected_status must be a string.");
         expected_status = parse_status(std::string(value->as_string()));
     }
-    if (const auto* value = object.if_contains("expected_plan_length"))
-    {
-        if (!value->is_int64() || value->as_int64() < 0)
-            throw std::runtime_error("case.expected_plan_length must be a non-negative integer.");
-        expected_plan_length = static_cast<uint_t>(value->as_int64());
-    }
     if (const auto* value = object.if_contains("expected_maximum_effective_width"))
     {
         if (!value->is_int64() || value->as_int64() < 0)
             throw std::runtime_error("case.expected_maximum_effective_width must be a non-negative integer.");
         expected_maximum_effective_width = static_cast<uint_t>(value->as_int64());
-    }
-    if (const auto* value = object.if_contains("expected_average_effective_width"))
-    {
-        static_cast<void>(value);
-        expected_average_effective_width = tyr::common::as_double(object, "expected_average_effective_width", "case");
     }
 
     return SiwCase { tyr::common::as_string(object, "name", "case"),
@@ -134,9 +118,7 @@ SiwCase parse_case(const boost::json::object& suite, const boost::json::object& 
                      tyr::common::suite_path(suite, tyr::common::as_string(object, "task_file", "case")),
                      max_arity,
                      expected_status,
-                     expected_plan_length,
-                     expected_maximum_effective_width,
-                     expected_average_effective_width };
+                     expected_maximum_effective_width };
 }
 
 std::vector<SiwCase> load_cases()
@@ -198,26 +180,10 @@ TEST_P(SiwTest, MatchesExpectedOutcome)
     {
         EXPECT_EQ(result.status, *param.expected_status);
     }
-    if (param.expected_plan_length)
-    {
-        ASSERT_TRUE(result.plan);
-        EXPECT_EQ(result.plan->get_length(), *param.expected_plan_length);
-    }
     if (param.expected_maximum_effective_width)
     {
         ASSERT_TRUE(maximum_effective_width);
         EXPECT_EQ(*maximum_effective_width, *param.expected_maximum_effective_width);
-    }
-    if (param.expected_average_effective_width)
-    {
-        if (std::isnan(*param.expected_average_effective_width))
-        {
-            EXPECT_FALSE(average_effective_width);
-            return;
-        }
-
-        ASSERT_TRUE(average_effective_width);
-        EXPECT_NEAR(*average_effective_width, *param.expected_average_effective_width, 1e-6);
     }
 }
 

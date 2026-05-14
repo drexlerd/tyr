@@ -94,17 +94,17 @@ SearchResult<Kind> find_solution(brfs::Solver<Kind>& brfs_solver, uint_t max_ari
         if (result.status == SearchStatus::SOLVED)
         {
             event_handler->on_solved(arity);
-            event_handler->on_end_search();
+            event_handler->on_end_search(result.status);
             return result;
         }
         if (result.status != SearchStatus::EXHAUSTED)
         {
-            event_handler->on_end_search();
+            event_handler->on_end_search(result.status);
             return result;
         }
     }
 
-    event_handler->on_end_search();
+    event_handler->on_end_search(result.status);
     return result;
 }
 

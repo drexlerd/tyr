@@ -29,7 +29,7 @@ class PyEventHandler : public EventHandler<Kind>
 public:
     using Base = EventHandler<Kind>;
 
-    NB_TRAMPOLINE(Base, 11);
+    NB_TRAMPOLINE(Base, 9);
 
     void on_expand_node(const Node<Kind>& node) override { NB_OVERRIDE_PURE(on_expand_node, node); }
 
@@ -51,13 +51,9 @@ public:
 
     void on_new_best_h_value(float_t h_value) override { NB_OVERRIDE_PURE(on_new_best_h_value, h_value); }
 
-    void on_end_search() override { NB_OVERRIDE_PURE(on_end_search); }
+    void on_end_search(tyr::planning::SearchStatus status) override { NB_OVERRIDE_PURE(on_end_search, status); }
 
     void on_solved(const Plan<Kind>& plan) override { NB_OVERRIDE_PURE(on_solved, plan); }
-
-    void on_unsolvable() override { NB_OVERRIDE_PURE(on_unsolvable); }
-
-    void on_exhausted() override { NB_OVERRIDE_PURE(on_exhausted); }
 };
 
 template<TaskKind Kind>
@@ -106,10 +102,8 @@ void bind_event_handler(nb::module_& m, const std::string& name)
         .def("on_prune_node", nb::overload_cast<const Node<Kind>&, const LabeledNode<Kind>&>(&T::on_prune_node), "source_node"_a, "labeled_succ_node"_a)
         .def("on_start_search", &T::on_start_search, "node"_a, "h_value"_a)
         .def("on_new_best_h_value", &T::on_new_best_h_value, "h_value"_a)
-        .def("on_end_search", &T::on_end_search)
-        .def("on_solved", &T::on_solved, "plan"_a)
-        .def("on_unsolvable", &T::on_unsolvable)
-        .def("on_exhausted", &T::on_exhausted);
+        .def("on_end_search", &T::on_end_search, "status"_a)
+        .def("on_solved", &T::on_solved, "plan"_a);
 }
 
 template<TaskKind Kind>

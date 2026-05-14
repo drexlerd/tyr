@@ -141,7 +141,10 @@ SearchResult<Kind> find_solution(Solver& solver, const Options<Kind, Solver>& op
             combined_start_node = sub_result.plan->get_start_node();
         }
 
-        event_handler->on_end_subsearch(subsearch_index, sub_result.status, local_solver);
+        if (local_solver.options.event_handler)
+            event_handler->add_subsearch_statistics(local_solver.options.event_handler->get_search_statistics(), local_solver.options.event_handler->get_statistics());
+
+        event_handler->on_end_subsearch(subsearch_index, sub_result.status);
 
         if (sub_result.status != SearchStatus::SOLVED)
         {

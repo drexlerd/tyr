@@ -20,6 +20,7 @@
 
 #include "tyr/formalism/planning/ground_action_view.hpp"
 #include "tyr/planning/algorithms/statistics.hpp"
+#include "tyr/planning/algorithms/utils.hpp"
 #include "tyr/planning/declarations.hpp"
 
 #include <chrono>
@@ -51,13 +52,9 @@ public:
 
     virtual void on_finish_layer(uint_t layer) = 0;
 
-    virtual void on_end_search() = 0;
+    virtual void on_end_search(tyr::planning::SearchStatus status) = 0;
 
     virtual void on_solved(const Plan<Kind>& plan) = 0;
-
-    virtual void on_unsolvable() = 0;
-
-    virtual void on_exhausted() = 0;
 
     virtual const tyr::planning::Statistics& get_search_statistics() const = 0;
     virtual const tyr::planning::Statistics& get_statistics() const = 0;
@@ -142,30 +139,18 @@ public:
             self().on_finish_layer_impl(layer, m_statistics.get_num_expanded(), m_statistics.get_num_generated());
     }
 
-    void on_end_search() override
+    void on_end_search(tyr::planning::SearchStatus status) override
     {
         m_statistics.set_search_end_time_point(std::chrono::high_resolution_clock::now());
 
         if (verbosity(1))
-            self().on_end_search_impl();
+            self().on_end_search_impl(status);
     }
 
     void on_solved(const Plan<Kind>& plan) override
     {
         if (verbosity(1))
             self().on_solved_impl(plan);
-    }
-
-    void on_unsolvable() override
-    {
-        if (verbosity(1))
-            self().on_unsolvable_impl();
-    }
-
-    void on_exhausted() override
-    {
-        if (verbosity(1))
-            self().on_exhausted_impl();
     }
 
     const tyr::planning::Statistics& get_search_statistics() const override { return m_statistics; }
@@ -191,13 +176,9 @@ private:
 
     void on_finish_layer_impl(uint_t layer, uint64_t num_expanded_states, uint64_t num_generated_states) const;
 
-    void on_end_search_impl() const;
+    void on_end_search_impl(tyr::planning::SearchStatus status) const;
 
     void on_solved_impl(const Plan<Kind>& plan) const;
-
-    void on_unsolvable_impl() const;
-
-    void on_exhausted_impl() const;
 
 public:
     DefaultEventHandler(size_t verbosity = 0);

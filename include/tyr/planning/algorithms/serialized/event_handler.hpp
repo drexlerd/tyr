@@ -36,8 +36,9 @@ public:
 
     virtual void on_start_search() = 0;
     virtual void on_start_subsearch(uint_t subsearch_index) = 0;
-    virtual void on_end_subsearch(uint_t subsearch_index, SearchStatus status, const Subsolver& subsolver) = 0;
-    virtual void on_end_search(SearchStatus status) = 0;
+    virtual void add_subsearch_statistics(const tyr::planning::Statistics& search_statistics, const typename Subsolver::EventHandlerType::StatisticsType& solver_statistics) = 0;
+    virtual void on_end_subsearch(uint_t subsearch_index, tyr::planning::SearchStatus status) = 0;
+    virtual void on_end_search(tyr::planning::SearchStatus status) = 0;
     virtual void on_solved(const Plan<Kind>& plan) = 0;
 };
 
@@ -74,19 +75,19 @@ public:
             self().on_start_subsearch_impl(subsearch_index);
     }
 
-    void on_end_subsearch(uint_t subsearch_index, SearchStatus status, const Subsolver& subsolver) override
+    void add_subsearch_statistics(const tyr::planning::Statistics& search_statistics, const typename Subsolver::EventHandlerType::StatisticsType& solver_statistics) override
     {
-        if (subsolver.options.event_handler)
-        {
-            m_statistics.add_search_statistics(subsolver.options.event_handler->get_search_statistics());
-            m_statistics.add_solver_statistics(subsolver.options.event_handler->get_statistics());
-        }
-
-        if (verbosity(1))
-            self().on_end_subsearch_impl(subsearch_index, status, subsolver);
+        m_statistics.add_search_statistics(search_statistics);
+        m_statistics.add_solver_statistics(solver_statistics);
     }
 
-    void on_end_search(SearchStatus status) override
+    void on_end_subsearch(uint_t subsearch_index, tyr::planning::SearchStatus status) override
+    {
+        if (verbosity(1))
+            self().on_end_subsearch_impl(subsearch_index, status);
+    }
+
+    void on_end_search(tyr::planning::SearchStatus status) override
     {
         if (verbosity(1))
             self().on_end_search_impl(status);
@@ -109,11 +110,10 @@ private:
 
     void on_start_search_impl() const {}
     void on_start_subsearch_impl(uint_t subsearch_index) const { static_cast<void>(subsearch_index); }
-    void on_end_subsearch_impl(uint_t subsearch_index, SearchStatus status, const Subsolver& subsolver) const
+    void on_end_subsearch_impl(uint_t subsearch_index, SearchStatus status) const
     {
         static_cast<void>(subsearch_index);
         static_cast<void>(status);
-        static_cast<void>(subsolver);
     }
     void on_end_search_impl(SearchStatus status) const { static_cast<void>(status); }
     void on_solved_impl(const Plan<Kind>& plan) const { static_cast<void>(plan); }

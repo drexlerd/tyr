@@ -20,6 +20,7 @@
 
 #include "tyr/formalism/planning/ground_action_view.hpp"
 #include "tyr/planning/algorithms/statistics.hpp"
+#include "tyr/planning/algorithms/utils.hpp"
 #include "tyr/planning/declarations.hpp"
 
 #include <chrono>
@@ -66,16 +67,10 @@ public:
     virtual void on_new_best_h_value(float_t h_value) = 0;
 
     /// @brief React on ending a search.
-    virtual void on_end_search() = 0;
+    virtual void on_end_search(tyr::planning::SearchStatus status) = 0;
 
     /// @brief React on solving a search.
     virtual void on_solved(const Plan<Kind>& plan) = 0;
-
-    /// @brief React on proving unsolvability during a search.
-    virtual void on_unsolvable() = 0;
-
-    /// @brief React on exhausting a search.
-    virtual void on_exhausted() = 0;
 
     virtual const tyr::planning::Statistics& get_search_statistics() const = 0;
     virtual const tyr::planning::Statistics& get_statistics() const = 0;
@@ -172,13 +167,13 @@ public:
         }
     }
 
-    void on_end_search() override
+    void on_end_search(tyr::planning::SearchStatus status) override
 
     {
         m_statistics.set_search_end_time_point(std::chrono::high_resolution_clock::now());
 
         if (verbosity(1))
-            self().on_end_search_impl();
+            self().on_end_search_impl(status);
     }
 
     void on_solved(const Plan<Kind>& plan) override
@@ -186,22 +181,6 @@ public:
         if (verbosity(1))
         {
             self().on_solved_impl(plan);
-        }
-    }
-
-    void on_unsolvable() override
-    {
-        if (verbosity(1))
-        {
-            self().on_unsolvable_impl();
-        }
-    }
-
-    void on_exhausted() override
-    {
-        if (verbosity(1))
-        {
-            self().on_exhausted_impl();
         }
     }
 
@@ -232,13 +211,9 @@ private:
 
     void on_new_best_h_value_impl(float_t h_value, uint64_t num_expanded_states, uint64_t num_generated_states) const;
 
-    void on_end_search_impl() const;
+    void on_end_search_impl(tyr::planning::SearchStatus status) const;
 
     void on_solved_impl(const Plan<Kind>& plan) const;
-
-    void on_unsolvable_impl() const;
-
-    void on_exhausted_impl() const;
 
 public:
     DefaultEventHandler(size_t verbosity = 0);

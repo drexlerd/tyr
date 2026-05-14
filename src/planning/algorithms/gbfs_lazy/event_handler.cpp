@@ -69,8 +69,9 @@ void DefaultEventHandler<Kind>::on_new_best_h_value_impl(float_t h_value, uint64
 }
 
 template<TaskKind Kind>
-void DefaultEventHandler<Kind>::on_end_search_impl() const
+void DefaultEventHandler<Kind>::on_end_search_impl(tyr::planning::SearchStatus status) const
 {
+    static_cast<void>(status);
     fmt::print(std::cout, "[GBFS] Search ended.\n{}\n", this->m_statistics);
 }
 
@@ -82,18 +83,6 @@ void DefaultEventHandler<Kind>::on_solved_impl(const Plan<Kind>& plan) const
               << "[GBFS] Plan length: " << plan.get_length() << std::endl;
 
     fmt::print(std::cout, "{}\n", plan);
-}
-
-template<TaskKind Kind>
-void DefaultEventHandler<Kind>::on_unsolvable_impl() const
-{
-    std::cout << "[GBFS] Task is unsolvable!" << std::endl;
-}
-
-template<TaskKind Kind>
-void DefaultEventHandler<Kind>::on_exhausted_impl() const
-{
-    std::cout << "[GBFS] Task is unsolvable!" << std::endl;
 }
 
 template<TaskKind Kind>

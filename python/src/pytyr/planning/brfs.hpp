@@ -15,12 +15,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_PYTHON_PLANNING_ASTAR_EAGER_HPP_
-#define TYR_PYTHON_PLANNING_ASTAR_EAGER_HPP_
+#ifndef TYR_PYTHON_PLANNING_BRFS_HPP_
+#define TYR_PYTHON_PLANNING_BRFS_HPP_
 
 #include "planning.hpp"
 
-namespace tyr::planning::astar_eager
+namespace tyr::planning::brfs
 {
 
 template<TaskKind Kind>
@@ -29,7 +29,7 @@ class PyEventHandler : public EventHandler<Kind>
 public:
     using Base = EventHandler<Kind>;
 
-    NB_TRAMPOLINE(Base, 12);
+    NB_TRAMPOLINE(Base, 11);
 
     void on_expand_node(const Node<Kind>& node) override { NB_OVERRIDE_PURE(on_expand_node, node); }
 
@@ -40,18 +40,6 @@ public:
         NB_OVERRIDE_PURE(on_generate_node, source_node, labeled_succ_node);
     }
 
-    void on_generate_node_relaxed(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
-    {
-        NB_OVERRIDE_PURE(on_generate_node_relaxed, source_node, labeled_succ_node);
-    };
-
-    void on_generate_node_not_relaxed(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
-    {
-        NB_OVERRIDE_PURE(on_generate_node_not_relaxed, source_node, labeled_succ_node);
-    }
-
-    void on_close_node(const Node<Kind>& node) override { NB_OVERRIDE_PURE(on_close_node, node); }
-
     void on_prune_node(const Node<Kind>& node) override { NB_OVERRIDE_PURE(on_prune_node, node); }
 
     void on_prune_node(const Node<Kind>& source_node, const LabeledNode<Kind>& labeled_succ_node) override
@@ -59,13 +47,17 @@ public:
         NB_OVERRIDE_PURE(on_prune_node, source_node, labeled_succ_node);
     }
 
-    void on_start_search(const Node<Kind>& node, float_t f_value) override { NB_OVERRIDE_PURE(on_start_search, node, f_value); }
+    void on_start_search(const Node<Kind>& node) override { NB_OVERRIDE_PURE(on_start_search, node); }
 
-    void on_finish_f_layer(float_t f_value) override { NB_OVERRIDE_PURE(on_finish_f_layer, f_value); }
+    void on_finish_layer(uint_t layer) override { NB_OVERRIDE_PURE(on_finish_layer, layer); }
 
     void on_end_search(tyr::planning::SearchStatus status) override { NB_OVERRIDE_PURE(on_end_search, status); }
 
     void on_solved(const Plan<Kind>& plan) override { NB_OVERRIDE_PURE(on_solved, plan); }
+
+    const tyr::planning::Statistics& get_search_statistics() const override { NB_OVERRIDE_PURE(get_search_statistics); }
+
+    const tyr::planning::Statistics& get_statistics() const override { NB_OVERRIDE_PURE(get_statistics); }
 };
 
 template<TaskKind Kind>
@@ -86,16 +78,27 @@ void bind_options(nb::module_& m, const std::string& name)
 }
 
 template<TaskKind Kind>
+void bind_solver(nb::module_& m, const std::string& name)
+{
+    using T = Solver<Kind>;
+
+    nb::class_<T>(m, name.c_str())
+        .def(nb::init<>())
+        .def_rw("task", &T::task)
+        .def_rw("successor_generator", &T::successor_generator)
+        .def_rw("options", &T::options)
+        .def("solve", &T::solve, nb::call_guard<nb::gil_scoped_release>());
+}
+
+template<TaskKind Kind>
 void bind_find_solution(nb::module_& m, const std::string& py_name)
 {
     m.def(
         py_name.c_str(),
-        [](Task<Kind>& task, SuccessorGenerator<Kind>& successor_generator, Heuristic<Kind>& heuristic, const Options<Kind>& options)
-        { return find_solution(task, successor_generator, heuristic, options); },
+        [](Task<Kind>& task, SuccessorGenerator<Kind>& successor_generator, const Options<Kind>& options) { return find_solution(task, successor_generator, options); },
         nb::call_guard<nb::gil_scoped_release>(),
         "task"_a,
         "successor_generator"_a,
-        "heuristic"_a,
         "options"_a);
 }
 
@@ -108,15 +111,14 @@ void bind_event_handler(nb::module_& m, const std::string& name)
         .def("on_expand_node", &T::on_expand_node, "node"_a)
         .def("on_expand_goal_node", &T::on_expand_goal_node, "node"_a)
         .def("on_generate_node", &T::on_generate_node, "source_node"_a, "labeled_succ_node"_a)
-        .def("on_generate_node_relaxed", &T::on_generate_node_relaxed, "source_node"_a, "labeled_succ_node"_a)
-        .def("on_generate_node_not_relaxed", &T::on_generate_node_not_relaxed, "source_node"_a, "labeled_succ_node"_a)
-        .def("on_close_node", &T::on_close_node, "node"_a)
         .def("on_prune_node", nb::overload_cast<const Node<Kind>&>(&T::on_prune_node), "node"_a)
         .def("on_prune_node", nb::overload_cast<const Node<Kind>&, const LabeledNode<Kind>&>(&T::on_prune_node), "source_node"_a, "labeled_succ_node"_a)
-        .def("on_start_search", &T::on_start_search, "node"_a, "f_value"_a)
-        .def("on_finish_f_layer", &T::on_finish_f_layer, "f_value"_a)
+        .def("on_start_search", &T::on_start_search, "node"_a)
+        .def("on_finish_layer", &T::on_finish_layer, "layer"_a)
         .def("on_end_search", &T::on_end_search, "status"_a)
-        .def("on_solved", &T::on_solved, "plan"_a);
+        .def("on_solved", &T::on_solved, "plan"_a)
+        .def("get_search_statistics", &T::get_search_statistics)
+        .def("get_statistics", &T::get_statistics);
 }
 
 template<TaskKind Kind>
@@ -126,18 +128,21 @@ void bind_default_event_handler(nb::module_& m, const std::string& name)
 
     nb::class_<T, EventHandler<Kind>>(m, name.c_str())  //
         .def(nb::init<size_t>(), "verbosity"_a)
-        .def("get_statistics", &T::get_statistics);
+        .def("get_search_statistics", &T::get_search_statistics)
+        .def("get_statistics", &T::get_statistics)
+        .def("get_progress_statistics", &T::get_progress_statistics);
 }
 
 template<TaskKind Kind>
 void bind_module_definitions_impl(nb::module_& m)
 {
     bind_options<Kind>(m, "Options");
+    bind_solver<Kind>(m, "Solver");
     bind_find_solution<Kind>(m, "find_solution");
     bind_event_handler<Kind>(m, "EventHandler");
     bind_default_event_handler<Kind>(m, "DefaultEventHandler");
 }
 
-}  // namespace tyr::planning::astar_eager
+}  // namespace tyr::planning::brfs
 
 #endif

@@ -19,7 +19,10 @@
 
 #include "../planning.hpp"
 #include "astar_eager/module.hpp"
+#include "brfs/module.hpp"
 #include "gbfs_lazy/module.hpp"
+#include "iw/module.hpp"
+#include "siw/module.hpp"
 
 #include <nanobind/stl/shared_ptr.h>
 #include <tyr/tyr.hpp>
@@ -32,8 +35,17 @@ void bind_lifted_module_definitions(nb::module_& m)
     auto astar_eager_module = m.def_submodule("astar_eager");
     astar_eager::bind_lifted_module_definitions(astar_eager_module);
 
+    auto brfs_module = m.def_submodule("brfs");
+    brfs::bind_lifted_module_definitions(brfs_module);
+
     auto gbfs_lazy_module = m.def_submodule("gbfs_lazy");
     gbfs_lazy::bind_lifted_module_definitions(gbfs_lazy_module);
+
+    auto iw_module = m.def_submodule("iw");
+    iw::bind_lifted_module_definitions(iw_module);
+
+    auto siw_module = m.def_submodule("siw");
+    siw::bind_lifted_module_definitions(siw_module);
 
     nb::enum_<GroundTaskInstantiationStatus>(m, "GroundTaskInstantiationStatus")
         .value("SUCCESS", GroundTaskInstantiationStatus::SUCCESS)

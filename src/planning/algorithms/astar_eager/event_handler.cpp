@@ -84,8 +84,9 @@ void DefaultEventHandler<Kind>::on_finish_f_layer_impl(float_t f_value, uint64_t
 }
 
 template<TaskKind Kind>
-void DefaultEventHandler<Kind>::on_end_search_impl() const
+void DefaultEventHandler<Kind>::on_end_search_impl(tyr::planning::SearchStatus status) const
 {
+    static_cast<void>(status);
     fmt::print(std::cout, "[ASTAR] Search ended.\n{}\n{}\n", this->get_statistics(), this->get_progress_statistics());
 }
 
@@ -97,18 +98,6 @@ void DefaultEventHandler<Kind>::on_solved_impl(const Plan<Kind>& plan) const
               << "[ASTAR] Plan length: " << plan.get_length() << std::endl;
 
     fmt::print(std::cout, "{}\n", plan);
-}
-
-template<TaskKind Kind>
-void DefaultEventHandler<Kind>::on_unsolvable_impl() const
-{
-    std::cout << "[ASTAR] Task is unsolvable!" << std::endl;
-}
-
-template<TaskKind Kind>
-void DefaultEventHandler<Kind>::on_exhausted_impl() const
-{
-    std::cout << "[ASTAR] Task is unsolvable!" << std::endl;
 }
 
 template<TaskKind Kind>

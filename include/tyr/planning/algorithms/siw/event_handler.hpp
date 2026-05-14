@@ -33,7 +33,7 @@ template<TaskKind Kind>
 class EventHandler : public serialized::EventHandler<Kind, iw::Solver<Kind>>
 {
 public:
-    virtual const Statistics& get_statistics() const = 0;
+    virtual const Statistics<Kind>& get_statistics() const = 0;
 };
 
 template<TaskKind Kind>
@@ -43,7 +43,7 @@ template<typename Derived, TaskKind Kind>
 class EventHandlerBase : public EventHandler<Kind>
 {
 protected:
-    Statistics m_statistics;
+    Statistics<Kind> m_statistics;
     size_t m_verbosity;
 
 private:
@@ -72,19 +72,20 @@ public:
             self().on_start_subsearch_impl(subsearch_index);
     }
 
-    void on_end_subsearch(uint_t subsearch_index, SearchStatus status, const iw::Solver<Kind>& solver) override
+    void add_subsearch_statistics(const tyr::planning::Statistics& search_statistics, const iw::Statistics<Kind>& solver_statistics) override
     {
-        if (solver.options.event_handler)
-        {
-            if (auto arity = solver.options.event_handler->get_statistics().get_solution_arity())
-                m_statistics.add_effective_width(*arity);
-        }
-
-        if (verbosity(1))
-            self().on_end_subsearch_impl(subsearch_index, status, solver);
+        static_cast<void>(search_statistics);
+        if (auto arity = solver_statistics.get_solution_arity())
+            m_statistics.add_effective_width(*arity);
     }
 
-    void on_end_search(SearchStatus status) override
+    void on_end_subsearch(uint_t subsearch_index, tyr::planning::SearchStatus status) override
+    {
+        if (verbosity(1))
+            self().on_end_subsearch_impl(subsearch_index, status);
+    }
+
+    void on_end_search(tyr::planning::SearchStatus status) override
     {
         if (verbosity(1))
             self().on_end_search_impl(status);
@@ -96,7 +97,7 @@ public:
             self().on_solved_impl(plan);
     }
 
-    const Statistics& get_statistics() const override { return m_statistics; }
+    const Statistics<Kind>& get_statistics() const override { return m_statistics; }
 };
 
 template<TaskKind Kind>
@@ -107,11 +108,10 @@ private:
 
     void on_start_search_impl() const {}
     void on_start_subsearch_impl(uint_t subsearch_index) const { static_cast<void>(subsearch_index); }
-    void on_end_subsearch_impl(uint_t subsearch_index, SearchStatus status, const iw::Solver<Kind>& solver) const
+    void on_end_subsearch_impl(uint_t subsearch_index, SearchStatus status) const
     {
         static_cast<void>(subsearch_index);
         static_cast<void>(status);
-        static_cast<void>(solver);
     }
     void on_end_search_impl(SearchStatus status) const { static_cast<void>(status); }
     void on_solved_impl(const Plan<Kind>& plan) const { static_cast<void>(plan); }

@@ -29,9 +29,15 @@ nanobind_add_module(_pytyr
     pytyr/planning/ground/module.cpp
     pytyr/planning/lifted/module.cpp
     pytyr/planning/ground/astar_eager/module.cpp
+    pytyr/planning/ground/brfs/module.cpp
     pytyr/planning/ground/gbfs_lazy/module.cpp
+    pytyr/planning/ground/iw/module.cpp
+    pytyr/planning/ground/siw/module.cpp
     pytyr/planning/lifted/astar_eager/module.cpp
+    pytyr/planning/lifted/brfs/module.cpp
     pytyr/planning/lifted/gbfs_lazy/module.cpp
+    pytyr/planning/lifted/iw/module.cpp
+    pytyr/planning/lifted/siw/module.cpp
 )
 
 target_link_libraries(_pytyr PRIVATE tyr::core TBB::tbb)
@@ -116,10 +122,16 @@ set(PYTYR_PYTHON_FILES
     pytyr/planning/__init__.py
     pytyr/planning/ground/__init__.py
     pytyr/planning/ground/astar_eager/__init__.py
+    pytyr/planning/ground/brfs/__init__.py
     pytyr/planning/ground/gbfs_lazy/__init__.py
+    pytyr/planning/ground/iw/__init__.py
+    pytyr/planning/ground/siw/__init__.py
     pytyr/planning/lifted/__init__.py
     pytyr/planning/lifted/astar_eager/__init__.py
+    pytyr/planning/lifted/brfs/__init__.py
     pytyr/planning/lifted/gbfs_lazy/__init__.py
+    pytyr/planning/lifted/iw/__init__.py
+    pytyr/planning/lifted/siw/__init__.py
 )
 
 foreach(python_file IN LISTS PYTYR_PYTHON_FILES)

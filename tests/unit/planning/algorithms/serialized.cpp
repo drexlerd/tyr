@@ -54,10 +54,8 @@ public:
         m_statistics = p::Statistics();
     }
     void on_finish_layer(uint_t layer) override { static_cast<void>(layer); }
-    void on_end_search() override {}
+    void on_end_search(p::SearchStatus status) override { static_cast<void>(status); }
     void on_solved(const p::Plan<Kind>& plan) override { static_cast<void>(plan); }
-    void on_unsolvable() override {}
-    void on_exhausted() override {}
     const p::Statistics& get_search_statistics() const override { return m_statistics; }
     const p::Statistics& get_statistics() const override { return m_statistics; }
 };

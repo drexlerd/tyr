@@ -19,6 +19,7 @@
 #define TYR_PLANNING_ALGORITHMS_SIW_STATISTICS_HPP_
 
 #include "tyr/common/types.hpp"
+#include "tyr/planning/declarations.hpp"
 
 #include <algorithm>
 #include <optional>
@@ -26,6 +27,7 @@
 namespace tyr::planning::siw
 {
 
+template<TaskKind Kind>
 class Statistics
 {
 private:

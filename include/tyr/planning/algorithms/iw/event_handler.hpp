@@ -33,16 +33,16 @@ template<TaskKind Kind>
 class EventHandler
 {
 public:
-    using StatisticsType = Statistics;
+    using StatisticsType = Statistics<Kind>;
 
     virtual ~EventHandler() = default;
     virtual void on_start_search(uint_t max_arity) = 0;
     virtual void on_start_arity(uint_t arity) = 0;
     virtual void on_end_arity(uint_t arity, SearchStatus status) = 0;
-    virtual void on_end_search() = 0;
+    virtual void on_end_search(tyr::planning::SearchStatus status) = 0;
     virtual void on_solved(uint_t arity) = 0;
     virtual const tyr::planning::Statistics& get_search_statistics() const = 0;
-    virtual const Statistics& get_statistics() const = 0;
+    virtual const Statistics<Kind>& get_statistics() const = 0;
 };
 
 template<TaskKind Kind>
@@ -52,7 +52,7 @@ template<typename Derived, TaskKind Kind>
 class EventHandlerBase : public EventHandler<Kind>
 {
 protected:
-    Statistics m_statistics;
+    Statistics<Kind> m_statistics;
     tyr::planning::Statistics m_search_statistics;
     size_t m_verbosity;
 
@@ -90,12 +90,12 @@ public:
             self().on_end_arity_impl(arity, status);
     }
 
-    void on_end_search() override
+    void on_end_search(tyr::planning::SearchStatus status) override
     {
         m_search_statistics.set_search_end_time_point(std::chrono::high_resolution_clock::now());
 
         if (verbosity(1))
-            self().on_end_search_impl();
+            self().on_end_search_impl(status);
     }
 
     void on_solved(uint_t arity) override
@@ -107,7 +107,7 @@ public:
     }
 
     const tyr::planning::Statistics& get_search_statistics() const override { return m_search_statistics; }
-    const Statistics& get_statistics() const override { return m_statistics; }
+    const Statistics<Kind>& get_statistics() const override { return m_statistics; }
 };
 
 template<TaskKind Kind>
@@ -123,7 +123,7 @@ private:
         static_cast<void>(arity);
         static_cast<void>(status);
     }
-    void on_end_search_impl() const {}
+    void on_end_search_impl(tyr::planning::SearchStatus status) const { static_cast<void>(status); }
     void on_solved_impl(uint_t arity) const { static_cast<void>(arity); }
 
 public:

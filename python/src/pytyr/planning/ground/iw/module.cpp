@@ -15,29 +15,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TYR_PLANNING_ALGORITHMS_IW_STATISTICS_HPP_
-#define TYR_PLANNING_ALGORITHMS_IW_STATISTICS_HPP_
+#include "module.hpp"
 
-#include "tyr/common/types.hpp"
-#include "tyr/planning/declarations.hpp"
-
-#include <optional>
+#include "../../iw.hpp"
 
 namespace tyr::planning::iw
 {
 
-template<TaskKind Kind>
-class Statistics
-{
-private:
-    std::optional<uint_t> m_solution_arity;
+void bind_ground_module_definitions(nb::module_& m) { bind_module_definitions_impl<GroundTag>(m); }
 
-public:
-    void clear() noexcept { m_solution_arity = std::nullopt; }
-    void set_solution_arity(uint_t arity) { m_solution_arity = arity; }
-    std::optional<uint_t> get_solution_arity() const { return m_solution_arity; }
-};
-
-}
-
-#endif
+}  // namespace tyr::planning::iw
