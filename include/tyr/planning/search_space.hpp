@@ -20,6 +20,7 @@
 
 #include "tyr/common/equal_to.hpp"
 #include "tyr/common/segmented_vector.hpp"
+#include "tyr/planning/algorithms/utils.hpp"
 #include "tyr/planning/applicability.hpp"
 #include "tyr/planning/node.hpp"
 #include "tyr/planning/search_node.hpp"
@@ -55,7 +56,9 @@ NodeList<Kind> extract_node_trajectory(const SegmentedVector<SearchNode>& search
 }
 
 template<TaskKind Kind>
-LabeledNodeList<Kind> extract_labeled_node_trajectory(const NodeList<Kind>& node_trajectory, SuccessorGenerator<Kind>& successor_generator)
+LabeledNodeList<Kind> extract_labeled_node_trajectory(const NodeList<Kind>& node_trajectory,
+                                                      SuccessorGenerator<Kind>& successor_generator,
+                                                      ActionCostMode action_cost_mode = ActionCostMode::GENERAL)
 {
     assert(!node_trajectory.empty());
 
@@ -69,10 +72,14 @@ LabeledNodeList<Kind> extract_labeled_node_trajectory(const NodeList<Kind>& node
 
         for (const auto& labeled_succ_node : labeled_succ_nodes)
         {
-            if (EqualTo<Node<Kind>> {}(labeled_succ_node.node, node_trajectory[i]))
+            const auto successor_g_value =
+                compute_successor_g_value(cur_node.get_metric(), labeled_succ_node.node.get_metric(), action_cost_mode);
+            const auto normalized_succ_node = Node<Kind>(labeled_succ_node.node.get_state(), successor_g_value);
+
+            if (EqualTo<Node<Kind>> {}(normalized_succ_node, node_trajectory[i]))
             {
-                labeled_node_trajectory.push_back(labeled_succ_node);
-                cur_node = labeled_succ_node.node;
+                labeled_node_trajectory.push_back(LabeledNode<Kind> { labeled_succ_node.label, normalized_succ_node });
+                cur_node = normalized_succ_node;
                 break;
             }
         }
@@ -86,11 +93,12 @@ template<TaskKind Kind, typename SearchNode>
 inline Plan<Kind> extract_total_ordered_plan(const SearchNode& final_search_node,
                                              const Node<Kind>& final_node,
                                              const SegmentedVector<SearchNode>& search_nodes,
-                                             SuccessorGenerator<Kind>& successor_generator)
+                                             SuccessorGenerator<Kind>& successor_generator,
+                                             ActionCostMode action_cost_mode = ActionCostMode::GENERAL)
 {
     const auto node_trajetory = extract_node_trajectory(search_nodes, final_search_node, final_node, successor_generator);
 
-    auto labeled_node_trajectory = extract_labeled_node_trajectory(node_trajetory, successor_generator);
+    auto labeled_node_trajectory = extract_labeled_node_trajectory(node_trajetory, successor_generator, action_cost_mode);
 
     return Plan<Kind>(node_trajetory.front(), std::move(labeled_node_trajectory));
 }

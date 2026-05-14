@@ -125,8 +125,11 @@ add_library(core ${TYR_CORE_LIBRARY_TYPE} ${TYR_PRIVATE_HEADER_FILES} ${TYR_PUBL
 
     planning/algorithms/astar_eager.cpp
     planning/algorithms/astar_eager/event_handler.cpp
+    planning/algorithms/brfs.cpp
+    planning/algorithms/brfs/event_handler.cpp
     planning/algorithms/gbfs_lazy.cpp
     planning/algorithms/gbfs_lazy/event_handler.cpp
+    planning/algorithms/iw.cpp
 
     planning/applicability.cpp
     planning/applicability_lifted.cpp

@@ -63,7 +63,7 @@ GroundVsLiftedCase parse_case(const boost::json::object& suite, const boost::jso
 
 std::vector<GroundVsLiftedCase> load_cases()
 {
-    const auto suite = tyr::common::load_json_file(tyr::common::root_path() / "tests/unit/planning/ground_vs_lifted.json");
+    const auto suite = tyr::common::load_json_file(tyr::common::root_path() / "tests/unit/planning/algorithms/ground_vs_lifted.json");
     const auto& suite_object = tyr::common::as_object(suite, "suite");
     const auto* cases_value = suite_object.if_contains("cases");
     if (!cases_value)

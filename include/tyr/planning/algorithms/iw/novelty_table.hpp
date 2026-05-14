@@ -20,6 +20,9 @@
 
 #include "tyr/common/types.hpp"
 #include "tyr/formalism/planning/fdr_fact_view.hpp"
+#include "tyr/planning/algorithms/iw/utils.hpp"
+#include "tyr/planning/ground_task/state_view.hpp"
+#include "tyr/planning/lifted_task/state_view.hpp"
 #include "tyr/planning/state_view.hpp"
 
 #include <algorithm>
@@ -108,12 +111,7 @@ inline TupleIndex rank_tuple(std::span<const uint_t> tuple)
 }
 
 template<size_t Arity, typename Callback>
-void for_each_tuple(const AtomIndexList& atoms,
-                    size_t tuple_size,
-                    size_t atom_pos,
-                    size_t tuple_pos,
-                    std::array<uint_t, Arity>& tuple,
-                    Callback&& callback)
+void for_each_tuple(const AtomIndexList& atoms, size_t tuple_size, size_t atom_pos, size_t tuple_pos, std::array<uint_t, Arity>& tuple, Callback&& callback)
     requires(Arity > 0)
 {
     if (tuple_pos == tuple_size)
@@ -131,11 +129,19 @@ void for_each_tuple(const AtomIndexList& atoms,
 }
 
 template<size_t Arity, typename Callback>
+void for_each_tuple(const AtomIndexList& atoms, size_t max_arity, std::array<uint_t, Arity>& tuple, Callback&& callback)
+    requires(Arity > 0)
+{
+    assert(max_arity <= Arity);
+    for (auto tuple_size = size_t { 1 }; tuple_size <= std::min({ Arity, max_arity, atoms.size() }); ++tuple_size)
+        for_each_tuple<Arity>(atoms, tuple_size, 0, 0, tuple, callback);
+}
+
+template<size_t Arity, typename Callback>
 void for_each_tuple(const AtomIndexList& atoms, std::array<uint_t, Arity>& tuple, Callback&& callback)
     requires(Arity > 0)
 {
-    for (auto tuple_size = size_t { 1 }; tuple_size <= std::min(Arity, atoms.size()); ++tuple_size)
-        for_each_tuple<Arity>(atoms, tuple_size, 0, 0, tuple, callback);
+    for_each_tuple<Arity>(atoms, Arity, tuple, callback);
 }
 
 template<size_t Arity, typename Callback>
@@ -153,17 +159,16 @@ void for_each_tuple_with_added_atoms(const AtomIndexList& added_atoms,
 {
     if (added_tuple_pos == num_added)
     {
-        for_each_tuple<Arity>(
-            kept_atoms,
-            num_kept,
-            0,
-            0,
-            kept_tuple,
-            [&](std::span<const uint_t> kept)
-            {
-                std::ranges::merge(added_tuple.begin(), added_tuple.begin() + num_added, kept.begin(), kept.end(), tuple.begin());
-                callback(std::span<const uint_t>(tuple.data(), num_added + num_kept));
-            });
+        for_each_tuple<Arity>(kept_atoms,
+                              num_kept,
+                              0,
+                              0,
+                              kept_tuple,
+                              [&](std::span<const uint_t> kept)
+                              {
+                                  std::ranges::merge(added_tuple.begin(), added_tuple.begin() + num_added, kept.begin(), kept.end(), tuple.begin());
+                                  callback(std::span<const uint_t>(tuple.data(), num_added + num_kept));
+                              });
         return;
     }
 
@@ -171,16 +176,30 @@ void for_each_tuple_with_added_atoms(const AtomIndexList& added_atoms,
     for (auto i = added_pos; i + remaining <= added_atoms.size(); ++i)
     {
         added_tuple[added_tuple_pos] = added_atoms[i];
-        for_each_tuple_with_added_atoms<Arity>(added_atoms,
-                                               kept_atoms,
-                                               num_added,
-                                               num_kept,
-                                               i + 1,
-                                               added_tuple_pos + 1,
-                                               added_tuple,
-                                               kept_tuple,
-                                               tuple,
-                                               callback);
+        for_each_tuple_with_added_atoms<
+            Arity>(added_atoms, kept_atoms, num_added, num_kept, i + 1, added_tuple_pos + 1, added_tuple, kept_tuple, tuple, callback);
+    }
+}
+
+template<size_t Arity, typename Callback>
+void for_each_tuple_with_added_atoms(const AtomIndexList& added_atoms,
+                                     const AtomIndexList& kept_atoms,
+                                     size_t max_arity,
+                                     std::array<uint_t, Arity>& added_tuple,
+                                     std::array<uint_t, Arity>& kept_tuple,
+                                     std::array<uint_t, Arity>& tuple,
+                                     Callback&& callback)
+    requires(Arity > 0)
+{
+    assert(max_arity <= Arity);
+    for (auto tuple_size = size_t { 1 }; tuple_size <= std::min({ Arity, max_arity, added_atoms.size() + kept_atoms.size() }); ++tuple_size)
+    {
+        for (auto num_added = size_t { 1 }; num_added <= std::min(tuple_size, added_atoms.size()); ++num_added)
+        {
+            const auto num_kept = tuple_size - num_added;
+            if (num_kept <= kept_atoms.size())
+                for_each_tuple_with_added_atoms<Arity>(added_atoms, kept_atoms, num_added, num_kept, 0, 0, added_tuple, kept_tuple, tuple, callback);
+        }
     }
 }
 
@@ -193,16 +212,7 @@ void for_each_tuple_with_added_atoms(const AtomIndexList& added_atoms,
                                      Callback&& callback)
     requires(Arity > 0)
 {
-    for (auto tuple_size = size_t { 1 }; tuple_size <= std::min(Arity, added_atoms.size() + kept_atoms.size()); ++tuple_size)
-    {
-        for (auto num_added = size_t { 1 }; num_added <= std::min(tuple_size, added_atoms.size()); ++num_added)
-        {
-            const auto num_kept = tuple_size - num_added;
-            if (num_kept <= kept_atoms.size())
-                for_each_tuple_with_added_atoms<Arity>(
-                    added_atoms, kept_atoms, num_added, num_kept, 0, 0, added_tuple, kept_tuple, tuple, callback);
-        }
-    }
+    for_each_tuple_with_added_atoms<Arity>(added_atoms, kept_atoms, Arity, added_tuple, kept_tuple, tuple, callback);
 }
 
 template<size_t Arity>
@@ -223,6 +233,12 @@ public:
     {
         for (auto& seen : m_seen_by_arity)
             seen.clear();
+    }
+
+    void validate_max_arity(uint_t max_arity) const
+    {
+        if (max_arity > Arity)
+            throw std::invalid_argument("DynamicNoveltyTable::validate_max_arity(...): max_arity exceeds table arity.");
     }
 
     bool test(std::span<const uint_t> tuple) const
@@ -249,8 +265,10 @@ public:
     }
 
     template<TaskKind Kind>
-    bool insert(StateView<Kind> state)
+    bool insert(StateView<Kind> state, uint_t max_arity)
     {
+        validate_max_arity(max_arity);
+
         collect_atoms(state, m_atoms);
 
         if constexpr (Arity == 0)
@@ -259,16 +277,27 @@ public:
         }
         else
         {
+            if (max_arity == 0)
+                return insert(std::span<const uint_t> {});
+
             auto novel = false;
-            for_each_tuple<Arity>(m_atoms, m_tuple, [&](std::span<const uint_t> tuple) { novel = insert(tuple) || novel; });
+            for_each_tuple<Arity>(m_atoms, max_arity, m_tuple, [&](std::span<const uint_t> tuple) { novel = insert(tuple) || novel; });
 
             return novel;
         }
     }
 
     template<TaskKind Kind>
-    bool insert(StateView<Kind> src, StateView<Kind> dst)
+    bool insert(StateView<Kind> state)
     {
+        return insert(state, Arity);
+    }
+
+    template<TaskKind Kind>
+    bool insert(StateView<Kind> src, StateView<Kind> dst, uint_t max_arity)
+    {
+        validate_max_arity(max_arity);
+
         if constexpr (Arity == 0)
         {
             static_cast<void>(src);
@@ -277,6 +306,13 @@ public:
         }
         else
         {
+            if (max_arity == 0)
+            {
+                static_cast<void>(src);
+                static_cast<void>(dst);
+                return false;
+            }
+
             collect_atoms(src, m_src_atoms);
             collect_atoms(dst, m_atoms);
 
@@ -291,6 +327,7 @@ public:
             auto novel = false;
             for_each_tuple_with_added_atoms<Arity>(m_added_atoms,
                                                    m_kept_atoms,
+                                                   max_arity,
                                                    m_added_tuple,
                                                    m_kept_tuple,
                                                    m_tuple,
@@ -298,6 +335,12 @@ public:
 
             return novel;
         }
+    }
+
+    template<TaskKind Kind>
+    bool insert(StateView<Kind> src, StateView<Kind> dst)
+    {
+        return insert(src, dst, Arity);
     }
 
 private:

@@ -18,7 +18,12 @@
 #ifndef TYR_PLANNING_ALGORITHMS_IW_HPP_
 #define TYR_PLANNING_ALGORITHMS_IW_HPP_
 
+#include "tyr/planning/algorithms/brfs.hpp"
+#include "tyr/planning/algorithms/iw/event_handler.hpp"
 #include "tyr/planning/algorithms/iw/novelty_table.hpp"
+#include "tyr/planning/algorithms/iw/pruning_strategy.hpp"
+#include "tyr/planning/algorithms/iw/statistics.hpp"
+#include "tyr/planning/algorithms/iw/utils.hpp"
 #include "tyr/planning/algorithms/utils.hpp"
 #include "tyr/planning/declarations.hpp"
 
@@ -34,7 +39,6 @@ struct Options
 {
     std::optional<Node<Kind>> start_node = std::nullopt;
     EventHandlerPtr<Kind> event_handler = nullptr;
-    PruningStrategyPtr<Kind> pruning_strategy = nullptr;
     GoalStrategyPtr<Kind> goal_strategy = nullptr;
     uint_t max_num_states = std::numeric_limits<uint_t>::max();
     std::optional<std::chrono::steady_clock::duration> max_time = std::nullopt;
@@ -45,18 +49,17 @@ struct Options
 };
 
 template<TaskKind Kind>
-SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& successor_generator, uint_t width, const Options<Kind>& options = Options<Kind>());
+SearchResult<Kind> find_solution(brfs::Solver<Kind>& brfs_solver, uint_t max_arity, const Options<Kind>& options = Options<Kind>());
 
-/// @brief Adapter that exposes A* eager search through the generic solver interface.
+/// @brief Adapter that exposes IW search through the generic solver interface.
 template<TaskKind Kind>
 struct Solver
 {
-    TaskPtr<Kind> task;
-    SuccessorGeneratorPtr<Kind> successor_generator;
-    uint_t width;
+    brfs::Solver<Kind> brfs_solver;
+    uint_t max_arity;
     Options<Kind> options;
 
-    SearchResult<Kind> solve() { return find_solution(*task, *successor_generator, width, options); }
+    SearchResult<Kind> solve() { return find_solution(brfs_solver, max_arity, options); }
 };
 
 }

@@ -46,7 +46,7 @@ struct Options
 template<TaskKind Kind>
 SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& successor_generator, const Options<Kind>& options = Options<Kind>());
 
-/// @brief Adapter that exposes A* eager search through the generic solver interface.
+/// @brief Adapter that exposes BrFS search through the generic solver interface.
 template<TaskKind Kind>
 struct Solver
 {

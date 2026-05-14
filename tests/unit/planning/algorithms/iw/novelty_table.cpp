@@ -15,11 +15,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
-#include <tyr/planning/algorithms/iw/novelty_table.hpp>
-
 #include <array>
+#include <gtest/gtest.h>
 #include <stdexcept>
+#include <tyr/planning/algorithms/iw/novelty_table.hpp>
+#include <tyr/planning/algorithms/iw/pruning_strategy.hpp>
 #include <vector>
 
 namespace tyr::tests
@@ -126,18 +126,25 @@ TEST(TyrTests, TyrPlanningIwForEachTupleGeneratesCanonicalTuplesUpToArity)
     auto tuple = std::array<uint_t, 2> {};
     auto generated = std::vector<planning::iw::AtomIndexList> {};
 
-    planning::iw::for_each_tuple<2>(
-        atoms,
-        tuple,
-        [&](std::span<const uint_t> item) { generated.emplace_back(item.begin(), item.end()); });
+    planning::iw::for_each_tuple<2>(atoms, tuple, [&](std::span<const uint_t> item) { generated.emplace_back(item.begin(), item.end()); });
 
     const auto expected = std::vector<planning::iw::AtomIndexList> {
-        { 1 },
-        { 3 },
-        { 5 },
-        { 1, 3 },
-        { 1, 5 },
-        { 3, 5 },
+        { 1 }, { 3 }, { 5 }, { 1, 3 }, { 1, 5 }, { 3, 5 },
+    };
+
+    EXPECT_EQ(generated, expected);
+}
+
+TEST(TyrTests, TyrPlanningIwForEachTupleRespectsRuntimeArity)
+{
+    const auto atoms = planning::iw::AtomIndexList { 1, 3, 5 };
+    auto tuple = std::array<uint_t, 3> {};
+    auto generated = std::vector<planning::iw::AtomIndexList> {};
+
+    planning::iw::for_each_tuple<3>(atoms, 2, tuple, [&](std::span<const uint_t> item) { generated.emplace_back(item.begin(), item.end()); });
+
+    const auto expected = std::vector<planning::iw::AtomIndexList> {
+        { 1 }, { 3 }, { 5 }, { 1, 3 }, { 1, 5 }, { 3, 5 },
     };
 
     EXPECT_EQ(generated, expected);
@@ -152,25 +159,50 @@ TEST(TyrTests, TyrPlanningIwForEachTupleWithAddedAtomsGeneratesOnlyTuplesContain
     auto tuple = std::array<uint_t, 2> {};
     auto generated = std::vector<planning::iw::AtomIndexList> {};
 
-    planning::iw::for_each_tuple_with_added_atoms<2>(
-        added,
-        kept,
-        added_tuple,
-        kept_tuple,
-        tuple,
-        [&](std::span<const uint_t> item) { generated.emplace_back(item.begin(), item.end()); });
+    planning::iw::for_each_tuple_with_added_atoms<2>(added,
+                                                     kept,
+                                                     added_tuple,
+                                                     kept_tuple,
+                                                     tuple,
+                                                     [&](std::span<const uint_t> item) { generated.emplace_back(item.begin(), item.end()); });
 
     const auto expected = std::vector<planning::iw::AtomIndexList> {
-        { 2 },
-        { 5 },
-        { 1, 2 },
-        { 2, 4 },
-        { 1, 5 },
-        { 4, 5 },
-        { 2, 5 },
+        { 2 }, { 5 }, { 1, 2 }, { 2, 4 }, { 1, 5 }, { 4, 5 }, { 2, 5 },
     };
 
     EXPECT_EQ(generated, expected);
+}
+
+TEST(TyrTests, TyrPlanningIwForEachTupleWithAddedAtomsRespectsRuntimeArity)
+{
+    const auto added = planning::iw::AtomIndexList { 2, 5 };
+    const auto kept = planning::iw::AtomIndexList { 1, 4 };
+    auto added_tuple = std::array<uint_t, 3> {};
+    auto kept_tuple = std::array<uint_t, 3> {};
+    auto tuple = std::array<uint_t, 3> {};
+    auto generated = std::vector<planning::iw::AtomIndexList> {};
+
+    planning::iw::for_each_tuple_with_added_atoms<3>(added,
+                                                     kept,
+                                                     2,
+                                                     added_tuple,
+                                                     kept_tuple,
+                                                     tuple,
+                                                     [&](std::span<const uint_t> item) { generated.emplace_back(item.begin(), item.end()); });
+
+    const auto expected = std::vector<planning::iw::AtomIndexList> {
+        { 2 }, { 5 }, { 1, 2 }, { 2, 4 }, { 1, 5 }, { 4, 5 }, { 2, 5 },
+    };
+
+    EXPECT_EQ(generated, expected);
+}
+
+TEST(TyrTests, TyrPlanningIwNoveltyPruningStrategyChecksRuntimeArity)
+{
+    auto pruning_strategy = planning::iw::NoveltyPruningStrategy<planning::GroundTag>(2);
+    EXPECT_EQ(pruning_strategy.get_max_arity(), 2);
+
+    EXPECT_THROW((planning::iw::NoveltyPruningStrategy<planning::GroundTag>(planning::iw::MaxArity + 1)), std::invalid_argument);
 }
 
 }

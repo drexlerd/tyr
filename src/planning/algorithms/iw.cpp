@@ -1,0 +1,117 @@
+/*
+ * Copyright (C) 2025-2026 Dominik Drexler
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "tyr/planning/algorithms/iw.hpp"
+
+#include "tyr/planning/algorithms/brfs.hpp"
+#include "tyr/planning/algorithms/concepts.hpp"
+#include "tyr/planning/algorithms/iw/pruning_strategy.hpp"
+#include "tyr/planning/algorithms/strategies/pruning.hpp"
+#include "tyr/planning/ground_task.hpp"
+#include "tyr/planning/ground_task/node.hpp"
+#include "tyr/planning/ground_task/successor_generator.hpp"
+#include "tyr/planning/lifted_task.hpp"
+#include "tyr/planning/lifted_task/node.hpp"
+#include "tyr/planning/lifted_task/successor_generator.hpp"
+
+#include <memory>
+#include <stdexcept>
+
+namespace tyr::planning::iw
+{
+
+template<TaskKind Kind>
+class CombinedPruningStrategy : public PruningStrategy<Kind>
+{
+public:
+    CombinedPruningStrategy(PruningStrategyPtr<Kind> lhs, PruningStrategyPtr<Kind> rhs) : m_lhs(std::move(lhs)), m_rhs(std::move(rhs)) {}
+
+    bool should_prune_state(const StateView<Kind>& state) override { return m_lhs->should_prune_state(state) || m_rhs->should_prune_state(state); }
+
+    bool should_prune_successor_state(const StateView<Kind>& state, const StateView<Kind>& succ_state, bool is_new_succ) override
+    {
+        return m_lhs->should_prune_successor_state(state, succ_state, is_new_succ) || m_rhs->should_prune_successor_state(state, succ_state, is_new_succ);
+    }
+
+private:
+    PruningStrategyPtr<Kind> m_lhs;
+    PruningStrategyPtr<Kind> m_rhs;
+};
+
+template<TaskKind Kind>
+PruningStrategyPtr<Kind> make_pruning_strategy(uint_t arity, PruningStrategyPtr<Kind> base_pruning_strategy)
+{
+    auto novelty_pruning_strategy = NoveltyPruningStrategy<Kind>::create(arity);
+    if (!base_pruning_strategy)
+        return novelty_pruning_strategy;
+
+    return std::make_shared<CombinedPruningStrategy<Kind>>(std::move(base_pruning_strategy), std::move(novelty_pruning_strategy));
+}
+
+template<TaskKind Kind>
+SearchResult<Kind> find_solution(brfs::Solver<Kind>& brfs_solver, uint_t max_arity, const Options<Kind>& options)
+{
+    if (max_arity > MaxArity)
+        throw std::invalid_argument("iw::find_solution(...): max_arity exceeds iw::MaxArity.");
+
+    const auto event_handler = options.event_handler ? options.event_handler : DefaultEventHandler<Kind>::create();
+
+    auto result = SearchResult<Kind> {};
+    result.status = SearchStatus::EXHAUSTED;
+
+    event_handler->on_start_search(max_arity);
+
+    for (auto arity = uint_t { 0 }; arity < max_arity; ++arity)
+    {
+        event_handler->on_start_arity(arity);
+
+        auto local_brfs_solver = brfs_solver;
+        local_brfs_solver.options.start_node = options.start_node ? options.start_node : brfs_solver.options.start_node;
+        local_brfs_solver.options.pruning_strategy = make_pruning_strategy<Kind>(arity, brfs_solver.options.pruning_strategy);
+        local_brfs_solver.options.goal_strategy = options.goal_strategy ? options.goal_strategy : brfs_solver.options.goal_strategy;
+        local_brfs_solver.options.max_num_states = options.max_num_states;
+        local_brfs_solver.options.max_time = options.max_time ? options.max_time : brfs_solver.options.max_time;
+        local_brfs_solver.options.random_seed = options.random_seed;
+        local_brfs_solver.options.shuffle_labeled_succ_nodes = options.shuffle_labeled_succ_nodes;
+
+        result = local_brfs_solver.solve();
+        event_handler->on_end_arity(arity, result.status);
+
+        if (result.status == SearchStatus::SOLVED)
+        {
+            event_handler->on_solved(arity);
+            event_handler->on_end_search();
+            return result;
+        }
+        if (result.status != SearchStatus::EXHAUSTED)
+        {
+            event_handler->on_end_search();
+            return result;
+        }
+    }
+
+    event_handler->on_end_search();
+    return result;
+}
+
+static_assert(SolverConcept<Solver<LiftedTag>, LiftedTag>);
+static_assert(SolverConcept<Solver<GroundTag>, GroundTag>);
+
+template SearchResult<LiftedTag> find_solution(brfs::Solver<LiftedTag>&, uint_t, const Options<LiftedTag>&);
+template SearchResult<GroundTag> find_solution(brfs::Solver<GroundTag>&, uint_t, const Options<GroundTag>&);
+
+}

@@ -37,6 +37,7 @@ struct Options
     GoalStrategyPtr<Kind> goal_strategy = nullptr;
     uint_t max_num_states = std::numeric_limits<uint_t>::max();
     std::optional<std::chrono::steady_clock::duration> max_time = std::nullopt;
+    ActionCostMode action_cost_mode = ActionCostMode::GENERAL;
     bool use_preferred_actions = true;
     uint_t boost_preferred_queue = 1000;
     uint64_t random_seed = 0;

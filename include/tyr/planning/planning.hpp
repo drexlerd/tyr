@@ -20,8 +20,13 @@
 
 #include "tyr/planning/algorithms/astar_eager.hpp"
 #include "tyr/planning/algorithms/astar_eager/event_handler.hpp"
+#include "tyr/planning/algorithms/brfs.hpp"
+#include "tyr/planning/algorithms/brfs/event_handler.hpp"
 #include "tyr/planning/algorithms/gbfs_lazy.hpp"
 #include "tyr/planning/algorithms/gbfs_lazy/event_handler.hpp"
+#include "tyr/planning/algorithms/iw.hpp"
+#include "tyr/planning/algorithms/iw/novelty_table.hpp"
+#include "tyr/planning/algorithms/iw/pruning_strategy.hpp"
 #include "tyr/planning/algorithms/statistics.hpp"
 #include "tyr/planning/algorithms/strategies/goal.hpp"
 #include "tyr/planning/algorithms/strategies/pruning.hpp"

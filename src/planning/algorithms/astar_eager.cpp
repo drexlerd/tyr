@@ -230,7 +230,7 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
             event_handler->on_end_search();
 
-            result.plan = extract_total_ordered_plan(search_node, node, search_nodes, successor_generator);
+            result.plan = extract_total_ordered_plan(search_node, node, search_nodes, successor_generator, options.action_cost_mode);
             result.goal_node = node;
             result.status = SearchStatus::SOLVED;
 
@@ -283,11 +283,13 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
             /* Check whether state must be reopened or not. */
 
-            const auto successor_g_value = FloatTolerance<float_t>::canonicalize(succ_node.get_metric());
+            const auto successor_g_value = compute_successor_g_value(search_node.g_value, succ_node.get_metric(), options.action_cost_mode);
+            const auto normalized_succ_node = Node<Kind>(succ_state, successor_g_value);
+            const auto normalized_labeled_succ_node = LabeledNode<Kind> { labeled_succ_node.label, normalized_succ_node };
 
             if (successor_g_value < successor_search_node.g_value)
             {
-                event_handler->on_generate_node(node, labeled_succ_node);
+                event_handler->on_generate_node(node, normalized_labeled_succ_node);
 
                 successor_search_node.parent_state = state_index;
                 successor_search_node.g_value = successor_g_value;
@@ -303,14 +305,14 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
                 const auto successor_is_goal_state = goal_strategy->is_dynamic_goal_satisfied(succ_state);
                 successor_search_node.status = successor_is_goal_state ? SearchNodeStatus::GOAL : SearchNodeStatus::OPEN;
 
-                event_handler->on_generate_node_relaxed(node, labeled_succ_node);
+                event_handler->on_generate_node_relaxed(node, normalized_labeled_succ_node);
 
                 const auto successor_f_value = FloatTolerance<float_t>::canonicalize(successor_g_value + successor_h_value);
                 openlist.insert(QueueEntry { successor_f_value, succ_state_index, successor_search_node.status });
             }
             else
             {
-                event_handler->on_generate_node_not_relaxed(node, labeled_succ_node);
+                event_handler->on_generate_node_not_relaxed(node, normalized_labeled_succ_node);
             }
         }
     }
