@@ -61,7 +61,7 @@ namespace tyr
 {
 
 template<>
-class Builder<planning::State<planning::LiftedTag>>
+struct Builder<planning::State<planning::LiftedTag>>
 {
 public:
     using TaskType = planning::Task<planning::LiftedTag>;
