@@ -237,15 +237,10 @@ using VariableListView = View<IndexList<Variable>, Repository>;
 
 }
 
-namespace tyr::formalism
-{
-
 #ifndef TYR_HEADER_INSTANTIATION
 
-/**
- * Explicit instantiations
- */
-
+namespace tyr::formalism
+{
 // BasicRelationRepository
 extern template class BasicRelationRepository<Predicate<StaticTag>>;
 extern template class BasicRelationRepository<Predicate<FluentTag>>;
@@ -322,7 +317,6 @@ extern template class Repository<tyr::formalism::datalog::SymbolRepository, tyr:
 
 namespace tyr
 {
-
 /**
  * Views
  */
@@ -453,8 +447,8 @@ extern template struct View<Index<formalism::RelationBinding<formalism::Function
 extern template struct View<Index<formalism::RelationBinding<formalism::Function<formalism::FluentTag>>>, formalism::datalog::Repository>;
 
 extern template struct View<Index<formalism::RelationBinding<formalism::datalog::Rule>>, formalism::datalog::Repository>;
+}
 
 #endif
-}
 
 #endif

@@ -140,10 +140,323 @@ template<formalism::FactKind T>
 ClosedInterval<float_t>
 is_valid_binding(formalism::datalog::NumericEffectOperatorView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
 
+/**
+ * evaluate
+ */
+
+inline ClosedInterval<float_t> evaluate(float_t element, const FactSets& fact_sets) { return ClosedInterval<float_t>(element, element); }
+
+template<formalism::ArithmeticOpKind O>
+ClosedInterval<float_t> evaluate(formalism::datalog::GroundUnaryOperatorView<O> element, const FactSets& fact_sets)
+{
+    return formalism::apply(O {}, evaluate(element.get_arg(), fact_sets));
 }
 
-#ifdef TYR_HEADER_INSTANTIATION
-#include "tyr/datalog/applicability.ipp"
+template<formalism::ArithmeticOpKind O>
+ClosedInterval<float_t> evaluate(formalism::datalog::GroundBinaryOperatorView<O> element, const FactSets& fact_sets)
+{
+    return formalism::apply(O {}, evaluate(element.get_lhs(), fact_sets), evaluate(element.get_rhs(), fact_sets));
+}
+
+template<formalism::BooleanOpKind O>
+bool evaluate(formalism::datalog::GroundBinaryOperatorView<O> element, const FactSets& fact_sets)
+{
+    return formalism::apply_existential(O {}, evaluate(element.get_lhs(), fact_sets), evaluate(element.get_rhs(), fact_sets));
+}
+
+template<formalism::ArithmeticOpKind O>
+ClosedInterval<float_t> evaluate(formalism::datalog::GroundMultiOperatorView<O> element, const FactSets& fact_sets)
+{
+    const auto child_fexprs = element.get_args();
+
+    return std::accumulate(std::next(child_fexprs.begin()),  // Start from the second expression
+                           child_fexprs.end(),
+                           evaluate(child_fexprs.front(), fact_sets),
+                           [&](const auto& value, const auto& child_expr) { return formalism::apply(O {}, value, evaluate(child_expr, fact_sets)); });
+}
+
+template<formalism::FactKind T>
+ClosedInterval<float_t> evaluate(formalism::datalog::GroundFunctionTermView<T> element, const FactSets& fact_sets)
+{
+    return fact_sets.template get<T>().function[element];
+}
+
+inline ClosedInterval<float_t> evaluate(formalism::datalog::GroundFunctionExpressionView element, const FactSets& fact_sets)
+{
+    return visit([&](auto&& arg) { return evaluate(arg, fact_sets); }, element.get_variant());
+}
+
+inline ClosedInterval<float_t> evaluate(formalism::datalog::GroundArithmeticOperatorView element, const FactSets& fact_sets)
+{
+    return visit([&](auto&& arg) { return evaluate(arg, fact_sets); }, element.get_variant());
+}
+
+inline bool evaluate(formalism::datalog::GroundBooleanOperatorView element, const FactSets& fact_sets)
+{
+    return visit([&](auto&& arg) { return evaluate(arg, fact_sets); }, element.get_variant());
+}
+
+/**
+ * is_applicable
+ */
+
+template<formalism::FactKind T>
+bool is_applicable(formalism::datalog::GroundLiteralView<T> element, const FactSets& fact_sets)
+{
+    return fact_sets.template get<T>().predicate.contains(element.get_atom().get_row()) == element.get_polarity();
+}
+
+template<formalism::FactKind T>
+bool is_applicable(formalism::datalog::GroundLiteralListView<T> elements, const FactSets& fact_sets)
+{
+    return std::all_of(elements.begin(), elements.end(), [&](auto&& arg) { return is_applicable(arg, fact_sets); });
+}
+
+inline bool is_applicable(formalism::datalog::GroundBooleanOperatorListView elements, const FactSets& fact_sets)
+{
+    return std::all_of(elements.begin(), elements.end(), [&](auto&& arg) { return evaluate(arg, fact_sets); });
+}
+
+// GroundConjunctiveCondition
+
+inline bool is_applicable(formalism::datalog::GroundConjunctiveConditionView element, const FactSets& fact_sets)
+{
+    return is_applicable(element.template get_literals<formalism::StaticTag>(), fact_sets)     //
+           && is_applicable(element.template get_literals<formalism::FluentTag>(), fact_sets)  //
+           && is_applicable(element.get_numeric_constraints(), fact_sets);
+}
+
+// GroundRule
+
+inline bool is_applicable(formalism::datalog::GroundRuleView element, const FactSets& fact_sets) { return is_applicable(element.get_body(), fact_sets); }
+
+/**
+ * is_valid_binding
+ */
+
+inline ClosedInterval<float_t> is_valid_binding(float_t element, const FactSets&, formalism::datalog::GrounderContext&)
+{
+    return ClosedInterval<float_t>(element, element);
+}
+
+template<formalism::ArithmeticOpKind O>
+ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::LiftedUnaryOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return formalism::apply(O {}, is_valid_binding(element.get_arg(), fact_sets, context));
+}
+
+template<formalism::ArithmeticOpKind O>
+ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::LiftedBinaryOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return formalism::apply(O {}, is_valid_binding(element.get_lhs(), fact_sets, context), is_valid_binding(element.get_rhs(), fact_sets, context));
+}
+
+template<formalism::BooleanOpKind O>
+bool is_valid_binding(formalism::datalog::LiftedBinaryOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return formalism::apply_existential(O {}, is_valid_binding(element.get_lhs(), fact_sets, context), is_valid_binding(element.get_rhs(), fact_sets, context));
+}
+
+template<formalism::ArithmeticOpKind O>
+ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::LiftedMultiOperatorView<O> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    const auto child_fexprs = element.get_args();
+
+    return std::accumulate(std::next(child_fexprs.begin()),  // Start from the second expression
+                           child_fexprs.end(),
+                           is_valid_binding(child_fexprs.front(), fact_sets, context),
+                           [&](const auto& value, const auto& child_expr)
+                           { return formalism::apply(O {}, value, is_valid_binding(child_expr, fact_sets, context)); });
+}
+
+template<formalism::FactKind T>
+ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::FunctionTermView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    auto binding_or_nullopt = try_ground_binding(element, context);
+    if (!binding_or_nullopt)
+        return {};
+
+    return fact_sets.template get<T>().function[*binding_or_nullopt];
+}
+
+inline ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::FunctionExpressionView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
+}
+
+inline ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::LiftedArithmeticOperatorView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
+}
+
+inline bool is_valid_binding(formalism::datalog::LiftedBooleanOperatorView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
+}
+
+template<formalism::FactKind T>
+bool is_valid_binding(formalism::datalog::LiteralView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    auto binding_or_nullopt = try_ground_binding(element.get_atom(), context);
+    if (!binding_or_nullopt)
+        return element.get_polarity() == false;
+
+    return fact_sets.template get<T>().predicate.contains(*binding_or_nullopt) == element.get_polarity();
+}
+
+template<formalism::FactKind T>
+bool is_valid_binding(formalism::datalog::LiteralListView<T> elements, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return std::all_of(elements.begin(), elements.end(), [&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); });
+}
+
+inline bool
+is_valid_binding(formalism::datalog::LiftedBooleanOperatorListView elements, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return std::all_of(elements.begin(), elements.end(), [&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); });
+}
+
+inline bool is_valid_binding(formalism::datalog::ConjunctiveConditionView element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return is_valid_binding(element.template get_literals<formalism::StaticTag>(), fact_sets, context)     //
+           && is_valid_binding(element.template get_literals<formalism::FluentTag>(), fact_sets, context)  //
+           && is_valid_binding(element.get_numeric_constraints(), fact_sets, context);
+}
+
+namespace details
+{
+template<typename Op>
+ClosedInterval<float_t> apply_numeric_effect(Op, ClosedInterval<float_t> lhs, ClosedInterval<float_t> rhs)
+{
+    if constexpr (std::is_same_v<Op, formalism::Assign>)
+        return rhs;
+    else if constexpr (std::is_same_v<Op, formalism::Increase>)
+        return lhs + rhs;
+    else if constexpr (std::is_same_v<Op, formalism::Decrease>)
+        return lhs - rhs;
+    else if constexpr (std::is_same_v<Op, formalism::ScaleUp>)
+        return lhs * rhs;
+    else if constexpr (std::is_same_v<Op, formalism::ScaleDown>)
+        return lhs / rhs;
+    else
+        static_assert(dependent_false<Op>::value, "Missing case");
+}
+
+}
+
+template<formalism::NumericEffectOpKind Op, formalism::FactKind T>
+ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::NumericEffectView<Op, T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    const auto rhs = is_valid_binding(element.get_fexpr(), fact_sets, context);
+    if (empty(rhs))
+        return {};
+
+    if constexpr (std::is_same_v<Op, formalism::Assign>)
+    {
+        return rhs;
+    }
+    else
+    {
+        const auto lhs = is_valid_binding(element.get_fterm(), fact_sets, context);
+        if (empty(lhs))
+            return {};
+
+        return details::apply_numeric_effect(Op {}, lhs, rhs);
+    }
+}
+
+template<formalism::FactKind T>
+ClosedInterval<float_t>
+is_valid_binding(formalism::datalog::NumericEffectOperatorView<T> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context)
+{
+    return visit([&](auto&& arg) { return is_valid_binding(arg, fact_sets, context); }, element.get_variant());
+}
+
+}
+
+#ifndef TYR_HEADER_INSTANTIATION
+
+namespace tyr::datalog
+{
+/**
+ * evaluate
+ */
+
+extern template ClosedInterval<float_t> evaluate(formalism::datalog::GroundUnaryOperatorView<formalism::Sub> element, const FactSets& fact_sets);
+
+extern template ClosedInterval<float_t> evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::Add> element, const FactSets& fact_sets);
+extern template ClosedInterval<float_t> evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::Sub> element, const FactSets& fact_sets);
+extern template ClosedInterval<float_t> evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::Mul> element, const FactSets& fact_sets);
+extern template ClosedInterval<float_t> evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::Div> element, const FactSets& fact_sets);
+
+extern template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::Eq> element, const FactSets& fact_sets);
+extern template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::Ne> element, const FactSets& fact_sets);
+extern template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::Ge> element, const FactSets& fact_sets);
+extern template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::Gt> element, const FactSets& fact_sets);
+extern template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::Le> element, const FactSets& fact_sets);
+extern template bool evaluate(formalism::datalog::GroundBinaryOperatorView<formalism::Lt> element, const FactSets& fact_sets);
+
+extern template ClosedInterval<float_t> evaluate(formalism::datalog::GroundMultiOperatorView<formalism::Add> element, const FactSets& fact_sets);
+extern template ClosedInterval<float_t> evaluate(formalism::datalog::GroundMultiOperatorView<formalism::Mul> element, const FactSets& fact_sets);
+
+extern template ClosedInterval<float_t> evaluate(formalism::datalog::GroundFunctionTermView<formalism::StaticTag> element, const FactSets& fact_sets);
+extern template ClosedInterval<float_t> evaluate(formalism::datalog::GroundFunctionTermView<formalism::FluentTag> element, const FactSets& fact_sets);
+
+/**
+ * is_applicable
+ */
+
+extern template bool is_applicable(formalism::datalog::GroundLiteralView<formalism::StaticTag> element, const FactSets& fact_sets);
+extern template bool is_applicable(formalism::datalog::GroundLiteralView<formalism::FluentTag> element, const FactSets& fact_sets);
+
+extern template bool is_applicable(formalism::datalog::GroundLiteralListView<formalism::StaticTag> elements, const FactSets& fact_sets);
+extern template bool is_applicable(formalism::datalog::GroundLiteralListView<formalism::FluentTag> elements, const FactSets& fact_sets);
+
+// GroundConjunctiveCondition
+
+// GroundRule
+
+/**
+ * is_valid_binding
+ */
+
+extern template bool
+is_valid_binding(formalism::datalog::LiteralView<formalism::StaticTag> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+extern template bool
+is_valid_binding(formalism::datalog::LiteralView<formalism::FluentTag> element, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+
+extern template bool
+is_valid_binding(formalism::datalog::LiteralListView<formalism::StaticTag> elements, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+extern template bool
+is_valid_binding(formalism::datalog::LiteralListView<formalism::FluentTag> elements, const FactSets& fact_sets, formalism::datalog::GrounderContext& context);
+
+extern template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<formalism::Assign, formalism::FluentTag> element,
+                                                         const FactSets& fact_sets,
+                                                         formalism::datalog::GrounderContext& context);
+extern template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<formalism::Increase, formalism::FluentTag> element,
+                                                         const FactSets& fact_sets,
+                                                         formalism::datalog::GrounderContext& context);
+extern template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<formalism::Decrease, formalism::FluentTag> element,
+                                                         const FactSets& fact_sets,
+                                                         formalism::datalog::GrounderContext& context);
+extern template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<formalism::ScaleUp, formalism::FluentTag> element,
+                                                         const FactSets& fact_sets,
+                                                         formalism::datalog::GrounderContext& context);
+extern template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectView<formalism::ScaleDown, formalism::FluentTag> element,
+                                                         const FactSets& fact_sets,
+                                                         formalism::datalog::GrounderContext& context);
+extern template ClosedInterval<float_t> is_valid_binding(formalism::datalog::NumericEffectOperatorView<formalism::FluentTag> element,
+                                                         const FactSets& fact_sets,
+                                                         formalism::datalog::GrounderContext& context);
+}
+
 #endif
 
 #endif

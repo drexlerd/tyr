@@ -18,7 +18,6 @@
 #include "tyr/formalism/datalog/merge.hpp"
 
 #ifndef TYR_HEADER_INSTANTIATION
-#include "tyr/formalism/datalog/merge.ipp"
 
 namespace tyr::formalism::datalog
 {

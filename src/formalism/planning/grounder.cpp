@@ -18,7 +18,6 @@
 #include "tyr/formalism/planning/grounder.hpp"
 
 #ifndef TYR_HEADER_INSTANTIATION
-#include "tyr/formalism/planning/grounder.ipp"
 
 namespace tyr::formalism::planning
 {

@@ -297,15 +297,10 @@ using VariableViewList = std::vector<VariableView>;
 
 }
 
-namespace tyr::formalism
-{
-
 #ifndef TYR_HEADER_INSTANTIATION
 
-/**
- * Explicit instantiations
- */
-
+namespace tyr::formalism
+{
 // BasicRelationRepository
 extern template class BasicRelationRepository<Predicate<StaticTag>>;
 extern template class BasicRelationRepository<Predicate<FluentTag>>;
@@ -568,8 +563,8 @@ extern template struct View<Index<formalism::RelationBinding<formalism::Function
 
 extern template struct View<Index<formalism::RelationBinding<formalism::planning::Action>>, formalism::planning::Repository>;
 extern template struct View<Index<formalism::RelationBinding<formalism::planning::Axiom>>, formalism::planning::Repository>;
+}
 
 #endif
-}
 
 #endif

@@ -18,7 +18,6 @@
 #include "tyr/formalism/datalog/grounder.hpp"
 
 #ifndef TYR_HEADER_INSTANTIATION
-#include "tyr/formalism/datalog/grounder.ipp"
 
 namespace tyr::formalism::datalog
 {

@@ -18,7 +18,6 @@
 #include "tyr/formalism/planning/merge.hpp"
 
 #ifndef TYR_HEADER_INSTANTIATION
-#include "tyr/formalism/planning/merge.ipp"
 
 namespace tyr::formalism::planning
 {

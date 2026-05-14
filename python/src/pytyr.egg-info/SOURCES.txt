@@ -56,7 +56,6 @@ include/tyr/common/indexed_hash_set.hpp
 include/tyr/common/iostream.hpp
 include/tyr/common/itertools.hpp
 include/tyr/common/json_loader.hpp
-include/tyr/common/macros.hpp
 include/tyr/common/memory.hpp
 include/tyr/common/observer_ptr.hpp
 include/tyr/common/onetbb.hpp

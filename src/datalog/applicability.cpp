@@ -18,7 +18,6 @@
 #include "tyr/datalog/applicability.hpp"
 
 #ifndef TYR_HEADER_INSTANTIATION
-#include "tyr/datalog/applicability.ipp"
 
 namespace tyr::datalog
 {

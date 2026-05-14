@@ -23,7 +23,6 @@
 #include "tyr/planning/lifted_task/state_builder.hpp"
 
 #ifndef TYR_HEADER_INSTANTIATION
-#include "tyr/planning/applicability.ipp"
 
 namespace tyr::planning
 {
