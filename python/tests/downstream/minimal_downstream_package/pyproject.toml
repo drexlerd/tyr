@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "downstream-tyr-user"
-version = "0.0.0"
+version = "999.0.0"
 dependencies = ["pytyr"]
 
 [tool.scikit-build]

@@ -112,7 +112,7 @@ auto labeled_successor_nodes = successor_generator->get_labeled_successor_nodes(
 Tyr consumes native dependencies from Python packages:
 
 ```console
-uv pip install pyyggdrasil>=0.0.8 pypddl>=1.0.5
+uv pip install pyyggdrasil==999.0.0 pypddl==999.0.0
 cmake -S . -B build \
   -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')" \
   -DPython3_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')" \
