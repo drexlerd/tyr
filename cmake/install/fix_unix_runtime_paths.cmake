@@ -8,6 +8,9 @@ if(NOT PATCHELF_EXECUTABLE)
     message(WARNING "patchelf not found; pytyr native libraries keep their original runtime paths")
     return()
 endif()
+if(NOT DEFINED TYR_PYTHON_NATIVE_LIBRARY_RPATH)
+    set(TYR_PYTHON_NATIVE_LIBRARY_RPATH "$ORIGIN")
+endif()
 
 file(GLOB_RECURSE native_libraries LIST_DIRECTORIES false
     "${native_lib_dir}/*.so"
@@ -15,7 +18,7 @@ file(GLOB_RECURSE native_libraries LIST_DIRECTORIES false
 
 foreach(native_library IN LISTS native_libraries)
     execute_process(
-        COMMAND "${PATCHELF_EXECUTABLE}" --set-rpath "$ORIGIN" "${native_library}"
+        COMMAND "${PATCHELF_EXECUTABLE}" --set-rpath "${TYR_PYTHON_NATIVE_LIBRARY_RPATH}" "${native_library}"
         RESULT_VARIABLE rpath_result
         ERROR_VARIABLE rpath_error)
     if(NOT rpath_result EQUAL 0)

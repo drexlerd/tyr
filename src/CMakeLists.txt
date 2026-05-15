@@ -166,12 +166,12 @@ target_compile_features(core PUBLIC cxx_std_20)
 
 target_link_libraries(core
   PUBLIC
-    loki::parsers
     TBB::tbb
     valla::core
     fmt::fmt-header-only
     gtl::gtl
   PRIVATE
+    loki::parsers
     Threads::Threads
 )
 
@@ -192,6 +192,7 @@ endif()
 target_include_directories(core
     PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+        "$<BUILD_INTERFACE:${TYR_NATIVE_DEPENDENCY_INCLUDE_DIRECTORIES}>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 

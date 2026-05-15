@@ -2,6 +2,8 @@ name: CI Ctest
 
 on:
   push:
+    tags-ignore:
+      - "**"
   pull_request:
 
 jobs:

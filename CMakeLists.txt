@@ -174,6 +174,7 @@ include("configure_boost")
 include("configure_ccache")
 include("configure_yggdrasil")
 include("configure_pypddl")
+include("tyr_native_dependencies")
 
 ##############################################################
 # CCache
@@ -191,6 +192,9 @@ configure_ccache()
 
 configure_yggdrasil()
 configure_pypddl()
+tyr_register_native_dependency_prefix("${PYPDDL_NATIVE_PREFIX}")
+tyr_register_python_native_runtime_prefix("pypddl/native")
+tyr_register_python_native_runtime_prefix("pyyggdrasil")
 
 # -----
 # argparse

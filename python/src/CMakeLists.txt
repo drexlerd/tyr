@@ -44,23 +44,15 @@ target_link_libraries(_pytyr PRIVATE tyr::core TBB::tbb)
 
 if(TYR_BUILD_SHARED)
     if(APPLE)
-        set(PYTYR_MODULE_RPATH
-            "@loader_path/native/${CMAKE_INSTALL_LIBDIR}"
-            "@loader_path/../pypddl/native/${CMAKE_INSTALL_LIBDIR}"
-            "@loader_path/../pyyggdrasil/${CMAKE_INSTALL_LIBDIR}")
-        set(PYTYR_CORE_RPATH
-            "@loader_path"
-            "@loader_path/../../../pypddl/native/${CMAKE_INSTALL_LIBDIR}"
-            "@loader_path/../../../pyyggdrasil/${CMAKE_INSTALL_LIBDIR}")
+        tyr_make_python_native_runtime_rpaths(PYTYR_MODULE_RPATH "@loader_path" "../")
+        list(APPEND PYTYR_MODULE_RPATH "@loader_path/native/${CMAKE_INSTALL_LIBDIR}")
+        tyr_make_python_native_runtime_rpaths(PYTYR_CORE_RPATH "@loader_path" "../../../")
+        tyr_make_python_native_runtime_rpaths(PYTYR_INSTALL_NATIVE_LIBRARY_RPATHS "@loader_path" "../../../")
     elseif(UNIX)
-        set(PYTYR_MODULE_RPATH
-            "$ORIGIN/native/${CMAKE_INSTALL_LIBDIR}"
-            "$ORIGIN/../pypddl/native/${CMAKE_INSTALL_LIBDIR}"
-            "$ORIGIN/../pyyggdrasil/${CMAKE_INSTALL_LIBDIR}")
-        set(PYTYR_CORE_RPATH
-            "$ORIGIN"
-            "$ORIGIN/../../../pypddl/native/${CMAKE_INSTALL_LIBDIR}"
-            "$ORIGIN/../../../pyyggdrasil/${CMAKE_INSTALL_LIBDIR}")
+        tyr_make_python_native_runtime_rpaths(PYTYR_MODULE_RPATH "$ORIGIN" "../")
+        list(APPEND PYTYR_MODULE_RPATH "$ORIGIN/native/${CMAKE_INSTALL_LIBDIR}")
+        tyr_make_python_native_runtime_rpaths(PYTYR_CORE_RPATH "$ORIGIN" "../../../")
+        tyr_make_python_native_runtime_rpath_string(PYTYR_INSTALL_NATIVE_LIBRARY_RPATH "$ORIGIN" "../../../")
     endif()
 
     if(PYTYR_MODULE_RPATH)
@@ -73,7 +65,8 @@ endif()
 install(TARGETS _pytyr DESTINATION "pytyr" COMPONENT pytyr)
 if(TYR_BUILD_SHARED)
     set_property(TARGET core PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-        "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>")
+        "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+        "$<BUILD_INTERFACE:${TYR_NATIVE_DEPENDENCY_INCLUDE_DIRECTORIES}>")
     set_property(TARGET core PROPERTY INSTALL_RPATH "${PYTYR_CORE_RPATH}")
     install(TARGETS core
             EXPORT pytyrTyrcoreTargets
@@ -106,10 +99,14 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/cmake/"
         COMPONENT pytyr)
 
 if(APPLE)
-    install(SCRIPT "${CMAKE_SOURCE_DIR}/cmake/install/fix_macos_runtime_paths.cmake"
+    install(CODE
+            "set(TYR_PYTHON_NATIVE_LIBRARY_RPATHS \"${PYTYR_INSTALL_NATIVE_LIBRARY_RPATHS}\")
+             include(\"${CMAKE_SOURCE_DIR}/cmake/install/fix_macos_runtime_paths.cmake\")"
             COMPONENT pytyr)
 elseif(UNIX)
-    install(SCRIPT "${CMAKE_SOURCE_DIR}/cmake/install/fix_unix_runtime_paths.cmake"
+    install(CODE
+            "set(TYR_PYTHON_NATIVE_LIBRARY_RPATH \"${PYTYR_INSTALL_NATIVE_LIBRARY_RPATH}\")
+             include(\"${CMAKE_SOURCE_DIR}/cmake/install/fix_unix_runtime_paths.cmake\")"
             COMPONENT pytyr)
 endif()
 
