@@ -240,11 +240,25 @@ SearchResult<Kind> find_solution(Task<Kind>& task, SuccessorGenerator<Kind>& suc
 
         successor_generator.get_labeled_successor_nodes(node, labeled_succ_nodes);
 
+        if (stopwatch && stopwatch->has_finished())
+        {
+            result.status = SearchStatus::OUT_OF_TIME;
+            event_handler->on_end_search(result.status);
+            return result;
+        }
+
         if (options.shuffle_labeled_succ_nodes)
             std::shuffle(labeled_succ_nodes.begin(), labeled_succ_nodes.end(), rng);
 
         for (const auto& labeled_succ_node : labeled_succ_nodes)
         {
+            if (stopwatch && stopwatch->has_finished())
+            {
+                result.status = SearchStatus::OUT_OF_TIME;
+                event_handler->on_end_search(result.status);
+                return result;
+            }
+
             const auto& succ_node = labeled_succ_node.node;
             const auto& succ_state = succ_node.get_state();
             const auto succ_state_index = succ_state.get_index();
